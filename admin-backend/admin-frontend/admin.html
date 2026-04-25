@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>InvoicePro — Super Admin</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#1a1814;--ink2:#756d5c;--ink3:#b8b2a3;--bg:#f8f7f4;--white:#fff;--border:#e8e5de;--green:#16a34a;--green-bg:#f0fdf4;--red:#dc2626;--red-bg:#fef2f2;--amber:#b45309;--amber-bg:#fffbeb;--blue:#1d4ed8;--blue-bg:#eff6ff;--lime:#a3e635}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);font-size:13px}
+#login{display:flex;align-items:center;justify-content:center;min-height:100vh}
+.login-box{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:40px;width:380px;text-align:center}
+.app{display:none;min-height:100vh}
+.sidebar{width:220px;background:var(--white);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;overflow-y:auto}
+.sidebar-logo{padding:18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.logo-mark{width:30px;height:30px;background:var(--ink);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--lime);font-weight:800;font-size:13px;flex-shrink:0}
+.nav-section{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);padding:12px 14px 4px;margin-top:8px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 14px;border-radius:8px;margin:1px 8px;cursor:pointer;font-size:13px;color:var(--ink2);transition:all .15s}
+.nav-item:hover{background:var(--bg);color:var(--ink)}
+.nav-item.active{background:var(--ink);color:white}
+.nav-badge{margin-left:auto;background:var(--red);color:white;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:600}
+.nav-badge.amber{background:var(--amber)}
+.sidebar-footer{padding:12px;border-top:1px solid var(--border);margin-top:auto}
+.main{margin-left:220px;padding:28px 32px;min-height:100vh}
+.page{display:none}
+.page.active{display:block}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.page-title{font-size:20px;font-weight:700;letter-spacing:-0.02em}
+.page-sub{font-size:13px;color:var(--ink2);margin-top:2px}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:1fr 1fr 1fr}
+.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px}
+.kpi-label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px}
+.kpi-val{font-size:26px;font-weight:700;letter-spacing:-0.03em}
+.kpi-sub{font-size:12px;color:var(--ink3);margin-top:4px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);padding:8px 12px;border-bottom:1px solid var(--border);background:var(--bg)}
+td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafaf8}
+.badge{display:inline-flex;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-paid{background:var(--green-bg);color:var(--green)}
+.badge-free{background:var(--bg);color:var(--ink3);border:1px solid var(--border)}
+.badge-starter{background:var(--blue-bg);color:var(--blue)}
+.badge-pro{background:#ede9fe;color:#5b21b6}
+.badge-enterprise{background:var(--amber-bg);color:var(--amber)}
+.badge-open{background:#fef3c7;color:#b45309}
+.badge-resolved{background:var(--green-bg);color:var(--green)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:7px;font-size:12.5px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--white);color:var(--ink);font-family:inherit;transition:all .15s}
+.btn:hover{background:var(--bg)}
+.btn-primary{background:var(--ink);color:white;border-color:var(--ink)}
+.btn-primary:hover{background:#2d2a24}
+.btn-success{background:var(--green-bg);color:var(--green);border-color:#bbf7d0}
+.btn-danger{background:var(--red-bg);color:var(--red);border-color:#fecaca}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-amber{background:var(--amber-bg);color:var(--amber);border-color:#fcd34d}
+input,select,textarea{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;background:var(--white);color:var(--ink);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--ink)}
+.form-row{display:grid;gap:10px;margin-bottom:12px}
+label{font-size:12px;font-weight:500;color:var(--ink2);display:block;margin-bottom:4px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:var(--white);border-radius:14px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-body{padding:20px}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+.empty{text-align:center;padding:50px 20px;color:var(--ink3)}
+.toggle{width:44px;height:24px;border-radius:12px;cursor:pointer;border:none;position:relative;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--green)}
+.toggle.off{background:var(--border)}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:white;top:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle.on::after{left:23px}
+.toggle.off::after{left:3px}
+.stat-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.stat-row:last-child{border:none}
+.alert{padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:12px;border-left:3px solid}
+.alert-info{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
+.alert-success{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.alert-warn{background:var(--amber-bg);border-color:var(--amber);color:var(--amber)}
+.search-box{position:relative;max-width:300px}
+.search-box input{padding-left:30px}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:13px}
+.plan-bar{height:6px;border-radius:3px;margin-top:4px}
+.feature-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.feature-row:last-child{border:none}
+.feature-info{flex:1}
+.feature-name{font-size:13px;font-weight:500;margin-bottom:2px}
+.feature-desc{font-size:11px;color:var(--ink3)}
+.feature-plans{display:flex;gap:4px;margin-top:4px}
+.plan-pill{font-size:10px;padding:1px 7px;border-radius:20px;font-weight:500}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-box">
+    <div style="width:44px;height:44px;background:var(--ink);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:var(--lime);font-weight:800;font-size:18px">IP</div>
+    <h1 style="font-size:20px;font-weight:700;margin-bottom:4px">InvoicePro Admin</h1>
+    <p style="font-size:13px;color:var(--ink2);margin-bottom:24px">Super admin control panel</p>
+    <input type="email" id="loginEmail" placeholder="Admin email" style="margin-bottom:10px" />
+    <input type="password" id="loginPassword" placeholder="Password" style="margin-bottom:16px" />
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:10px" onclick="doLogin()">Sign in →</button>
+    <div id="loginError" style="color:var(--red);font-size:12px;margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">IP</div>
+      <div><div style="font-size:14px;font-weight:700">InvoicePro</div><div style="font-size:10px;color:var(--ink3)">Super Admin</div></div>
+    </div>
+
+    <div class="nav-section">Overview</div>
+    <div class="nav-item active" onclick="show('dashboard')">📊 Dashboard</div>
+    <div class="nav-item" onclick="show('revenue')">💰 Revenue analytics</div>
+
+    <div class="nav-section">Users</div>
+    <div class="nav-item" onclick="show('users')">👥 All users</div>
+    <div class="nav-item" onclick="show('plans')">📋 Plans & pricing</div>
+
+    <div class="nav-section">Features</div>
+    <div class="nav-item" onclick="show('features')">🚦 Feature flags</div>
+    <div class="nav-item" onclick="show('aiusage')">🤖 AI usage</div>
+    <div class="nav-item" onclick="show('financing')">💳 Financing apps</div>
+    <div class="nav-item" onclick="show('satisfaction')">⭐ Client satisfaction</div>
+
+    <div class="nav-section">Support</div>
+    <div class="nav-item" onclick="show('tickets')">🎫 Support tickets <span class="nav-badge amber" id="ticketBadge" style="display:none">0</span></div>
+    <div class="nav-item" onclick="show('broadcast')">📢 Broadcast</div>
+
+    <div class="nav-section">System</div>
+    <div class="nav-item" onclick="show('invoices')">🧾 All invoices</div>
+    <div class="nav-item" onclick="show('currencies')">💱 Currencies</div>
+    <div class="nav-item" onclick="show('settings')">⚙️ App settings</div>
+    <div class="nav-item" onclick="show('audit')">📝 Audit log</div>
+
+    <div class="sidebar-footer">
+      <div style="font-size:12px;color:var(--ink3);margin-bottom:8px" id="adminName">—</div>
+      <button class="btn btn-sm" style="width:100%;justify-content:center" onclick="logout()">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header"><div><div class="page-title">Dashboard</div><div class="page-sub">Platform overview</div></div><button class="btn btn-sm" onclick="loadDashboard()">↻ Refresh</button></div>
+      <div class="grid g4" id="statsGrid" style="margin-bottom:16px"></div>
+      <div class="grid g2" style="margin-bottom:16px">
+        <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Plan breakdown</div><div id="planBreakdown"></div></div>
+        <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Quick actions</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="btn" onclick="show('users')">👥 Manage users</button>
+            <button class="btn" onclick="show('tickets')">🎫 View open tickets</button>
+            <button class="btn" onclick="show('financing')">💳 Review financing apps</button>
+            <button class="btn" onclick="show('broadcast')">📢 Send broadcast</button>
+            <button class="btn" onclick="show('features')">🚦 Toggle features</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVENUE -->
+    <div class="page" id="page-revenue">
+      <div class="page-header"><div><div class="page-title">Revenue analytics</div><div class="page-sub">Platform-wide financial data</div></div></div>
+      <div class="grid g3" id="revenueStats" style="margin-bottom:16px"></div>
+      <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Monthly revenue processed</div><div id="revenueChart" style="font-size:13px;color:var(--ink2)">Loading...</div></div>
+    </div>
+
+    <!-- USERS -->
+    <div class="page" id="page-users">
+      <div class="page-header">
+        <div><div class="page-title">Users</div><div class="page-sub" id="userCount">—</div></div>
+        <div style="display:flex;gap:8px">
+          <input id="userSearch" placeholder="Search users..." style="width:220px" oninput="searchUsers()" />
+          <select id="planFilter" style="width:140px" onchange="loadUsers()">
+            <option value="">All plans</option>
+            <option value="free">Free</option>
+            <option value="starter">Starter</option>
+            <option value="pro">Pro</option>
+            <option value="enterprise">Enterprise</option>
+          </select>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden"><table id="usersTable"><thead><tr><th>User</th><th>Plan</th><th>Invoices</th><th>Joined</th><th>Actions</th></tr></thead><tbody id="usersTbody"></tbody></table></div>
+    </div>
+
+    <!-- PLANS -->
+    <div class="page" id="page-plans">
+      <div class="page-header"><div><div class="page-title">Plans & pricing</div></div><button class="btn btn-primary" onclick="openPlanModal()">+ New plan</button></div>
+      <div id="plansGrid" class="grid g4"></div>
+    </div>
+
+    <!-- FEATURE FLAGS -->
+    <div class="page" id="page-features">
+      <div class="page-header"><div><div class="page-title">Feature flags</div><div class="page-sub">Enable or disable features platform-wide per plan</div></div></div>
+      <div class="card">
+        <div class="alert alert-info" style="margin-bottom:16px">Changes take effect immediately for all users. Use with care.</div>
+        <div id="featureList"></div>
+      </div>
+    </div>
+
+    <!-- AI USAGE -->
+    <div class="page" id="page-aiusage">
+      <div class="page-header"><div><div class="page-title">AI assistant usage</div><div class="page-sub">Track how customers use the AI features</div></div></div>
+      <div class="grid g3" id="aiStats" style="margin-bottom:16px"></div>
+      <div class="card" style="padding:0;overflow:hidden"><table><thead><tr><th>User</th><th>Requests</th><th>Last used</th></tr></thead><tbody id="aiTbody"></tbody></table></div>
+    </div>
+
+    <!-- FINANCING -->
+    <div class="page" id="page-financing">
+      <div class="page-header"><div><div class="page-title">Financing applications</div><div class="page-sub">Review and approve invoice financing requests</div></div></div>
+      <div class="card" style="padding:0;overflow:hidden"><table><thead><tr><th>User</th><th>Invoice amount</th><th>Status</th><th>Applied</th><th>Actions</th></tr></thead><tbody id="financingTbody"></tbody></table></div>
+    </div>
+
+    <!-- SATISFACTION -->
+    <div class="page" id="page-satisfaction">
+      <div class="page-header"><div><div class="page-title">Client satisfaction</div></div></div>
+      <div class="grid g3" id="satisfactionStats" style="margin-bottom:16px"></div>
+      <div class="card" style="padding:0;overflow:hidden"><table><thead><tr><th>Business</th><th>Client</th><th>Score</th><th>Comment</th><th>Date</th></tr></thead><tbody id="satisfactionTbody"></tbody></table></div>
+    </div>
+
+    <!-- TICKETS -->
+    <div class="page" id="page-tickets">
+      <div class="page-header">
+        <div><div class="page-title">Support tickets</div></div>
+        <select id="ticketFilter" style="width:160px" onchange="loadTickets()"><option value="">All tickets</option><option value="open">Open</option><option value="resolved">Resolved</option></select>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden"><table><thead><tr><th>User</th><th>Subject</th><th>Priority</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody id="ticketsTbody"></tbody></table></div>
+    </div>
+
+    <!-- BROADCAST -->
+    <div class="page" id="page-broadcast">
+      <div class="page-header"><div><div class="page-title">Broadcast message</div><div class="page-sub">Send a message to all or selected users</div></div></div>
+      <div class="card" style="max-width:620px">
+        <div class="form-row" style="grid-template-columns:1fr 1fr">
+          <div><label>Send to</label><select id="broadcastPlan"><option value="">All users</option><option value="free">Free plan</option><option value="starter">Starter plan</option><option value="pro">Pro plan</option><option value="enterprise">Enterprise plan</option></select></div>
+          <div><label>Subject *</label><input id="broadcastSubject" placeholder="What's new in InvoicePro..." /></div>
+        </div>
+        <div style="margin-bottom:12px"><label>Message *</label><textarea id="broadcastMsg" rows="5" placeholder="Your message to users..."></textarea></div>
+        <div class="alert alert-warn">This will send an email to all matching users. Double-check before sending.</div>
+        <button class="btn btn-primary" onclick="sendBroadcast()">📢 Send broadcast</button>
+        <div id="broadcastResult" style="margin-top:12px;font-size:13px"></div>
+      </div>
+    </div>
+
+    <!-- INVOICES -->
+    <div class="page" id="page-invoices">
+      <div class="page-header"><div><div class="page-title">All invoices</div><div class="page-sub" id="invoiceCount">—</div></div>
+        <select id="invoiceStatusFilter" style="width:160px" onchange="loadInvoices()"><option value="">All statuses</option><option value="paid">Paid</option><option value="sent">Sent</option><option value="overdue">Overdue</option><option value="draft">Draft</option></select>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden"><table><thead><tr><th>Invoice</th><th>Business</th><th>Client</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody id="invoicesTbody"></tbody></table></div>
+    </div>
+
+    <!-- CURRENCIES -->
+    <div class="page" id="page-currencies">
+      <div class="page-header"><div><div class="page-title">Currencies</div></div><button class="btn btn-primary" onclick="openCurrencyModal()">+ Add currency</button></div>
+      <div class="card" style="padding:0;overflow:hidden"><table><thead><tr><th>Code</th><th>Name</th><th>Symbol</th><th>Active</th><th>Actions</th></tr></thead><tbody id="currencyTbody"></tbody></table></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="page-header"><div><div class="page-title">App settings</div></div><button class="btn btn-primary" onclick="saveSettings()">Save all settings</button></div>
+      <div class="grid g2" id="settingsGrid"></div>
+    </div>
+
+    <!-- AUDIT -->
+    <div class="page" id="page-audit">
+      <div class="page-header"><div><div class="page-title">Audit log</div><div class="page-sub">All admin actions</div></div></div>
+      <div class="card" style="padding:0;overflow:hidden"><table><thead><tr><th>Admin</th><th>Action</th><th>Entity</th><th>Time</th></tr></thead><tbody id="auditTbody"></tbody></table></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- USER MODAL -->
+<div class="modal-overlay" id="userModal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal">
+    <div class="modal-header"><strong id="userModalTitle">User details</strong><button class="btn btn-sm" onclick="document.getElementById('userModal').style.display='none'">✕</button></div>
+    <div class="modal-body" id="userModalBody"></div>
+  </div>
+</div>
+
+<!-- TICKET MODAL -->
+<div class="modal-overlay" id="ticketModal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal">
+    <div class="modal-header"><strong>Reply to ticket</strong><button class="btn btn-sm" onclick="document.getElementById('ticketModal').style.display='none'">✕</button></div>
+    <div class="modal-body">
+      <div id="ticketModalContent"></div>
+      <label style="margin-top:14px;display:block">Your reply *</label>
+      <textarea id="ticketReply" rows="4"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="document.getElementById('ticketModal').style.display='none'">Cancel</button>
+      <button class="btn btn-success" onclick="submitTicketReply()">Send reply & resolve</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:3002'
+let token = localStorage.getItem('adminToken')
+let currentTicketId = null
+let settingsData = []
+
+const $ = id => document.getElementById(id)
+
+function planBadge(plan) {
+  const map = { free:'badge-free', starter:'badge-starter', pro:'badge-pro', enterprise:'badge-enterprise' }
+  return `<span class="badge ${map[plan]||'badge-free'}">${plan||'free'}</span>`
+}
+function statusBadge(s) {
+  const map = { paid:'badge-paid', open:'badge-open', resolved:'badge-resolved', draft:'', sent:'badge-starter', overdue:'badge badge-danger' }
+  return `<span class="badge ${map[s]||''}">${s}</span>`
+}
+function fmt(n) { return '£' + (+n||0).toLocaleString('en-GB', {minimumFractionDigits:2,maximumFractionDigits:2}) }
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—' }
+function stars(n) { return '★'.repeat(n||0)+'☆'.repeat(5-(n||0)) }
+
+async function apiFetch(path, opts={}) {
+  const res = await fetch(API + path, { ...opts, headers: { 'Content-Type':'application/json', ...(token ? { Authorization:`Bearer ${token}` } : {}), ...opts.headers } })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Request failed')
+  return data
+}
+
+async function doLogin() {
+  const email = $('loginEmail').value
+  const password = $('loginPassword').value
+  $('loginError').textContent = ''
+  try {
+    const data = await apiFetch('/admin/login', { method:'POST', body: JSON.stringify({email,password}) })
+    token = data.token
+    localStorage.setItem('adminToken', token)
+    $('adminName').textContent = data.admin.full_name || data.admin.email
+    $('login').style.display = 'none'
+    $('app').style.display = 'block'
+    loadDashboard()
+  } catch(e) { $('loginError').textContent = e.message }
+}
+
+function logout() { localStorage.removeItem('adminToken'); token = null; location.reload() }
+
+// Check existing token
+if (token) {
+  $('login').style.display = 'none'
+  $('app').style.display = 'block'
+  loadDashboard()
+}
+
+function show(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
+  $('page-' + page).classList.add('active')
+  const loaders = { dashboard: loadDashboard, revenue: loadRevenue, users: loadUsers, plans: loadPlans, features: loadFeatures, aiusage: loadAIUsage, financing: loadFinancing, satisfaction: loadSatisfaction, tickets: loadTickets, invoices: loadInvoices, currencies: loadCurrencies, settings: loadSettings, audit: loadAudit }
+  if (loaders[page]) loaders[page]()
+}
+
+// ── DASHBOARD ────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const d = await apiFetch('/admin/stats')
+    const stats = [
+      { label:'Total users', val: d.total_users, sub:`+${d.new_users_30d} this month`, color:'' },
+      { label:'MRR', val: fmt(d.mrr), sub:`ARR: ${fmt(d.arr)}`, color:'var(--green)' },
+      { label:'Revenue processed', val: fmt(d.revenue_30d), sub:'last 30 days', color:'var(--blue)' },
+      { label:'Avg satisfaction', val: d.avg_satisfaction + '/5', sub:'from all surveys', color: d.avg_satisfaction >= 4 ? 'var(--green)' : 'var(--amber)' },
+      { label:'Total invoices', val: d.total_invoices, sub:`${d.paid_invoices} paid`, color:'' },
+      { label:'Open tickets', val: d.open_tickets, sub:'need attention', color: d.open_tickets > 0 ? 'var(--red)' : 'var(--green)' },
+      { label:'Total revenue', val: fmt(d.total_revenue), sub:'all time', color:'' },
+      { label:'Feature usage', val: d.feature_usage_30d, sub:'AI/financing actions 30d', color:'' },
+    ]
+    $('statsGrid').innerHTML = stats.map(s => `<div class="card"><div class="kpi-label">${s.label}</div><div class="kpi-val" style="font-size:22px;${s.color ? `color:${s.color}` : ''}">${s.val}</div><div class="kpi-sub">${s.sub}</div></div>`).join('')
+
+    // Plan breakdown
+    const plans = ['free','starter','pro','enterprise']
+    const colors = ['#b8b2a3','#1d4ed8','#7c3aed','#b45309']
+    const total = Object.values(d.plan_breakdown||{}).reduce((a,b) => +a + +b, 0) || 1
+    $('planBreakdown').innerHTML = plans.map((p,i) => {
+      const count = d.plan_breakdown?.[p] || 0
+      const pct = Math.round(count/+total*100)
+      return `<div class="stat-row"><span style="font-weight:500;text-transform:capitalize">${p}</span><div style="flex:1;margin:0 12px"><div class="plan-bar" style="background:${colors[i]};width:${pct}%"></div></div><span style="font-size:12px;color:var(--ink2)">${count} (${pct}%)</span></div>`
+    }).join('')
+
+    // Ticket badge
+    if (d.open_tickets > 0) { $('ticketBadge').textContent = d.open_tickets; $('ticketBadge').style.display = 'inline' }
+  } catch(e) { console.error(e) }
+}
+
+// ── REVENUE ──────────────────────────────────────────────
+async function loadRevenue() {
+  try {
+    const d = await apiFetch('/admin/revenue')
+    const months = Object.entries(d.monthly_revenue||{}).sort((a,b) => a[0].localeCompare(b[0])).slice(-12)
+    const maxVal = Math.max(...months.map(m => m[1]), 1)
+    $('revenueStats').innerHTML = `
+      <div class="card"><div class="kpi-label">Total processed</div><div class="kpi-val" style="color:var(--green)">${fmt(d.total_processed)}</div></div>
+      <div class="card"><div class="kpi-label">Best month</div><div class="kpi-val" style="font-size:18px">${months.sort((a,b)=>b[1]-a[1])[0]?.[0]||'—'}</div><div class="kpi-sub">${fmt(months.sort((a,b)=>b[1]-a[1])[0]?.[1]||0)}</div></div>
+      <div class="card"><div class="kpi-label">Months tracked</div><div class="kpi-val">${months.length}</div></div>`
+    $('revenueChart').innerHTML = `<div style="display:flex;align-items:flex-end;gap:6px;height:160px;padding:10px 0">${months.map(([m,v])=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;background:var(--ink);border-radius:3px 3px 0 0;height:${Math.round(v/maxVal*120)}px;min-height:2px" title="${fmt(v)}"></div><div style="font-size:9px;color:var(--ink3);transform:rotate(-45deg);white-space:nowrap">${m.slice(5)}</div></div>`).join('')}</div>`
+  } catch(e) {}
+}
+
+// ── USERS ────────────────────────────────────────────────
+let searchTimeout
+function searchUsers() { clearTimeout(searchTimeout); searchTimeout = setTimeout(loadUsers, 400) }
+async function loadUsers() {
+  const search = $('userSearch').value
+  const plan = $('planFilter').value
+  try {
+    const d = await apiFetch(`/admin/users?search=${encodeURIComponent(search)}&plan=${plan}&limit=25`)
+    $('userCount').textContent = `${d.total} users`
+    $('usersTbody').innerHTML = (d.data||[]).map(u => `
+      <tr>
+        <td><div style="font-weight:500">${u.full_name||'—'}</div><div style="font-size:11px;color:var(--ink3)">${u.email}</div>${u.company_name?`<div style="font-size:11px;color:var(--ink3)">${u.company_name}</div>`:''}</td>
+        <td>${planBadge(u.plan)}</td>
+        <td style="color:var(--ink2)">—</td>
+        <td style="color:var(--ink3);font-size:12px">${fmtDate(u.created_at)}</td>
+        <td><div style="display:flex;gap:4px">
+          <button class="btn btn-sm" onclick="openUserModal('${u.id}','${(u.full_name||u.email).replace(/'/g,"\\'")}')">View</button>
+          <select class="btn btn-sm" style="width:auto;padding:4px 6px" onchange="changePlan('${u.id}',this.value)">
+            <option value="">Change plan</option>
+            <option value="free">Free</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option>
+          </select>
+        </div></td>
+      </tr>`).join('')
+  } catch(e) {}
+}
+
+async function openUserModal(userId, name) {
+  $('userModalTitle').textContent = name
+  $('userModalBody').innerHTML = '<div style="color:var(--ink3);padding:20px">Loading...</div>'
+  $('userModal').style.display = 'flex'
+  try {
+    const d = await apiFetch(`/admin/users/${userId}`)
+    const p = d.profile || {}
+    const s = d.stats || {}
+    $('userModalBody').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+        ${[['Email',p.email],['Plan',`${planBadge(p.plan)}`],['Company',p.company_name||'—'],['Currency',p.default_currency||'GBP'],['Tax rate',`${p.default_tax_rate||20}%`],['Joined',fmtDate(p.created_at)]].map(([l,v])=>`<div><div style="font-size:11px;color:var(--ink3);margin-bottom:2px">${l}</div><div>${v}</div>`).join('')}
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:14px;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:600;margin-bottom:10px">Stats</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          ${[['Total invoices',s.total_invoices],['Paid invoices',s.paid_invoices],['Total revenue',fmt(s.total_revenue)],['Avg satisfaction',s.avg_satisfaction?s.avg_satisfaction+'/5':'No data']].map(([l,v])=>`<div style="background:var(--bg);border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--ink3)">${l}</div><div style="font-weight:600;font-size:15px">${v}</div></div>`).join('')}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm btn-danger" onclick="suspendUser('${userId}',true)">Suspend user</button>
+        <button class="btn btn-sm btn-success" onclick="suspendUser('${userId}',false)">Unsuspend</button>
+        <button class="btn btn-sm" style="border-color:var(--red);color:var(--red)" onclick="if(confirm('Delete this user? This cannot be undone.'))deleteUser('${userId}')">Delete user</button>
+      </div>`
+  } catch(e) { $('userModalBody').innerHTML = '<div style="color:var(--red)">Failed to load user</div>' }
+}
+
+async function changePlan(userId, plan) {
+  if (!plan) return
+  if (!confirm(`Change this user to ${plan} plan?`)) return
+  try { await apiFetch(`/admin/users/${userId}/plan`, { method:'PUT', body:JSON.stringify({plan}) }); alert(`Plan changed to ${plan}`); loadUsers() } catch(e) { alert(e.message) }
+}
+
+async function suspendUser(userId, suspend) {
+  try { await apiFetch(`/admin/users/${userId}/suspend`, { method:'PUT', body:JSON.stringify({suspended:suspend}) }); alert(suspend ? 'User suspended' : 'User unsuspended'); $('userModal').style.display='none' } catch(e) { alert(e.message) }
+}
+
+async function deleteUser(userId) {
+  try { await apiFetch(`/admin/users/${userId}`, { method:'DELETE' }); alert('User deleted'); $('userModal').style.display='none'; loadUsers() } catch(e) { alert(e.message) }
+}
+
+// ── PLANS ─────────────────────────────────────────────────
+async function loadPlans() {
+  const d = await apiFetch('/admin/plans')
+  const colors = { free:'#888', starter:'var(--blue)', pro:'#7c3aed', enterprise:'var(--amber)' }
+  $('plansGrid').innerHTML = (d||[]).map(p => `
+    <div class="card" style="border-top:3px solid ${colors[p.slug]||'var(--border)'}">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin-bottom:6px">${p.name}</div>
+      <div style="font-size:28px;font-weight:700;margin-bottom:4px">£${p.price_monthly}<span style="font-size:13px;font-weight:400;color:var(--ink3)">/mo</span></div>
+      <div style="font-size:12px;color:var(--ink2);margin-bottom:12px">£${p.price_yearly}/yr</div>
+      <div style="border-top:1px solid var(--border);padding-top:10px;font-size:12px;color:var(--ink2)">
+        <div class="stat-row"><span>Invoices</span><span>${p.max_invoices===-1?'Unlimited':p.max_invoices}</span></div>
+        <div class="stat-row"><span>Clients</span><span>${p.max_clients===-1?'Unlimited':p.max_clients}</span></div>
+        <div class="stat-row"><span>Team members</span><span>${p.max_team_members===-1?'Unlimited':p.max_team_members}</span></div>
+        <div class="stat-row"><span>Featured</span><span>${p.is_featured?'Yes':'No'}</span></div>
+      </div>
+      <button class="btn btn-sm" style="width:100%;justify-content:center;margin-top:10px" onclick="editPlan('${p.id}')">Edit plan</button>
+    </div>`).join('')
+}
+
+function openPlanModal() { alert('Plan creation — edit plans via the database for now') }
+function editPlan(id) { alert('Edit plan: ' + id + ' — update via database or add an edit form') }
+
+// ── FEATURE FLAGS ─────────────────────────────────────────
+const FEATURES = [
+  { key:'feature_ai_assistant', name:'AI Invoice Assistant', desc:'Claude-powered chat widget on every page', plans:['pro','enterprise'] },
+  { key:'feature_whatsapp_sms', name:'WhatsApp & SMS reminders', desc:'Send reminders via WhatsApp and SMS (requires Twilio)', plans:['pro','enterprise'] },
+  { key:'feature_receipt_scanner', name:'AI Receipt Scanner', desc:'Upload receipt photos, AI extracts expense data', plans:['starter','pro','enterprise'] },
+  { key:'feature_cashflow_forecast', name:'Cash Flow Forecast', desc:'90-day income forecast based on invoice due dates', plans:['pro','enterprise'] },
+  { key:'feature_invoice_designer', name:'Invoice Template Designer', desc:'Custom invoice templates with brand colours', plans:['starter','pro','enterprise'] },
+  { key:'feature_client_happiness', name:'Client Happiness Score', desc:'NPS surveys sent after invoice payment', plans:['pro','enterprise'] },
+  { key:'feature_financing', name:'Invoice Financing (Get Paid Now)', desc:'Advance 90% of invoice value within 24 hours', plans:['pro','enterprise'] },
+  { key:'feature_milestones', name:'Milestone Billing', desc:'Split projects into phased invoice milestones', plans:['pro','enterprise'] },
+  { key:'feature_early_payment', name:'Early Payment Discount', desc:'Offer % discount for fast payment', plans:['starter','pro','enterprise'] },
+  { key:'feature_view_tracking', name:'Invoice View Tracking', desc:'See when client opened your invoice email', plans:['starter','pro','enterprise'] },
+  { key:'feature_year_review', name:'Year in Review', desc:'Annual revenue report sent to users on Jan 1st', plans:['free','starter','pro','enterprise'] },
+  { key:'feature_time_tracking', name:'Time Tracking', desc:'Log billable hours and convert to invoices', plans:['pro','enterprise'] },
+  { key:'feature_recurring', name:'Recurring Invoices', desc:'Auto-generate invoices on schedule', plans:['starter','pro','enterprise'] },
+  { key:'feature_xero_export', name:'Xero/QuickBooks Export', desc:'Export invoices in accountant-friendly formats', plans:['enterprise'] },
+  { key:'feature_white_label', name:'White Label', desc:'Custom branding on all emails and portals', plans:['enterprise'] },
+  { key:'feature_api_access', name:'API Access', desc:'REST API with key management', plans:['enterprise'] },
+]
+
+const planPillColors = { free:'background:#f1f0ed;color:#756d5c', starter:'background:#dbeafe;color:#1d4ed8', pro:'background:#ede9fe;color:#5b21b6', enterprise:'background:#fef3c7;color:#b45309' }
+
+async function loadFeatures() {
+  let flags = {}
+  try { const d = await apiFetch('/admin/feature-flags'); d.forEach(f => { flags[f.key] = JSON.parse(f.value) }) } catch {}
+  $('featureList').innerHTML = FEATURES.map(f => {
+    const enabled = flags[f.key] !== false // default on
+    return `<div class="feature-row">
+      <div class="feature-info">
+        <div class="feature-name">${f.name}</div>
+        <div class="feature-desc">${f.desc}</div>
+        <div class="feature-plans">${f.plans.map(p=>`<span class="plan-pill" style="${planPillColors[p]||''}">${p}</span>`).join('')}</div>
+      </div>
+      <button class="toggle ${enabled?'on':'off'}" onclick="toggleFeature('${f.key}',this)" title="${enabled?'Disable':'Enable'}"></button>
+    </div>`
+  }).join('')
+}
+
+async function toggleFeature(key, btn) {
+  const isOn = btn.classList.contains('on')
+  btn.classList.toggle('on', !isOn)
+  btn.classList.toggle('off', isOn)
+  try { await apiFetch(`/admin/feature-flags/${key}`, { method:'PUT', body:JSON.stringify({value:!isOn}) }) }
+  catch(e) { btn.classList.toggle('on', isOn); btn.classList.toggle('off', !isOn); alert('Failed: ' + e.message) }
+}
+
+// ── AI USAGE ─────────────────────────────────────────────
+async function loadAIUsage() {
+  try {
+    const d = await apiFetch('/admin/ai-usage')
+    $('aiStats').innerHTML = `
+      <div class="card"><div class="kpi-label">Total AI requests</div><div class="kpi-val">${d.total_requests}</div></div>
+      <div class="card"><div class="kpi-label">Unique users</div><div class="kpi-val">${d.unique_users}</div></div>
+      <div class="card"><div class="kpi-label">Avg per user</div><div class="kpi-val">${d.unique_users>0?(d.total_requests/d.unique_users).toFixed(1):0}</div></div>`
+    $('aiTbody').innerHTML = (d.recent||[]).length > 0 ? (d.recent||[]).map(r=>`<tr><td style="font-size:11px;color:var(--ink3)">${r.user_id?.slice(0,8)}...</td><td>1</td><td style="font-size:12px;color:var(--ink3)">${fmtDate(r.created_at)}</td></tr>`).join('') : '<tr><td colspan="3" style="text-align:center;color:var(--ink3);padding:30px">No AI usage recorded yet</td></tr>'
+  } catch(e) {}
+}
+
+// ── FINANCING ─────────────────────────────────────────────
+async function loadFinancing() {
+  try {
+    const d = await apiFetch('/admin/financing')
+    $('financingTbody').innerHTML = (d||[]).length > 0 ? (d||[]).map(a=>`
+      <tr>
+        <td><div style="font-weight:500">${a.profiles?.company_name||a.profiles?.full_name||'—'}</div><div style="font-size:11px;color:var(--ink3)">${a.profiles?.email||''}</div></td>
+        <td class="currency-amount">${fmt(a.metadata?.amount||0)}</td>
+        <td>${a.metadata?.status ? `<span class="badge ${a.metadata.status==='approved'?'badge-paid':'badge-open'}">${a.metadata.status}</span>` : '<span class="badge badge-open">pending</span>'}</td>
+        <td style="font-size:12px;color:var(--ink3)">${fmtDate(a.created_at)}</td>
+        <td><div style="display:flex;gap:4px">
+          <button class="btn btn-sm btn-success" onclick="updateFinancing('${a.id}','approved')">Approve</button>
+          <button class="btn btn-sm btn-danger" onclick="updateFinancing('${a.id}','rejected')">Reject</button>
+        </div></td>
+      </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--ink3);padding:30px">No financing applications yet</td></tr>'
+  } catch(e) {}
+}
+
+async function updateFinancing(id, status) {
+  try { await apiFetch(`/admin/financing/${id}/status`, { method:'PUT', body:JSON.stringify({status}) }); loadFinancing(); alert(`Application ${status}`) } catch(e) { alert(e.message) }
+}
+
+// ── SATISFACTION ─────────────────────────────────────────
+async function loadSatisfaction() {
+  try {
+    const d = await apiFetch('/admin/satisfaction')
+    $('satisfactionStats').innerHTML = `
+      <div class="card"><div class="kpi-label">Platform avg score</div><div class="kpi-val" style="color:${d.average>=4?'var(--green)':d.average>=3?'var(--amber)':'var(--red)'}">${d.average}/5</div></div>
+      <div class="card"><div class="kpi-label">Total responses</div><div class="kpi-val">${d.total}</div></div>
+      <div class="card"><div class="kpi-label">Score distribution</div><div style="display:flex;gap:4px;margin-top:8px">${(d.distribution||[]).map(s=>`<div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--ink3)">${s.score}★</div><div style="font-weight:600">${s.count}</div></div>`).join('')}</div></div>`
+    $('satisfactionTbody').innerHTML = (d.scores||[]).length > 0 ? (d.scores||[]).map(s=>`<tr><td style="font-weight:500">${s.profiles?.company_name||s.profiles?.full_name||'—'}</td><td style="color:var(--ink2)">${s.clients?.name||'—'}</td><td style="color:#f59e0b">${stars(s.score)}</td><td style="color:var(--ink3);font-size:12px;max-width:200px">${s.comment||'—'}</td><td style="font-size:11px;color:var(--ink3)">${fmtDate(s.responded_at)}</td></tr>`).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--ink3);padding:30px">No satisfaction scores yet</td></tr>'
+  } catch(e) {}
+}
+
+// ── TICKETS ──────────────────────────────────────────────
+async function loadTickets() {
+  const status = $('ticketFilter').value
+  try {
+    const d = await apiFetch('/admin/tickets' + (status ? `?status=${status}` : ''))
+    $('ticketsTbody').innerHTML = (d||[]).length > 0 ? (d||[]).map(t=>`
+      <tr>
+        <td><div style="font-weight:500">${t.profiles?.full_name||'—'}</div><div style="font-size:11px;color:var(--ink3)">${t.profiles?.email||''}</div>${planBadge(t.profiles?.plan)}</td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.subject}</td>
+        <td><span class="badge ${t.priority==='urgent'?'badge-danger':t.priority==='high'?'badge-open':''}">${t.priority||'normal'}</span></td>
+        <td><span class="badge ${t.status==='open'?'badge-open':'badge-paid'}">${t.status}</span></td>
+        <td style="font-size:11px;color:var(--ink3)">${fmtDate(t.created_at)}</td>
+        <td><button class="btn btn-sm" onclick="openTicket('${t.id}')">Reply</button></td>
+      </tr>`).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--ink3);padding:30px">No tickets found</td></tr>'
+  } catch(e) {}
+}
+
+function openTicket(id) {
+  currentTicketId = id
+  $('ticketReply').value = ''
+  $('ticketModal').style.display = 'flex'
+}
+
+async function submitTicketReply() {
+  const reply = $('ticketReply').value
+  if (!reply.trim()) return alert('Enter a reply first')
+  try { await apiFetch(`/admin/tickets/${currentTicketId}`, { method:'PUT', body:JSON.stringify({admin_reply:reply,status:'resolved'}) }); $('ticketModal').style.display='none'; loadTickets(); alert('Reply sent and ticket resolved!') } catch(e) { alert(e.message) }
+}
+
+// ── BROADCAST ─────────────────────────────────────────────
+async function sendBroadcast() {
+  const subject = $('broadcastSubject').value
+  const message = $('broadcastMsg').value
+  const plan_filter = $('broadcastPlan').value
+  if (!subject || !message) return alert('Subject and message required')
+  if (!confirm(`Send broadcast to ${plan_filter ? plan_filter + ' plan' : 'ALL'} users?`)) return
+  try {
+    const d = await apiFetch('/admin/broadcast', { method:'POST', body:JSON.stringify({subject,message,plan_filter}) })
+    $('broadcastResult').innerHTML = `<div class="alert alert-success">✓ Broadcast sent to ${d.recipients} users</div>`
+    $('broadcastSubject').value = ''; $('broadcastMsg').value = ''
+  } catch(e) { $('broadcastResult').innerHTML = `<div class="alert" style="background:var(--red-bg);border-color:var(--red);color:var(--red)">${e.message}</div>` }
+}
+
+// ── INVOICES ─────────────────────────────────────────────
+async function loadInvoices() {
+  const status = $('invoiceStatusFilter').value
+  try {
+    const d = await apiFetch(`/admin/invoices?status=${status}&limit=50`)
+    $('invoiceCount').textContent = `${d.total} invoices`
+    $('invoicesTbody').innerHTML = (d.data||[]).map(i=>`
+      <tr>
+        <td style="font-family:monospace;font-size:12px;font-weight:600">${i.invoice_number}</td>
+        <td><div style="font-weight:500">${i.profiles?.company_name||i.profiles?.full_name||'—'}</div></td>
+        <td style="color:var(--ink2)">${i.clients?.name||'—'}</td>
+        <td style="font-weight:600">£${(+i.total||0).toFixed(2)}</td>
+        <td>${statusBadge(i.status)}</td>
+        <td style="font-size:11px;color:var(--ink3)">${fmtDate(i.created_at)}</td>
+      </tr>`).join('')
+  } catch(e) {}
+}
+
+// ── CURRENCIES ───────────────────────────────────────────
+async function loadCurrencies() {
+  const d = await apiFetch('/admin/currencies')
+  $('currencyTbody').innerHTML = (d||[]).map(c=>`
+    <tr>
+      <td style="font-family:monospace;font-weight:600">${c.code}</td>
+      <td>${c.name}</td>
+      <td style="font-size:16px">${c.symbol}</td>
+      <td><span class="badge ${c.is_active?'badge-paid':'badge-free'}">${c.is_active?'Active':'Inactive'}</span></td>
+      <td><button class="btn btn-sm" onclick="toggleCurrency('${c.code}',${!c.is_active})">${c.is_active?'Disable':'Enable'}</button></td>
+    </tr>`).join('')
+}
+
+function openCurrencyModal() { alert('Add currency — enter via database for now') }
+async function toggleCurrency(code, active) {
+  try { await apiFetch(`/admin/currencies/${code}`, { method:'PUT', body:JSON.stringify({is_active:active}) }); loadCurrencies() } catch(e) { alert(e.message) }
+}
+
+// ── SETTINGS ─────────────────────────────────────────────
+async function loadSettings() {
+  settingsData = await apiFetch('/admin/settings')
+  const grouped = {}
+  settingsData.forEach(s => { if (!grouped[s.category]) grouped[s.category] = []; grouped[s.category].push(s) })
+  $('settingsGrid').innerHTML = Object.entries(grouped).map(([cat,items])=>`
+    <div class="card">
+      <div style="font-size:12px;font-weight:600;text-transform:capitalize;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)">${cat}</div>
+      ${items.map(s=>{
+        let val = s.value
+        try { val = JSON.parse(s.value) } catch {}
+        const isBoolean = val === true || val === false
+        return `<div style="margin-bottom:12px">
+          <label>${s.label||s.key}</label>
+          ${isBoolean ? `<button class="toggle ${val?'on':'off'}" id="setting_${s.key}" onclick="toggleSetting('${s.key}',this)"></button>` : `<input id="setting_${s.key}" value="${val||''}" />`}
+        </div>`
+      }).join('')}
+    </div>`).join('')
+}
+
+function toggleSetting(key, btn) { btn.classList.toggle('on'); btn.classList.toggle('off') }
+
+async function saveSettings() {
+  const updates = settingsData.map(s => {
+    const el = $('setting_' + s.key)
+    if (!el) return null
+    let val = el.tagName === 'BUTTON' ? el.classList.contains('on') : el.value
+    return { key: s.key, value: val }
+  }).filter(Boolean)
+  try { await apiFetch('/admin/settings', { method:'PUT', body:JSON.stringify(updates) }); alert('Settings saved!') } catch(e) { alert(e.message) }
+}
+
+// ── AUDIT ─────────────────────────────────────────────────
+async function loadAudit() {
+  const d = await apiFetch('/admin/audit')
+  $('auditTbody').innerHTML = (d||[]).map(a=>`
+    <tr>
+      <td style="font-size:12px">${a.admin_users?.email||'—'}</td>
+      <td><code style="font-size:11px;background:var(--bg);padding:2px 6px;border-radius:4px">${a.action}</code></td>
+      <td style="font-size:12px;color:var(--ink2)">${a.entity_type||'—'} ${a.entity_id?a.entity_id.slice(0,8)+'...':''}</td>
+      <td style="font-size:11px;color:var(--ink3)">${fmtDate(a.created_at)}</td>
+    </tr>`).join('')
+}
+</script>
+</body>
+</html>

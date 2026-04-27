@@ -8,7 +8,7 @@ const router = Router()
 router.post('/stripe', async (req: Request, res: Response) => {
   const sig = req.headers['stripe-signature'] as string
   let event: any
-  try { event = await stripeService.constructWebhookEvent(req.body, sig) } catch (err: any) { return res.status(400).send(`Webhook Error: ${err.message}`) }
+  try { event = await stripeService.constructWebhookEvent((req as any).body, sig) } catch (err: any) { return res.status(400).send(`Webhook Error: ${err.message}`) }
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object
     const invoiceId = session.metadata?.invoice_id

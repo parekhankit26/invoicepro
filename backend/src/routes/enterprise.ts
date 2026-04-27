@@ -11,7 +11,7 @@ router.use(authenticate)
 router.get('/api-keys', async (req: AuthRequest, res: Response) => {
   try {
     const { data } = await supabase.from('api_keys').select('id,name,key_prefix,permissions,last_used,expires_at,is_active,request_count,created_at')
-      .eq('user_id', req.user!.id).order('created_at', { ascending: false })
+      .eq('user_id', (req as any).user!.id).order('created_at', { ascending: false })
     return res.json(data || [])
   } catch {
     return res.status(500).json({ error: 'Failed to fetch API keys' })
@@ -20,11 +20,11 @@ router.get('/api-keys', async (req: AuthRequest, res: Response) => {
 
 router.post('/api-keys', async (req: AuthRequest, res: Response) => {
   try {
-    const { data: profile } = await supabase.from('profiles').select('plan').eq('id', req.user!.id).single()
+    const { data: profile } = await supabase.from('profiles').select('plan').eq('id', (req as any).user!.id).single()
     if (!['enterprise'].includes(profile?.plan || '')) {
       return res.status(403).json({ error: 'API keys require Enterprise plan' })
     }
-    const { name, permissions = ['invoices:read'], expires_at } = req.body
+    const { name, permissions = ['invoices:read'], expires_at } = (req as any).body
     if (!name) return res.status(400).json({ error: 'Name is required' })
 
     const rawKey = `ipro_${crypto.randomBytes(32).toString('hex')}`
@@ -32,7 +32,7 @@ router.post('/api-keys', async (req: AuthRequest, res: Response) => {
     const keyPrefix = rawKey.slice(0, 12)
 
     const { data, error } = await supabase.from('api_keys').insert({
-      user_id: req.user!.id, name, key_hash: keyHash, key_prefix: keyPrefix, permissions, expires_at
+      user_id: (req as any).user!.id, name, key_hash: keyHash, key_prefix: keyPrefix, permissions, expires_at
     }).select('id,name,key_prefix,permissions,expires_at,created_at').single()
     if (error) return res.status(400).json({ error: error.message })
 
@@ -45,7 +45,7 @@ router.post('/api-keys', async (req: AuthRequest, res: Response) => {
 
 router.delete('/api-keys/:id', async (req: AuthRequest, res: Response) => {
   try {
-    await supabase.from('api_keys').update({ is_active: false }).eq('id', req.params.id).eq('user_id', req.user!.id)
+    await supabase.from('api_keys').update({ is_active: false }).eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id)
     return res.json({ message: 'API key revoked' })
   } catch {
     return res.status(500).json({ error: 'Failed to revoke key' })
@@ -56,7 +56,7 @@ router.delete('/api-keys/:id', async (req: AuthRequest, res: Response) => {
 
 router.get('/white-label', async (req: AuthRequest, res: Response) => {
   try {
-    const { data, error } = await supabase.from('white_label_settings').select('*').eq('user_id', req.user!.id).single()
+    const { data, error } = await supabase.from('white_label_settings').select('*').eq('user_id', (req as any).user!.id).single()
     if (error) return res.json(null)
     return res.json(data)
   } catch {
@@ -66,16 +66,16 @@ router.get('/white-label', async (req: AuthRequest, res: Response) => {
 
 router.put('/white-label', async (req: AuthRequest, res: Response) => {
   try {
-    const { data: profile } = await supabase.from('profiles').select('plan').eq('id', req.user!.id).single()
+    const { data: profile } = await supabase.from('profiles').select('plan').eq('id', (req as any).user!.id).single()
     if (profile?.plan !== 'enterprise') {
       return res.status(403).json({ error: 'White label requires Enterprise plan' })
     }
     const allowed = ['brand_name','brand_logo_url','brand_primary_color','brand_accent_color','custom_domain','custom_email_from','custom_email_name','invoice_footer','hide_powered_by']
     const updates: Record<string, any> = {}
-    allowed.forEach(k => { if (req.body[k] !== undefined) updates[k] = req.body[k] })
+    allowed.forEach(k => { if ((req as any).body[k] !== undefined) updates[k] = (req as any).body[k] })
 
     const { data, error } = await supabase.from('white_label_settings')
-      .upsert({ user_id: req.user!.id, ...updates }, { onConflict: 'user_id' }).select().single()
+      .upsert({ user_id: (req as any).user!.id, ...updates }, { onConflict: 'user_id' }).select().single()
     if (error) return res.status(400).json({ error: error.message })
     return res.json(data)
   } catch {
@@ -87,15 +87,15 @@ router.put('/white-label', async (req: AuthRequest, res: Response) => {
 
 router.get('/tax-report', async (req: AuthRequest, res: Response) => {
   try {
-    const { from, to } = req.query
+    const { from, to } = (req as any).query
     if (!from || !to) return res.status(400).json({ error: 'from and to dates required (YYYY-MM-DD)' })
 
     const [invoicesRes, expensesRes] = await Promise.all([
       supabase.from('invoices').select('total, tax_amount, tax_rate, status, paid_at')
-        .eq('user_id', req.user!.id).eq('status', 'paid')
+        .eq('user_id', (req as any).user!.id).eq('status', 'paid')
         .gte('paid_at', `${from}T00:00:00`).lte('paid_at', `${to}T23:59:59`),
       supabase.from('expenses').select('amount, tax_amount')
-        .eq('user_id', req.user!.id).gte('date', from as string).lte('date', to as string)
+        .eq('user_id', (req as any).user!.id).gte('date', from as string).lte('date', to as string)
     ])
 
     const invoices = invoicesRes.data || []
@@ -139,11 +139,11 @@ router.get('/tax-report', async (req: AuthRequest, res: Response) => {
 
 router.get('/invoice-analytics/:invoiceId', async (req: AuthRequest, res: Response) => {
   try {
-    const { data: invoice } = await supabase.from('invoices').select('id').eq('id', req.params.invoiceId).eq('user_id', req.user!.id).single()
+    const { data: invoice } = await supabase.from('invoices').select('id').eq('id', (req as any).params.invoiceId).eq('user_id', (req as any).user!.id).single()
     if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
 
     const { data: views } = await supabase.from('invoice_views').select('*')
-      .eq('invoice_id', req.params.invoiceId).order('viewed_at', { ascending: false })
+      .eq('invoice_id', (req as any).params.invoiceId).order('viewed_at', { ascending: false })
 
     return res.json({
       total_views: views?.length || 0,
@@ -160,9 +160,9 @@ router.get('/invoice-analytics/:invoiceId', async (req: AuthRequest, res: Respon
 
 router.post('/late-fee/:invoiceId', async (req: AuthRequest, res: Response) => {
   try {
-    const { fee_percent = 2 } = req.body
+    const { fee_percent = 2 } = (req as any).body
     const { data: invoice } = await supabase.from('invoices').select('*')
-      .eq('id', req.params.invoiceId).eq('user_id', req.user!.id).single()
+      .eq('id', (req as any).params.invoiceId).eq('user_id', (req as any).user!.id).single()
     if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
     if (invoice.status === 'paid') return res.status(400).json({ error: 'Invoice already paid' })
 
@@ -175,7 +175,7 @@ router.post('/late-fee/:invoiceId', async (req: AuthRequest, res: Response) => {
 
     const { data, error } = await supabase.from('invoices')
       .update({ late_fee_percent: fee_percent, late_fee_amount: lateFeeAmount, total: newTotal })
-      .eq('id', req.params.invoiceId).select().single()
+      .eq('id', (req as any).params.invoiceId).select().single()
     if (error) return res.status(400).json({ error: error.message })
     return res.json({ ...data, days_overdue: daysOverdue, months_overdue: monthsOverdue, late_fee_added: lateFeeAmount })
   } catch {
@@ -187,12 +187,12 @@ router.post('/late-fee/:invoiceId', async (req: AuthRequest, res: Response) => {
 
 router.get('/export/:format', async (req: AuthRequest, res: Response) => {
   try {
-    const { format } = req.params // 'csv' | 'xero' | 'quickbooks'
-    const { from, to } = req.query
+    const { format } = (req as any).params // 'csv' | 'xero' | 'quickbooks'
+    const { from, to } = (req as any).query
 
     const { data: invoices } = await supabase.from('invoices')
       .select(`*, clients(name, email, address)`)
-      .eq('user_id', req.user!.id)
+      .eq('user_id', (req as any).user!.id)
       .gte('created_at', from ? `${from}T00:00:00` : '2020-01-01')
       .lte('created_at', to ? `${to}T23:59:59` : new Date().toISOString())
       .order('created_at')

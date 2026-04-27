@@ -8,8 +8,8 @@ router.use(authenticate)
 // AI Assistant — understands natural language and performs actions
 router.post('/chat', async (req: AuthRequest, res: Response) => {
   try {
-    const { message, conversation_history = [] } = req.body
-    const userId = req.user!.id
+    const { message, conversation_history = [] } = (req as any).body
+    const userId = (req as any).user!.id
 
     // Fetch user's data for context
     const [invoicesRes, clientsRes, expensesRes, profileRes] = await Promise.all([
@@ -146,7 +146,7 @@ INSTRUCTIONS:
 
 // Get conversation suggestions
 router.get('/suggestions', async (req: AuthRequest, res: Response) => {
-  const { data: overdue } = await supabase.from('invoices').select('invoice_number').eq('user_id', req.user!.id).eq('status', 'overdue').limit(3)
+  const { data: overdue } = await supabase.from('invoices').select('invoice_number').eq('user_id', (req as any).user!.id).eq('status', 'overdue').limit(3)
   const suggestions = [
     'Who hasn\'t paid me this month?',
     'What\'s my total revenue this year?',

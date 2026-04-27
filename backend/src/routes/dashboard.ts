@@ -6,7 +6,7 @@ const router = Router()
 router.use(authenticate)
 
 router.get('/overview', async (req: AuthRequest, res: Response) => {
-  const userId = req.user!.id
+  const userId = (req as any).user!.id
   const now = new Date()
   const [invoicesRes, expensesRes, clientsRes] = await Promise.all([
     supabase.from('invoices').select('*').eq('user_id', userId),

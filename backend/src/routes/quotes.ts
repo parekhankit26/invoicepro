@@ -13,7 +13,7 @@ router.get('/portal/:token', async (req: Request, res: Response) => {
     const { data: quote, error } = await supabase
       .from('quotes')
       .select(`*, clients(*), quote_items(*), profiles(company_name, full_name, company_address, company_phone, tax_number)`)
-      .eq('client_token', req.params.token)
+      .eq('client_token', (req as any).params.token)
       .single()
     if (error || !quote) return res.status(404).json({ error: 'Quote not found' })
     // Track view
@@ -26,9 +26,9 @@ router.get('/portal/:token', async (req: Request, res: Response) => {
 
 router.post('/portal/:token/respond', async (req: Request, res: Response) => {
   try {
-    const { action, message } = req.body // action: 'accept' | 'decline'
+    const { action, message } = (req as any).body // action: 'accept' | 'decline'
     const { data: quote } = await supabase
-      .from('quotes').select('*').eq('client_token', req.params.token).single()
+      .from('quotes').select('*').eq('client_token', (req as any).params.token).single()
     if (!quote) return res.status(404).json({ error: 'Quote not found' })
     if (!['accepted', 'declined'].includes(action === 'accept' ? 'accepted' : 'declined')) {
       return res.status(400).json({ error: 'Invalid action' })
@@ -50,11 +50,11 @@ router.use(authenticate)
 // List quotes
 router.get('/', async (req: AuthRequest, res: Response) => {
   try {
-    const { status, client_id, page = 1, limit = 20 } = req.query
+    const { status, client_id, page = 1, limit = 20 } = (req as any).query
     let query = supabase
       .from('quotes')
       .select(`*, clients(id, name, email), quote_items(*)`, { count: 'exact' })
-      .eq('user_id', req.user!.id)
+      .eq('user_id', (req as any).user!.id)
       .order('created_at', { ascending: false })
       .range((+page - 1) * +limit, +page * +limit - 1)
     if (status) query = query.eq('status', status)
@@ -73,8 +73,8 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
     const { data, error } = await supabase
       .from('quotes')
       .select(`*, clients(*), quote_items(*)`)
-      .eq('id', req.params.id)
-      .eq('user_id', req.user!.id)
+      .eq('id', (req as any).params.id)
+      .eq('user_id', (req as any).user!.id)
       .single()
     if (error) return res.status(404).json({ error: 'Quote not found' })
     return res.json(data)
@@ -86,7 +86,7 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
 // Create quote
 router.post('/', async (req: AuthRequest, res: Response) => {
   try {
-    const { items = [], ...quoteData } = req.body
+    const { items = [], ...quoteData } = (req as any).body
     const subtotal = items.reduce((s: number, i: any) => s + (i.quantity * i.unit_price), 0)
     const taxAmount = subtotal * ((quoteData.tax_rate || 0) / 100)
     const discountAmount = subtotal * ((quoteData.discount_percent || 0) / 100)
@@ -94,7 +94,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 
     // Auto-generate quote number
     if (!quoteData.quote_number) {
-      const { count } = await supabase.from('quotes').select('*', { count: 'exact', head: true }).eq('user_id', req.user!.id)
+      const { count } = await supabase.from('quotes').select('*', { count: 'exact', head: true }).eq('user_id', (req as any).user!.id)
       quoteData.quote_number = `QTE-${String((count || 0) + 1).padStart(4, '0')}`
     }
 
@@ -103,7 +103,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 
     const { data: quote, error } = await supabase
       .from('quotes')
-      .insert({ ...quoteData, user_id: req.user!.id, subtotal, tax_amount: taxAmount, discount_amount: discountAmount, total, client_token: clientToken })
+      .insert({ ...quoteData, user_id: (req as any).user!.id, subtotal, tax_amount: taxAmount, discount_amount: discountAmount, total, client_token: clientToken })
       .select().single()
     if (error) return res.status(400).json({ error: error.message })
 
@@ -124,8 +124,8 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 // Update quote
 router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
-    const { items, ...quoteData } = req.body
-    const { data: existing } = await supabase.from('quotes').select('id').eq('id', req.params.id).eq('user_id', req.user!.id).single()
+    const { items, ...quoteData } = (req as any).body
+    const { data: existing } = await supabase.from('quotes').select('id').eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id).single()
     if (!existing) return res.status(404).json({ error: 'Quote not found' })
 
     if (items) {
@@ -136,15 +136,15 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
       quoteData.tax_amount = taxAmount
       quoteData.discount_amount = discountAmount
       quoteData.total = subtotal + taxAmount - discountAmount
-      await supabase.from('quote_items').delete().eq('quote_id', req.params.id)
+      await supabase.from('quote_items').delete().eq('quote_id', (req as any).params.id)
       const lineItems = items.map((item: any, idx: number) => ({
-        quote_id: req.params.id, description: item.description,
+        quote_id: (req as any).params.id, description: item.description,
         quantity: item.quantity, unit_price: item.unit_price,
         tax_rate: item.tax_rate || 0, amount: item.quantity * item.unit_price, sort_order: idx
       }))
       await supabase.from('quote_items').insert(lineItems)
     }
-    const { data, error } = await supabase.from('quotes').update(quoteData).eq('id', req.params.id).select().single()
+    const { data, error } = await supabase.from('quotes').update(quoteData).eq('id', (req as any).params.id).select().single()
     if (error) return res.status(400).json({ error: error.message })
     return res.json(data)
   } catch {
@@ -155,7 +155,7 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
 // Delete quote
 router.delete('/:id', async (req: AuthRequest, res: Response) => {
   try {
-    const { error } = await supabase.from('quotes').delete().eq('id', req.params.id).eq('user_id', req.user!.id)
+    const { error } = await supabase.from('quotes').delete().eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id)
     if (error) return res.status(400).json({ error: error.message })
     return res.json({ message: 'Quote deleted' })
   } catch {
@@ -168,7 +168,7 @@ router.post('/:id/send', async (req: AuthRequest, res: Response) => {
   try {
     const { data: quote } = await supabase
       .from('quotes').select(`*, clients(*), quote_items(*), profiles(*)`)
-      .eq('id', req.params.id).eq('user_id', req.user!.id).single()
+      .eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id).single()
     if (!quote) return res.status(404).json({ error: 'Quote not found' })
 
     const portalUrl = `${process.env.APP_URL}/quotes/portal/${quote.client_token}`
@@ -185,18 +185,18 @@ router.post('/:id/send', async (req: AuthRequest, res: Response) => {
 router.post('/:id/convert', async (req: AuthRequest, res: Response) => {
   try {
     const { data: quote } = await supabase
-      .from('quotes').select(`*, quote_items(*)`).eq('id', req.params.id).eq('user_id', req.user!.id).single()
+      .from('quotes').select(`*, quote_items(*)`).eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id).single()
     if (!quote) return res.status(404).json({ error: 'Quote not found' })
     if (quote.status !== 'accepted') return res.status(400).json({ error: 'Only accepted quotes can be converted' })
 
     // Get next invoice number
-    const { count } = await supabase.from('invoices').select('*', { count: 'exact', head: true }).eq('user_id', req.user!.id)
+    const { count } = await supabase.from('invoices').select('*', { count: 'exact', head: true }).eq('user_id', (req as any).user!.id)
     const invoiceNumber = `INV-${String((count || 0) + 1).padStart(4, '0')}`
     const dueDate = new Date()
     dueDate.setDate(dueDate.getDate() + 30)
 
     const { data: invoice, error } = await supabase.from('invoices').insert({
-      user_id: req.user!.id, client_id: quote.client_id,
+      user_id: (req as any).user!.id, client_id: quote.client_id,
       invoice_number: invoiceNumber, status: 'draft',
       issue_date: new Date().toISOString().split('T')[0],
       due_date: dueDate.toISOString().split('T')[0],

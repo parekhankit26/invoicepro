@@ -64,7 +64,7 @@ router.post('/whatsapp/:invoiceId', async (req: AuthRequest, res: Response) => {
   try {
     const { data: invoice } = await supabase.from('invoices')
       .select(`*, clients(*), profiles(company_name, full_name)`)
-      .eq('id', req.params.invoiceId).eq('user_id', req.user!.id).single()
+      .eq('id', (req as any).params.invoiceId).eq('user_id', (req as any).user!.id).single()
 
     if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
     if (!invoice.clients?.phone) return res.status(400).json({ error: 'Client has no phone number. Add a phone number to this client first.' })
@@ -100,7 +100,7 @@ router.post('/sms/:invoiceId', async (req: AuthRequest, res: Response) => {
   try {
     const { data: invoice } = await supabase.from('invoices')
       .select(`*, clients(*), profiles(company_name, full_name)`)
-      .eq('id', req.params.invoiceId).eq('user_id', req.user!.id).single()
+      .eq('id', (req as any).params.invoiceId).eq('user_id', (req as any).user!.id).single()
 
     if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
     if (!invoice.clients?.phone) return res.status(400).json({ error: 'Client has no phone number' })
@@ -128,7 +128,7 @@ router.post('/whatsapp-bulk', async (req: AuthRequest, res: Response) => {
   try {
     const { data: overdue } = await supabase.from('invoices')
       .select(`*, clients(*), profiles(company_name, full_name)`)
-      .eq('user_id', req.user!.id)
+      .eq('user_id', (req as any).user!.id)
       .in('status', ['overdue', 'sent', 'pending'])
       .lt('due_date', new Date().toISOString().split('T')[0])
 

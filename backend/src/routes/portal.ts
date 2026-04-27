@@ -13,14 +13,14 @@ router.get('/view/:token', async (req: Request, res: Response) => {
     const { data: portal } = await supabase
       .from('client_portal_tokens')
       .select(`*, clients(*), profiles(company_name, full_name, company_logo, company_address, company_phone)`)
-      .eq('token', req.params.token)
+      .eq('token', (req as any).params.token)
       .eq('is_active', true)
       .single()
 
     if (!portal) return res.status(404).json({ error: 'Portal not found or inactive' })
 
     // Update last accessed
-    await supabase.from('client_portal_tokens').update({ last_accessed: new Date().toISOString() }).eq('token', req.params.token)
+    await supabase.from('client_portal_tokens').update({ last_accessed: new Date().toISOString() }).eq('token', (req as any).params.token)
 
     // Get all invoices for this client
     const { data: invoices } = await supabase
@@ -63,11 +63,11 @@ router.get('/view/:token', async (req: Request, res: Response) => {
 router.post('/view/:token/invoices/:invoiceId/pay', async (req: Request, res: Response) => {
   try {
     const { data: portal } = await supabase
-      .from('client_portal_tokens').select('*').eq('token', req.params.token).eq('is_active', true).single()
+      .from('client_portal_tokens').select('*').eq('token', (req as any).params.token).eq('is_active', true).single()
     if (!portal) return res.status(404).json({ error: 'Portal not found' })
 
     const { data: invoice } = await supabase
-      .from('invoices').select('*').eq('id', req.params.invoiceId).eq('client_id', portal.client_id).single()
+      .from('invoices').select('*').eq('id', (req as any).params.invoiceId).eq('client_id', portal.client_id).single()
     if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
 
     if (invoice.stripe_payment_link) {
@@ -86,7 +86,7 @@ router.use(authenticate)
 router.post('/generate/:clientId', async (req: AuthRequest, res: Response) => {
   try {
     const { data: client } = await supabase
-      .from('clients').select('id, name').eq('id', req.params.clientId).eq('user_id', req.user!.id).single()
+      .from('clients').select('id, name').eq('id', (req as any).params.clientId).eq('user_id', (req as any).user!.id).single()
     if (!client) return res.status(404).json({ error: 'Client not found' })
 
     const token = crypto.randomBytes(48).toString('base64url')
@@ -94,7 +94,7 @@ router.post('/generate/:clientId', async (req: AuthRequest, res: Response) => {
     // Upsert — regenerate if exists
     const { data, error } = await supabase
       .from('client_portal_tokens')
-      .upsert({ user_id: req.user!.id, client_id: req.params.clientId, token, is_active: true }, { onConflict: 'user_id,client_id' })
+      .upsert({ user_id: (req as any).user!.id, client_id: (req as any).params.clientId, token, is_active: true }, { onConflict: 'user_id,client_id' })
       .select().single()
     if (error) return res.status(400).json({ error: error.message })
 
@@ -110,7 +110,7 @@ router.get('/client/:clientId', async (req: AuthRequest, res: Response) => {
   try {
     const { data, error } = await supabase
       .from('client_portal_tokens')
-      .select('*').eq('client_id', req.params.clientId).eq('user_id', req.user!.id).single()
+      .select('*').eq('client_id', (req as any).params.clientId).eq('user_id', (req as any).user!.id).single()
     if (error) return res.status(404).json({ error: 'No portal found for this client' })
     const portalUrl = `${process.env.FRONTEND_URL}/portal/${data.token}`
     return res.json({ ...data, portal_url: portalUrl })
@@ -123,7 +123,7 @@ router.get('/client/:clientId', async (req: AuthRequest, res: Response) => {
 router.delete('/client/:clientId', async (req: AuthRequest, res: Response) => {
   try {
     await supabase.from('client_portal_tokens')
-      .update({ is_active: false }).eq('client_id', req.params.clientId).eq('user_id', req.user!.id)
+      .update({ is_active: false }).eq('client_id', (req as any).params.clientId).eq('user_id', (req as any).user!.id)
     return res.json({ message: 'Portal deactivated' })
   } catch {
     return res.status(500).json({ error: 'Failed to deactivate portal' })

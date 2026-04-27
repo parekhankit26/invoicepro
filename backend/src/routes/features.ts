@@ -7,7 +7,7 @@ const router = Router()
 // ── FEATURE 3: AI Receipt Scanner ────────────────────────
 router.post('/scan-receipt', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { image_base64, media_type = 'image/jpeg' } = req.body
+    const { image_base64, media_type = 'image/jpeg' } = (req as any).body
     if (!image_base64) return res.status(400).json({ error: 'image_base64 is required' })
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -40,7 +40,7 @@ router.post('/scan-receipt', authenticate, async (req: AuthRequest, res: Respons
     // Auto-create expense if data is valid
     if (extracted.merchant && extracted.amount && !extracted.error) {
       const { data: expense } = await supabase.from('expenses').insert({
-        user_id: req.user!.id,
+        user_id: (req as any).user!.id,
         category: extracted.category || 'Other',
         description: extracted.description || extracted.merchant,
         amount: extracted.amount,
@@ -63,7 +63,7 @@ router.post('/scan-receipt', authenticate, async (req: AuthRequest, res: Respons
 // ── FEATURE 4: Cash Flow Forecast ────────────────────────
 router.get('/cashflow', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user!.id
+    const userId = (req as any).user!.id
     const now = new Date()
     const in90 = new Date(now); in90.setDate(in90.getDate() + 90)
 
@@ -132,7 +132,7 @@ router.get('/cashflow', authenticate, async (req: AuthRequest, res: Response) =>
 // ── FEATURE 6: Client Happiness Score ────────────────────
 router.post('/satisfaction/send/:invoiceId', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { data: invoice } = await supabase.from('invoices').select(`*, clients(*), profiles(company_name, full_name)`).eq('id', req.params.invoiceId).eq('user_id', req.user!.id).single()
+    const { data: invoice } = await supabase.from('invoices').select(`*, clients(*), profiles(company_name, full_name)`).eq('id', (req as any).params.invoiceId).eq('user_id', (req as any).user!.id).single()
     if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
     if (invoice.status !== 'paid') return res.status(400).json({ error: 'Can only send satisfaction survey for paid invoices' })
 
@@ -157,8 +157,8 @@ router.post('/satisfaction/send/:invoiceId', authenticate, async (req: AuthReque
 
 router.post('/satisfaction/respond/:token', async (req: Request, res: Response) => {
   try {
-    const { score, comment } = req.body // score 1-5
-    const { data: invoice } = await supabase.from('invoices').select('*').eq('client_token', req.params.token).single()
+    const { score, comment } = (req as any).body // score 1-5
+    const { data: invoice } = await supabase.from('invoices').select('*').eq('client_token', (req as any).params.token).single()
     if (!invoice) return res.status(404).json({ error: 'Survey not found' })
 
     await supabase.from('satisfaction_scores').upsert({
@@ -175,7 +175,7 @@ router.post('/satisfaction/respond/:token', async (req: Request, res: Response) 
 
 router.get('/satisfaction/scores', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { data } = await supabase.from('satisfaction_scores').select(`*, clients(name), invoices(invoice_number)`).eq('user_id', req.user!.id).order('responded_at', { ascending: false })
+    const { data } = await supabase.from('satisfaction_scores').select(`*, clients(name), invoices(invoice_number)`).eq('user_id', (req as any).user!.id).order('responded_at', { ascending: false })
     const scores = data || []
     const avg = scores.length > 0 ? scores.reduce((s, r) => s + r.score, 0) / scores.length : 0
     const nps = scores.filter(s => s.score >= 4).length - scores.filter(s => s.score <= 2).length
@@ -188,7 +188,7 @@ router.get('/satisfaction/scores', authenticate, async (req: AuthRequest, res: R
 // ── FEATURE 7: Invoice Financing ─────────────────────────
 router.post('/financing/quote/:invoiceId', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { data: invoice } = await supabase.from('invoices').select(`*, clients(*)`).eq('id', req.params.invoiceId).eq('user_id', req.user!.id).single()
+    const { data: invoice } = await supabase.from('invoices').select(`*, clients(*)`).eq('id', (req as any).params.invoiceId).eq('user_id', (req as any).user!.id).single()
     if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
     if (invoice.status === 'paid') return res.status(400).json({ error: 'Invoice already paid' })
     if (invoice.total < 500) return res.status(400).json({ error: 'Minimum invoice amount is £500 for financing' })
@@ -221,11 +221,11 @@ router.post('/financing/apply/:invoiceId', authenticate, async (req: AuthRequest
   try {
     // In production this would integrate with a financing partner API
     // For now we store the application and simulate approval
-    const { data: invoice } = await supabase.from('invoices').select('*').eq('id', req.params.invoiceId).eq('user_id', req.user!.id).single()
+    const { data: invoice } = await supabase.from('invoices').select('*').eq('id', (req as any).params.invoiceId).eq('user_id', (req as any).user!.id).single()
     if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
 
     await supabase.from('activity_logs').insert({
-      user_id: req.user!.id, entity_type: 'invoice', entity_id: invoice.id,
+      user_id: (req as any).user!.id, entity_type: 'invoice', entity_id: invoice.id,
       action: 'financing_applied', metadata: { amount: invoice.total }
     })
 
@@ -242,12 +242,12 @@ router.post('/financing/apply/:invoiceId', authenticate, async (req: AuthRequest
 // ── FEATURE 9: Milestone Billing ──────────────────────────
 router.post('/milestones', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { client_id, project_name, total_amount, currency = 'GBP', milestones } = req.body
+    const { client_id, project_name, total_amount, currency = 'GBP', milestones } = (req as any).body
     // milestones: [{ name, percent, due_date }]
     if (!milestones?.length) return res.status(400).json({ error: 'milestones array required' })
 
     const created = []
-    const { data: profile } = await supabase.from('profiles').select('default_tax_rate, default_currency').eq('id', req.user!.id).single()
+    const { data: profile } = await supabase.from('profiles').select('default_tax_rate, default_currency').eq('id', (req as any).user!.id).single()
 
     for (let i = 0; i < milestones.length; i++) {
       const m = milestones[i]
@@ -256,11 +256,11 @@ router.post('/milestones', authenticate, async (req: AuthRequest, res: Response)
       const taxAmount = amount * (taxRate / 100)
       const total = amount + taxAmount
 
-      const { count } = await supabase.from('invoices').select('*', { count: 'exact', head: true }).eq('user_id', req.user!.id)
+      const { count } = await supabase.from('invoices').select('*', { count: 'exact', head: true }).eq('user_id', (req as any).user!.id)
       const invoiceNumber = `INV-${String((count || 0) + 1).padStart(4, '0')}`
 
       const { data: invoice } = await supabase.from('invoices').insert({
-        user_id: req.user!.id, client_id,
+        user_id: (req as any).user!.id, client_id,
         invoice_number: invoiceNumber, status: 'draft',
         issue_date: new Date().toISOString().split('T')[0],
         due_date: m.due_date, currency,
@@ -287,8 +287,8 @@ router.post('/milestones', authenticate, async (req: AuthRequest, res: Response)
 // ── FEATURE 10: Early Payment Discount ────────────────────
 router.post('/early-payment/:invoiceId', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { discount_percent = 2, discount_days = 5 } = req.body
-    const { data: invoice } = await supabase.from('invoices').select('*').eq('id', req.params.invoiceId).eq('user_id', req.user!.id).single()
+    const { discount_percent = 2, discount_days = 5 } = (req as any).body
+    const { data: invoice } = await supabase.from('invoices').select('*').eq('id', (req as any).params.invoiceId).eq('user_id', (req as any).user!.id).single()
     if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
 
     const discountAmount = invoice.subtotal * (discount_percent / 100)
@@ -301,7 +301,7 @@ router.post('/early-payment/:invoiceId', authenticate, async (req: AuthRequest, 
     const { data, error } = await supabase.from('invoices').update({
       discount_percent, discount_amount: discountAmount,
       total: discountedTotal, notes: updatedNotes.trim()
-    }).eq('id', req.params.invoiceId).select().single()
+    }).eq('id', (req as any).params.invoiceId).select().single()
 
     if (error) return res.status(400).json({ error: error.message })
     return res.json({ ...data, discount_deadline: discountDeadline.toISOString(), savings: discountAmount })
@@ -313,17 +313,17 @@ router.post('/early-payment/:invoiceId', authenticate, async (req: AuthRequest, 
 // ── FEATURE 11: Invoice View Tracking ─────────────────────
 router.post('/track-view/:invoiceId', async (req: Request, res: Response) => {
   try {
-    const { source = 'link' } = req.body
+    const { source = 'link' } = (req as any).body
     await supabase.from('invoice_views').insert({
-      invoice_id: req.params.invoiceId,
+      invoice_id: (req as any).params.invoiceId,
       ip_address: req.headers['x-forwarded-for'] as string || req.socket.remoteAddress,
       user_agent: req.headers['user-agent'],
       source,
       viewed_at: new Date().toISOString()
     })
     // Update view count and last viewed
-    await supabase.rpc('increment_view_count', { invoice_id: req.params.invoiceId }).catch(() => {
-      supabase.from('invoices').update({ view_count: 1, viewed_at: new Date().toISOString() }).eq('id', req.params.invoiceId)
+    await supabase.rpc('increment_view_count', { invoice_id: (req as any).params.invoiceId }).catch(() => {
+      supabase.from('invoices').update({ view_count: 1, viewed_at: new Date().toISOString() }).eq('id', (req as any).params.invoiceId)
     })
     return res.json({ tracked: true })
   } catch (err) {
@@ -334,15 +334,15 @@ router.post('/track-view/:invoiceId', async (req: Request, res: Response) => {
 // ── FEATURE 12: Annual Year in Review ─────────────────────
 router.get('/year-review/:year', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const year = parseInt(req.params.year) || new Date().getFullYear() - 1
+    const year = parseInt((req as any).params.year) || new Date().getFullYear() - 1
     const start = `${year}-01-01`
     const end = `${year}-12-31`
 
     const [invoicesRes, paymentsRes, expensesRes, clientsRes] = await Promise.all([
-      supabase.from('invoices').select('*, clients(name)').eq('user_id', req.user!.id).gte('created_at', start).lte('created_at', end),
-      supabase.from('payments').select('amount, paid_at').eq('user_id', req.user!.id).gte('paid_at', start).lte('paid_at', end),
-      supabase.from('expenses').select('amount, category').eq('user_id', req.user!.id).gte('date', start).lte('date', end),
-      supabase.from('clients').select('id, name').eq('user_id', req.user!.id)
+      supabase.from('invoices').select('*, clients(name)').eq('user_id', (req as any).user!.id).gte('created_at', start).lte('created_at', end),
+      supabase.from('payments').select('amount, paid_at').eq('user_id', (req as any).user!.id).gte('paid_at', start).lte('paid_at', end),
+      supabase.from('expenses').select('amount, category').eq('user_id', (req as any).user!.id).gte('date', start).lte('date', end),
+      supabase.from('clients').select('id, name').eq('user_id', (req as any).user!.id)
     ])
 
     const invoices = invoicesRes.data || []

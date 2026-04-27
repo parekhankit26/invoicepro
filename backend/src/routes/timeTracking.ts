@@ -8,11 +8,11 @@ router.use(authenticate)
 // List time entries
 router.get('/', async (req: AuthRequest, res: Response) => {
   try {
-    const { client_id, project, is_billed, from, to, page = 1, limit = 50 } = req.query
+    const { client_id, project, is_billed, from, to, page = 1, limit = 50 } = (req as any).query
     let query = supabase
       .from('time_entries')
       .select(`*, clients(id, name)`, { count: 'exact' })
-      .eq('user_id', req.user!.id)
+      .eq('user_id', (req as any).user!.id)
       .order('date', { ascending: false })
       .range((+page - 1) * +limit, +page * +limit - 1)
     if (client_id) query = query.eq('client_id', client_id)
@@ -39,7 +39,7 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const { data, error } = await supabase
       .from('time_entries').select(`*, clients(id, name)`)
-      .eq('id', req.params.id).eq('user_id', req.user!.id).single()
+      .eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id).single()
     if (error) return res.status(404).json({ error: 'Entry not found' })
     return res.json(data)
   } catch {
@@ -50,7 +50,7 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
 // Create time entry
 router.post('/', async (req: AuthRequest, res: Response) => {
   try {
-    const { hours, hourly_rate, started_at, ended_at, ...rest } = req.body
+    const { hours, hourly_rate, started_at, ended_at, ...rest } = (req as any).body
     if (!hours || !hourly_rate) return res.status(400).json({ error: 'Hours and hourly rate are required' })
 
     // Auto-calculate hours from start/end if provided
@@ -61,7 +61,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     }
 
     const { data, error } = await supabase.from('time_entries')
-      .insert({ ...rest, user_id: req.user!.id, hours: finalHours, hourly_rate: +hourly_rate, started_at, ended_at })
+      .insert({ ...rest, user_id: (req as any).user!.id, hours: finalHours, hourly_rate: +hourly_rate, started_at, ended_at })
       .select().single()
     if (error) return res.status(400).json({ error: error.message })
     return res.status(201).json(data)
@@ -74,7 +74,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const { data, error } = await supabase.from('time_entries')
-      .update(req.body).eq('id', req.params.id).eq('user_id', req.user!.id).select().single()
+      .update((req as any).body).eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id).select().single()
     if (error) return res.status(400).json({ error: error.message })
     return res.json(data)
   } catch {
@@ -85,7 +85,7 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
 // Delete time entry
 router.delete('/:id', async (req: AuthRequest, res: Response) => {
   try {
-    await supabase.from('time_entries').delete().eq('id', req.params.id).eq('user_id', req.user!.id)
+    await supabase.from('time_entries').delete().eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id)
     return res.json({ message: 'Entry deleted' })
   } catch {
     return res.status(500).json({ error: 'Failed to delete entry' })
@@ -95,18 +95,18 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
 // Convert time entries to invoice
 router.post('/convert-to-invoice', async (req: AuthRequest, res: Response) => {
   try {
-    const { entry_ids, client_id, due_days = 30 } = req.body
+    const { entry_ids, client_id, due_days = 30 } = (req as any).body
     if (!entry_ids?.length || !client_id) {
       return res.status(400).json({ error: 'entry_ids and client_id are required' })
     }
 
     const { data: entries } = await supabase.from('time_entries')
-      .select('*').in('id', entry_ids).eq('user_id', req.user!.id).eq('is_billed', false)
+      .select('*').in('id', entry_ids).eq('user_id', (req as any).user!.id).eq('is_billed', false)
     if (!entries?.length) return res.status(400).json({ error: 'No unbilled entries found' })
 
     // Build invoice
-    const { data: profile } = await supabase.from('profiles').select('default_tax_rate, default_currency').eq('id', req.user!.id).single()
-    const { count } = await supabase.from('invoices').select('*', { count: 'exact', head: true }).eq('user_id', req.user!.id)
+    const { data: profile } = await supabase.from('profiles').select('default_tax_rate, default_currency').eq('id', (req as any).user!.id).single()
+    const { count } = await supabase.from('invoices').select('*', { count: 'exact', head: true }).eq('user_id', (req as any).user!.id)
     const invoiceNumber = `INV-${String((count || 0) + 1).padStart(4, '0')}`
     const dueDate = new Date()
     dueDate.setDate(dueDate.getDate() + due_days)
@@ -117,7 +117,7 @@ router.post('/convert-to-invoice', async (req: AuthRequest, res: Response) => {
     const total = subtotal + taxAmount
 
     const { data: invoice, error } = await supabase.from('invoices').insert({
-      user_id: req.user!.id, client_id,
+      user_id: (req as any).user!.id, client_id,
       invoice_number: invoiceNumber, status: 'draft',
       issue_date: new Date().toISOString().split('T')[0],
       due_date: dueDate.toISOString().split('T')[0],
@@ -148,7 +148,7 @@ router.post('/convert-to-invoice', async (req: AuthRequest, res: Response) => {
 // Get summary by project/client
 router.get('/summary/by-client', async (req: AuthRequest, res: Response) => {
   try {
-    const { data } = await supabase.from('time_entries').select(`*, clients(name)`).eq('user_id', req.user!.id)
+    const { data } = await supabase.from('time_entries').select(`*, clients(name)`).eq('user_id', (req as any).user!.id)
     const byClient: Record<string, any> = {}
     data?.forEach(e => {
       const key = e.client_id || 'no-client'

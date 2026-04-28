@@ -187,33 +187,33 @@ function LogTimeModal({ clients, onClose, onSave }: any) {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                 <label className="form-label">Description *</label>
-                <input {...register('description', { required: true })} className="form-input" placeholder="What did you work on?" />
+                <input {...(register as any)('description', { required: true })} className="form-input" placeholder="What did you work on?" />
               </div>
               <div className="form-group">
                 <label className="form-label">Client</label>
-                <select {...register('client_id')} className="form-select">
+                <select {...(register as any)('client_id')} className="form-select">
                   <option value="">No client</option>
                   {clients.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
               <div className="form-group">
                 <label className="form-label">Project</label>
-                <input {...register('project')} className="form-input" placeholder="Project name" />
+                <input {...(register as any)('project')} className="form-input" placeholder="Project name" />
               </div>
               <div className="form-group">
                 <label className="form-label">Date</label>
-                <input {...register('date')} className="form-input" type="date" />
+                <input {...(register as any)('date')} className="form-input" type="date" />
               </div>
               <div className="form-group">
                 <label className="form-label">Hours *</label>
-                <input {...register('hours', { required: true, valueAsNumber: true })} className="form-input" type="number" min="0.1" step="0.25" />
+                <input {...(register as any)('hours', { required: true, valueAsNumber: true })} className="form-input" type="number" min="0.1" step="0.25" />
               </div>
               <div className="form-group">
                 <label className="form-label">Hourly rate (£) *</label>
-                <input {...register('hourly_rate', { required: true, valueAsNumber: true })} className="form-input" type="number" min="0" step="0.01" />
+                <input {...(register as any)('hourly_rate', { required: true, valueAsNumber: true })} className="form-input" type="number" min="0" step="0.01" />
               </div>
               <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <input {...register('is_billable')} type="checkbox" id="billable" style={{ width: 'auto' }} defaultChecked />
+                <input {...(register as any)('is_billable')} type="checkbox" id="billable" style={{ width: 'auto' }} defaultChecked />
                 <label htmlFor="billable" className="form-label" style={{ margin: 0, cursor: 'pointer' }}>Billable to client</label>
               </div>
             </div>
@@ -236,14 +236,14 @@ function ConvertForm({ clients, entryIds, onConvert, isPending }: any) {
     <form onSubmit={handleSubmit(d => onConvert({ ...d, entry_ids: entryIds }))}>
       <div className="form-group">
         <label className="form-label">Client *</label>
-        <select {...register('client_id', { required: true })} className="form-select">
+        <select {...(register as any)('client_id', { required: true })} className="form-select">
           <option value="">Select client...</option>
           {clients.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       </div>
       <div className="form-group">
         <label className="form-label">Payment due (days)</label>
-        <input {...register('due_days', { valueAsNumber: true })} className="form-input" type="number" min="1" />
+        <input {...(register as any)('due_days', { valueAsNumber: true })} className="form-input" type="number" min="1" />
       </div>
       <div className="modal-footer" style={{ padding: 0, marginTop: 16 }}>
         <button type="submit" className="btn btn-primary" disabled={isPending} style={{ width: '100%', justifyContent: 'center' }}>

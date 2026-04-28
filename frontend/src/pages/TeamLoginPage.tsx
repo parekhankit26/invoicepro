@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Zap, Eye, EyeOff } from 'lucide-react'
 
-const API = import.meta.env.VITE_API_URL || '/api'
+const API = (import.meta as any).env.VITE_API_URL || '/api'
 
 export default function TeamLoginPage() {
   const navigate = useNavigate()

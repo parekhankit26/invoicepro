@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { FileText, CheckCircle, Clock, AlertTriangle, Download, CreditCard, Zap } from 'lucide-react'
 import { formatCurrency, formatDate, getStatusClass } from '../lib/utils'
 
-const API = import.meta.env.VITE_API_URL || '/api'
+const API = (import.meta as any).env.VITE_API_URL || '/api'
 
 export default function ClientPortalPage() {
   const { token } = useParams()
@@ -169,7 +169,7 @@ function InvoiceCard({ invoice: inv, token, highlight = false }: { invoice: any;
 }
 
 async function respondToQuote(quoteToken: string, action: 'accept' | 'decline') {
-  const API = import.meta.env.VITE_API_URL || '/api'
+  const API = (import.meta as any).env.VITE_API_URL || '/api'
   try {
     await fetch(`${API}/quotes/portal/${quoteToken}/respond`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },

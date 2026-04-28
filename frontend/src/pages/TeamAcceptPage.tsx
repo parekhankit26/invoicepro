@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Zap, Eye, EyeOff, CheckCircle } from 'lucide-react'
 
-const API = import.meta.env.VITE_API_URL || '/api'
+const API = (import.meta as any).env.VITE_API_URL || '/api'
 
 export default function TeamAcceptPage() {
   const { token } = useParams()

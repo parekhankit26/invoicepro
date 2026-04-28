@@ -324,7 +324,7 @@ function TaxReportTab() {
 
   const exportCSV = async (format: string) => {
     const headers = await (api as any).getHeaders?.() || {}
-    const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/enterprise/export/${format}?from=${from}&to=${to}`, { headers })
+    const res = await fetch(`${(import.meta as any).env.VITE_API_URL || '/api'}/enterprise/export/${format}?from=${from}&to=${to}`, { headers })
     const blob = await res.blob()
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a'); a.href = url; a.download = `export-${format}-${from}.${format === 'csv' || format === 'xero' ? 'csv' : 'json'}`; a.click()

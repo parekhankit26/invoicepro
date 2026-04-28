@@ -236,8 +236,8 @@ function ApiKeysTab({ plan }: { plan: string }) {
             </div>
             <form onSubmit={handleSubmit(d => createMutation.mutate(d))}>
               <div className="modal-body">
-                <div className="form-group"><label className="form-label">Key name *</label><input {...register('name', { required: true })} className="form-input" placeholder="e.g. Production App" /></div>
-                <div className="form-group"><label className="form-label">Expiry date (optional)</label><input {...register('expires_at')} className="form-input" type="date" /></div>
+                <div className="form-group"><label className="form-label">Key name *</label><input {...(register as any)('name', { required: true })} className="form-input" placeholder="e.g. Production App" /></div>
+                <div className="form-group"><label className="form-label">Expiry date (optional)</label><input {...(register as any)('expires_at')} className="form-input" type="date" /></div>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowCreate(false)}>Cancel</button>

@@ -28,9 +28,11 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
 router.post('/', async (req: AuthRequest, res: Response) => {
   const { items = [], ...invoiceData } = (req as any).body
   const subtotal = items.reduce((s: number, i: any) => s + (i.quantity * i.unit_price), 0)
-  const taxAmount = subtotal * ((invoiceData.tax_rate || 0) / 100)
+  // UK HMRC compliant: apply discount first, then calculate VAT on discounted amount
   const discountAmount = subtotal * ((invoiceData.discount_percent || 0) / 100)
-  const total = subtotal + taxAmount - discountAmount
+  const taxableAmount = subtotal - discountAmount
+  const taxAmount = taxableAmount * ((invoiceData.tax_rate || 0) / 100)
+  const total = taxableAmount + taxAmount
   if (!invoiceData.invoice_number) {
     const { count } = await supabase.from('invoices').select('*', { count: 'exact', head: true }).eq('user_id', (req as any).user!.id)
     invoiceData.invoice_number = `INV-${String((count || 0) + 1).padStart(4, '0')}`
@@ -56,9 +58,11 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
   if (items) {
     const subtotal = items.reduce((s: number, i: any) => s + (i.quantity * i.unit_price), 0)
     invoiceData.subtotal = subtotal
-    invoiceData.tax_amount = subtotal * ((invoiceData.tax_rate || 0) / 100)
+    // UK HMRC compliant: apply discount first, then calculate VAT on discounted amount
     invoiceData.discount_amount = subtotal * ((invoiceData.discount_percent || 0) / 100)
-    invoiceData.total = invoiceData.subtotal + invoiceData.tax_amount - invoiceData.discount_amount
+    const taxableBase = subtotal - invoiceData.discount_amount
+    invoiceData.tax_amount = taxableBase * ((invoiceData.tax_rate || 0) / 100)
+    invoiceData.total = taxableBase + invoiceData.tax_amount
     await supabase.from('invoice_items').delete().eq('invoice_id', (req as any).params.id)
     await supabase.from('invoice_items').insert(items.map((item: any, idx: number) => ({ invoice_id: (req as any).params.id, description: item.description, quantity: item.quantity, unit_price: item.unit_price, tax_rate: item.tax_rate || 0, amount: item.quantity * item.unit_price, sort_order: idx })))
   }
@@ -135,6 +139,19 @@ router.post('/:id/mark-paid', async (req: AuthRequest, res: Response) => {
   await supabase.from('payments').insert({ user_id: (req as any).user!.id, invoice_id: invoice.id, amount: paymentAmount, currency: invoice.currency, method, reference, notes, status: 'completed' })
   await supabase.from('invoices').update({ status: 'paid', amount_paid: paymentAmount, paid_at: new Date().toISOString() }).eq('id', invoice.id)
   return res.json({ message: 'Invoice marked as paid' })
+})
+
+router.post('/:id/mark-unpaid', async (req: AuthRequest, res: Response) => {
+  const { data: invoice } = await supabase.from('invoices').select('*').eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id).single()
+  if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
+  if (invoice.status !== 'paid') return res.status(400).json({ error: 'Invoice is not paid' })
+  // Remove the payment record for this invoice
+  await supabase.from('payments').delete().eq('invoice_id', invoice.id).eq('user_id', (req as any).user!.id)
+  // Revert to sent if it was previously sent, otherwise draft
+  const revertStatus = invoice.sent_at ? 'sent' : 'draft'
+  const { data, error } = await supabase.from('invoices').update({ status: revertStatus, amount_paid: 0, paid_at: null }).eq('id', (req as any).params.id).select().single()
+  if (error) return res.status(400).json({ error: error.message })
+  return res.json({ message: 'Invoice marked as unpaid', data })
 })
 
 router.post('/:id/payment-link', async (req: AuthRequest, res: Response) => {

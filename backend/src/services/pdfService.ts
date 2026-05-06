@@ -18,8 +18,10 @@ export const pdfService = {
         // Use stored values from DB if available, otherwise calculate
         const discountPercent = Number(invoice.discount_percent || invoice.discount || 0)
         const discountAmount = Number(invoice.discount_amount) || (subtotal * discountPercent / 100)
+        // UK HMRC: VAT is calculated on subtotal AFTER discount (taxable amount)
         const taxableAmount = subtotal - discountAmount
-        const taxAmount = Number(invoice.tax_amount) || (taxableAmount * (Number(invoice.tax_rate || 0) / 100))
+        const taxRate = Number(invoice.tax_rate || 0)
+        const taxAmount = Number(invoice.tax_amount) || (taxableAmount * (taxRate / 100))
         const total = Number(invoice.total) || (taxableAmount + taxAmount)
 
         // Header
@@ -75,14 +77,18 @@ export const pdfService = {
         doc.fontSize(10).fillColor('#666').text('Subtotal', 350, y)
         doc.fillColor('#1a1814').text(`${symbol}${subtotal.toFixed(2)}`, 460, y, { width: 80, align: 'right' })
         y += 18
-        if (taxAmount > 0) {
-          doc.fillColor('#666').text(`Tax (${invoice.tax_rate}%)`, 350, y)
-          doc.fillColor('#1a1814').text(`${symbol}${taxAmount.toFixed(2)}`, 460, y, { width: 80, align: 'right' })
-          y += 18
-        }
         if (discountAmount > 0) {
+          // Show discount before VAT (HMRC compliant order)
           doc.fillColor('#666').text(discountPercent > 0 ? `Discount (${discountPercent}%)` : 'Discount', 350, y)
           doc.fillColor('#e74c3c').text(`-${symbol}${discountAmount.toFixed(2)}`, 460, y, { width: 80, align: 'right' })
+          y += 18
+          doc.fillColor('#888').text('Taxable Amount', 350, y)
+          doc.fillColor('#1a1814').text(`${symbol}${taxableAmount.toFixed(2)}`, 460, y, { width: 80, align: 'right' })
+          y += 18
+        }
+        if (taxAmount > 0) {
+          doc.fillColor('#666').text(`VAT (${invoice.tax_rate}%)`, 350, y)
+          doc.fillColor('#1a1814').text(`${symbol}${taxAmount.toFixed(2)}`, 460, y, { width: 80, align: 'right' })
           y += 18
         }
         y += 5

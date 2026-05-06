@@ -1,0 +1,6 @@
+[build]
+buildCommand = "npm install"
+
+[deploy]
+startCommand = "node admin-server.js"
+restartPolicyType = "on_failure"

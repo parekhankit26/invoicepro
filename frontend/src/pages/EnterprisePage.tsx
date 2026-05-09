@@ -5,6 +5,7 @@ import { Key, Users, Globe, FileText, Download, Plus, Trash2, Copy, X, Shield } 
 import { api } from '../lib/api'
 import { formatCurrency, formatDate } from '../lib/utils'
 import toast from 'react-hot-toast'
+import { modalState } from '../lib/modalState'
 
 const TABS = [
   { id: 'team', label: 'Team members', icon: Users },
@@ -72,7 +73,7 @@ function TeamTab({ plan }: { plan: string }) {
       } else {
         toast.success('Invite sent!')
       }
-      reset(); setShowInvite(false)
+      reset(); { setShowInvite(false); modalState.close() }
     },
     onError: (e: any) => toast.error(e.message)
   })
@@ -97,7 +98,7 @@ function TeamTab({ plan }: { plan: string }) {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
         <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{Array.isArray(members) ? members.length : 0} team members</div>
-        <button className="btn btn-primary btn-sm" onClick={() => setShowInvite(true)}><Plus size={13} /> Invite member</button>
+        <button className="btn btn-primary btn-sm" onClick={() => { setShowInvite(true); modalState.open() }}><Plus size={13} /> Invite member</button>
       </div>
 
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -135,11 +136,11 @@ function TeamTab({ plan }: { plan: string }) {
       </div>
 
       {showInvite && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowInvite(false)}>
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && (setShowInvite(false), modalState.close())}>
           <div className="modal-box" style={{ maxWidth: 420 }}>
             <div className="modal-header">
               <h2 style={{ fontSize: 17, fontWeight: 700 }}>Invite team member</h2>
-              <button className="btn btn-ghost btn-icon" onClick={() => setShowInvite(false)}><X size={18} /></button>
+              <button className="btn btn-ghost btn-icon" onClick={() => { setShowInvite(false); modalState.close() }}><X size={18} /></button>
             </div>
             <form onSubmit={handleSubmit(d => inviteMutation.mutate(d))}>
               <div className="modal-body">
@@ -157,7 +158,7 @@ function TeamTab({ plan }: { plan: string }) {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowInvite(false)}>Cancel</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { setShowInvite(false); modalState.close() }}>Cancel</button>
                 <button type="submit" className="btn btn-primary" disabled={inviteMutation.isPending}>{inviteMutation.isPending ? 'Sending...' : 'Send invite'}</button>
               </div>
             </form>
@@ -178,7 +179,7 @@ function ApiKeysTab({ plan }: { plan: string }) {
 
   const createMutation = useMutation({
     mutationFn: (data: any) => api.post('/enterprise/api-keys', data),
-    onSuccess: (data: any) => { qc.invalidateQueries({ queryKey: ['api-keys'] }); setNewKey(data.api_key); reset(); setShowCreate(false) },
+    onSuccess: (data: any) => { qc.invalidateQueries({ queryKey: ['api-keys'] }); setNewKey(data.api_key); reset(); { setShowCreate(false); modalState.close() } },
     onError: (e: any) => toast.error(e.message)
   })
 
@@ -209,7 +210,7 @@ function ApiKeysTab({ plan }: { plan: string }) {
       )}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 14 }}>
-        <button className="btn btn-primary btn-sm" onClick={() => setShowCreate(true)}><Plus size={13} /> Create API key</button>
+        <button className="btn btn-primary btn-sm" onClick={() => { setShowCreate(true); modalState.open() }}><Plus size={13} /> Create API key</button>
       </div>
 
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -236,11 +237,11 @@ function ApiKeysTab({ plan }: { plan: string }) {
       </div>
 
       {showCreate && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowCreate(false)}>
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && (setShowCreate(false), modalState.close())}>
           <div className="modal-box" style={{ maxWidth: 400 }}>
             <div className="modal-header">
               <h2 style={{ fontSize: 17, fontWeight: 700 }}>Create API key</h2>
-              <button className="btn btn-ghost btn-icon" onClick={() => setShowCreate(false)}><X size={18} /></button>
+              <button className="btn btn-ghost btn-icon" onClick={() => { setShowCreate(false); modalState.close() }}><X size={18} /></button>
             </div>
             <form onSubmit={handleSubmit(d => createMutation.mutate(d))}>
               <div className="modal-body">
@@ -248,7 +249,7 @@ function ApiKeysTab({ plan }: { plan: string }) {
                 <div className="form-group"><label className="form-label">Expiry date (optional)</label><input {...(register as any)('expires_at')} className="form-input" type="date" /></div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowCreate(false)}>Cancel</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { setShowCreate(false); modalState.close() }}>Cancel</button>
                 <button type="submit" className="btn btn-primary" disabled={createMutation.isPending}>{createMutation.isPending ? 'Creating...' : 'Create key'}</button>
               </div>
             </form>

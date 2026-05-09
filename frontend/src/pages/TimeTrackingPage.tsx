@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { api } from '../lib/api'
 import { formatCurrency, formatDate } from '../lib/utils'
 import toast from 'react-hot-toast'
+import { modalState } from '../lib/modalState'
 
 export default function TimeTrackingPage() {
   const qc = useQueryClient()
@@ -31,7 +32,7 @@ export default function TimeTrackingPage() {
     onSuccess: (data: any) => {
       qc.invalidateQueries({ queryKey: ['time-entries'] })
       toast.success(`Invoice ${data.invoice_number} created — ${data.total_hours}h, ${formatCurrency(data.total_amount)}`)
-      setShowConvertModal(false); setSelectedEntries([])
+      { setShowConvertModal(false); modalState.close() }; setSelectedEntries([])
     },
     onError: (e: any) => toast.error(e.message)
   })
@@ -53,11 +54,11 @@ export default function TimeTrackingPage() {
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           {selectedEntries.length > 0 && (
-            <button className="btn btn-secondary" onClick={() => setShowConvertModal(true)}>
+            <button className="btn btn-secondary" onClick={() => { setShowConvertModal(true); modalState.open() }}>
               <FileText size={14} /> Convert {selectedEntries.length} entries to invoice
             </button>
           )}
-          <button className="btn btn-primary" onClick={() => setShowModal(true)}><Plus size={15} /> Log time</button>
+          <button className="btn btn-primary" onClick={() => { setShowModal(true); modalState.open() }}><Plus size={15} /> Log time</button>
         </div>
       </div>
 
@@ -96,7 +97,7 @@ export default function TimeTrackingPage() {
               <div className="empty-state-icon"><Clock size={20} /></div>
               <div style={{ fontWeight: 500, marginBottom: 4 }}>No time entries yet</div>
               <div style={{ fontSize: 13 }}>Log your billable hours and convert them to invoices</div>
-              <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => setShowModal(true)}><Plus size={15} /> Log time</button>
+              <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => { setShowModal(true); modalState.open() }}><Plus size={15} /> Log time</button>
             </div>
           ) : (
             <div className="table-wrapper"><table className="data-table">
@@ -141,17 +142,17 @@ export default function TimeTrackingPage() {
 
       {/* Log Time Modal */}
       {showModal && (
-        <LogTimeModal clients={clientList} onClose={() => setShowModal(false)}
-          onSave={() => { qc.invalidateQueries({ queryKey: ['time-entries'] }); setShowModal(false) }} />
+        <LogTimeModal clients={clientList} onClose={() => { setShowModal(false); modalState.close() }}
+          onSave={() => { qc.invalidateQueries({ queryKey: ['time-entries'] }); { setShowModal(false); modalState.close() } }} />
       )}
 
       {/* Convert Modal */}
       {showConvertModal && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowConvertModal(false)}>
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && (setShowConvertModal(false), modalState.close())}>
           <div className="modal-box" style={{ maxWidth: 420 }}>
             <div className="modal-header">
               <h2 style={{ fontSize: 17, fontWeight: 700 }}>Convert to invoice</h2>
-              <button className="btn btn-ghost btn-icon" onClick={() => setShowConvertModal(false)}><X size={18} /></button>
+              <button className="btn btn-ghost btn-icon" onClick={() => { setShowConvertModal(false); modalState.close() }}><X size={18} /></button>
             </div>
             <div className="modal-body">
               <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>

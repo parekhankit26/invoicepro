@@ -6,6 +6,7 @@ import { api } from '../lib/api'
 import { formatCurrency, formatDate, getStatusClass, isOverdue } from '../lib/utils'
 import InvoiceModal from '../components/InvoiceModal'
 import toast from 'react-hot-toast'
+import { modalState } from '../lib/modalState'
 
 export default function InvoicesPage() {
   const navigate = useNavigate()
@@ -25,10 +26,10 @@ export default function InvoicesPage() {
     <>
       <div className="page-header">
         <div><h1 className="page-title">Invoices</h1><p className="page-subtitle">{data?.total || 0} total invoices</p></div>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}><Plus size={15} /> New invoice</button>
+        <button className="btn btn-primary" onClick={() => { setShowModal(true); modalState.open() }}><Plus size={15} /> New invoice</button>
       </div>
       <div className="page-body">
-        <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+        <div className="filter-row" style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
           <div style={{ position: 'relative', flex: 1, maxWidth: 300 }}>
             <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-subtle)' }} />
             <input className="form-input" placeholder="Search invoices..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: 32 }} />
@@ -39,7 +40,7 @@ export default function InvoicesPage() {
         </div>
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
           {isLoading ? <div className="empty-state">Loading...</div> : invoices.length === 0 ? (
-            <div className="empty-state"><div className="empty-state-icon"><Plus size={20} /></div><div style={{ fontWeight: 500 }}>No invoices yet</div><button className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => setShowModal(true)}><Plus size={15} /> Create invoice</button></div>
+            <div className="empty-state"><div className="empty-state-icon"><Plus size={20} /></div><div style={{ fontWeight: 500 }}>No invoices yet</div><button className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => { setShowModal(true); modalState.open() }}><Plus size={15} /> Create invoice</button></div>
           ) : (
             <div className="table-wrapper"><table className="data-table">
               <thead><tr><th>Invoice</th><th>Client</th><th>Issue date</th><th>Due date</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
@@ -70,7 +71,7 @@ export default function InvoicesPage() {
           )}
         </div>
       </div>
-      {showModal && <InvoiceModal onClose={() => setShowModal(false)} onSave={() => { qc.invalidateQueries({ queryKey: ['invoices'] }); setShowModal(false) }} />}
+      {showModal && <InvoiceModal onClose={() => { setShowModal(false); modalState.close() }} onSave={() => { qc.invalidateQueries({ queryKey: ['invoices'] }); { setShowModal(false); modalState.close() } }} />}
     </>
   )
 }

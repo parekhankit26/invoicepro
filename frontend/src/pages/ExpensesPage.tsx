@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { api } from '../lib/api'
 import { formatCurrency, formatDate, CURRENCIES } from '../lib/utils'
 import toast from 'react-hot-toast'
+import { modalState } from '../lib/modalState'
 
 const CATS = ['Software','Hardware','Travel','Meals','Office','Marketing','Contractor','Utilities','Rent','Insurance','Legal','Other']
 
@@ -35,7 +36,7 @@ export default function ExpensesPage() {
       qc.invalidateQueries({ queryKey: ['expenses'] })
       qc.invalidateQueries({ queryKey: ['expense-summary'] })
       toast.success(editingExpense ? 'Expense updated!' : 'Expense added!')
-      setShowModal(false)
+      { setShowModal(false); modalState.close() }
       setEditingExpense(null)
     },
     onError: (e: any) => toast.error(e.message)
@@ -55,13 +56,13 @@ export default function ExpensesPage() {
   const openNew = () => {
     setEditingExpense(null)
     reset({ date: today, currency: defaultCurrency, is_billable: false, category: 'Software' })
-    setShowModal(true)
+    { setShowModal(true); modalState.open() }
   }
 
   const openEdit = (expense: any) => {
     setEditingExpense(expense)
     reset({ ...expense, client_id: expense.client_id || '' })
-    setShowModal(true)
+    { setShowModal(true); modalState.open() }
   }
 
   const list = Array.isArray(expenses) ? expenses : []
@@ -72,7 +73,7 @@ export default function ExpensesPage() {
       <div className="page-header">
         <div><h1 className="page-title">Expenses</h1><p className="page-subtitle">Track business costs & receipts</p></div>
         <div style={{ display:'flex', gap:8 }}>
-          <button className="btn btn-secondary" onClick={() => setShowScanner(true)}><Camera size={15}/> Scan receipt</button>
+          <button className="btn btn-secondary" onClick={() => { setShowScanner(true); modalState.open() }}><Camera size={15}/> Scan receipt</button>
           <button className="btn btn-primary" onClick={openNew}><Plus size={15}/> Add expense</button>
         </div>
       </div>
@@ -141,11 +142,11 @@ export default function ExpensesPage() {
 
       {/* Add/Edit modal */}
       {showModal && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowModal(false)}>
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && (setShowModal(false), modalState.close())}>
           <div className="modal-box" style={{ maxWidth:520 }}>
             <div className="modal-header">
               <h2 style={{ fontSize:17, fontWeight:700 }}>{editingExpense ? 'Edit expense' : 'Add expense'}</h2>
-              <button className="btn btn-ghost btn-icon" onClick={() => { setShowModal(false); setEditingExpense(null) }}><X size={18}/></button>
+              <button className="btn btn-ghost btn-icon" onClick={() => { { setShowModal(false); modalState.close() }; setEditingExpense(null) }}><X size={18}/></button>
             </div>
             <form onSubmit={handleSubmit(d => saveMutation.mutate(d))}>
               <div className="modal-body">
@@ -200,7 +201,7 @@ export default function ExpensesPage() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => { setShowModal(false); setEditingExpense(null) }}>Cancel</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { { setShowModal(false); modalState.close() }; setEditingExpense(null) }}>Cancel</button>
                 <button type="submit" className="btn btn-primary" disabled={saveMutation.isPending}>
                   {saveMutation.isPending ? 'Saving...' : editingExpense ? 'Update expense' : 'Add expense'}
                 </button>
@@ -212,8 +213,8 @@ export default function ExpensesPage() {
 
       {showScanner && (
         <ReceiptScanner
-          onSave={() => { qc.invalidateQueries({ queryKey: ['expenses'] }); qc.invalidateQueries({ queryKey: ['expense-summary'] }); setShowScanner(false) }}
-          onClose={() => setShowScanner(false)}
+          onSave={() => { qc.invalidateQueries({ queryKey: ['expenses'] }); qc.invalidateQueries({ queryKey: ['expense-summary'] }); { setShowScanner(false); modalState.close() } }}
+          onClose={() => { setShowScanner(false); modalState.close() }}
         />
       )}
     </>

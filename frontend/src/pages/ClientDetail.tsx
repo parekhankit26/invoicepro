@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { api } from '../lib/api'
 import { formatCurrency, formatDate, getStatusClass, CURRENCIES } from '../lib/utils'
 import toast from 'react-hot-toast'
+import { modalState } from '../lib/modalState'
 
 export default function ClientDetail() {
   const { id } = useParams()
@@ -23,7 +24,7 @@ export default function ClientDetail() {
 
   const updateMutation = useMutation({
     mutationFn: (data: any) => api.put(`/clients/${id}`, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['client', id] }); toast.success('Client updated!'); setShowEdit(false) },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['client', id] }); toast.success('Client updated!'); { setShowEdit(false); modalState.close() } },
     onError: (e: any) => toast.error(e.message)
   })
 
@@ -50,7 +51,7 @@ export default function ClientDetail() {
   const invoices = client.invoices || []
   const currency = client.currency || 'GBP'
 
-  const openEdit = () => { reset(client); setShowEdit(true) }
+  const openEdit = () => { reset(client); { setShowEdit(true); modalState.open() } }
 
   return (
     <>
@@ -185,11 +186,11 @@ export default function ClientDetail() {
 
       {/* Edit modal */}
       {showEdit && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowEdit(false)}>
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && (setShowEdit(false), modalState.close())}>
           <div className="modal-box" style={{ maxWidth:580 }}>
             <div className="modal-header">
               <h2 style={{ fontSize:17, fontWeight:700 }}>Edit client</h2>
-              <button className="btn btn-ghost btn-icon" onClick={() => setShowEdit(false)}><X size={18}/></button>
+              <button className="btn btn-ghost btn-icon" onClick={() => { setShowEdit(false); modalState.close() }}><X size={18}/></button>
             </div>
             <form onSubmit={handleSubmit(d => updateMutation.mutate(d))}>
               <div className="modal-body">
@@ -214,7 +215,7 @@ export default function ClientDetail() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowEdit(false)}>Cancel</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { setShowEdit(false); modalState.close() }}>Cancel</button>
                 <button type="submit" className="btn btn-primary" disabled={updateMutation.isPending}>{updateMutation.isPending ? 'Saving...' : 'Update client'}</button>
               </div>
             </form>

@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Send, Download, CheckCircle, XCircle, Edit, Trash2, Link, MessageSquare, Star, Zap } from 'lucide-react'
+import { ArrowLeft, Send, Download, CheckCircle, XCircle, Edit, Trash2, Link, MessageSquare, Star, Zap, MoreVertical } from 'lucide-react'
 import { api } from '../lib/api'
+import { modalState } from '../lib/modalState'
 import { formatCurrency, formatDate, formatRelative, getStatusClass } from '../lib/utils'
 import InvoiceModal from '../components/InvoiceModal'
 import { FinancingWidget } from '../components/FeatureComponents'
@@ -13,6 +14,7 @@ export default function InvoiceDetail() {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const [showEdit, setShowEdit] = useState(false)
+  const [showActions, setShowActions] = useState(false)
   const [showFinancing, setShowFinancing] = useState(false)
 
   const { data: invoice, isLoading } = useQuery({ queryKey: ['invoice', id], queryFn: () => api.get<any>(`/invoices/${id}`) })
@@ -56,7 +58,7 @@ export default function InvoiceDetail() {
           {invoice.status === 'paid' && <button className="btn btn-secondary" onClick={() => surveyMutation.mutate()} disabled={surveyMutation.isPending}><Star size={14} /> Send survey</button>}
           {invoice.status === 'paid' && <button className="btn btn-secondary" style={{color:'#e74c3c', borderColor:'#e74c3c'}} onClick={() => { if(confirm('Mark this invoice as unpaid?')) markUnpaidMutation.mutate() }} disabled={markUnpaidMutation.isPending}><XCircle size={14} /> Mark unpaid</button>}
           <button className="btn btn-secondary" onClick={() => api.downloadPDF(invoice.id, invoice.invoice_number).catch(e => toast.error(e.message))}><Download size={14} /> PDF</button>
-          <button className="btn btn-secondary" onClick={() => setShowEdit(true)}><Edit size={14} /> Edit</button>
+          <button className="btn btn-secondary" onClick={() => { setShowEdit(true); modalState.open() }}><Edit size={14} /> Edit</button>
           {invoice.status === 'draft' && <button className="btn btn-danger" onClick={() => { if (confirm('Delete?')) deleteMutation.mutate() }}><Trash2 size={14} /></button>}
         </div>
       </div>
@@ -164,7 +166,7 @@ export default function InvoiceDetail() {
         </div>
       </div>
 
-      {showEdit && <InvoiceModal invoice={invoice} onClose={() => setShowEdit(false)} onSave={() => { qc.invalidateQueries({ queryKey: ['invoice', id] }); setShowEdit(false) }} />}
+      {showEdit && <InvoiceModal invoice={invoice} onClose={() => { setShowEdit(false); modalState.close() }} onSave={() => { qc.invalidateQueries({ queryKey: ['invoice', id] }); { setShowEdit(false); modalState.close() } }} />}
     </>
   )
 }

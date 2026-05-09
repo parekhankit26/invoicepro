@@ -7,6 +7,7 @@ import { api } from '../lib/api'
 import { formatCurrency, formatDate, CURRENCIES } from '../lib/utils'
 import { COUNTRY_LIST, COUNTRY_TAX_CONFIGS, CURRENCY_TO_COUNTRY, calculateTax } from '../lib/taxSystem'
 import toast from 'react-hot-toast'
+import { modalState } from '../lib/modalState'
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'badge-draft', sent: 'badge-sent', accepted: 'badge-paid',
@@ -56,10 +57,10 @@ export default function QuotesPage() {
     <>
       <div className="page-header">
         <div><h1 className="page-title">Quotes</h1><p className="page-subtitle">{data?.total || 0} total</p></div>
-        <button className="btn btn-primary" onClick={() => { setEditQuote(null); setShowModal(true) }}><Plus size={15}/> New quote</button>
+        <button className="btn btn-primary" onClick={() => { setEditQuote(null); { setShowModal(true); modalState.open() } }}><Plus size={15}/> New quote</button>
       </div>
       <div className="page-body">
-        <div style={{ display:'flex', gap:10, marginBottom:16 }}>
+        <div className="filter-row" style={{ display:'flex', gap:10, marginBottom:16 }}>
           <div style={{ position:'relative', flex:1, maxWidth:300 }}>
             <Search size={14} style={{ position:'absolute', left:10, top:'50%', transform:'translateY(-50%)', color:'var(--text-subtle)' }}/>
             <input className="form-input" placeholder="Search quotes..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft:32 }}/>
@@ -77,7 +78,7 @@ export default function QuotesPage() {
               <div className="empty-state-icon"><FileText size={20}/></div>
               <div style={{ fontWeight:500, marginBottom:4 }}>No quotes yet</div>
               <div style={{ fontSize:13 }}>Send quotes to clients and convert accepted ones into invoices</div>
-              <button className="btn btn-primary" style={{ marginTop:16 }} onClick={() => setShowModal(true)}><Plus size={15}/> New quote</button>
+              <button className="btn btn-primary" style={{ marginTop:16 }} onClick={() => { setShowModal(true); modalState.open() }}><Plus size={15}/> New quote</button>
             </div>
           ) : (
             <div className="table-wrapper"><table className="data-table">
@@ -92,7 +93,7 @@ export default function QuotesPage() {
                     <td><span className={`badge ${STATUS_COLORS[q.status] || 'badge-draft'}`}>{q.status}</span></td>
                     <td>
                       <div style={{ display:'flex', gap:4 }}>
-                        <button className="btn btn-sm btn-secondary" onClick={() => { setEditQuote(q); setShowModal(true) }}>Edit</button>
+                        <button className="btn btn-sm btn-secondary" onClick={() => { setEditQuote(q); { setShowModal(true); modalState.open() } }}>Edit</button>
                         {q.status === 'draft' && <button className="btn btn-sm btn-secondary" title="Send to client" onClick={() => sendMutation.mutate(q.id)}><Send size={12}/></button>}
                         {q.status === 'accepted' && (
                           <button className="btn btn-sm btn-secondary" style={{ color:'var(--green)' }} onClick={() => convertMutation.mutate(q.id)}>
@@ -117,8 +118,8 @@ export default function QuotesPage() {
           quote={editQuote}
           clients={Array.isArray(clients) ? clients : []}
           profile={profile}
-          onClose={() => { setShowModal(false); setEditQuote(null) }}
-          onSave={() => { qc.invalidateQueries({ queryKey: ['quotes'] }); setShowModal(false); setEditQuote(null) }}
+          onClose={() => { { setShowModal(false); modalState.close() }; setEditQuote(null) }}
+          onSave={() => { qc.invalidateQueries({ queryKey: ['quotes'] }); { setShowModal(false); modalState.close() }; setEditQuote(null) }}
         />
       )}
     </>

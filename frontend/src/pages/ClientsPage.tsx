@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { api } from '../lib/api'
 import { CURRENCIES } from '../lib/utils'
 import toast from 'react-hot-toast'
+import { modalState } from '../lib/modalState'
 
 export default function ClientsPage() {
   const navigate = useNavigate()
@@ -30,7 +31,7 @@ export default function ClientsPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['clients'] })
       toast.success(editClient ? 'Client updated!' : 'Client added!')
-      setShowModal(false); setEditClient(null)
+      { setShowModal(false); modalState.close() }; setEditClient(null)
     },
     onError: (e: any) => toast.error(e.message)
   })
@@ -41,8 +42,8 @@ export default function ClientsPage() {
     onError: (e: any) => toast.error(e.message)
   })
 
-  const openAdd = () => { reset({ currency: defaultCurrency }); setEditClient(null); setShowModal(true) }
-  const openEdit = (c: any) => { reset(c); setEditClient(c); setShowModal(true) }
+  const openAdd = () => { reset({ currency: defaultCurrency }); setEditClient(null); { setShowModal(true); modalState.open() } }
+  const openEdit = (c: any) => { reset(c); setEditClient(c); { setShowModal(true); modalState.open() } }
 
   const clientList = Array.isArray(clients) ? clients : []
   const totalClients = clientList.length
@@ -110,11 +111,11 @@ export default function ClientsPage() {
 
       {/* Add / Edit modal */}
       {showModal && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowModal(false)}>
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && (setShowModal(false), modalState.close())}>
           <div className="modal-box" style={{ maxWidth:580 }}>
             <div className="modal-header">
               <h2 style={{ fontSize:17, fontWeight:700 }}>{editClient ? 'Edit client' : 'Add client'}</h2>
-              <button className="btn btn-ghost btn-icon" onClick={() => { setShowModal(false); setEditClient(null) }}><X size={18}/></button>
+              <button className="btn btn-ghost btn-icon" onClick={() => { { setShowModal(false); modalState.close() }; setEditClient(null) }}><X size={18}/></button>
             </div>
             <form onSubmit={handleSubmit(d => saveMutation.mutate(d))}>
               <div className="modal-body">
@@ -160,7 +161,7 @@ export default function ClientsPage() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => { setShowModal(false); setEditClient(null) }}>Cancel</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { { setShowModal(false); modalState.close() }; setEditClient(null) }}>Cancel</button>
                 <button type="submit" className="btn btn-primary" disabled={saveMutation.isPending}>
                   {saveMutation.isPending ? 'Saving...' : editClient ? 'Update client' : 'Add client'}
                 </button>

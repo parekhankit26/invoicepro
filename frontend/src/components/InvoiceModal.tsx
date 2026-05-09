@@ -3,6 +3,7 @@ import { useForm, useFieldArray } from 'react-hook-form'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { Plus, Trash2, X, Info } from 'lucide-react'
 import { api } from '../lib/api'
+import { modalState } from '../lib/modalState'
 import { CURRENCIES, formatCurrency } from '../lib/utils'
 import {
   COUNTRY_TAX_CONFIGS,
@@ -18,6 +19,9 @@ export default function InvoiceModal({ invoice, onClose, onSave }: { invoice?: a
   const in30 = new Date(Date.now() + 30 * 864e5).toISOString().split('T')[0]
 
   const { data: clients } = useQuery({ queryKey: ['clients'], queryFn: () => api.get<any[]>('/clients') })
+
+  // Signal AI button to hide
+  useEffect(() => { modalState.open(); return () => modalState.close() }, [])
 
   const { register, control, handleSubmit, watch, setValue } = useForm({
     defaultValues: invoice

@@ -627,3 +627,69 @@
 @media (max-width: 380px) {
   .auth-card { padding: 20px 16px !important; }
 }
+
+/* ── DROPDOWN MENU ───────────────────────────────────── */
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13.5px;
+  color: var(--text);
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.1s;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+.dropdown-item:hover { background: var(--bg); }
+.dropdown-item + .dropdown-item { border-top: 1px solid var(--border); }
+
+/* ── MODAL FOOTER MOBILE FIX ─────────────────────────── */
+/* On mobile, footer buttons stack full-width for easier tapping */
+@media (max-width: 640px) {
+  .modal-footer {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+  .modal-footer .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 13px;
+    font-size: 15px;
+  }
+  /* Search + filter row on mobile: stack vertically */
+  .filter-row {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  .filter-row > div,
+  .filter-row > select {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* ── PAGE HEADER MOBILE ───────────────────────────────── */
+@media (max-width: 640px) {
+  .page-header-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* ── INVOICE DETAIL HEADER MOBILE ────────────────────── */
+@media (max-width: 640px) {
+  .invoice-actions {
+    flex-wrap: wrap;
+  }
+  .invoice-actions .btn {
+    flex: 1;
+    justify-content: center;
+    min-width: 0;
+  }
+}

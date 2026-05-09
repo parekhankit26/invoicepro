@@ -9,7 +9,7 @@ router.get('/overview', async (req: AuthRequest, res: Response) => {
   const userId = (req as any).user!.id
   const now = new Date()
   const [invoicesRes, expensesRes, clientsRes] = await Promise.all([
-    supabase.from('invoices').select('*').eq('user_id', userId),
+    supabase.from('invoices').select('*, clients(id,name)').eq('user_id', userId),
     supabase.from('expenses').select('*').eq('user_id', userId),
     supabase.from('clients').select('id').eq('user_id', userId).eq('is_archived', false)
   ])
@@ -38,7 +38,7 @@ router.get('/overview', async (req: AuthRequest, res: Response) => {
     if (monthly[key]) monthly[key].expenses += exp.amount
   })
 
-  const overdueInvoices = invoices.filter(i => i.status !== 'paid' && i.status !== 'cancelled' && new Date(i.due_date) < now).sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()).slice(0, 5)
+  const overdueInvoices = invoices.filter(i => i.status !== 'paid' && i.status !== 'cancelled' && new Date(i.due_date) < now).sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()).slice(0, 5).map(i => ({ ...i, client_name: (i as any).clients?.name }))
 
   return res.json({
     summary: { total_billed: totalBilled, total_paid: totalPaid, total_pending: totalPending, total_overdue: totalOverdue, total_expenses: totalExpenses, net_profit: totalPaid - totalExpenses, payment_rate: totalBilled > 0 ? Math.round((totalPaid / totalBilled) * 100) : 0, client_count: clientsRes.data?.length || 0, invoice_count: invoices.length },

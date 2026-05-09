@@ -1,4 +1,5 @@
 import { Router, Response, Request } from 'express'
+import { calculateTax } from '../lib/taxCalculator'
 import { authenticate, AuthRequest } from '../middleware/auth'
 import { supabase } from '../lib/supabase'
 import { emailService } from '../services/emailService'
@@ -88,9 +89,10 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   try {
     const { items = [], ...quoteData } = (req as any).body
     const subtotal = items.reduce((s: number, i: any) => s + (i.quantity * i.unit_price), 0)
-    const taxAmount = subtotal * ((quoteData.tax_rate || 0) / 100)
-    const discountAmount = subtotal * ((quoteData.discount_percent || 0) / 100)
-    const total = subtotal + taxAmount - discountAmount
+    const taxResult = calculateTax(subtotal, quoteData.discount_percent || 0, quoteData.tax_rate || 0, quoteData.country_code || 'GB', quoteData.tax_type || 'CGST_SGST')
+    const taxAmount = taxResult.totalTax
+    const discountAmount = taxResult.discountAmount
+    const total = taxResult.total
 
     // Auto-generate quote number
     if (!quoteData.quote_number) {
@@ -130,12 +132,11 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
 
     if (items) {
       const subtotal = items.reduce((s: number, i: any) => s + (i.quantity * i.unit_price), 0)
-      const taxAmount = subtotal * ((quoteData.tax_rate || 0) / 100)
-      const discountAmount = subtotal * ((quoteData.discount_percent || 0) / 100)
+      const taxResult = calculateTax(subtotal, quoteData.discount_percent || 0, quoteData.tax_rate || 0, quoteData.country_code || 'GB', quoteData.tax_type || 'CGST_SGST')
       quoteData.subtotal = subtotal
-      quoteData.tax_amount = taxAmount
-      quoteData.discount_amount = discountAmount
-      quoteData.total = subtotal + taxAmount - discountAmount
+      quoteData.tax_amount = taxResult.totalTax
+      quoteData.discount_amount = taxResult.discountAmount
+      quoteData.total = taxResult.total
       await supabase.from('quote_items').delete().eq('quote_id', (req as any).params.id)
       const lineItems = items.map((item: any, idx: number) => ({
         quote_id: (req as any).params.id, description: item.description,

@@ -50,3 +50,47 @@ router.put('/profile', authenticate, async (req: AuthRequest, res: Response) => 
 })
 
 export default router
+
+// One-time admin setup endpoint — creates first super admin
+// Protected by ADMIN_SETUP_KEY env var
+router.post('/setup-admin', async (req: Request, res: Response) => {
+  try {
+    const { email, password, full_name, setup_key } = (req as any).body
+    
+    // Must match ADMIN_SETUP_KEY env var
+    if (!process.env.ADMIN_SETUP_KEY || setup_key !== process.env.ADMIN_SETUP_KEY) {
+      return res.status(403).json({ error: 'Invalid setup key' })
+    }
+    if (!email || !password || password.length < 8) {
+      return res.status(400).json({ error: 'Email and password (8+ chars) required' })
+    }
+
+    const { supabase: sb } = await import('../lib/supabase')
+    
+    // Check if admin already exists
+    const { data: existing } = await sb.from('admin_users').select('id').eq('email', email).single()
+    if (existing) return res.status(400).json({ error: 'Admin with this email already exists' })
+
+    // Hash password
+    const bcrypt = await import('bcryptjs')
+    const hash = await bcrypt.default.hash(password, 12)
+
+    const { data, error } = await sb.from('admin_users').insert({
+      email,
+      password_hash: hash,
+      full_name: full_name || 'Super Admin',
+      role: 'super_admin',
+      is_active: true
+    }).select('id, email, full_name, role').single()
+
+    if (error) return res.status(400).json({ error: error.message })
+    
+    return res.json({
+      message: '✅ Super admin created successfully!',
+      admin: data,
+      login_url: `${process.env.FRONTEND_URL || 'https://invoicepro-ten.vercel.app'}/admin-login`
+    })
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message })
+  }
+})

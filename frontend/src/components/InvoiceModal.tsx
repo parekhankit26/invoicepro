@@ -19,6 +19,10 @@ export default function InvoiceModal({ invoice, onClose, onSave }: { invoice?: a
   const in30 = new Date(Date.now() + 30 * 864e5).toISOString().split('T')[0]
 
   const { data: clients } = useQuery({ queryKey: ['clients'], queryFn: () => api.get<any[]>('/clients') })
+  const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: () => api.get<any>('/auth/profile') })
+  const defaultCurrency = profile?.default_currency || 'GBP'
+  const defaultCountry = profile?.country_code || CURRENCY_TO_COUNTRY[defaultCurrency] || 'GB'
+  const defaultTaxRate = profile?.default_tax_rate ?? COUNTRY_TAX_CONFIGS[defaultCountry]?.defaultRate ?? 20
 
   // Signal AI button to hide
   useEffect(() => { modalState.open(); return () => modalState.close() }, [])

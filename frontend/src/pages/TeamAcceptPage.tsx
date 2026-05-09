@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Zap, Eye, EyeOff, CheckCircle } from 'lucide-react'
 
-const API = (import.meta as any).env.VITE_API_URL || '/api'
+const API = (import.meta as any).env?.VITE_API_URL || 'https://invoicepro-production-2ed7.up.railway.app/api'
 
 export default function TeamAcceptPage() {
   const { token } = useParams()

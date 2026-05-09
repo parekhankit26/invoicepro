@@ -321,15 +321,11 @@ router.post('/track-view/:invoiceId', async (req: Request, res: Response) => {
       source,
       viewed_at: new Date().toISOString()
     })
-    // Update view count and last viewed
-    try {
-      const { error: rpcError } = await supabase.rpc('increment_view_count', { invoice_id: (req as any).params.invoiceId })
-      if (rpcError) {
-        await supabase.from('invoices').update({ view_count: 1, viewed_at: new Date().toISOString() }).eq('id', (req as any).params.invoiceId)
-      }
-    } catch {
-      await supabase.from('invoices').update({ view_count: 1, viewed_at: new Date().toISOString() }).eq('id', (req as any).params.invoiceId)
-    }
+    // Update view count using raw increment
+    const { data: curr } = await supabase.from('invoices').select('view_count').eq('id', (req as any).params.invoiceId).single()
+    await supabase.from('invoices')
+      .update({ view_count: (curr?.view_count || 0) + 1, viewed_at: new Date().toISOString() })
+      .eq('id', (req as any).params.invoiceId)
     return res.json({ tracked: true })
   } catch (err) {
     return res.json({ tracked: false })

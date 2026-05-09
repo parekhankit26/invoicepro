@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
-const API = (import.meta as any).env.VITE_API_URL || '/api'
+const API = (import.meta as any).env?.VITE_API_URL || 'https://invoicepro-production-2ed7.up.railway.app/api'
 
 export default function SatisfactionPage() {
   const [params] = useSearchParams()

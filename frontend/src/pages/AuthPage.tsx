@@ -9,7 +9,24 @@ export default function AuthPage() {
   const [mode, setMode] = useState<'login'|'register'>('login')
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [resetSent, setResetSent] = useState(false)
   const { signIn, signUp } = useAuthStore()
+  const { supabase: sb } = { supabase: null as any }
+
+  const handleForgotPassword = async (email: string) => {
+    if (!email) { toast.error('Enter your email first'); return }
+    setLoading(true)
+    try {
+      const { supabase: supa } = await import('../lib/supabase')
+      const { error } = await supa.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/auth'
+      })
+      if (error) throw error
+      setResetSent(true)
+      toast.success('Password reset email sent!')
+    } catch (e: any) { toast.error(e.message) }
+    finally { setLoading(false) }
+  }
   const navigate = useNavigate()
   const { register, handleSubmit, formState: { errors }, reset } = useForm<any>()
 
@@ -49,6 +66,14 @@ export default function AuthPage() {
                   {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+              {mode === 'login' && (
+                <div style={{ textAlign: 'right', marginTop: 4 }}>
+                  <button type="button" onClick={() => handleForgotPassword((document.querySelector('input[type="email"]') as HTMLInputElement)?.value)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-subtle)', fontSize: 12 }}>
+                    Forgot password?
+                  </button>
+                </div>
+              )}
             </div>
             <button type="submit" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '11px', marginTop: 8 }} disabled={loading}>
               {loading ? 'Please wait...' : mode === 'login' ? 'Sign in' : 'Create account'}

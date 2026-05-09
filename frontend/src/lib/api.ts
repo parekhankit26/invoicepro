@@ -1,15 +1,12 @@
 import { supabase } from './supabase'
 
+// Always use the Railway backend URL directly - Vercel doesn't proxy /api
 const API_URL = (import.meta as any).env?.VITE_API_URL || 'https://invoicepro-production-2ed7.up.railway.app/api'
 
 async function getToken(): Promise<string | null> {
-  // First try Supabase session (business owners)
   const { data } = await supabase.auth.getSession()
   if (data?.session?.access_token) return data.session.access_token
-  // Fallback to team member token (stored by /team/login)
-  const teamToken = localStorage.getItem('team_token')
-  if (teamToken) return teamToken
-  return null
+  return localStorage.getItem('team_token')
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -23,8 +20,12 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     },
   })
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }))
-    throw new Error(err.error || err.message || 'Request failed')
+    let errMsg = `Request failed: ${res.status}`
+    try {
+      const err = await res.json()
+      errMsg = err.error || err.message || errMsg
+    } catch {}
+    throw new Error(errMsg)
   }
   return res.json()
 }
@@ -41,15 +42,20 @@ export const api = {
       headers: { Authorization: `Bearer ${token}` },
     })
     if (!res.ok) {
-      const errText = await res.text().catch(() => 'Unknown error')
-      throw new Error(`PDF download failed: ${res.status} ${errText}`)
+      const err = await res.json().catch(() => ({ error: 'PDF generation failed' }))
+      throw new Error(err.error || 'Failed to generate PDF')
     }
     const blob = new Blob([await res.arrayBuffer()], { type: 'application/pdf' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
-    a.href = url; a.download = `${invoiceNumber}.pdf`
-    document.body.appendChild(a); a.click()
+    a.href = url
+    a.download = `${invoiceNumber}.pdf`
+    document.body.appendChild(a)
+    a.click()
     document.body.removeChild(a)
-    setTimeout(() => URL.revokeObjectURL(url), 100)
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
   },
 }
+
+// Constant for non-hook contexts (portal, satisfaction, team pages)
+export const API_BASE = API_URL

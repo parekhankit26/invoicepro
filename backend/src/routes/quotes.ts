@@ -171,14 +171,26 @@ router.post('/:id/send', async (req: AuthRequest, res: Response) => {
       .from('quotes').select(`*, clients(*), quote_items(*), profiles(*)`)
       .eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id).single()
     if (!quote) return res.status(404).json({ error: 'Quote not found' })
+    if (!quote.clients?.email) return res.status(400).json({ error: 'Client has no email address' })
 
-    const portalUrl = `${process.env.APP_URL}/quotes/portal/${quote.client_token}`
-    await emailService.sendQuote({ to: quote.clients.email, clientName: quote.clients.name, quote, portalUrl })
+    const portalUrl = `${process.env.FRONTEND_URL || 'https://invoicepro-ten.vercel.app'}/portal/${quote.client_token}`
+    
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
+      await supabase.from('quotes').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', quote.id)
+      return res.json({ message: 'Quote marked as sent (email requires SMTP config)', portal_url: portalUrl, email_sent: false })
+    }
+    
+    try {
+      await emailService.sendQuote({ to: quote.clients.email, clientName: quote.clients.name, quote, portalUrl })
+    } catch (emailErr: any) {
+      await supabase.from('quotes').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', quote.id)
+      return res.json({ message: `Quote marked as sent but email failed: ${emailErr.message}`, email_sent: false })
+    }
+    
     await supabase.from('quotes').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', quote.id)
-    return res.json({ message: 'Quote sent successfully', portal_url: portalUrl })
-  } catch (err) {
-    console.error(err)
-    return res.status(500).json({ error: 'Failed to send quote' })
+    return res.json({ message: `Quote sent to ${quote.clients.email}`, portal_url: portalUrl, email_sent: true })
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message || 'Failed to send quote' })
   }
 })
 

@@ -118,17 +118,37 @@ router.get('/:id/pdf', async (req: AuthRequest, res: Response) => {
 })
 
 router.post('/:id/send', async (req: AuthRequest, res: Response) => {
-  const { data: invoice } = await supabase.from('invoices').select('*, clients(*), invoice_items(*), profiles(*)').eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id).single()
-  if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
-  let paymentLink = invoice.stripe_payment_link
-  if (!paymentLink) {
+  try {
+    const { data: invoice } = await supabase.from('invoices').select('*, clients(*), invoice_items(*), profiles(*)').eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id).single()
+    if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
+    if (!invoice.clients?.email) return res.status(400).json({ error: 'Client has no email address. Add one in the client profile first.' })
+    
+    let paymentLink = invoice.stripe_payment_link
     try { paymentLink = await stripeService.createPaymentLink(invoice); await supabase.from('invoices').update({ stripe_payment_link: paymentLink }).eq('id', invoice.id) } catch(e) {}
+    
+    // Check if SMTP is configured
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
+      // Mark as sent even without email config — update status
+      await supabase.from('invoices').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', invoice.id)
+      return res.json({ message: 'Invoice marked as sent (email delivery requires SMTP configuration)', payment_link: paymentLink, email_sent: false })
+    }
+    
+    try {
+      const pdfBuffer = await pdfService.generateInvoicePDF(invoice)
+      await emailService.sendInvoice({ to: invoice.clients.email, clientName: invoice.clients.name, invoice: { ...invoice, stripe_payment_link: paymentLink }, pdfBuffer })
+    } catch (emailErr: any) {
+      console.error('Email send failed:', emailErr)
+      // Still mark as sent, just note email failed
+      await supabase.from('invoices').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', invoice.id)
+      return res.json({ message: `Invoice marked as sent but email delivery failed: ${emailErr.message}`, email_sent: false })
+    }
+    
+    await supabase.from('invoices').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', invoice.id)
+    return res.json({ message: `Invoice sent to ${invoice.clients.email}`, payment_link: paymentLink, email_sent: true })
+  } catch (err: any) {
+    console.error('Send invoice error:', err)
+    return res.status(500).json({ error: err.message || 'Failed to send invoice' })
   }
-  // Send email with HTML invoice (no PDF attachment needed)
-  const pdfBuffer = Buffer.from(pdfService.generateHTMLOnly(invoice), 'utf-8')
-  await emailService.sendInvoice({ to: invoice.clients.email, clientName: invoice.clients.name, invoice: { ...invoice, stripe_payment_link: paymentLink }, pdfBuffer })
-  await supabase.from('invoices').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', invoice.id)
-  return res.json({ message: 'Invoice sent', payment_link: paymentLink })
 })
 
 router.post('/:id/mark-paid', async (req: AuthRequest, res: Response) => {

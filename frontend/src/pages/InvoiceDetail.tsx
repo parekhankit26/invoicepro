@@ -19,13 +19,28 @@ export default function InvoiceDetail() {
 
   const { data: invoice, isLoading } = useQuery({ queryKey: ['invoice', id], queryFn: () => api.get<any>(`/invoices/${id}`) })
 
-  const sendMutation = useMutation({ mutationFn: () => api.post(`/invoices/${id}/send`, {}), onSuccess: () => { qc.invalidateQueries({ queryKey: ['invoice', id] }); toast.success('Invoice sent!') }, onError: (e: any) => toast.error(e.message) })
+  const sendMutation = useMutation({
+    mutationFn: () => api.post(`/invoices/${id}/send`, {}),
+    onSuccess: (data: any) => {
+      qc.invalidateQueries({ queryKey: ['invoice', id] })
+      toast.success(data.message || 'Invoice sent!')
+    },
+    onError: (e: any) => toast.error(e.message.includes('email') ? 'Client has no email — add one in client profile' : e.message)
+  })
   const markPaidMutation = useMutation({ mutationFn: () => api.post(`/invoices/${id}/mark-paid`, {}), onSuccess: () => { qc.invalidateQueries({ queryKey: ['invoice', id] }); toast.success('Marked as paid!') }, onError: (e: any) => toast.error(e.message) })
   const markUnpaidMutation = useMutation({ mutationFn: () => api.post(`/invoices/${id}/mark-unpaid`, {}), onSuccess: () => { qc.invalidateQueries({ queryKey: ['invoice', id] }); toast.success('Marked as unpaid') }, onError: (e: any) => toast.error(e.message) })
   const deleteMutation = useMutation({ mutationFn: () => api.delete(`/invoices/${id}`), onSuccess: () => { toast.success('Deleted'); navigate('/invoices') } })
   const payLinkMutation = useMutation({ mutationFn: () => api.post(`/invoices/${id}/payment-link`, {}), onSuccess: (data: any) => { navigator.clipboard.writeText(data.payment_link); toast.success('Payment link copied!') }, onError: (e: any) => toast.error(e.message) })
-  const whatsappMutation = useMutation({ mutationFn: () => api.post(`/notify/whatsapp/${id}`, {}), onSuccess: (data: any) => toast.success(data.message), onError: (e: any) => toast.error(e.message) })
-  const smsMutation = useMutation({ mutationFn: () => api.post(`/notify/sms/${id}`, {}), onSuccess: (data: any) => toast.success(data.message), onError: (e: any) => toast.error(e.message) })
+  const whatsappMutation = useMutation({
+    mutationFn: () => api.post(`/notify/whatsapp/${id}`, {}),
+    onSuccess: (data: any) => toast.success(data.message || 'WhatsApp sent!'),
+    onError: (e: any) => toast.error(e.message.includes('phone') ? 'Client has no phone number — add one in client profile' : e.message)
+  })
+  const smsMutation = useMutation({
+    mutationFn: () => api.post(`/notify/sms/${id}`, {}),
+    onSuccess: (data: any) => toast.success(data.message || 'SMS sent!'),
+    onError: (e: any) => toast.error(e.message.includes('phone') ? 'Client has no phone number — add one in client profile' : e.message)
+  })
   const surveyMutation = useMutation({ mutationFn: () => api.post(`/features/satisfaction/send/${id}`, {}), onSuccess: (data: any) => toast.success(data.message), onError: (e: any) => toast.error(e.message) })
   const earlyPayMutation = useMutation({ mutationFn: () => api.post(`/features/early-payment/${id}`, { discount_percent: 2, discount_days: 5 }), onSuccess: () => { qc.invalidateQueries({ queryKey: ['invoice', id] }); toast.success('Early payment discount applied!') }, onError: (e: any) => toast.error(e.message) })
 

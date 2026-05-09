@@ -27,25 +27,44 @@ export default function ReportsPage() {
   const profitPositive = (s.net_profit || 0) >= 0
 
   const exportCSV = () => {
+    if (!data) { toast.error('No data to export yet'); return }
+    const date = new Date().toISOString().split('T')[0]
     const rows = [
+      ['InvoicePro Report', date],
+      [''],
       ['Metric', 'Value'],
-      ['Total Revenue', s.total_paid || 0],
-      ['Total Expenses', s.total_expenses || 0],
-      ['Net Profit', s.net_profit || 0],
+      ['Total Revenue', (s.total_paid || 0).toFixed(2)],
+      ['Total Expenses', (s.total_expenses || 0).toFixed(2)],
+      ['Net Profit', (s.net_profit || 0).toFixed(2)],
       ['Profit Margin %', margin],
-      ['Outstanding', s.total_pending || 0],
-      ['Overdue', s.total_overdue || 0],
-      ['Total Billed', s.total_billed || 0],
+      ['Outstanding', (s.total_pending || 0).toFixed(2)],
+      ['Overdue', (s.total_overdue || 0).toFixed(2)],
+      ['Total Billed', (s.total_billed || 0).toFixed(2)],
       ['Invoice Count', s.invoice_count || 0],
+      ['Active Clients', s.client_count || 0],
       ['Payment Rate %', s.payment_rate || 0],
+      [''],
+      ['Monthly Breakdown'],
+      ['Month', 'Revenue', 'Expenses', 'Profit'],
+      ...monthly.map((m: any) => [m.month, (m.revenue||0).toFixed(2), (m.expenses||0).toFixed(2), ((m.revenue||0)-(m.expenses||0)).toFixed(2)]),
     ]
     const csv = rows.map(r => r.join(',')).join('\n')
-    const blob = new Blob([csv], { type: 'text/csv' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url; a.download = `invoicepro-report-${new Date().toISOString().split('T')[0]}.csv`
-    a.click(); URL.revokeObjectURL(url)
-    toast.success('Report exported!')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    // Mobile-safe download
+    if ((navigator as any).msSaveBlob) {
+      (navigator as any).msSaveBlob(blob, `invoicepro-report-${date}.csv`)
+    } else {
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `invoicepro-report-${date}.csv`)
+      link.style.display = 'none'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    }
+    toast.success('Report exported successfully!')
   }
 
   return (

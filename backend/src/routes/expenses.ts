@@ -31,13 +31,20 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 })
 
 router.post('/', async (req: AuthRequest, res: Response) => {
-  const { data, error } = await supabase.from('expenses').insert({ ...(req as any).body, user_id: (req as any).user!.id }).select().single()
+  const { client_id, ...rest } = (req as any).body
+  const insertData: any = { ...rest, user_id: (req as any).user!.id }
+  if (client_id) insertData.client_id = client_id // only include if not empty
+  const { data, error } = await supabase.from('expenses').insert(insertData).select().single()
   if (error) return res.status(400).json({ error: error.message })
   return res.status(201).json(data)
 })
 
 router.put('/:id', async (req: AuthRequest, res: Response) => {
-  const { data, error } = await supabase.from('expenses').update((req as any).body).eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id).select().single()
+  const { client_id, id, user_id, created_at, ...rest } = (req as any).body
+  const updateData: any = { ...rest }
+  if (client_id) updateData.client_id = client_id
+  else updateData.client_id = null
+  const { data, error } = await supabase.from('expenses').update(updateData).eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id).select().single()
   if (error) return res.status(400).json({ error: error.message })
   return res.json(data)
 })

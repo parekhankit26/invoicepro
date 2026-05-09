@@ -172,7 +172,13 @@ function LogTimeModal({ clients, onClose, onSave }: any) {
     defaultValues: { date: new Date().toISOString().split('T')[0], hours: 1, hourly_rate: 75, is_billable: true }
   })
   const saveMutation = useMutation({
-    mutationFn: (data: any) => api.post('/time', data),
+    mutationFn: (data: any) => {
+      const hours = parseFloat(data.hours)
+      const hourly_rate = parseFloat(data.hourly_rate)
+      if (isNaN(hours) || hours <= 0) throw new Error('Please enter valid hours (e.g. 1.5)')
+      if (isNaN(hourly_rate) || hourly_rate < 0) throw new Error('Please enter a valid hourly rate')
+      return api.post('/time', { ...data, hours, hourly_rate })
+    },
     onSuccess: () => { toast.success('Time logged!'); onSave() },
     onError: (e: any) => toast.error(e.message)
   })

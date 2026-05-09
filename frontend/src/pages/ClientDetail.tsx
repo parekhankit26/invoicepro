@@ -72,7 +72,7 @@ export default function ClientDetail() {
       </div>
 
       <div className="page-body">
-        <div style={{ display:'grid', gridTemplateColumns:'300px 1fr', gap:16 }}>
+        <div className="client-detail-grid" style={{ display:'grid', gridTemplateColumns:'300px 1fr', gap:16 }}>
           {/* Left panel */}
           <div>
             <div className="card card-p" style={{ marginBottom:12 }}>
@@ -115,7 +115,7 @@ export default function ClientDetail() {
             </div>
 
             {/* Stats */}
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:12 }}>
+            <div className="form-grid-2" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:12 }}>
               {[
                 ['Total billed', formatCurrency(stats.total_billed||0, currency), 'var(--text)'],
                 ['Collected', formatCurrency(stats.total_paid||0, currency), 'var(--green)'],
@@ -193,7 +193,7 @@ export default function ClientDetail() {
             </div>
             <form onSubmit={handleSubmit(d => updateMutation.mutate(d))}>
               <div className="modal-body">
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                <div className="form-grid-2" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
                   <div className="form-group" style={{ gridColumn:'1/-1' }}>
                     <label className="form-label">Full name / Business name *</label>
                     <input {...register('name', { required:true })} className="form-input"/>

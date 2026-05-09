@@ -48,7 +48,7 @@ export default function InvoiceDetail() {
             <p className="page-subtitle">{client.name} · Due {formatDate(invoice.due_date)}</p>
           </div>
         </div>
-        <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+        <div style={{ display:'flex', gap:6, flexWrap:'wrap', maxWidth:'100%', overflowX:'auto' }}>
           {invoice.status !== 'paid' && <button className="btn btn-secondary" onClick={() => sendMutation.mutate()} disabled={sendMutation.isPending}><Send size={14} /> Send email</button>}
           {invoice.status !== 'paid' && <button className="btn btn-secondary" onClick={() => whatsappMutation.mutate()} disabled={whatsappMutation.isPending} title="Send WhatsApp reminder"><MessageSquare size={14} /> WhatsApp</button>}
           {invoice.status !== 'paid' && <button className="btn btn-secondary" onClick={() => smsMutation.mutate()} disabled={smsMutation.isPending} title="Send SMS">SMS</button>}
@@ -62,7 +62,7 @@ export default function InvoiceDetail() {
       </div>
 
       <div className="page-body">
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 280px', gap:16 }}>
+        <div className="invoice-detail-grid" style={{ display:'grid', gridTemplateColumns:'1fr 280px', gap:16 }}>
           <div className="card card-p">
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:24, marginBottom:24, paddingBottom:24, borderBottom:'1px solid var(--border)' }}>
               <div>
@@ -77,12 +77,12 @@ export default function InvoiceDetail() {
               </div>
             </div>
 
-            <table className="data-table" style={{ marginBottom:16 }}>
+            <div className="table-wrapper"><table className="data-table" style={{ marginBottom:16 }}>
               <thead><tr><th style={{ width:'50%' }}>Description</th><th style={{ textAlign:'center' }}>Qty</th><th style={{ textAlign:'right' }}>Price</th><th style={{ textAlign:'right' }}>Amount</th></tr></thead>
               <tbody>{items.map((item: any) => (
                 <tr key={item.id}><td>{item.description}</td><td style={{ textAlign:'center', color:'var(--text-muted)' }}>{item.quantity}</td><td style={{ textAlign:'right' }} className="currency-amount">{formatCurrency(item.unit_price, invoice.currency)}</td><td style={{ textAlign:'right' }} className="currency-amount">{formatCurrency(item.amount, invoice.currency)}</td></tr>
               ))}</tbody>
-            </table>
+            </table></div>
 
             <div style={{ display:'flex', justifyContent:'flex-end' }}>
               <div style={{ width:240 }}>

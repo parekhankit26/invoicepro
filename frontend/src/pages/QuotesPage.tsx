@@ -80,7 +80,7 @@ export default function QuotesPage() {
               <button className="btn btn-primary" style={{ marginTop:16 }} onClick={() => setShowModal(true)}><Plus size={15}/> New quote</button>
             </div>
           ) : (
-            <table className="data-table">
+            <div className="table-wrapper"><table className="data-table">
               <thead><tr><th>Quote #</th><th>Client</th><th>Amount</th><th>Expiry</th><th>Status</th><th></th></tr></thead>
               <tbody>
                 {quotes.map((q: any) => (
@@ -107,7 +107,7 @@ export default function QuotesPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           )}
         </div>
       </div>
@@ -179,7 +179,7 @@ function QuoteModal({ quote, clients, profile, onClose, onSave }: any) {
         <form onSubmit={handleSubmit(d => saveMutation.mutate(d))}>
           <div className="modal-body">
             {/* Row 1 */}
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12, marginBottom:16 }}>
+            <div className="form-grid-3" style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12, marginBottom:16 }}>
               <div className="form-group">
                 <label className="form-label">Client *</label>
                 <select {...register('client_id', { required:true })} className="form-select">
@@ -198,7 +198,7 @@ function QuoteModal({ quote, clients, profile, onClose, onSave }: any) {
             </div>
 
             {/* Row 2: Country + Currency + Discount */}
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12, marginBottom:8 }}>
+            <div className="form-grid-3" style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12, marginBottom:8 }}>
               <div className="form-group">
                 <label className="form-label">Country / Tax system</label>
                 <select {...register('country_code')} className="form-select" onChange={e => {
@@ -274,7 +274,7 @@ function QuoteModal({ quote, clients, profile, onClose, onSave }: any) {
             </div>
 
             {/* Notes + Tax summary */}
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 260px', gap:16 }}>
+            <div className="tax-summary-grid" style={{ display:'grid', gridTemplateColumns:'1fr 260px', gap:16 }}>
               <div>
                 <div className="form-group"><label className="form-label">Notes</label><textarea {...register('notes')} className="form-input" rows={2} style={{ resize:'vertical' }}/></div>
                 <div className="form-group"><label className="form-label">Terms</label><input {...register('terms')} className="form-input"/></div>

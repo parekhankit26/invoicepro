@@ -96,7 +96,7 @@ export default function InvoiceModal({ invoice, onClose, onSave }: { invoice?: a
           <div className="modal-body">
 
             {/* Row 1: Client + Dates */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 16 }}>
+            <div className="form-grid-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 16 }}>
               <div className="form-group">
                 <label className="form-label">Client *</label>
                 <select {...register('client_id', { required: true })} className="form-select">
@@ -117,7 +117,7 @@ export default function InvoiceModal({ invoice, onClose, onSave }: { invoice?: a
             </div>
 
             {/* Row 2: Country + Currency + Discount */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 8 }}>
+            <div className="form-grid-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 8 }}>
               <div className="form-group">
                 <label className="form-label">Country / Tax system</label>
                 <select {...register('country_code')} className="form-select">
@@ -230,7 +230,7 @@ export default function InvoiceModal({ invoice, onClose, onSave }: { invoice?: a
             </div>
 
             {/* Notes + Tax summary */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 260px', gap: 16 }}>
+            <div className="tax-summary-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 260px', gap: 16 }}>
               <div>
                 <div className="form-group"><label className="form-label">Notes</label><textarea {...register('notes')} className="form-input" rows={2} style={{ resize: 'vertical' }} /></div>
                 <div className="form-group"><label className="form-label">Payment terms</label><input {...register('terms')} className="form-input" /></div>

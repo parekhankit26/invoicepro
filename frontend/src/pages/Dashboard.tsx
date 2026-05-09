@@ -27,7 +27,7 @@ export default function Dashboard() {
       <div className="page-body">
 
         {/* KPI cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 20 }}>
+        <div className="dash-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 20 }}>
           {[
             { label: 'Total billed',  value: fmt(s.total_billed||0),   sub: `${s.invoice_count||0} invoices`,      icon: null, color: undefined },
             { label: 'Collected',     value: fmt(s.total_paid||0),     sub: `${s.payment_rate||0}% collection`,    icon: <TrendingUp size={14}/>, color: 'var(--green)' },
@@ -45,7 +45,7 @@ export default function Dashboard() {
           ))}
         </div>
 
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:16 }}>
+        <div className="dash-mid-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:16 }}>
           {/* Net profit */}
           <div className="card card-p">
             <div style={{ fontSize:13, fontWeight:600, marginBottom:14 }}>Net profit</div>
@@ -100,7 +100,7 @@ export default function Dashboard() {
               <AlertTriangle size={14} color="var(--red)"/>
               <span style={{ fontSize:13, fontWeight:600, color:'var(--red)' }}>Overdue invoices ({overdue.length})</span>
             </div>
-            <table className="data-table">
+            <div className="table-wrapper"><table className="data-table">
               <thead><tr><th>Invoice</th><th>Client</th><th>Due date</th><th>Amount</th><th></th></tr></thead>
               <tbody>
                 {overdue.map((inv: any) => (
@@ -113,7 +113,7 @@ export default function Dashboard() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           </div>
         )}
 

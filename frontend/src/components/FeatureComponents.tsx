@@ -20,7 +20,7 @@ export function CashFlowPage() {
       <div className="page-body">
         {isLoading ? <div style={{ color: 'var(--text-subtle)' }}>Calculating forecast...</div> : (
           <>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
+            <div className="form-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
               {[['Next 30 days', s.next_30_days||0,'var(--green)'],['Next 60 days', s.next_60_days||0,'var(--blue)'],['Next 90 days', s.next_90_days||0,'var(--text)']].map(([label,val,color]:any) => (
                 <div key={label} className="metric-card">
                   <div className="metric-label">{label}</div>
@@ -77,7 +77,7 @@ export function HappinessPage() {
         <div><h1 className="page-title">Client happiness</h1><p className="page-subtitle">Track satisfaction after every paid invoice</p></div>
       </div>
       <div className="page-body">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
+        <div className="form-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
           <div className="metric-card">
             <div className="metric-label">Average score</div>
             <div className="metric-value" style={{ color: avg >= 4 ? 'var(--green)' : avg >= 3 ? 'var(--amber)' : 'var(--red)' }}>{avg.toFixed(1)}/5</div>
@@ -185,7 +185,7 @@ export function YearReviewPage() {
         <div><h1 className="page-title">{year} — Your year in review</h1><p className="page-subtitle">A look back at your business performance</p></div>
       </div>
       <div className="page-body">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
+        <div className="form-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
           {[['Total revenue', formatCurrency(data?.total_revenue||0),'var(--green)'],['Net profit', formatCurrency(data?.net_profit||0),(data?.net_profit||0)>=0?'var(--green)':'var(--red)'],['Invoices created', data?.invoices_created||0,'var(--text)'],['Invoices paid', data?.invoices_paid||0,'var(--green)'],['Total expenses', formatCurrency(data?.total_expenses||0),'var(--red)'],['Clients', data?.new_clients||0,'var(--blue)']].map(([label,val,color]:any) => (
             <div key={label} className="metric-card">
               <div className="metric-label">{label}</div>

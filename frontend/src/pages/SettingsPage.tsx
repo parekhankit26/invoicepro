@@ -34,7 +34,7 @@ export default function SettingsPage() {
       </div>
       <div className="page-body">
         <form onSubmit={handleSubmit(d => saveMutation.mutate(d))}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <div className="settings-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
 
             {/* Personal Info */}
             <div className="card card-p">
@@ -84,7 +84,7 @@ export default function SettingsPage() {
                 </select>
                 <div className="form-hint">{countryConfig.description}</div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+              <div className="form-grid-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
                 <div className="form-group">
                   <label className="form-label">Default currency</label>
                   <select {...register('default_currency')} className="form-select">

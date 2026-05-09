@@ -42,7 +42,7 @@ export default function ClientPortalPage() {
   return (
     <div style={{ minHeight: '100vh', background: '#f8f7f4', fontFamily: 'system-ui, sans-serif' }}>
       {/* Header */}
-      <div style={{ background: '#1a1814', color: 'white', padding: '20px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ background: '#1a1814', color: 'white', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {business?.company_logo && <img src={business.company_logo} alt="" style={{ height: 36, borderRadius: 6 }} />}
           <div>
@@ -56,7 +56,7 @@ export default function ClientPortalPage() {
         </div>
       </div>
 
-      <div style={{ maxWidth: 800, margin: '0 auto', padding: '32px 20px' }}>
+      <div style={{ maxWidth: 800, margin: '0 auto', padding: 'clamp(16px, 4vw, 32px) 16px' }}>
         {/* Welcome */}
         <div style={{ marginBottom: 28 }}>
           <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 4 }}>Hello, {client?.name} 👋</h1>
@@ -64,7 +64,7 @@ export default function ClientPortalPage() {
         </div>
 
         {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 28 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }} className='dash-kpi-grid'>
           {[
             ['Total invoices', stats.total_invoices, '#1a1814'],
             ['Outstanding', formatCurrency(stats.outstanding), stats.outstanding > 0 ? '#b45309' : '#16a34a'],

@@ -79,7 +79,7 @@ export default function ExpensesPage() {
 
       <div className="page-body">
         {/* Summary cards */}
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:20 }}>
+        <div className="dash-kpi-grid" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:20 }}>
           <div className="metric-card">
             <div className="metric-label">Total expenses</div>
             <div className="metric-value" style={{ color:'var(--red)' }}>{formatCurrency(totalExpenses, defaultCurrency)}</div>
@@ -114,7 +114,7 @@ export default function ExpensesPage() {
               <button className="btn btn-primary" onClick={openNew}><Plus size={15}/> Add expense</button>
             </div>
           ) : (
-            <table className="data-table">
+            <div className="table-wrapper"><table className="data-table">
               <thead>
                 <tr><th>Date</th><th>Category</th><th>Description</th><th>Client</th><th>Amount</th><th>Billable</th><th></th></tr>
               </thead>
@@ -134,7 +134,7 @@ export default function ExpensesPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           )}
         </div>
       </div>
@@ -149,7 +149,7 @@ export default function ExpensesPage() {
             </div>
             <form onSubmit={handleSubmit(d => saveMutation.mutate(d))}>
               <div className="modal-body">
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                <div className="form-grid-2" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
                   <div className="form-group">
                     <label className="form-label">Category</label>
                     <select {...register('category')} className="form-select">

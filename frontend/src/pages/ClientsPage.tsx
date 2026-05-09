@@ -76,7 +76,7 @@ export default function ClientsPage() {
               <button className="btn btn-primary" onClick={openAdd}><Plus size={15}/> Add client</button>
             </div>
           ) : (
-            <table className="data-table">
+            <div className="table-wrapper"><table className="data-table">
               <thead>
                 <tr><th>Client</th><th>Email</th><th>Phone</th><th>Currency</th><th>Tax number</th><th></th></tr>
               </thead>
@@ -103,7 +103,7 @@ export default function ClientsPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           )}
         </div>
       </div>
@@ -118,7 +118,7 @@ export default function ClientsPage() {
             </div>
             <form onSubmit={handleSubmit(d => saveMutation.mutate(d))}>
               <div className="modal-body">
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                <div className="form-grid-2" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
                   <div className="form-group" style={{ gridColumn:'1/-1' }}>
                     <label className="form-label">Full name / Business name *</label>
                     <input {...register('name', { required:true })} className="form-input" placeholder="Acme Ltd or John Smith"/>

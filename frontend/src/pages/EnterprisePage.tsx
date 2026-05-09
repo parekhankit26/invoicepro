@@ -108,7 +108,7 @@ function TeamTab({ plan }: { plan: string }) {
             <div style={{ fontSize: 13 }}>Invite your team to collaborate</div>
           </div>
         ) : (
-          <table className="data-table">
+          <div className="table-wrapper"><table className="data-table">
             <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th></th></tr></thead>
             <tbody>
               {members.map((m: any) => (
@@ -130,7 +130,7 @@ function TeamTab({ plan }: { plan: string }) {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         )}
       </div>
 
@@ -217,7 +217,7 @@ function ApiKeysTab({ plan }: { plan: string }) {
         !Array.isArray(keys) || keys.length === 0 ? (
           <div className="empty-state"><div style={{ fontSize: 13 }}>No API keys yet. Create one to access the API.</div></div>
         ) : (
-          <table className="data-table">
+          <div className="table-wrapper"><table className="data-table">
             <thead><tr><th>Name</th><th>Key</th><th>Last used</th><th>Requests</th><th>Status</th><th></th></tr></thead>
             <tbody>
               {keys.map((k: any) => (
@@ -231,7 +231,7 @@ function ApiKeysTab({ plan }: { plan: string }) {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         )}
       </div>
 

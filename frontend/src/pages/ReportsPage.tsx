@@ -77,7 +77,7 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:16 }}>
+        <div className="reports-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:16 }}>
           {/* Monthly bar chart */}
           <div className="card card-p">
             <div style={{ fontSize:13, fontWeight:600, marginBottom:14 }}>Monthly revenue vs expenses</div>

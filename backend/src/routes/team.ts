@@ -93,7 +93,7 @@ router.use(authenticate)
 router.get('/', async (req: AuthRequest, res: Response) => {
   try {
     const { data, error } = await supabase
-      .from('team_members').select('*').eq('owner_id', (req as any).user!.id).order('created_at')
+      .from('team_members').select('id,email,full_name,role,permissions,status,joined_at,created_at,invite_token').eq('owner_id', (req as any).user!.id).order('created_at')
     if (error) return res.status(400).json({ error: error.message })
     return res.json(data)
   } catch {

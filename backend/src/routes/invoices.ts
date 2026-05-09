@@ -1,6 +1,6 @@
 import { Router, Response } from 'express'
 import { calculateTax } from '../lib/taxCalculator'
-import { authenticate, AuthRequest } from '../middleware/auth'
+import { authenticate, AuthRequest, requirePermission } from '../middleware/auth'
 import { supabase } from '../lib/supabase'
 import { pdfService } from '../services/pdfService'
 import { emailService } from '../services/emailService'
@@ -26,7 +26,7 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
   return res.json(data)
 })
 
-router.post('/', async (req: AuthRequest, res: Response) => {
+router.post('/', requirePermission('create_invoices'), async (req: AuthRequest, res: Response) => {
   const { items = [], ...invoiceData } = (req as any).body
   const subtotal = items.reduce((s: number, i: any) => s + (i.quantity * i.unit_price), 0)
   const taxResult = calculateTax(subtotal, invoiceData.discount_percent || 0, invoiceData.tax_rate || 0, invoiceData.country_code || 'GB', invoiceData.tax_type || 'CGST_SGST')
@@ -45,7 +45,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   return res.status(201).json(invoice)
 })
 
-router.put('/:id', async (req: AuthRequest, res: Response) => {
+router.put('/:id', requirePermission('create_invoices'), async (req: AuthRequest, res: Response) => {
   const { items, clients, profiles, invoice_items, id, user_id, created_at, ...invoiceData } = (req as any).body
   // Remove any nested objects that aren't real columns
   Object.keys(invoiceData).forEach(key => {
@@ -71,7 +71,7 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
   return res.json(data)
 })
 
-router.delete('/:id', async (req: AuthRequest, res: Response) => {
+router.delete('/:id', requirePermission('create_invoices'), async (req: AuthRequest, res: Response) => {
   const { error } = await supabase.from('invoices').delete().eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id)
   if (error) return res.status(400).json({ error: error.message })
   return res.json({ message: 'Invoice deleted' })

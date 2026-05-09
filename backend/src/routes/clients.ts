@@ -1,5 +1,5 @@
 import { Router, Response } from 'express'
-import { authenticate, AuthRequest } from '../middleware/auth'
+import { authenticate, AuthRequest, requirePermission } from '../middleware/auth'
 import { supabase } from '../lib/supabase'
 
 const router = Router()
@@ -8,7 +8,7 @@ router.use(authenticate)
 router.get('/', async (req: AuthRequest, res: Response) => {
   const { search, archived } = (req as any).query
   let query = supabase.from('clients').select('*').eq('user_id', (req as any).user!.id).order('name')
-  if (search) query = query.ilike('name', `%${search}%`)
+  if (search) query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,company.ilike.%${search}%`)
   if (archived !== 'true') query = query.eq('is_archived', false)
   const { data, error } = await query
   if (error) return res.status(400).json({ error: error.message })
@@ -28,7 +28,7 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
   return res.json({ ...client, invoices, stats })
 })
 
-router.post('/', async (req: AuthRequest, res: Response) => {
+router.post('/', requirePermission('manage_clients'), async (req: AuthRequest, res: Response) => {
   const { data, error } = await supabase.from('clients').insert({ ...(req as any).body, user_id: (req as any).user!.id }).select().single()
   if (error) return res.status(400).json({ error: error.message })
   return res.status(201).json(data)

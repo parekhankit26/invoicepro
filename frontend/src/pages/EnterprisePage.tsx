@@ -118,7 +118,15 @@ function TeamTab({ plan }: { plan: string }) {
                   <td><span className="badge badge-sent">{m.role}</span></td>
                   <td><span className={`badge ${m.status === 'active' ? 'badge-paid' : m.status === 'pending' ? 'badge-pending' : 'badge-draft'}`}>{m.status}</span></td>
                   <td style={{ color: 'var(--text-subtle)', fontSize: 12 }}>{m.joined_at ? formatDate(m.joined_at) : 'Pending'}</td>
-                  <td><button className="btn btn-sm btn-danger" onClick={() => { if (confirm('Remove this team member?')) removeMutation.mutate(m.id) }}><Trash2 size={12} /></button></td>
+                  <td style={{ display:'flex', gap:4 }}>
+                      {m.status === 'pending' && (
+                        <button className="btn btn-sm btn-secondary" title="Copy invite link" onClick={() => {
+                          const url = `${window.location.origin}/team/accept/${m.invite_token}`
+                          navigator.clipboard.writeText(url).then(() => toast.success('Invite link copied!')).catch(() => toast.error('Copy failed'))
+                        }}>Link</button>
+                      )}
+                      <button className="btn btn-sm btn-danger" onClick={() => { if (confirm('Remove this team member?')) removeMutation.mutate(m.id) }}><Trash2 size={12} /></button>
+                    </td>
                 </tr>
               ))}
             </tbody>

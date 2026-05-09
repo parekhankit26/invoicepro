@@ -86,9 +86,21 @@ export default function InvoiceDetail() {
 
             <div style={{ display:'flex', justifyContent:'flex-end' }}>
               <div style={{ width:240 }}>
-                {[['Subtotal', invoice.subtotal], invoice.discount_amount > 0 ? ['Discount', -invoice.discount_amount] : null, invoice.tax_amount > 0 ? [`VAT (${invoice.tax_rate}%)`, invoice.tax_amount] : null, invoice.late_fee_amount > 0 ? ['Late fee', invoice.late_fee_amount] : null].filter(Boolean).map(([l, v]: any) => (
-                  <div key={l} style={{ display:'flex', justifyContent:'space-between', fontSize:13, color:'var(--text-muted)', marginBottom:6 }}><span>{l}</span><span className="currency-amount">{v < 0 ? '-' : ''}{formatCurrency(Math.abs(v), invoice.currency)}</span></div>
-                ))}
+                {/* Subtotal */}
+                <div style={{ display:'flex', justifyContent:'space-between', fontSize:13, color:'var(--text-muted)', marginBottom:6 }}><span>Subtotal</span><span className="currency-amount">{formatCurrency(invoice.subtotal, invoice.currency)}</span></div>
+                {/* Discount */}
+                {invoice.discount_amount > 0 && <div style={{ display:'flex', justifyContent:'space-between', fontSize:13, color:'#e74c3c', marginBottom:6 }}><span>Discount ({invoice.discount_percent}%)</span><span className="currency-amount">-{formatCurrency(invoice.discount_amount, invoice.currency)}</span></div>}
+                {/* Taxable amount — shown when discount exists */}
+                {invoice.discount_amount > 0 && <div style={{ display:'flex', justifyContent:'space-between', fontSize:12, color:'var(--text-subtle)', marginBottom:6 }}><span>Taxable amount</span><span className="currency-amount">{formatCurrency(invoice.subtotal - invoice.discount_amount, invoice.currency)}</span></div>}
+                {/* Country-specific tax lines (CGST+SGST, VAT, GST etc.) */}
+                {(invoice.tax_lines && invoice.tax_lines.length > 0)
+                  ? invoice.tax_lines.map((line: any) => (
+                      <div key={line.label} style={{ display:'flex', justifyContent:'space-between', fontSize:13, color:'var(--text-muted)', marginBottom:6 }}><span>{line.label}</span><span className="currency-amount">{formatCurrency(line.amount, invoice.currency)}</span></div>
+                    ))
+                  : invoice.tax_amount > 0 && <div style={{ display:'flex', justifyContent:'space-between', fontSize:13, color:'var(--text-muted)', marginBottom:6 }}><span>{invoice.tax_summary_label || 'Tax'} ({invoice.tax_rate}%)</span><span className="currency-amount">{formatCurrency(invoice.tax_amount, invoice.currency)}</span></div>
+                }
+                {/* Late fee */}
+                {invoice.late_fee_amount > 0 && <div style={{ display:'flex', justifyContent:'space-between', fontSize:13, color:'var(--text-muted)', marginBottom:6 }}><span>Late fee</span><span className="currency-amount">{formatCurrency(invoice.late_fee_amount, invoice.currency)}</span></div>}
                 <div style={{ borderTop:'2px solid var(--text)', paddingTop:10, display:'flex', justifyContent:'space-between', fontWeight:700, fontSize:15 }}><span>Total</span><span className="currency-amount">{formatCurrency(invoice.total, invoice.currency)}</span></div>
               </div>
             </div>

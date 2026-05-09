@@ -1,4 +1,5 @@
 import { Router, Response } from 'express'
+import { calculateTax } from '../lib/taxCalculator'
 import { authenticate, AuthRequest } from '../middleware/auth'
 import { supabase } from '../lib/supabase'
 import { pdfService } from '../services/pdfService'
@@ -28,16 +29,15 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
 router.post('/', async (req: AuthRequest, res: Response) => {
   const { items = [], ...invoiceData } = (req as any).body
   const subtotal = items.reduce((s: number, i: any) => s + (i.quantity * i.unit_price), 0)
-  // UK HMRC compliant: apply discount first, then calculate VAT on discounted amount
-  const discountAmount = subtotal * ((invoiceData.discount_percent || 0) / 100)
-  const taxableAmount = subtotal - discountAmount
-  const taxAmount = taxableAmount * ((invoiceData.tax_rate || 0) / 100)
-  const total = taxableAmount + taxAmount
+  const taxResult = calculateTax(subtotal, invoiceData.discount_percent || 0, invoiceData.tax_rate || 0, invoiceData.country_code || 'GB', invoiceData.tax_type || 'CGST_SGST')
+  const discountAmount = taxResult.discountAmount
+  const taxAmount = taxResult.totalTax
+  const total = taxResult.total
   if (!invoiceData.invoice_number) {
     const { count } = await supabase.from('invoices').select('*', { count: 'exact', head: true }).eq('user_id', (req as any).user!.id)
     invoiceData.invoice_number = `INV-${String((count || 0) + 1).padStart(4, '0')}`
   }
-  const { data: invoice, error } = await supabase.from('invoices').insert({ ...invoiceData, user_id: (req as any).user!.id, subtotal, tax_amount: taxAmount, discount_amount: discountAmount, total }).select().single()
+  const { data: invoice, error } = await supabase.from('invoices').insert({ ...invoiceData, user_id: (req as any).user!.id, subtotal, tax_amount: taxAmount, discount_amount: discountAmount, total, tax_lines: taxResult.taxLines, taxable_amount: taxResult.taxableAmount, tax_summary_label: taxResult.taxSummaryLabel }).select().single()
   if (error) return res.status(400).json({ error: error.message })
   if (items.length) {
     await supabase.from('invoice_items').insert(items.map((item: any, idx: number) => ({ invoice_id: invoice.id, description: item.description, quantity: item.quantity, unit_price: item.unit_price, tax_rate: item.tax_rate || 0, amount: item.quantity * item.unit_price, sort_order: idx })))
@@ -58,11 +58,11 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
   if (items) {
     const subtotal = items.reduce((s: number, i: any) => s + (i.quantity * i.unit_price), 0)
     invoiceData.subtotal = subtotal
-    // UK HMRC compliant: apply discount first, then calculate VAT on discounted amount
-    invoiceData.discount_amount = subtotal * ((invoiceData.discount_percent || 0) / 100)
-    const taxableBase = subtotal - invoiceData.discount_amount
-    invoiceData.tax_amount = taxableBase * ((invoiceData.tax_rate || 0) / 100)
-    invoiceData.total = taxableBase + invoiceData.tax_amount
+    const taxResult = calculateTax(subtotal, invoiceData.discount_percent || 0, invoiceData.tax_rate || 0, invoiceData.country_code || 'GB', invoiceData.tax_type || 'CGST_SGST')
+    invoiceData.discount_amount = taxResult.discountAmount
+    invoiceData.tax_amount = taxResult.totalTax
+    invoiceData.tax_lines = taxResult.taxLines
+    invoiceData.total = taxResult.total
     await supabase.from('invoice_items').delete().eq('invoice_id', (req as any).params.id)
     await supabase.from('invoice_items').insert(items.map((item: any, idx: number) => ({ invoice_id: (req as any).params.id, description: item.description, quantity: item.quantity, unit_price: item.unit_price, tax_rate: item.tax_rate || 0, amount: item.quantity * item.unit_price, sort_order: idx })))
   }

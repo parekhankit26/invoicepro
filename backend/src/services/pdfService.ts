@@ -18,11 +18,14 @@ export const pdfService = {
         // Use stored values from DB if available, otherwise calculate
         const discountPercent = Number(invoice.discount_percent || invoice.discount || 0)
         const discountAmount = Number(invoice.discount_amount) || (subtotal * discountPercent / 100)
-        // UK HMRC: VAT is calculated on subtotal AFTER discount (taxable amount)
         const taxableAmount = subtotal - discountAmount
         const taxRate = Number(invoice.tax_rate || 0)
-        const taxAmount = Number(invoice.tax_amount) || (taxableAmount * (taxRate / 100))
-        const total = Number(invoice.total) || (taxableAmount + taxAmount)
+        // Use stored tax_lines for country-specific breakdown, fallback to single line
+        const taxLines: Array<{label: string; rate: number; amount: number}> = invoice.tax_lines && invoice.tax_lines.length > 0
+          ? invoice.tax_lines
+          : taxRate > 0 ? [{ label: `${invoice.tax_summary_label || 'Tax'} (${taxRate}%)`, rate: taxRate, amount: taxableAmount * (taxRate / 100) }] : []
+        const totalTax = taxLines.reduce((s: number, l: any) => s + l.amount, 0)
+        const total = Number(invoice.total) || (taxableAmount + totalTax)
 
         // Header
         doc.fontSize(28).fillColor('#1a1814').text('INVOICE', 50, 50)
@@ -78,7 +81,6 @@ export const pdfService = {
         doc.fillColor('#1a1814').text(`${symbol}${subtotal.toFixed(2)}`, 460, y, { width: 80, align: 'right' })
         y += 18
         if (discountAmount > 0) {
-          // Show discount before VAT (HMRC compliant order)
           doc.fillColor('#666').text(discountPercent > 0 ? `Discount (${discountPercent}%)` : 'Discount', 350, y)
           doc.fillColor('#e74c3c').text(`-${symbol}${discountAmount.toFixed(2)}`, 460, y, { width: 80, align: 'right' })
           y += 18
@@ -86,11 +88,12 @@ export const pdfService = {
           doc.fillColor('#1a1814').text(`${symbol}${taxableAmount.toFixed(2)}`, 460, y, { width: 80, align: 'right' })
           y += 18
         }
-        if (taxAmount > 0) {
-          doc.fillColor('#666').text(`VAT (${invoice.tax_rate}%)`, 350, y)
-          doc.fillColor('#1a1814').text(`${symbol}${taxAmount.toFixed(2)}`, 460, y, { width: 80, align: 'right' })
+        // Render all tax lines (supports CGST+SGST, IGST, VAT, GST etc.)
+        taxLines.forEach((line: any) => {
+          doc.fillColor('#666').text(line.label, 350, y)
+          doc.fillColor('#1a1814').text(`${symbol}${Number(line.amount).toFixed(2)}`, 460, y, { width: 80, align: 'right' })
           y += 18
-        }
+        })
         y += 5
         doc.moveTo(350, y).lineTo(545, y).strokeColor('#1a1814').lineWidth(1.5).stroke()
         y += 10

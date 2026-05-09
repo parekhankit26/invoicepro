@@ -7,7 +7,10 @@ const router = Router()
 router.post('/register', async (req: Request, res: Response) => {
   const { email, password, full_name, company_name } = (req as any).body
   if (!email || !password || !full_name) return res.status(400).json({ error: 'Email, password and name required' })
-  const { data, error } = await supabase.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { full_name, company_name } })
+  const { data, error } = await supabase.auth.admin.createUser({
+    email, password, email_confirm: true,
+    user_metadata: { full_name, company_name }
+  })
   if (error) return res.status(400).json({ error: error.message })
   return res.status(201).json({ message: 'Account created', user: data.user })
 })
@@ -20,16 +23,28 @@ router.post('/login', async (req: Request, res: Response) => {
 })
 
 router.get('/profile', authenticate, async (req: AuthRequest, res: Response) => {
-  const { data, error } = await supabase.from('profiles').select('*').eq('id', (req as any).user!.id).single()
-  if (error) return res.status(404).json({ error: 'Profile not found' })
+  const { data, error } = await supabase.from('profiles').select('*').eq('id', req.user!.id).single()
+  if (error) {
+    // Auto-create profile if missing (handles edge case)
+    const { data: created } = await supabase.from('profiles').insert({
+      id: req.user!.id, email: req.user!.email
+    }).select().single()
+    return res.json(created || { id: req.user!.id, email: req.user!.email, plan: 'free' })
+  }
   return res.json(data)
 })
 
 router.put('/profile', authenticate, async (req: AuthRequest, res: Response) => {
-  const allowed = ['full_name','company_name','company_address','company_phone','company_website','tax_number','default_currency','default_tax_rate','default_payment_terms']
+  const allowed = [
+    'full_name', 'company_name', 'company_address', 'company_phone',
+    'company_website', 'tax_number', 'default_currency', 'default_tax_rate',
+    'default_payment_terms', 'country_code', 'notify_on_view',
+    'notify_on_payment', 'auto_reminders'
+  ]
   const updates: Record<string, any> = {}
   allowed.forEach(k => { if ((req as any).body[k] !== undefined) updates[k] = (req as any).body[k] })
-  const { data, error } = await supabase.from('profiles').update(updates).eq('id', (req as any).user!.id).select().single()
+  if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'No valid fields to update' })
+  const { data, error } = await supabase.from('profiles').update(updates).eq('id', req.user!.id).select().single()
   if (error) return res.status(400).json({ error: error.message })
   return res.json(data)
 })

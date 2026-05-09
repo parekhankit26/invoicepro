@@ -14,6 +14,9 @@ export default function ClientsPage() {
   const [showModal, setShowModal] = useState(false)
   const [editClient, setEditClient] = useState<any>(null)
 
+  const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: () => api.get<any>('/auth/profile') })
+  const defaultCurrency = profile?.default_currency || 'GBP'
+
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients', search],
     queryFn: () => api.get<any[]>(`/clients${search ? `?search=${search}` : ''}`)
@@ -38,7 +41,7 @@ export default function ClientsPage() {
     onError: (e: any) => toast.error(e.message)
   })
 
-  const openAdd = () => { reset({ currency: 'GBP' }); setEditClient(null); setShowModal(true) }
+  const openAdd = () => { reset({ currency: defaultCurrency }); setEditClient(null); setShowModal(true) }
   const openEdit = (c: any) => { reset(c); setEditClient(c); setShowModal(true) }
 
   const clientList = Array.isArray(clients) ? clients : []

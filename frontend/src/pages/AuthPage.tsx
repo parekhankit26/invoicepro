@@ -32,7 +32,7 @@ export default function AuthPage() {
           <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em' }}>InvoicePro</h1>
           <p style={{ fontSize: 13, color: 'var(--text-subtle)', marginTop: 4 }}>{mode === 'login' ? 'Sign in to your account' : 'Create your free account'}</p>
         </div>
-        <div className="card" style={{ padding: 28 }}>
+        <div className="card auth-card" style={{ padding: 28 }}>
           <form onSubmit={handleSubmit(onSubmit)}>
             {mode === 'register' && (
               <>

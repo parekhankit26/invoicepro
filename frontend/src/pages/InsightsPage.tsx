@@ -48,7 +48,7 @@ export default function InsightsPage() {
         {isLoading ? <div style={{ color: 'var(--text-subtle)' }}>Analysing your business...</div> : (
           <>
             {/* Health Score */}
-            <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 16, marginBottom: 20 }}>
+            <div className="client-detail-grid" style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 16, marginBottom: 20 }}>
               <div className="card card-p" style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-subtle)', marginBottom: 16 }}>Business health score</div>
                 <div style={{ position: 'relative', width: 140, height: 140, margin: '0 auto 16px' }}>
@@ -68,7 +68,7 @@ export default function InsightsPage() {
 
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12 }}>Key metrics</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div className="form-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                   {[
                     ['Payment rate', `${paymentRate}%`, paymentRate >= 80 ? 'var(--green)' : 'var(--amber)'],
                     ['Total billed', formatCurrency(totalBilled), 'var(--text)'],
@@ -108,7 +108,7 @@ export default function InsightsPage() {
             {/* Tips section */}
             <div className="card card-p">
               <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 14 }}>Quick wins to improve your score</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+              <div className="form-grid-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
                 {[
                   { num: '01', title: 'Enable Stripe payments', desc: 'Businesses with online payment links get paid 3x faster on average.' },
                   { num: '02', title: 'Set up auto-reminders', desc: 'Automated reminders reduce late payments by up to 60%.' },

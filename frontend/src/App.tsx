@@ -23,6 +23,7 @@ import TeamAcceptPage from './pages/TeamAcceptPage'
 import TeamLoginPage from './pages/TeamLoginPage'
 import TeamDashboard from './pages/TeamDashboard'
 import { CashFlowPage, HappinessPage, YearReviewPage } from './components/FeatureComponents'
+import NotFoundPage from './pages/NotFoundPage'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthStore()
@@ -87,6 +88,8 @@ export default function App() {
         <Route path="enterprise" element={<EnterprisePage />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>
+      {/* ── 404 ── */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

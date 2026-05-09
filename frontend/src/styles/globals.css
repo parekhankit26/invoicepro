@@ -610,3 +610,20 @@
   .invoice-detail-grid { grid-template-columns: 1fr 240px !important; }
   .client-detail-grid { grid-template-columns: 1fr 240px !important; }
 }
+
+/* Line item rows in modals */
+@media (max-width: 480px) {
+  .line-item-row {
+    grid-template-columns: 1fr 60px 90px 60px 32px !important;
+    gap: 4px !important;
+  }
+  .line-item-row .form-input {
+    padding: 7px 8px;
+    font-size: 14px;
+  }
+}
+
+/* AuthPage on very small screens */
+@media (max-width: 380px) {
+  .auth-card { padding: 20px 16px !important; }
+}

@@ -262,7 +262,7 @@ function QuoteModal({ quote, clients, profile, onClose, onSave }: any) {
               {fields.map((field, i) => {
                 const amt = (Number(items?.[i]?.quantity)||0) * (Number(items?.[i]?.unit_price)||0)
                 return (
-                  <div key={field.id} style={{ display:'grid', gridTemplateColumns:'1fr 80px 130px 80px 36px', gap:8, marginBottom:6, alignItems:'center' }}>
+                  <div key={field.id} className="line-item-row" style={{ display:'grid', gridTemplateColumns:'1fr 70px 110px 70px 36px', gap:6, marginBottom:6, alignItems:'center' }}>
                     <input {...register(`items.${i}.description`)} className="form-input" placeholder="Description..."/>
                     <input {...register(`items.${i}.quantity`, { valueAsNumber:true })} className="form-input" type="number" min="0" step="0.01" placeholder="Qty"/>
                     <input {...register(`items.${i}.unit_price`, { valueAsNumber:true })} className="form-input" type="number" min="0" step="0.01" placeholder="Unit price"/>

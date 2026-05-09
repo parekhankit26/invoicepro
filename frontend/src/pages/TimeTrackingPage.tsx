@@ -63,7 +63,7 @@ export default function TimeTrackingPage() {
 
       <div className="page-body">
         {/* Summary */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
+        <div className="form-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
           <div className="metric-card">
             <div className="metric-label">Total hours</div>
             <div className="metric-value">{(summary.total_hours || 0).toFixed(1)}h</div>

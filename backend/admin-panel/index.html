@@ -1255,6 +1255,43 @@ async function changeMyPassword() {
   }
 })()
 
+
+// ── SESSION TIMER ─────────────────────────────────────────
+let sessionTimer, countdownTimer
+
+function startSessionTimer() {
+  clearTimeout(sessionTimer)
+  sessionTimer = setTimeout(() => {
+    const warn = document.getElementById('sessionWarn')
+    if (warn) warn.style.display = 'block'
+    let remaining = 10 * 60
+    clearInterval(countdownTimer)
+    countdownTimer = setInterval(() => {
+      remaining--
+      const el = document.getElementById('sessionCountdown')
+      if (el) el.textContent = Math.floor(remaining/60) + ':' + String(remaining%60).padStart(2,'0')
+      if (remaining <= 0) { clearInterval(countdownTimer); logout() }
+    }, 1000)
+  }, (8 * 3600000) - (10 * 60000))
+}
+
+function refreshSession() {
+  const warn = document.getElementById('sessionWarn')
+  if (warn) warn.style.display = 'none'
+  clearInterval(countdownTimer)
+  startSessionTimer()
+}
+
+// ── TEST EMAIL ────────────────────────────────────────────
+async function sendTestEmail() {
+  const to = document.getElementById('testEmailAddr').value
+  if (!to) { document.getElementById('testEmailResult').innerHTML='<div class="alert ar">Enter an email address</div>'; return }
+  try {
+    const d = await apiFetch('/admin/test-email', { method:'POST', body:JSON.stringify({to}) })
+    document.getElementById('testEmailResult').innerHTML = '<div class="alert as">✅ ' + d.message + '</div>'
+  } catch(e) { document.getElementById('testEmailResult').innerHTML = '<div class="alert ar">❌ ' + e.message + '</div>' }
+}
+
 </script>
 </body>
 </html>

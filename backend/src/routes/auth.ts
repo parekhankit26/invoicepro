@@ -163,14 +163,38 @@ router.post('/reset-user-password', async (req: Request, res: Response) => {
 
       return res.json({ message: `✅ Password updated for ${email}. Login at invoicepro-ten.vercel.app/auth`, action: 'updated' })
     } else {
-      // User does NOT exist in Supabase auth — create them
+      // User not in page 1 — try to create, catch duplicate
       const { data: newUser, error } = await supabase.auth.admin.createUser({
         email, password: new_password, email_confirm: true,
         user_metadata: { full_name: email.split('@')[0] }
       })
-      if (error) return res.status(400).json({ error: error.message })
+      
+      if (error) {
+        // "Database error" usually means user exists in a later page
+        // Try searching all pages
+        let foundUser = null
+        let page = 1
+        while (!foundUser) {
+          const { data: pageData } = await supabase.auth.admin.listUsers({ page, perPage: 1000 })
+          if (!pageData?.users?.length) break
+          foundUser = pageData.users.find((u: any) => u.email?.toLowerCase() === email.toLowerCase())
+          if (foundUser) break
+          if (pageData.users.length < 1000) break
+          page++
+        }
+        
+        if (foundUser) {
+          // Found on deeper page — update password
+          const { error: upErr } = await supabase.auth.admin.updateUserById(foundUser.id, { 
+            password: new_password, email_confirm: true 
+          })
+          if (upErr) return res.status(400).json({ error: upErr.message })
+          await supabase.from('profiles').upsert({ id: foundUser.id, email, plan: 'free', default_currency: 'GBP', country_code: 'GB' })
+          return res.json({ message: `✅ Password updated for ${email}. You can now login!`, action: 'updated' })
+        }
+        return res.status(400).json({ error: error.message })
+      }
 
-      // Create profile
       if (newUser?.user) {
         await supabase.from('profiles').upsert({
           id: newUser.user.id, email,
@@ -178,7 +202,6 @@ router.post('/reset-user-password', async (req: Request, res: Response) => {
           plan: 'free', default_currency: 'GBP', country_code: 'GB'
         })
       }
-
       return res.json({ message: `✅ Account created for ${email}. Login at invoicepro-ten.vercel.app/auth`, action: 'created' })
     }
   } catch(e: any) { return res.status(500).json({ error: e.message }) }

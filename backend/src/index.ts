@@ -33,16 +33,7 @@ app.set('trust proxy', 1)
 
 app.use(helmet({
   crossOriginResourcePolicy: false,
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https:"],
-    }
-  }
+  contentSecurityPolicy: false
 }))
 app.use(cors({ 
   origin: (origin: any, cb: any) => cb(null, true), // Allow all origins — protected by auth tokens 

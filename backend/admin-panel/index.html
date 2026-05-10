@@ -8,95 +8,97 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f7f4;color:#1a1814;font-size:13px}
 .center{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#1a1814}
-.card{background:#fff;border-radius:16px;padding:36px;width:100%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
-.logo{width:52px;height:52px;background:#1a1814;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#a3e635;font-weight:900;font-size:22px;letter-spacing:-1px}
-h1{text-align:center;font-size:22px;font-weight:800;margin-bottom:4px}
+.lcard{background:#fff;border-radius:16px;padding:36px;width:100%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.logo-box{width:52px;height:52px;background:#1a1814;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#a3e635;font-weight:900;font-size:22px}
+h1{text-align:center;font-size:22px;font-weight:800;margin-bottom:4px;letter-spacing:-.02em}
 .sub{text-align:center;font-size:13px;color:#888;margin-bottom:28px}
-label{display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:4px}
-input{width:100%;padding:11px 14px;border:1.5px solid #e8e5de;border-radius:9px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s;margin-bottom:14px}
-input:focus{border-color:#1a1814}
-.btn{width:100%;padding:13px;background:#1a1814;color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s}
-.btn:hover{opacity:.85}
-.btn:active{opacity:.7}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.err{color:#dc2626;font-size:13px;margin-top:10px;text-align:center;min-height:20px}
-.link{background:none;border:none;color:#888;font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline;display:block;text-align:center;margin-top:12px}
-.link:hover{color:#1a1814}
-.hidden{display:none}
-/* App layout */
-#app{display:none;min-height:100vh}
+.lbl{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:5px;margin-top:12px}
+.inp{width:100%;padding:11px 14px;border:1.5px solid #e8e5de;border-radius:9px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s}
+.inp:focus{border-color:#1a1814;box-shadow:0 0 0 3px rgba(26,24,20,.08)}
+.btn-full{width:100%;padding:13px;background:#1a1814;color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:16px;transition:opacity .15s}
+.btn-full:hover{opacity:.85}
+.btn-full:disabled{opacity:.4;cursor:not-allowed}
+.errtxt{color:#dc2626;font-size:12.5px;margin-top:10px;text-align:center;min-height:18px}
+.link-btn{background:none;border:none;color:#999;font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline;display:block;text-align:center;margin-top:12px;padding:4px}
+.link-btn:hover{color:#1a1814}
+.hidden{display:none!important}
+#app{display:none}
 .layout{display:flex;min-height:100vh}
-.sidebar{width:230px;background:#fff;border-right:1px solid #e8e5de;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto}
-.s-logo{padding:16px;border-bottom:1px solid #e8e5de;display:flex;align-items:center;gap:10px}
-.s-logo-icon{width:34px;height:34px;background:#1a1814;border-radius:9px;color:#a3e635;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center}
-.nav-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#b8b2a3;padding:10px 14px 3px;margin-top:4px}
-.nav-item{display:flex;align-items:center;gap:8px;padding:9px 12px;margin:1px 8px;border-radius:8px;cursor:pointer;font-size:13px;color:#756d5c;transition:all .12s;user-select:none;border:none;background:none;width:calc(100% - 16px);text-align:left;font-family:inherit}
-.nav-item:hover{background:#f8f7f4;color:#1a1814}
-.nav-item.active{background:#1a1814;color:#fff}
-.s-footer{padding:12px;border-top:1px solid #e8e5de;margin-top:auto}
-.main{margin-left:230px;flex:1}
+.sidebar{width:224px;background:#fff;border-right:1px solid #e8e5de;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:10}
+.s-top{padding:16px;border-bottom:1px solid #e8e5de;display:flex;align-items:center;gap:10px}
+.s-icon{width:34px;height:34px;background:#1a1814;border-radius:9px;color:#a3e635;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-sec{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#b8b2a3;padding:10px 14px 2px;margin-top:6px}
+.nv{display:flex;align-items:center;gap:8px;padding:9px 12px;margin:1px 8px;border-radius:8px;cursor:pointer;font-size:13px;color:#756d5c;border:none;background:none;width:calc(100% - 16px);text-align:left;font-family:inherit;transition:all .12s}
+.nv:hover{background:#f8f7f4;color:#1a1814}
+.nv.on{background:#1a1814;color:#fff}
+.s-foot{padding:12px;border-top:1px solid #e8e5de;margin-top:auto}
+.s-user{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.s-av{width:30px;height:30px;border-radius:8px;background:#1a1814;color:#a3e635;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0}
+.foot-btns{display:flex;gap:6px}
+.main{margin-left:224px;flex:1;min-width:0}
 .topbar{background:#fff;border-bottom:1px solid #e8e5de;padding:0 28px;height:50px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}
-.page{display:none;padding:24px 28px 40px}
-.page.active{display:block}
+.pg{display:none;padding:24px 28px 40px}
+.pg.on{display:block}
 .ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
 .pt{font-size:20px;font-weight:700;letter-spacing:-.02em}
-.ps{font-size:13px;color:#888;margin-top:2px}
-.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.ps{font-size:13px;color:#999;margin-top:2px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.kcard{background:#fff;border:1px solid #e8e5de;border-radius:12px;padding:16px}
-.kl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b8b2a3;margin-bottom:8px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.bc{background:#fff;border:1px solid #e8e5de;border-radius:12px;padding:20px;margin-bottom:14px}
+.kc{background:#fff;border:1px solid #e8e5de;border-radius:12px;padding:16px}
+.kl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b8b2a3;margin-bottom:6px}
 .kv{font-size:24px;font-weight:700;letter-spacing:-.03em}
 .ks{font-size:11px;color:#b8b2a3;margin-top:4px}
-.bcard{background:#fff;border:1px solid #e8e5de;border-radius:12px;padding:20px;margin-bottom:14px}
-table{width:100%;border-collapse:collapse}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:500px}
 th{text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b8b2a3;padding:9px 12px;border-bottom:1px solid #e8e5de;background:#f8f7f4;white-space:nowrap}
-td{padding:11px 12px;border-bottom:1px solid #e8e5de;font-size:13px}
+td{padding:11px 12px;border-bottom:1px solid #e8e5de;font-size:13px;vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#fafaf8}
-.badge{display:inline-flex;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.bdg{display:inline-flex;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
 .b-free{background:#f0f0f0;color:#888}
 .b-starter{background:#eff6ff;color:#1d4ed8}
 .b-pro{background:#ede9fe;color:#7c3aed}
 .b-enterprise{background:#fffbeb;color:#b45309}
 .b-paid{background:#f0fdf4;color:#16a34a}
-.b-sent{background:#eff6ff;color:#1d4ed8}
+.b-open{background:#fef3c7;color:#b45309}
 .b-draft{background:#f0f0f0;color:#888}
 .b-overdue{background:#fef2f2;color:#dc2626}
+.b-sent{background:#eff6ff;color:#1d4ed8}
+.b-resolved{background:#f0fdf4;color:#16a34a}
 .b-ok{background:#f0fdf4;color:#16a34a}
 .b-warn{background:#fffbeb;color:#b45309}
 .b-err{background:#fef2f2;color:#dc2626}
 .b-super_admin{background:#1a1814;color:#fff}
 .b-admin{background:#ede9fe;color:#7c3aed}
 .b-support{background:#eff6ff;color:#1d4ed8}
-.abtn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;border:1px solid #e8e5de;background:#fff;color:#1a1814;font-family:inherit;transition:all .12s;white-space:nowrap}
-.abtn:hover{background:#f8f7f4}
-.abtn-p{background:#1a1814;color:#fff;border-color:#1a1814}
-.abtn-p:hover{background:#2d2a24}
-.abtn-s{background:#f0fdf4;color:#16a34a;border-color:#bbf7d0}
-.abtn-d{background:#fef2f2;color:#dc2626;border-color:#fecaca}
-.abtn-sm{padding:5px 10px;font-size:12px}
-.fi{width:100%;padding:9px 12px;border:1.5px solid #e8e5de;border-radius:8px;font-size:13px;font-family:inherit;outline:none}
+.ab{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;border:1px solid #e8e5de;background:#fff;color:#1a1814;font-family:inherit;transition:all .12s;white-space:nowrap}
+.ab:hover{background:#f8f7f4}
+.ab:disabled{opacity:.4;cursor:not-allowed}
+.ab-p{background:#1a1814!important;color:#fff!important;border-color:#1a1814!important}
+.ab-p:hover{opacity:.85}
+.ab-s{background:#f0fdf4!important;color:#16a34a!important;border-color:#bbf7d0!important}
+.ab-d{background:#fef2f2!important;color:#dc2626!important;border-color:#fecaca!important}
+.ab-sm{padding:5px 10px!important;font-size:12px!important}
+.fi{width:100%;padding:9px 12px;border:1.5px solid #e8e5de;border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}
 .fi:focus{border-color:#1a1814}
 .fg{margin-bottom:12px}
 .fg label{font-size:12px;font-weight:500;color:#666;display:block;margin-bottom:4px}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
-.modal-bg.show{display:flex}
-.modal-box{background:#fff;border-radius:14px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.18)}
-.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e8e5de;position:sticky;top:0;background:#fff;border-radius:14px 14px 0 0}
-.modal-body{padding:20px}
-.modal-ftr{padding:14px 20px;border-top:1px solid #e8e5de;display:flex;gap:8px;justify-content:flex-end}
-.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
-.dot-ok{background:#16a34a}
-.dot-warn{background:#b45309}
-.dot-err{background:#dc2626}
-.alert{padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:10px;border-left:3px solid;line-height:1.5}
-.a-ok{background:#f0fdf4;border-color:#16a34a;color:#15803d}
-.a-err{background:#fef2f2;border-color:#dc2626;color:#dc2626}
-.a-info{background:#eff6ff;border-color:#1d4ed8;color:#1d4ed8}
-.a-warn{background:#fffbeb;border-color:#b45309;color:#b45309}
+.mo-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
+.mo-bg.show{display:flex}
+.mo-box{background:#fff;border-radius:14px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.2)}
+.mo-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e8e5de;position:sticky;top:0;background:#fff;border-radius:14px 14px 0 0}
+.mo-hdr h3{font-size:16px;font-weight:700}
+.mo-body{padding:20px}
+.mo-ftr{padding:14px 20px;border-top:1px solid #e8e5de;display:flex;gap:8px;justify-content:flex-end}
+.al{padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:10px;border-left:3px solid;line-height:1.5}
+.al-ok{background:#f0fdf4;border-color:#16a34a;color:#15803d}
+.al-err{background:#fef2f2;border-color:#dc2626;color:#dc2626}
+.al-info{background:#eff6ff;border-color:#1d4ed8;color:#1d4ed8}
+.al-warn{background:#fffbeb;border-color:#b45309;color:#b45309}
 .empty{text-align:center;padding:40px;color:#b8b2a3}
-.tog{width:42px;height:23px;border-radius:12px;cursor:pointer;border:none;position:relative;transition:background .2s;flex-shrink:0;vertical-align:middle}
+.tog{width:42px;height:23px;border-radius:12px;cursor:pointer;border:none;position:relative;transition:background .2s;flex-shrink:0}
 .tog.on{background:#16a34a}
 .tog.off{background:#e8e5de}
 .tog::after{content:'';position:absolute;width:17px;height:17px;border-radius:50%;background:#fff;top:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
@@ -104,937 +106,889 @@ tr:hover td{background:#fafaf8}
 .tog.off::after{left:3px}
 .sr{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e8e5de;gap:12px}
 .sr:last-child{border:none}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
+.dot-ok{background:#16a34a}
+.dot-warn{background:#b45309}
+.dot-err{background:#dc2626}
 </style>
 </head>
 <body>
 
-<!-- ── LOGIN ─────────────────────────────────────────────── -->
+<!-- LOGIN PAGE -->
 <div id="loginPage" class="center">
-  <div class="card">
-    <div class="logo">IP</div>
+  <div class="lcard">
+    <div class="logo-box">IP</div>
     <h1>Super Admin</h1>
     <p class="sub">InvoicePro control panel</p>
-    <div id="loginForm">
-      <label>Email</label>
-      <input type="email" id="loginEmail" placeholder="admin@yourdomain.com" autocomplete="email"/>
-      <label>Password</label>
-      <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password"/>
-      <button class="btn" id="loginBtn">Sign in →</button>
-      <button class="link" id="forgotBtn">Forgot password?</button>
-      <div class="err" id="loginErr"></div>
+
+    <!-- Login form -->
+    <div id="fLogin">
+      <label class="lbl">Email</label>
+      <input class="inp" type="email" id="iEmail" placeholder="admin@yourdomain.com" autocomplete="email"/>
+      <label class="lbl">Password</label>
+      <input class="inp" type="password" id="iPw" placeholder="••••••••" autocomplete="current-password"/>
+      <button class="btn-full" id="btnLogin">Sign in →</button>
+      <button class="link-btn" id="btnShowForgot">Forgot password?</button>
+      <div class="errtxt" id="loginErr"></div>
     </div>
-    <div id="forgotForm" class="hidden">
-      <label>Your admin email</label>
-      <input type="email" id="forgotEmail" placeholder="admin@yourdomain.com"/>
-      <button class="btn" id="forgotSendBtn">Send reset link</button>
-      <button class="link" id="backToLoginBtn">← Back to sign in</button>
-      <div class="err" id="forgotMsg" style="color:#16a34a"></div>
+
+    <!-- Forgot password form -->
+    <div id="fForgot" class="hidden">
+      <label class="lbl">Admin email</label>
+      <input class="inp" type="email" id="iForgotEmail" placeholder="admin@yourdomain.com"/>
+      <button class="btn-full" id="btnSendReset">Send reset link</button>
+      <button class="link-btn" id="btnBackLogin">← Back to sign in</button>
+      <div class="errtxt" id="forgotMsg" style="color:#16a34a;min-height:40px"></div>
     </div>
-    <div id="resetForm" class="hidden">
-      <label>New password</label>
-      <input type="password" id="newPw1" placeholder="••••••••"/>
-      <label>Confirm password</label>
-      <input type="password" id="newPw2" placeholder="••••••••"/>
-      <button class="btn" id="resetBtn">Set new password</button>
-      <div class="err" id="resetMsg" style="color:#16a34a"></div>
+
+    <!-- Reset password form (from email link) -->
+    <div id="fReset" class="hidden">
+      <label class="lbl">New password (8+ characters)</label>
+      <input class="inp" type="password" id="iNewPw1" placeholder="New password"/>
+      <label class="lbl">Confirm new password</label>
+      <input class="inp" type="password" id="iNewPw2" placeholder="Repeat new password"/>
+      <button class="btn-full" id="btnDoReset">Set new password →</button>
+      <div class="errtxt" id="resetMsg" style="min-height:40px"></div>
     </div>
   </div>
 </div>
 
-<!-- ── APP ───────────────────────────────────────────────── -->
+<!-- MAIN APP -->
 <div id="app">
  <div class="layout">
+
+  <!-- SIDEBAR -->
   <aside class="sidebar">
-    <div class="s-logo">
-      <div class="s-logo-icon">IP</div>
-      <div>
-        <div style="font-size:14px;font-weight:800;letter-spacing:-.02em">InvoicePro</div>
-        <div style="font-size:10px;color:#b8b2a3">Super Admin</div>
-      </div>
+    <div class="s-top">
+      <div class="s-icon">IP</div>
+      <div><div style="font-size:14px;font-weight:800;letter-spacing:-.02em">InvoicePro</div><div style="font-size:10px;color:#b8b2a3">Super Admin</div></div>
     </div>
-    <div class="nav-label">Overview</div>
-    <button class="nav-item active" data-page="dashboard">📊 Dashboard</button>
-    <button class="nav-item" data-page="health">🟢 System health</button>
-    <button class="nav-item" data-page="revenue">💰 Revenue & MRR</button>
-    <button class="nav-item" data-page="churn">📉 Churn & retention</button>
-    <div class="nav-label">Users</div>
-    <button class="nav-item" data-page="users">👥 All users</button>
-    <button class="nav-item" data-page="clients">🏢 All clients</button>
-    <div class="nav-label">Transactions</div>
-    <button class="nav-item" data-page="invoices">🧾 Invoices</button>
-    <button class="nav-item" data-page="payments">💳 Payments</button>
-    <div class="nav-label">Product</div>
-    <button class="nav-item" data-page="features">🚦 Feature flags</button>
-    <button class="nav-item" data-page="plans">📋 Plans</button>
-    <button class="nav-item" data-page="announcement">📣 Announcement</button>
-    <div class="nav-label">Support</div>
-    <button class="nav-item" data-page="tickets">🎫 Tickets</button>
-    <button class="nav-item" data-page="satisfaction">⭐ Satisfaction</button>
-    <button class="nav-item" data-page="broadcast">📢 Broadcast</button>
-    <div class="nav-label">System</div>
-    <button class="nav-item" data-page="admins">🔐 Admin accounts</button>
-    <button class="nav-item" data-page="audit">📝 Audit log</button>
-    <div class="s-footer">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <div style="width:30px;height:30px;border-radius:8px;background:#1a1814;color:#a3e635;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px" id="adminAvatar">A</div>
+    <div class="nav-sec">Overview</div>
+    <button class="nv on" data-pg="dashboard">📊 Dashboard</button>
+    <button class="nv" data-pg="health">🟢 System health</button>
+    <button class="nv" data-pg="revenue">💰 Revenue & MRR</button>
+    <button class="nv" data-pg="churn">📉 Churn & retention</button>
+    <div class="nav-sec">Users</div>
+    <button class="nv" data-pg="users">👥 All users</button>
+    <button class="nv" data-pg="clients">🏢 All clients</button>
+    <div class="nav-sec">Transactions</div>
+    <button class="nv" data-pg="invoices">🧾 Invoices</button>
+    <button class="nv" data-pg="payments">💳 Payments</button>
+    <div class="nav-sec">Product</div>
+    <button class="nv" data-pg="features">🚦 Feature flags</button>
+    <button class="nv" data-pg="plans">📋 Plans</button>
+    <button class="nv" data-pg="announce">📣 Announcement</button>
+    <div class="nav-sec">Support</div>
+    <button class="nv" data-pg="tickets">🎫 Tickets</button>
+    <button class="nv" data-pg="satisfaction">⭐ Satisfaction</button>
+    <button class="nv" data-pg="broadcast">📢 Broadcast</button>
+    <div class="nav-sec">System</div>
+    <button class="nv" data-pg="admins">🔐 Admin accounts</button>
+    <button class="nv" data-pg="audit">📝 Audit log</button>
+    <div class="s-foot">
+      <div class="s-user">
+        <div class="s-av" id="sAvatar">A</div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:12.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="adminName">Admin</div>
-          <div style="font-size:10px;color:#b8b2a3" id="adminRole">super_admin</div>
+          <div style="font-size:12.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="sName">Admin</div>
+          <div style="font-size:10px;color:#b8b2a3" id="sRole">super_admin</div>
         </div>
       </div>
-      <div style="display:flex;gap:6px">
-        <button class="abtn abtn-sm" style="flex:1;justify-content:center" id="logoutBtn">Sign out</button>
-        <button class="abtn abtn-sm" id="changePwBtn" title="Change password">🔑</button>
+      <div class="foot-btns">
+        <button class="ab ab-sm" style="flex:1;justify-content:center" id="btnLogout">Sign out</button>
+        <button class="ab ab-sm" id="btnChangePw" title="Change password">🔑</button>
       </div>
     </div>
   </aside>
 
+  <!-- MAIN CONTENT -->
   <div class="main">
     <div class="topbar">
-      <div style="font-size:12px;color:#888">InvoicePro Admin Panel</div>
-      <div style="display:flex;gap:8px">
-        <span id="annBadge" class="badge b-warn hidden">📣 Announcement active</span>
-        <button class="abtn abtn-sm" id="refreshBtn">↻ Refresh</button>
+      <div style="font-size:12px;color:#999">InvoicePro Admin Panel</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="annBadge" class="bdg b-warn hidden">📣 Announcement active</span>
       </div>
     </div>
 
     <!-- DASHBOARD -->
-    <div class="page active" id="page-dashboard">
-      <div class="ph"><div><div class="pt">Dashboard</div><div class="ps" id="dashTime"></div></div></div>
-      <div class="g4" id="statsGrid"></div>
+    <div class="pg on" id="pg-dashboard">
+      <div class="ph"><div><div class="pt">Dashboard</div><div class="ps" id="dashTs">—</div></div></div>
+      <div class="g4" id="statCards"></div>
       <div class="g2">
-        <div class="bcard"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Plan breakdown</div><div id="planChart"></div></div>
-        <div class="bcard"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Quick actions</div>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <button class="abtn" onclick="navigate('users')">👥 Manage users</button>
-            <button class="abtn" onclick="navigate('churn')">📉 At-risk users</button>
-            <button class="abtn" onclick="navigate('features')">🚦 Feature flags</button>
-            <button class="abtn" onclick="navigate('announcement')">📣 Post announcement</button>
-            <button class="abtn" onclick="navigate('broadcast')">📢 Broadcast email</button>
-          </div>
-        </div>
+        <div class="bc"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Plan breakdown</div><div id="planBars"></div></div>
+        <div class="bc"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Quick actions</div><div id="quickActions"></div></div>
       </div>
+      <div class="bc"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Recent signups</div><div id="recentUsers"></div></div>
     </div>
 
     <!-- HEALTH -->
-    <div class="page" id="page-health">
-      <div class="ph"><div><div class="pt">System health</div></div><button class="abtn abtn-p" onclick="loadHealth()">↻ Refresh</button></div>
-      <div class="g3" id="healthGrid" style="margin-bottom:14px"></div>
-      <div class="bcard">
-        <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Test email</div>
+    <div class="pg" id="pg-health">
+      <div class="ph"><div><div class="pt">System health</div></div></div>
+      <div class="g3" id="healthCards"></div>
+      <div class="bc">
+        <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Test email sending</div>
         <div style="display:flex;gap:8px">
-          <input class="fi" id="testEmailTo" type="email" placeholder="Enter email to send test to..." style="flex:1"/>
-          <button class="abtn abtn-p" onclick="doTestEmail()">Send test</button>
+          <input class="fi" type="email" id="testEmailTo" placeholder="Send test to this email..." style="flex:1"/>
+          <button class="ab ab-p" id="btnTestEmail">Send test</button>
         </div>
-        <div id="testEmailResult" style="margin-top:8px"></div>
+        <div id="testEmailRes" style="margin-top:8px"></div>
       </div>
     </div>
 
     <!-- REVENUE -->
-    <div class="page" id="page-revenue">
+    <div class="pg" id="pg-revenue">
       <div class="ph"><div><div class="pt">Revenue & MRR</div></div></div>
-      <div class="g4" id="revStats"></div>
-      <div class="bcard"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Monthly revenue</div><div id="revBars" style="display:flex;align-items:flex-end;gap:6px;height:180px"></div></div>
+      <div class="g4" id="revCards"></div>
+      <div class="bc"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Monthly revenue</div><div id="revBars" style="display:flex;align-items:flex-end;gap:6px;height:180px;overflow-x:auto"></div></div>
     </div>
 
     <!-- CHURN -->
-    <div class="page" id="page-churn">
+    <div class="pg" id="pg-churn">
       <div class="ph"><div><div class="pt">Churn & Retention</div></div></div>
-      <div class="g3" id="churnStats" style="margin-bottom:14px"></div>
-      <div class="g2">
-        <div class="bcard"><div style="font-size:13px;font-weight:600;color:#dc2626;margin-bottom:12px">⚠ At-risk (paid, inactive 30d+)</div><div id="atRisk"></div></div>
-        <div class="bcard"><div style="font-size:13px;font-weight:600;color:#16a34a;margin-bottom:12px">✨ New signups (7d)</div><div id="newSigs"></div></div>
+      <div class="g3" id="churnCards"></div>
+      <div class="g2" style="margin-top:0">
+        <div class="bc"><div style="font-size:13px;font-weight:600;color:#dc2626;margin-bottom:10px">⚠ At-risk users</div><div id="atRiskList"></div></div>
+        <div class="bc"><div style="font-size:13px;font-weight:600;color:#16a34a;margin-bottom:10px">✨ New signups (7d)</div><div id="newSignupList"></div></div>
       </div>
     </div>
 
     <!-- USERS -->
-    <div class="page" id="page-users">
+    <div class="pg" id="pg-users">
       <div class="ph">
-        <div><div class="pt">Users</div><div class="ps" id="userTotal"></div></div>
+        <div><div class="pt">All users</div><div class="ps" id="userCount">—</div></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input class="fi" id="userSearch" placeholder="Search..." style="width:220px" oninput="clearTimeout(window.uSt);window.uSt=setTimeout(loadUsers,400)"/>
-          <select class="fi" id="planFilter" style="width:140px" onchange="loadUsers()">
+          <input class="fi" id="uSearch" placeholder="Search name, email..." style="width:220px"/>
+          <select class="fi" id="uPlan" style="width:140px">
             <option value="">All plans</option>
             <option value="free">Free</option><option value="starter">Starter</option>
             <option value="pro">Pro</option><option value="enterprise">Enterprise</option>
           </select>
         </div>
       </div>
-      <div class="bcard" style="padding:0;overflow:auto">
+      <div class="bc" style="padding:0"><div class="tbl-wrap">
         <table><thead><tr><th>User / Company</th><th>Plan</th><th>Email</th><th>Joined</th><th>Actions</th></tr></thead>
-        <tbody id="usersTbody"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
-      </div>
-      <div id="usersPager" style="display:flex;gap:6px;justify-content:flex-end;margin-top:10px;flex-wrap:wrap"></div>
+        <tbody id="userRows"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
+      </div></div>
+      <div id="userPager" style="display:flex;gap:6px;justify-content:flex-end;margin-top:10px;flex-wrap:wrap"></div>
     </div>
 
     <!-- CLIENTS -->
-    <div class="page" id="page-clients">
-      <div class="ph"><div><div class="pt">All clients</div><div class="ps" id="clientTotal"></div></div></div>
-      <div class="bcard" style="padding:0;overflow:auto">
+    <div class="pg" id="pg-clients">
+      <div class="ph"><div><div class="pt">All clients</div><div class="ps" id="clientCount">—</div></div></div>
+      <div class="bc" style="padding:0"><div class="tbl-wrap">
         <table><thead><tr><th>Name</th><th>Email</th><th>Owner</th><th>Currency</th></tr></thead>
-        <tbody id="clientsTbody"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
-      </div>
+        <tbody id="clientRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
+      </div></div>
     </div>
 
     <!-- INVOICES -->
-    <div class="page" id="page-invoices">
+    <div class="pg" id="pg-invoices">
       <div class="ph">
-        <div><div class="pt">All invoices</div><div class="ps" id="invTotal"></div></div>
-        <select class="fi" id="invStatus" style="width:160px" onchange="loadInvoices()">
+        <div><div class="pt">All invoices</div><div class="ps" id="invCount">—</div></div>
+        <select class="fi" id="invFilter" style="width:160px">
           <option value="">All statuses</option>
           <option value="paid">Paid</option><option value="sent">Sent</option>
           <option value="draft">Draft</option><option value="overdue">Overdue</option>
         </select>
       </div>
-      <div class="bcard" style="padding:0;overflow:auto">
-        <table><thead><tr><th>Invoice #</th><th>Owner</th><th>Amount</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
-        <tbody id="invTbody"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
-      </div>
+      <div class="bc" style="padding:0"><div class="tbl-wrap">
+        <table><thead><tr><th>Invoice #</th><th>Owner</th><th>Amount</th><th>Status</th><th>Date</th><th></th></tr></thead>
+        <tbody id="invRows"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
+      </div></div>
     </div>
 
     <!-- PAYMENTS -->
-    <div class="page" id="page-payments">
+    <div class="pg" id="pg-payments">
       <div class="ph"><div><div class="pt">All payments</div></div></div>
-      <div class="bcard" style="padding:0;overflow:auto">
+      <div class="bc" style="padding:0"><div class="tbl-wrap">
         <table><thead><tr><th>Owner</th><th>Invoice</th><th>Amount</th><th>Method</th><th>Date</th></tr></thead>
-        <tbody id="payTbody"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
-      </div>
+        <tbody id="payRows"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
+      </div></div>
     </div>
 
     <!-- FEATURES -->
-    <div class="page" id="page-features">
-      <div class="ph"><div><div class="pt">Feature flags</div><div class="ps">Toggle features platform-wide</div></div></div>
-      <div class="bcard"><div id="featureList"><div class="empty">Loading...</div></div></div>
+    <div class="pg" id="pg-features">
+      <div class="ph"><div><div class="pt">Feature flags</div><div class="ps">Toggle features on/off for all users</div></div></div>
+      <div class="bc"><div id="featureToggles"><div class="empty">Loading...</div></div></div>
     </div>
 
     <!-- PLANS -->
-    <div class="page" id="page-plans">
+    <div class="pg" id="pg-plans">
       <div class="ph"><div><div class="pt">Plans & pricing</div></div></div>
-      <div class="g4" id="plansGrid"></div>
+      <div class="g4" id="planCards"></div>
     </div>
 
     <!-- ANNOUNCEMENT -->
-    <div class="page" id="page-announcement">
-      <div class="ph"><div><div class="pt">Platform announcement</div><div class="ps">Show a banner to all app users</div></div></div>
+    <div class="pg" id="pg-announce">
+      <div class="ph"><div><div class="pt">Platform announcement</div><div class="ps">Show a banner to all users</div></div></div>
       <div class="g2">
-        <div class="bcard">
-          <div class="fg"><label>Title</label><input class="fi" id="annTitle" placeholder="e.g. Scheduled maintenance"/></div>
-          <div class="fg"><label>Message</label><textarea class="fi" id="annMsg" rows="3" placeholder="Details..."></textarea></div>
-          <div class="fg"><label>Type</label>
-            <select class="fi" id="annType"><option value="info">ℹ Info</option><option value="warning">⚠ Warning</option><option value="success">✅ Success</option></select>
-          </div>
-          <div class="fg"><label>Expires after (hours)</label><input class="fi" id="annHours" type="number" value="24"/></div>
+        <div class="bc">
+          <div class="fg"><label>Title</label><input class="fi" id="annTitle" placeholder="e.g. Scheduled maintenance tonight"/></div>
+          <div class="fg"><label>Message</label><textarea class="fi" id="annMsg" rows="3" placeholder="We'll be performing maintenance..."></textarea></div>
+          <div class="fg"><label>Type</label><select class="fi" id="annType"><option value="info">ℹ Info (blue)</option><option value="warning">⚠ Warning (amber)</option><option value="success">✅ Success (green)</option></select></div>
+          <div class="fg"><label>Expires after (hours)</label><input class="fi" id="annHours" type="number" value="24" min="1"/></div>
           <div style="display:flex;gap:8px">
-            <button class="abtn abtn-p" style="flex:1;justify-content:center" onclick="doPublishAnn()">📣 Publish</button>
-            <button class="abtn abtn-d" style="flex:1;justify-content:center" onclick="doRemoveAnn()">🗑 Remove</button>
+            <button class="ab ab-p" style="flex:1;justify-content:center" id="btnPublishAnn">📣 Publish</button>
+            <button class="ab ab-d" style="flex:1;justify-content:center" id="btnRemoveAnn">🗑 Remove</button>
           </div>
-          <div id="annResult" style="margin-top:10px"></div>
+          <div id="annFeedback" style="margin-top:10px"></div>
         </div>
-        <div class="bcard"><div style="font-size:13px;font-weight:600;margin-bottom:10px">Current</div><div id="annPreview"></div></div>
+        <div class="bc"><div style="font-size:13px;font-weight:600;margin-bottom:10px">Current announcement</div><div id="annCurrent"><div class="empty" style="padding:20px">No active announcement</div></div></div>
       </div>
     </div>
 
     <!-- TICKETS -->
-    <div class="page" id="page-tickets">
+    <div class="pg" id="pg-tickets">
       <div class="ph"><div><div class="pt">Support tickets</div></div>
-        <select class="fi" id="tickFilter" style="width:160px" onchange="loadTickets()">
-          <option value="">All</option><option value="open">Open</option><option value="resolved">Resolved</option>
-        </select>
+        <select class="fi" id="tickFilter" style="width:160px"><option value="">All</option><option value="open">Open</option><option value="resolved">Resolved</option></select>
       </div>
-      <div class="bcard" style="padding:0;overflow:auto">
-        <table><thead><tr><th>User</th><th>Subject</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
-        <tbody id="tickTbody"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
-      </div>
+      <div class="bc" style="padding:0"><div class="tbl-wrap">
+        <table><thead><tr><th>User</th><th>Subject</th><th>Status</th><th>Date</th><th></th></tr></thead>
+        <tbody id="tickRows"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
+      </div></div>
     </div>
 
     <!-- SATISFACTION -->
-    <div class="page" id="page-satisfaction">
+    <div class="pg" id="pg-satisfaction">
       <div class="ph"><div><div class="pt">Client satisfaction</div></div></div>
-      <div class="g3" id="satStats" style="margin-bottom:14px"></div>
-      <div class="bcard" style="padding:0;overflow:auto">
+      <div class="g3" id="satCards"></div>
+      <div class="bc" style="padding:0"><div class="tbl-wrap">
         <table><thead><tr><th>Business</th><th>Score</th><th>Comment</th><th>Date</th></tr></thead>
-        <tbody id="satTbody"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
-      </div>
+        <tbody id="satRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
+      </div></div>
     </div>
 
     <!-- BROADCAST -->
-    <div class="page" id="page-broadcast">
-      <div class="ph"><div><div class="pt">Broadcast email</div><div class="ps">Send email to all or filtered users</div></div></div>
+    <div class="pg" id="pg-broadcast">
+      <div class="ph"><div><div class="pt">Broadcast email</div><div class="ps">Send to all or filtered users</div></div></div>
       <div class="g2">
-        <div class="bcard">
-          <div class="fg"><label>Subject</label><input class="fi" id="bSubject" placeholder="New feature announcement"/></div>
-          <div class="fg"><label>Filter by plan (optional)</label>
-            <select class="fi" id="bPlan"><option value="">All users</option><option value="free">Free only</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select>
-          </div>
+        <div class="bc">
+          <div class="fg"><label>Subject</label><input class="fi" id="bSubj" placeholder="Subject line"/></div>
+          <div class="fg"><label>Plan filter (optional)</label><select class="fi" id="bPlan"><option value="">All users</option><option value="free">Free only</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select></div>
           <div class="fg"><label>Message</label><textarea class="fi" id="bMsg" rows="5" placeholder="Hi there..."></textarea></div>
-          <button class="abtn abtn-p" style="width:100%;justify-content:center" onclick="doBroadcast()">📢 Send broadcast</button>
-          <div id="bResult" style="margin-top:10px"></div>
+          <button class="ab ab-p" style="width:100%;justify-content:center" id="btnBroadcast">📢 Send broadcast</button>
+          <div id="broadcastRes" style="margin-top:10px"></div>
         </div>
-        <div class="bcard">
-          <div class="alert a-info">Use plan filter to target specific segments.</div>
-          <div class="alert a-warn" style="margin-top:8px">SMTP must be configured in Railway for delivery.</div>
-        </div>
+        <div class="bc"><div class="al al-info">Target specific segments with plan filter.</div><div class="al al-warn" style="margin-top:8px">SMTP must be set in Railway for delivery.</div></div>
       </div>
     </div>
 
     <!-- ADMINS -->
-    <div class="page" id="page-admins">
-      <div class="ph"><div><div class="pt">Admin accounts</div></div>
-        <button class="abtn abtn-p" onclick="document.getElementById('addAdminModal').classList.add('show')">+ Add admin</button>
-      </div>
-      <div class="bcard" style="padding:0;overflow:auto">
-        <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Last login</th><th>Status</th><th>Action</th></tr></thead>
-        <tbody id="adminsTbody"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
-      </div>
+    <div class="pg" id="pg-admins">
+      <div class="ph"><div><div class="pt">Admin accounts</div></div><button class="ab ab-p" id="btnAddAdmin">+ Add admin</button></div>
+      <div class="bc" style="padding:0"><div class="tbl-wrap">
+        <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Last login</th><th>Status</th><th></th></tr></thead>
+        <tbody id="adminRows"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
+      </div></div>
     </div>
 
     <!-- AUDIT -->
-    <div class="page" id="page-audit">
+    <div class="pg" id="pg-audit">
       <div class="ph"><div><div class="pt">Audit log</div></div></div>
-      <div class="bcard" style="padding:0;overflow:auto">
+      <div class="bc" style="padding:0"><div class="tbl-wrap">
         <table><thead><tr><th>Admin</th><th>Action</th><th>Entity</th><th>Time</th></tr></thead>
-        <tbody id="auditTbody"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
-      </div>
+        <tbody id="auditRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
+      </div></div>
     </div>
 
-  </div><!-- end main -->
- </div><!-- end layout -->
-</div><!-- end app -->
+  </div><!-- /main -->
+ </div><!-- /layout -->
+</div><!-- /app -->
 
-<!-- Change Password Modal -->
-<div class="modal-bg" id="changePwModal">
-  <div class="modal-box" style="max-width:420px">
-    <div class="modal-hdr"><span style="font-size:16px;font-weight:700">🔑 Change password</span><button class="abtn abtn-sm" onclick="document.getElementById('changePwModal').classList.remove('show')">✕</button></div>
-    <div class="modal-body">
-      <div class="fg"><label>Current password</label><input class="fi" type="password" id="cpCurrent"/></div>
-      <div class="fg"><label>New password (8+ chars)</label><input class="fi" type="password" id="cpNew"/></div>
-      <div class="fg"><label>Confirm new password</label><input class="fi" type="password" id="cpConfirm"/></div>
+<!-- MODALS -->
+<div class="mo-bg" id="mChangePw">
+  <div class="mo-box" style="max-width:420px">
+    <div class="mo-hdr"><h3>🔑 Change password</h3><button class="ab ab-sm" id="btnClosePwMo">✕ Close</button></div>
+    <div class="mo-body">
+      <div class="fg"><label>Current password</label><input class="fi" type="password" id="cpCur" placeholder="Current password"/></div>
+      <div class="fg"><label>New password (8+ chars)</label><input class="fi" type="password" id="cpNew" placeholder="New password"/></div>
+      <div class="fg"><label>Confirm new password</label><input class="fi" type="password" id="cpCon" placeholder="Repeat new password"/></div>
       <div id="cpMsg"></div>
     </div>
-    <div class="modal-ftr">
-      <button class="abtn" onclick="document.getElementById('changePwModal').classList.remove('show')">Cancel</button>
-      <button class="abtn abtn-p" onclick="doChangePw()">Update password</button>
+    <div class="mo-ftr">
+      <button class="ab" id="btnCancelPw">Cancel</button>
+      <button class="ab ab-p" id="btnSavePw">Update password</button>
     </div>
   </div>
 </div>
 
-<!-- Add Admin Modal -->
-<div class="modal-bg" id="addAdminModal">
-  <div class="modal-box" style="max-width:440px">
-    <div class="modal-hdr"><span style="font-size:16px;font-weight:700">Add admin</span><button class="abtn abtn-sm" onclick="document.getElementById('addAdminModal').classList.remove('show')">✕</button></div>
-    <div class="modal-body">
-      <div class="fg"><label>Full name</label><input class="fi" id="newAdminName" placeholder="Support Agent"/></div>
-      <div class="fg"><label>Email</label><input class="fi" type="email" id="newAdminEmail"/></div>
-      <div class="fg"><label>Password</label><input class="fi" type="password" id="newAdminPw"/></div>
-      <div class="fg"><label>Role</label>
-        <select class="fi" id="newAdminRole">
-          <option value="support">Support (read-only)</option>
-          <option value="admin">Admin (full access)</option>
-          <option value="super_admin">Super Admin</option>
-        </select>
-      </div>
-      <div id="addAdminMsg"></div>
+<div class="mo-bg" id="mAddAdmin">
+  <div class="mo-box" style="max-width:440px">
+    <div class="mo-hdr"><h3>Add admin account</h3><button class="ab ab-sm" id="btnCloseAddAdmin">✕ Close</button></div>
+    <div class="mo-body">
+      <div class="fg"><label>Full name</label><input class="fi" id="naName" placeholder="Support Agent"/></div>
+      <div class="fg"><label>Email</label><input class="fi" type="email" id="naEmail" placeholder="support@example.com"/></div>
+      <div class="fg"><label>Password (8+ chars)</label><input class="fi" type="password" id="naPw" placeholder="••••••••"/></div>
+      <div class="fg"><label>Role</label><select class="fi" id="naRole"><option value="support">Support (read-only)</option><option value="admin">Admin (full access)</option><option value="super_admin">Super Admin</option></select></div>
+      <div id="naMsg"></div>
     </div>
-    <div class="modal-ftr">
-      <button class="abtn" onclick="document.getElementById('addAdminModal').classList.remove('show')">Cancel</button>
-      <button class="abtn abtn-p" onclick="doAddAdmin()">Create admin</button>
+    <div class="mo-ftr">
+      <button class="ab" id="btnCancelAddAdmin">Cancel</button>
+      <button class="ab ab-p" id="btnSaveAdmin">Create admin</button>
     </div>
   </div>
 </div>
 
-<!-- Ticket Reply Modal -->
-<div class="modal-bg" id="tickModal">
-  <div class="modal-box" style="max-width:500px">
-    <div class="modal-hdr"><span style="font-size:16px;font-weight:700">Reply to ticket</span><button class="abtn abtn-sm" onclick="document.getElementById('tickModal').classList.remove('show')">✕</button></div>
-    <div class="modal-body">
-      <div id="tickContent" style="background:#f8f7f4;padding:12px;border-radius:8px;margin-bottom:14px;font-size:13px;line-height:1.6"></div>
-      <div class="fg"><label>Your reply</label><textarea class="fi" id="tickReply" rows="4"></textarea></div>
-      <div class="fg"><label>Status</label><select class="fi" id="tickStat"><option value="resolved">Resolved</option><option value="open">Keep open</option></select></div>
+<div class="mo-bg" id="mTicket">
+  <div class="mo-box" style="max-width:500px">
+    <div class="mo-hdr"><h3>Reply to ticket</h3><button class="ab ab-sm" id="btnCloseTicket">✕ Close</button></div>
+    <div class="mo-body">
+      <div id="ticketContent" style="background:#f8f7f4;padding:12px;border-radius:8px;margin-bottom:14px;font-size:13px;line-height:1.6"></div>
+      <div class="fg"><label>Your reply</label><textarea class="fi" id="tickReply" rows="4" placeholder="Type your response..."></textarea></div>
+      <div class="fg"><label>Update status</label><select class="fi" id="tickStat"><option value="resolved">Mark resolved</option><option value="open">Keep open</option></select></div>
     </div>
-    <div class="modal-ftr">
-      <button class="abtn" onclick="document.getElementById('tickModal').classList.remove('show')">Cancel</button>
-      <button class="abtn abtn-p" onclick="doReplyTicket()">Send reply</button>
+    <div class="mo-ftr">
+      <button class="ab" id="btnCancelTicket">Cancel</button>
+      <button class="ab ab-p" id="btnSendTicket">Send reply</button>
     </div>
   </div>
 </div>
 
 <script>
-// ── CONFIG ────────────────────────────────────────────────
-const API = '/api'
-let authToken = null
-let currentTicketId = null
-let usersPage = 1
-let invPage = 1
+var API = '/api';
+var tok = null;
+var curTicketId = null;
+var uPage = 1;
+var iPage = 1;
 
-// ── HELPERS ───────────────────────────────────────────────
-function el(id) { return document.getElementById(id) }
-function fmtMoney(n) { return '£' + (+n||0).toLocaleString('en-GB', {minimumFractionDigits:2, maximumFractionDigits:2}) }
-function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) : '—' }
-function fmtTime(d) { return d ? new Date(d).toLocaleString('en-GB', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}) : '—' }
-function badge(cls, text) { return '<span class="badge b-' + cls + '">' + text + '</span>' }
-function planBadge(p) { return badge(p||'free', p||'free') }
-function statusBadge(s) { return badge(s||'draft', s||'—') }
-function starsStr(n) { return '★'.repeat(n) + '☆'.repeat(5-n) }
+function q(id) { return document.getElementById(id); }
+function money(n) { return '£' + (+(n)||0).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function dDate(d) { return d ? new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'; }
+function dTime(d) { return d ? new Date(d).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—'; }
+function badge(cls,txt) { return '<span class="bdg b-'+cls+'">'+txt+'</span>'; }
+function pBadge(p) { return badge(p||'free', p||'free'); }
+function sBadge(s) { return badge(s||'draft', s||'draft'); }
 
-async function api(path, opts) {
-  opts = opts || {}
-  var headers = { 'Content-Type': 'application/json' }
-  if (authToken) headers['Authorization'] = 'Bearer ' + authToken
-  var res = await fetch(API + path, Object.assign({}, opts, { headers: Object.assign(headers, opts.headers || {}) }))
-  var data = await res.json()
-  if (!res.ok) throw new Error(data.error || 'Request failed')
-  return data
+function request(path, opts) {
+  opts = opts || {};
+  var hdrs = {'Content-Type':'application/json'};
+  if (tok) hdrs['Authorization'] = 'Bearer ' + tok;
+  if (opts.headers) Object.assign(hdrs, opts.headers);
+  return fetch(API + path, Object.assign({}, opts, {headers: hdrs}))
+    .then(function(r) {
+      return r.json().then(function(data) {
+        if (!r.ok) throw new Error(data.error || 'Request failed ('+r.status+')');
+        return data;
+      });
+    });
 }
 
+function showErr(elId, msg) { var el = q(elId); if(el) el.innerHTML = '<div class="al al-err">'+msg+'</div>'; }
+function showOk(elId, msg) { var el = q(elId); if(el) el.innerHTML = '<div class="al al-ok">✅ '+msg+'</div>'; }
+function openMo(id) { var el = q(id); if(el) el.classList.add('show'); }
+function closeMo(id) { var el = q(id); if(el) el.classList.remove('show'); }
+
 // ── NAVIGATION ────────────────────────────────────────────
-function navigate(page) {
-  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active') })
-  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active') })
-  var pageEl = el('page-' + page)
-  if (pageEl) pageEl.classList.add('active')
-  document.querySelectorAll('.nav-item').forEach(function(n) {
-    if (n.dataset.page === page) n.classList.add('active')
-  })
-  var loaders = {
-    dashboard: loadDashboard, health: loadHealth, revenue: loadRevenue,
-    churn: loadChurn, users: loadUsers, clients: loadClients,
-    invoices: loadInvoices, payments: loadPayments, features: loadFeatures,
-    plans: loadPlans, announcement: loadAnnouncement, tickets: loadTickets,
-    satisfaction: loadSatisfaction, admins: loadAdmins, audit: loadAudit
-  }
-  if (loaders[page]) loaders[page]()
+function goPage(page) {
+  document.querySelectorAll('.pg').forEach(function(p){ p.classList.remove('on'); });
+  document.querySelectorAll('.nv').forEach(function(n){ n.classList.remove('on'); });
+  var pg = q('pg-'+page);
+  if (pg) pg.classList.add('on');
+  document.querySelectorAll('.nv[data-pg="'+page+'"]').forEach(function(n){ n.classList.add('on'); });
+  var fn = {dashboard:loadDash, health:loadHealth, revenue:loadRev, churn:loadChurn,
+    users:loadUsers, clients:loadClients, invoices:loadInv, payments:loadPay,
+    features:loadFeatures, plans:loadPlans, announce:loadAnnounce, tickets:loadTickets,
+    satisfaction:loadSat, broadcast:function(){}, admins:loadAdmins, audit:loadAudit};
+  if (fn[page]) fn[page]();
 }
 
 // ── AUTH ─────────────────────────────────────────────────
-function showApp(adminObj) {
-  el('loginPage').style.display = 'none'
-  el('app').style.display = 'block'
-  el('adminName').textContent = adminObj.full_name || adminObj.email
-  el('adminRole').textContent = adminObj.role
-  el('adminAvatar').textContent = (adminObj.full_name || adminObj.email)[0].toUpperCase()
-  loadDashboard()
+function showApp(admin) {
+  q('loginPage').style.display = 'none';
+  q('app').style.display = 'block';
+  q('sName').textContent = admin.full_name || admin.email;
+  q('sRole').textContent = admin.role;
+  q('sAvatar').textContent = (admin.full_name || admin.email)[0].toUpperCase();
+  tok = admin._tok || tok;
+  loadDash();
 }
 
-async function doLogin() {
-  var email = el('loginEmail').value.trim()
-  var password = el('loginPassword').value
-  var errEl = el('loginErr')
-  var btn = el('loginBtn')
-
-  errEl.textContent = ''
-  if (!email || !password) { errEl.textContent = 'Enter email and password'; return }
-
-  btn.disabled = true
-  btn.textContent = 'Signing in...'
-
-  try {
-    var data = await api('/admin/login', { method: 'POST', body: JSON.stringify({ email: email, password: password }) })
-    authToken = data.token
-    localStorage.setItem('ipAdminToken', authToken)
-    showApp(data.admin)
-  } catch(e) {
-    errEl.textContent = e.message || 'Invalid email or password'
-    btn.disabled = false
-    btn.textContent = 'Sign in →'
-  }
+function doLogin() {
+  var email = q('iEmail').value.trim();
+  var pw = q('iPw').value;
+  var btn = q('btnLogin');
+  q('loginErr').textContent = '';
+  if (!email || !pw) { q('loginErr').textContent = 'Enter email and password'; return; }
+  btn.disabled = true; btn.textContent = 'Signing in...';
+  request('/admin/login', {method:'POST', body:JSON.stringify({email:email, password:pw})})
+    .then(function(d) {
+      tok = d.token;
+      localStorage.setItem('ipat', tok);
+      d.admin._tok = tok;
+      showApp(d.admin);
+    })
+    .catch(function(e) {
+      q('loginErr').textContent = e.message || 'Invalid email or password';
+      btn.disabled = false; btn.textContent = 'Sign in →';
+    });
 }
 
 function doLogout() {
-  authToken = null
-  localStorage.removeItem('ipAdminToken')
-  location.reload()
+  tok = null; localStorage.removeItem('ipat'); location.reload();
 }
 
-function showForgotForm() {
-  el('loginForm').classList.add('hidden')
-  el('forgotForm').classList.remove('hidden')
+function doForgot() {
+  var email = q('iForgotEmail').value.trim();
+  var msg = q('forgotMsg');
+  if (!email) { msg.style.color='#dc2626'; msg.textContent='Enter your email'; return; }
+  msg.style.color='#888'; msg.textContent='Sending...';
+  request('/admin/forgot-password', {method:'POST', body:JSON.stringify({email:email})})
+    .then(function(d) {
+      if (d.dev_reset_url) {
+        msg.style.color='#1d4ed8';
+        msg.innerHTML = '✅ Reset link generated!<br><br><a href="'+d.dev_reset_url+'" target="_blank" style="color:#1d4ed8;font-weight:600;font-size:12px;word-break:break-all">'+d.dev_reset_url+'</a>';
+      } else {
+        msg.style.color='#16a34a'; msg.textContent='✅ '+d.message;
+      }
+    })
+    .catch(function(e) { msg.style.color='#dc2626'; msg.textContent=e.message; });
 }
 
-function showLoginForm() {
-  el('forgotForm').classList.add('hidden')
-  el('resetForm').classList.add('hidden')
-  el('loginForm').classList.remove('hidden')
+function doResetPw() {
+  var pw1 = q('iNewPw1').value, pw2 = q('iNewPw2').value;
+  var msg = q('resetMsg');
+  var hash = window.location.hash;
+  var token = hash.split('reset=')[1];
+  if (!token) { msg.style.color='#dc2626'; msg.textContent='Invalid reset link'; return; }
+  if (pw1 !== pw2) { msg.style.color='#dc2626'; msg.textContent='Passwords do not match'; return; }
+  if (pw1.length < 8) { msg.style.color='#dc2626'; msg.textContent='8+ characters required'; return; }
+  request('/admin/reset-password/'+token, {method:'POST', body:JSON.stringify({password:pw1})})
+    .then(function(d) {
+      msg.style.color='#16a34a'; msg.textContent='✅ '+d.message;
+      setTimeout(function(){ window.history.replaceState(null,'',window.location.pathname); location.reload(); }, 2000);
+    })
+    .catch(function(e){ msg.style.color='#dc2626'; msg.textContent=e.message; });
 }
 
-async function doForgotPassword() {
-  var email = el('forgotEmail').value.trim()
-  var msgEl = el('forgotMsg')
-  if (!email) { msgEl.style.color = '#dc2626'; msgEl.textContent = 'Enter your email'; return }
-  msgEl.style.color = '#888'; msgEl.textContent = 'Sending...'
-  try {
-    var data = await api('/admin/forgot-password', { method: 'POST', body: JSON.stringify({ email: email }) })
-    if (data.dev_reset_url) {
-      msgEl.style.color = '#1d4ed8'
-      msgEl.innerHTML = 'Reset link: <a href="' + data.dev_reset_url + '" target="_blank" style="color:#1d4ed8;font-weight:600">Click here to reset</a>'
-    } else {
-      msgEl.style.color = '#16a34a'
-      msgEl.textContent = data.message
-    }
-  } catch(e) { msgEl.style.color = '#dc2626'; msgEl.textContent = e.message }
-}
-
-async function doResetPassword() {
-  var pw1 = el('newPw1').value
-  var pw2 = el('newPw2').value
-  var msgEl = el('resetMsg')
-  var hash = window.location.hash
-  var token = hash.split('reset=')[1]
-  if (!token) { msgEl.style.color = '#dc2626'; msgEl.textContent = 'Invalid reset link'; return }
-  if (pw1 !== pw2) { msgEl.style.color = '#dc2626'; msgEl.textContent = 'Passwords do not match'; return }
-  if (pw1.length < 8) { msgEl.style.color = '#dc2626'; msgEl.textContent = '8+ characters required'; return }
-  try {
-    var data = await api('/admin/reset-password/' + token, { method: 'POST', body: JSON.stringify({ password: pw1 }) })
-    msgEl.style.color = '#16a34a'; msgEl.textContent = data.message + ' Redirecting to login...'
-    setTimeout(function() { window.history.replaceState(null, '', window.location.pathname); showLoginForm() }, 2000)
-  } catch(e) { msgEl.style.color = '#dc2626'; msgEl.textContent = e.message }
-}
-
-async function doChangePw() {
-  var current = el('cpCurrent').value
-  var next = el('cpNew').value
-  var confirm = el('cpConfirm').value
-  var msgEl = el('cpMsg')
-  if (!current || !next || !confirm) { msgEl.innerHTML = '<div class="alert a-err">Fill all fields</div>'; return }
-  if (next !== confirm) { msgEl.innerHTML = '<div class="alert a-err">Passwords do not match</div>'; return }
-  if (next.length < 8) { msgEl.innerHTML = '<div class="alert a-err">8+ characters required</div>'; return }
-  try {
-    var data = await api('/admin/change-password', { method: 'PUT', body: JSON.stringify({ current_password: current, new_password: next }) })
-    msgEl.innerHTML = '<div class="alert a-ok">✅ ' + data.message + '</div>'
-    el('cpCurrent').value = ''; el('cpNew').value = ''; el('cpConfirm').value = ''
-    setTimeout(function() { el('changePwModal').classList.remove('show') }, 1500)
-  } catch(e) { msgEl.innerHTML = '<div class="alert a-err">' + e.message + '</div>' }
+function doChangePw() {
+  var cur = q('cpCur').value, nxt = q('cpNew').value, con = q('cpCon').value;
+  var msg = q('cpMsg');
+  msg.innerHTML = '';
+  if (!cur||!nxt||!con) { showErr('cpMsg','Fill all fields'); return; }
+  if (nxt !== con) { showErr('cpMsg','Passwords do not match'); return; }
+  if (nxt.length < 8) { showErr('cpMsg','8+ characters required'); return; }
+  request('/admin/change-password', {method:'PUT', body:JSON.stringify({current_password:cur, new_password:nxt})})
+    .then(function(d) {
+      showOk('cpMsg', d.message);
+      q('cpCur').value=''; q('cpNew').value=''; q('cpCon').value='';
+      setTimeout(function(){ closeMo('mChangePw'); }, 1800);
+    })
+    .catch(function(e){ showErr('cpMsg', e.message); });
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────
-async function loadDashboard() {
-  el('dashTime').textContent = 'Updated ' + fmtTime(new Date())
-  try {
-    var d = await api('/admin/stats')
-    var plans = d.plan_breakdown || {}
-    el('statsGrid').innerHTML = [
-      { l: 'Total users', v: d.total_users || 0, s: '+' + (d.new_users_30d||0) + ' this month' },
-      { l: 'MRR', v: fmtMoney(d.mrr), s: 'ARR: ' + fmtMoney(d.arr), c: '#16a34a' },
-      { l: 'Total revenue', v: fmtMoney(d.total_revenue), s: (d.total_invoices||0) + ' invoices' },
-      { l: 'Overdue', v: d.overdue_invoices || 0, s: 'invoices', c: d.overdue_invoices > 0 ? '#dc2626' : null },
-    ].map(function(s) {
-      return '<div class="kcard"><div class="kl">' + s.l + '</div><div class="kv"' + (s.c ? ' style="color:' + s.c + '"' : '') + '>' + s.v + '</div><div class="ks">' + s.s + '</div></div>'
-    }).join('')
+function loadDash() {
+  q('dashTs').textContent = 'Updated '+dTime(new Date());
+  request('/admin/stats')
+    .then(function(d) {
+      var pb = d.plan_breakdown || {};
+      q('statCards').innerHTML = [
+        {l:'Total users', v:d.total_users||0, s:'+'+((d.new_users_30d||0))+' this month'},
+        {l:'MRR', v:money(d.mrr), s:'ARR: '+money(d.arr), c:'#16a34a'},
+        {l:'Total revenue', v:money(d.total_revenue), s:(d.total_invoices||0)+' invoices total'},
+        {l:'Overdue invoices', v:d.overdue_invoices||0, s:'Need attention', c:(d.overdue_invoices>0?'#dc2626':null)},
+      ].map(function(s){ return '<div class="kc"><div class="kl">'+s.l+'</div><div class="kv"'+(s.c?' style="color:'+s.c+'"':'')+'>'+s.v+'</div><div class="ks">'+s.s+'</div></div>'; }).join('');
 
-    var total = Object.values(plans).reduce(function(a, b) { return a + b }, 0) || 1
-    var pColors = { free: '#b8b2a3', starter: '#1d4ed8', pro: '#7c3aed', enterprise: '#b45309' }
-    el('planChart').innerHTML = Object.entries(plans).map(function(entry) {
-      var plan = entry[0], count = entry[1]
-      var pct = Math.round(count / total * 100)
-      return '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>' + planBadge(plan) + '</span><span style="font-weight:600">' + count + ' (' + pct + '%)</span></div><div style="height:5px;background:#e8e5de;border-radius:3px;overflow:hidden"><div style="height:100%;border-radius:3px;width:' + pct + '%;background:' + (pColors[plan]||'#888') + '"></div></div></div>'
-    }).join('')
-  } catch(e) { el('statsGrid').innerHTML = '<div class="alert a-err" style="grid-column:1/-1">Failed: ' + e.message + '</div>' }
+      var total = Object.values(pb).reduce(function(a,b){return a+b;},0)||1;
+      var pc = {free:'#b8b2a3',starter:'#1d4ed8',pro:'#7c3aed',enterprise:'#b45309'};
+      q('planBars').innerHTML = Object.entries(pb).map(function(e){
+        var pct = Math.round(e[1]/total*100);
+        return '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">'+pBadge(e[0])+'<span style="font-weight:600">'+e[1]+' ('+pct+'%)</span></div><div style="height:5px;background:#e8e5de;border-radius:3px;overflow:hidden"><div style="height:100%;border-radius:3px;width:'+pct+'%;background:'+(pc[e[0]]||'#888')+'"></div></div></div>';
+      }).join('');
+
+      q('quickActions').innerHTML = ['users','churn','features','announce','broadcast'].map(function(p){
+        var labels={users:'👥 Manage users',churn:'📉 At-risk users',features:'🚦 Feature flags',announce:'📣 Announcement',broadcast:'📢 Broadcast'};
+        return '<button class="ab" style="width:100%;margin-bottom:6px;justify-content:flex-start" onclick="goPage(\''+p+'\')">'+labels[p]+'</button>';
+      }).join('');
+    })
+    .catch(function(e){ q('statCards').innerHTML='<div class="al al-err" style="grid-column:1/-1">Error: '+e.message+'</div>'; });
+
+  // Recent users
+  request('/admin/users?page=1&limit=5')
+    .then(function(d){
+      q('recentUsers').innerHTML=(d.data||[]).map(function(u){
+        return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #e8e5de"><div style="flex:1;min-width:0"><div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(u.company_name||u.full_name||'—')+'</div><div style="font-size:11px;color:#888">'+u.email+'</div></div>'+pBadge(u.plan)+'<div style="font-size:11px;color:#888">'+dDate(u.created_at)+'</div></div>';
+      }).join('')||'<div class="empty">No users yet</div>';
+    }).catch(function(){});
 }
 
 // ── HEALTH ────────────────────────────────────────────────
-async function loadHealth() {
-  try {
-    var d = await api('/admin/health')
-    var checks = d.checks || {}
-    el('healthGrid').innerHTML = [
-      { l: 'Database', ok: !checks.database?.error, detail: checks.database?.error || (checks.database?.latency + 'ms') },
-      { l: 'Email / SMTP', ok: checks.smtp_configured, detail: checks.smtp_configured ? 'Configured' : 'Not set — emails disabled' },
-      { l: 'Stripe', ok: checks.stripe_configured, detail: checks.stripe_configured ? 'Configured' : 'Not set — payments disabled' },
-      { l: 'AI Assistant', ok: checks.ai_configured, detail: checks.ai_configured ? 'Configured' : 'No Anthropic key' },
-      { l: 'Twilio SMS', ok: checks.twilio_configured, detail: checks.twilio_configured ? 'Configured' : 'Not set' },
-      { l: 'API Server', ok: true, detail: 'Running · ' + fmtTime(d.timestamp) },
-    ].map(function(h) {
-      var dotCls = h.ok ? 'dot-ok' : 'dot-warn'
-      var badgeCls = h.ok ? 'b-ok' : 'b-warn'
-      return '<div class="kcard"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span class="status-dot ' + dotCls + '"></span><span style="font-weight:600;font-size:13px">' + h.l + '</span><span class="badge ' + badgeCls + '" style="margin-left:auto">' + (h.ok ? 'OK' : 'Not set') + '</span></div><div style="font-size:12px;color:#888">' + h.detail + '</div></div>'
-    }).join('')
-  } catch(e) { el('healthGrid').innerHTML = '<div class="alert a-err" style="grid-column:1/-1">Failed: ' + e.message + '</div>' }
-}
-
-async function doTestEmail() {
-  var to = el('testEmailTo').value.trim()
-  var res = el('testEmailResult')
-  if (!to) { res.innerHTML = '<div class="alert a-err">Enter email address</div>'; return }
-  res.innerHTML = '<div class="alert a-info">Sending...</div>'
-  try {
-    var d = await api('/admin/test-email', { method: 'POST', body: JSON.stringify({ to: to }) })
-    res.innerHTML = '<div class="alert a-ok">✅ ' + d.message + '</div>'
-  } catch(e) { res.innerHTML = '<div class="alert a-err">❌ ' + e.message + '</div>' }
+function loadHealth() {
+  request('/admin/health')
+    .then(function(d){
+      var c = d.checks||{};
+      q('healthCards').innerHTML = [
+        {l:'Database',      ok:!c.database?.error,     txt:c.database?.error||((c.database?.latency||0)+'ms latency')},
+        {l:'Email / SMTP',  ok:c.smtp_configured,      txt:c.smtp_configured?'Configured':'Not configured — emails disabled'},
+        {l:'Stripe',        ok:c.stripe_configured,    txt:c.stripe_configured?'Configured':'Not configured'},
+        {l:'AI Assistant',  ok:c.ai_configured,        txt:c.ai_configured?'Configured':'No Anthropic key'},
+        {l:'Twilio SMS',    ok:c.twilio_configured,    txt:c.twilio_configured?'Configured':'Not configured'},
+        {l:'API Server',    ok:true,                   txt:'Running · '+dTime(d.timestamp)},
+      ].map(function(h){
+        return '<div class="kc"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span class="dot '+(h.ok?'dot-ok':'dot-warn')+'"></span><strong style="font-size:13px">'+h.l+'</strong><span class="bdg b-'+(h.ok?'ok':'warn')+'" style="margin-left:auto">'+(h.ok?'OK':'Not set')+'</span></div><div style="font-size:12px;color:#888">'+h.txt+'</div></div>';
+      }).join('');
+    }).catch(function(e){ q('healthCards').innerHTML='<div class="al al-err" style="grid-column:1/-1">Failed: '+e.message+'</div>'; });
 }
 
 // ── REVENUE ───────────────────────────────────────────────
-async function loadRevenue() {
-  try {
-    var rev = await api('/admin/revenue')
-    var stats = await api('/admin/stats')
-    el('revStats').innerHTML = [
-      { l: 'Total processed', v: fmtMoney(rev.total_processed) },
-      { l: 'MRR', v: fmtMoney(stats.mrr), c: '#16a34a' },
-      { l: 'ARR', v: fmtMoney(stats.arr) },
-      { l: 'Revenue (30d)', v: fmtMoney(stats.revenue_30d) },
-    ].map(function(s) { return '<div class="kcard"><div class="kl">' + s.l + '</div><div class="kv"' + (s.c ? ' style="color:' + s.c + '"' : '') + '>' + s.v + '</div></div>' }).join('')
-
-    var months = Object.entries(rev.monthly_revenue || {}).sort().slice(-12)
-    var maxV = Math.max.apply(null, months.map(function(m) { return m[1] })) || 1
-    el('revBars').innerHTML = months.map(function(m) {
-      var pct = Math.max(4, m[1] / maxV * 160)
-      return '<div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:4px"><div style="font-size:10px;color:#888">' + fmtMoney(m[1]).split('.')[0] + '</div><div style="width:100%;background:#1a1814;border-radius:4px 4px 0 0;height:' + pct + 'px"></div><div style="font-size:10px;color:#888;white-space:nowrap">' + m[0].slice(5) + '</div></div>'
-    }).join('')
-  } catch(e) {}
+function loadRev() {
+  Promise.all([request('/admin/revenue'), request('/admin/stats')])
+    .then(function(res){
+      var rev=res[0], s=res[1];
+      q('revCards').innerHTML=[
+        {l:'Total processed',v:money(rev.total_processed)},
+        {l:'MRR',v:money(s.mrr),c:'#16a34a'},
+        {l:'ARR',v:money(s.arr)},
+        {l:'Revenue 30d',v:money(s.revenue_30d)},
+      ].map(function(x){ return '<div class="kc"><div class="kl">'+x.l+'</div><div class="kv"'+(x.c?' style="color:'+x.c+'"':'')+'>'+x.v+'</div></div>'; }).join('');
+      var months=Object.entries(rev.monthly_revenue||{}).sort().slice(-12);
+      var maxV=Math.max.apply(null,[1].concat(months.map(function(m){return m[1];})));
+      q('revBars').innerHTML=months.map(function(m){
+        var h=Math.max(4,m[1]/maxV*160);
+        return '<div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:36px;gap:4px"><div style="font-size:10px;color:#888">'+money(m[1]).split('.')[0]+'</div><div style="width:100%;background:#1a1814;border-radius:3px 3px 0 0;height:'+h+'px"></div><div style="font-size:10px;color:#888;white-space:nowrap">'+m[0].slice(5)+'</div></div>';
+      }).join('');
+    }).catch(function(){});
 }
 
-// ── CHURN ────────────────────────────────────────────────
-async function loadChurn() {
-  try {
-    var d = await api('/admin/churn')
-    var at = d.at_risk || []
-    var sigs = d.new_signups_7d || []
-    el('churnStats').innerHTML = [
-      { l: 'At-risk users', v: at.length, c: at.length > 0 ? '#dc2626' : '#16a34a' },
-      { l: 'New signups (7d)', v: sigs.length, c: '#16a34a' },
-      { l: 'Est. churn rate', v: (d.churn_rate || 0) + '%' },
-    ].map(function(s) { return '<div class="kcard"><div class="kl">' + s.l + '</div><div class="kv" style="color:' + (s.c||'inherit') + '">' + s.v + '</div></div>' }).join('')
-
-    function userRow(u) {
-      return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #e8e5de"><div style="flex:1;min-width:0"><div style="font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (u.company_name||u.full_name||'—') + '</div><div style="font-size:11px;color:#888">' + u.email + '</div></div>' + planBadge(u.plan) + '</div>'
-    }
-    el('atRisk').innerHTML = at.length ? at.map(userRow).join('') : '<div class="empty" style="padding:20px">No at-risk users 🎉</div>'
-    el('newSigs').innerHTML = sigs.length ? sigs.map(userRow).join('') : '<div class="empty" style="padding:20px">No new signups</div>'
-  } catch(e) {}
+// ── CHURN ─────────────────────────────────────────────────
+function loadChurn() {
+  request('/admin/churn')
+    .then(function(d){
+      var at=d.at_risk||[], ns=d.new_signups_7d||[];
+      q('churnCards').innerHTML=[
+        {l:'At-risk users',v:at.length,c:at.length>0?'#dc2626':'#16a34a'},
+        {l:'New signups (7d)',v:ns.length,c:'#16a34a'},
+        {l:'Est. churn rate',v:(d.churn_rate||0)+'%'},
+      ].map(function(x){ return '<div class="kc"><div class="kl">'+x.l+'</div><div class="kv"'+(x.c?' style="color:'+x.c+'"':'')+'>'+x.v+'</div></div>'; }).join('');
+      function uRow(u){ return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #e8e5de"><div style="flex:1;min-width:0"><div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(u.company_name||u.full_name||'—')+'</div><div style="font-size:11px;color:#888">'+u.email+'</div></div>'+pBadge(u.plan)+'</div>'; }
+      q('atRiskList').innerHTML=at.length?at.map(uRow).join(''):'<div class="empty" style="padding:20px">No at-risk users 🎉</div>';
+      q('newSignupList').innerHTML=ns.length?ns.map(uRow).join(''):'<div class="empty" style="padding:20px">No new signups</div>';
+    }).catch(function(){});
 }
 
 // ── USERS ─────────────────────────────────────────────────
-async function loadUsers() {
-  var search = el('userSearch').value
-  var plan = el('planFilter').value
-  try {
-    var d = await api('/admin/users?search=' + encodeURIComponent(search) + '&plan=' + plan + '&page=' + usersPage + '&limit=25')
-    el('userTotal').textContent = (d.total || 0) + ' users'
-    el('usersTbody').innerHTML = (d.data || []).map(function(u) {
-      return '<tr><td><div style="font-weight:500">' + (u.company_name||u.full_name||'—') + '</div><div style="font-size:11px;color:#888">' + (u.full_name||'') + '</div></td><td>' + planBadge(u.plan) + '</td><td style="color:#1d4ed8;font-size:12px">' + (u.email||'—') + '</td><td style="font-size:11px;color:#888">' + fmtDate(u.created_at) + '</td><td><div style="display:flex;gap:4px"><button class="abtn abtn-sm" onclick="doChangePlan(\'' + u.id + '\',\'' + (u.plan||'free') + '\')">Plan</button><button class="abtn abtn-sm" onclick="doExtendTrial(\'' + u.id + '\')">Trial+</button><button class="abtn abtn-sm abtn-d" onclick="doSuspend(\'' + u.id + '\')">Suspend</button></div></td></tr>'
-    }).join('') || '<tr><td colspan="5" class="empty">No users found</td></tr>'
-
-    var pages = Math.ceil((d.total||0) / 25)
-    if (pages > 1) {
-      var html = ''
-      for (var i = 1; i <= Math.min(pages, 10); i++) {
-        html += '<button class="abtn abtn-sm' + (i === usersPage ? ' abtn-p' : '') + '" onclick="usersPage=' + i + ';loadUsers()">' + i + '</button>'
-      }
-      el('usersPager').innerHTML = html
-    } else { el('usersPager').innerHTML = '' }
-  } catch(e) { el('usersTbody').innerHTML = '<tr><td colspan="5" class="empty">Error: ' + e.message + '</td></tr>' }
+function loadUsers() {
+  var s=q('uSearch').value, p=q('uPlan').value;
+  request('/admin/users?search='+encodeURIComponent(s)+'&plan='+p+'&page='+uPage+'&limit=25')
+    .then(function(d){
+      q('userCount').textContent=(d.total||0)+' users';
+      q('userRows').innerHTML=(d.data||[]).map(function(u){
+        return '<tr><td><div style="font-weight:500">'+(u.company_name||u.full_name||'—')+'</div><div style="font-size:11px;color:#888">'+(u.full_name||'')+'</div></td><td>'+pBadge(u.plan)+'</td><td style="color:#1d4ed8;font-size:12px">'+(u.email||'—')+'</td><td style="font-size:11px;color:#888">'+dDate(u.created_at)+'</td><td><div style="display:flex;gap:4px"><button class="ab ab-sm" onclick="changePlan(\''+u.id+'\',\''+u.plan+'\')">Plan</button><button class="ab ab-sm ab-s" onclick="giveFreeTrial(\''+u.id+'\')">Trial+</button><button class="ab ab-sm ab-d" onclick="suspendUser(\''+u.id+'\')">Suspend</button></div></td></tr>';
+      }).join('')||'<tr><td colspan="5" class="empty">No users found</td></tr>';
+      var pages=Math.ceil((d.total||0)/25);
+      if(pages>1){
+        var h='';for(var i=1;i<=Math.min(pages,10);i++){h+='<button class="ab ab-sm'+(i===uPage?' ab-p':'')+'" onclick="uPage='+i+';loadUsers()">'+i+'</button>';}
+        q('userPager').innerHTML=h;
+      } else { q('userPager').innerHTML=''; }
+    }).catch(function(e){ q('userRows').innerHTML='<tr><td colspan="5" class="empty">Error: '+e.message+'</td></tr>'; });
 }
 
-async function doChangePlan(id, current) {
-  var newPlan = prompt('Change plan (free/starter/pro/enterprise):', current)
-  if (!newPlan || !['free','starter','pro','enterprise'].includes(newPlan)) return
-  try { await api('/admin/users/' + id + '/plan', { method: 'PUT', body: JSON.stringify({ plan: newPlan }) }); alert('Plan updated to ' + newPlan); loadUsers() }
-  catch(e) { alert(e.message) }
+function changePlan(id,cur){
+  var p=prompt('New plan (free/starter/pro/enterprise):',cur);
+  if(!p||!['free','starter','pro','enterprise'].includes(p))return;
+  request('/admin/users/'+id+'/plan',{method:'PUT',body:JSON.stringify({plan:p})})
+    .then(function(){alert('Plan updated to '+p);loadUsers();}).catch(function(e){alert(e.message);});
 }
-
-async function doExtendTrial(id) {
-  if (!confirm('Give this user Pro plan for 14 days?')) return
-  try { var d = await api('/admin/users/' + id + '/extend-trial', { method: 'POST', body: JSON.stringify({ days: 14, plan: 'pro' }) }); alert(d.message); loadUsers() }
-  catch(e) { alert(e.message) }
+function giveFreeTrial(id){
+  if(!confirm('Give Pro plan for 14 days?'))return;
+  request('/admin/users/'+id+'/extend-trial',{method:'POST',body:JSON.stringify({days:14,plan:'pro'})})
+    .then(function(d){alert(d.message);loadUsers();}).catch(function(e){alert(e.message);});
 }
-
-async function doSuspend(id) {
-  if (!confirm('Suspend this account?')) return
-  try { await api('/admin/users/' + id + '/suspend', { method: 'PUT', body: JSON.stringify({ suspended: true }) }); alert('Suspended'); loadUsers() }
-  catch(e) { alert(e.message) }
+function suspendUser(id){
+  if(!confirm('Suspend this account?'))return;
+  request('/admin/users/'+id+'/suspend',{method:'PUT',body:JSON.stringify({suspended:true})})
+    .then(function(){alert('Suspended');loadUsers();}).catch(function(e){alert(e.message);});
 }
 
 // ── CLIENTS ───────────────────────────────────────────────
-async function loadClients() {
-  try {
-    var d = await api('/admin/clients')
-    el('clientTotal').textContent = (d.total||0) + ' clients'
-    el('clientsTbody').innerHTML = (d.data||[]).map(function(c) {
-      return '<tr><td style="font-weight:500">' + (c.name||'—') + '</td><td style="color:#1d4ed8;font-size:12px">' + (c.email||'—') + '</td><td style="font-size:12px;color:#888">' + (c.profiles?.company_name||c.profiles?.full_name||'—') + '</td><td>' + (c.currency||'GBP') + '</td></tr>'
-    }).join('') || '<tr><td colspan="4" class="empty">No clients</td></tr>'
-  } catch(e) {}
+function loadClients(){
+  request('/admin/clients').then(function(d){
+    q('clientCount').textContent=(d.total||0)+' clients';
+    q('clientRows').innerHTML=(d.data||[]).map(function(c){
+      return '<tr><td style="font-weight:500">'+(c.name||'—')+'</td><td style="color:#1d4ed8;font-size:12px">'+(c.email||'—')+'</td><td style="font-size:12px;color:#888">'+(c.profiles&&(c.profiles.company_name||c.profiles.full_name)||'—')+'</td><td>'+(c.currency||'GBP')+'</td></tr>';
+    }).join('')||'<tr><td colspan="4" class="empty">No clients</td></tr>';
+  }).catch(function(){});
 }
 
 // ── INVOICES ──────────────────────────────────────────────
-async function loadInvoices() {
-  var status = el('invStatus').value
-  try {
-    var d = await api('/admin/invoices?status=' + status + '&page=' + invPage + '&limit=25')
-    el('invTotal').textContent = (d.total||0) + ' invoices'
-    el('invTbody').innerHTML = (d.data||[]).map(function(inv) {
-      return '<tr><td style="font-family:monospace;font-size:12px;font-weight:600">' + inv.invoice_number + '</td><td style="font-size:12px">' + (inv.profiles?.company_name||inv.profiles?.full_name||'—') + '</td><td style="font-weight:500">£' + (+inv.total||0).toFixed(2) + '</td><td>' + statusBadge(inv.status) + '</td><td style="font-size:11px;color:#888">' + fmtDate(inv.created_at) + '</td><td>' + (inv.status !== 'paid' ? '<button class="abtn abtn-sm abtn-s" onclick="doMarkPaid(\'' + inv.id + '\')">✓ Paid</button>' : '') + '</td></tr>'
-    }).join('') || '<tr><td colspan="6" class="empty">No invoices</td></tr>'
-  } catch(e) {}
+function loadInv(){
+  var f=q('invFilter').value;
+  request('/admin/invoices?status='+f+'&page='+iPage+'&limit=25').then(function(d){
+    q('invCount').textContent=(d.total||0)+' invoices';
+    q('invRows').innerHTML=(d.data||[]).map(function(inv){
+      return '<tr><td style="font-family:monospace;font-weight:600;font-size:12px">'+inv.invoice_number+'</td><td style="font-size:12px">'+(inv.profiles&&(inv.profiles.company_name||inv.profiles.full_name)||'—')+'</td><td style="font-weight:500">'+money(inv.total)+'</td><td>'+sBadge(inv.status)+'</td><td style="font-size:11px;color:#888">'+dDate(inv.created_at)+'</td><td>'+(inv.status!=='paid'?'<button class="ab ab-sm ab-s" onclick="markPaid(\''+inv.id+'\')">✓ Paid</button>':'')+'</td></tr>';
+    }).join('')||'<tr><td colspan="6" class="empty">No invoices</td></tr>';
+  }).catch(function(){});
 }
-
-async function doMarkPaid(id) {
-  try { await api('/admin/invoices/' + id, { method: 'PUT', body: JSON.stringify({ status: 'paid' }) }); loadInvoices() }
-  catch(e) { alert(e.message) }
+function markPaid(id){
+  request('/admin/invoices/'+id,{method:'PUT',body:JSON.stringify({status:'paid'})}).then(loadInv).catch(function(e){alert(e.message);});
 }
 
 // ── PAYMENTS ──────────────────────────────────────────────
-async function loadPayments() {
-  try {
-    var d = await api('/admin/payments?limit=50')
-    el('payTbody').innerHTML = (d.data||[]).map(function(p) {
-      return '<tr><td style="font-size:12px">' + (p.profiles?.company_name||p.profiles?.full_name||'—') + '</td><td style="font-family:monospace;font-size:11px">' + (p.invoices?.invoice_number||'—') + '</td><td style="font-weight:500;color:#16a34a">£' + (+p.amount||0).toFixed(2) + '</td><td>' + badge('draft', p.method||'manual') + '</td><td style="font-size:11px;color:#888">' + fmtDate(p.paid_at) + '</td></tr>'
-    }).join('') || '<tr><td colspan="5" class="empty">No payments</td></tr>'
-  } catch(e) {}
+function loadPay(){
+  request('/admin/payments?limit=50').then(function(d){
+    q('payRows').innerHTML=(d.data||[]).map(function(p){
+      return '<tr><td style="font-size:12px">'+(p.profiles&&(p.profiles.company_name||p.profiles.full_name)||'—')+'</td><td style="font-family:monospace;font-size:11px">'+(p.invoices&&p.invoices.invoice_number||'—')+'</td><td style="font-weight:500;color:#16a34a">'+money(p.amount)+'</td><td>'+badge('draft',p.method||'manual')+'</td><td style="font-size:11px;color:#888">'+dDate(p.paid_at)+'</td></tr>';
+    }).join('')||'<tr><td colspan="5" class="empty">No payments</td></tr>';
+  }).catch(function(){});
 }
 
 // ── FEATURES ──────────────────────────────────────────────
-var FEATURES = [
-  {key:'feature_ai_assistant',name:'AI Invoice Assistant'},
-  {key:'feature_whatsapp_sms',name:'WhatsApp & SMS'},
-  {key:'feature_receipt_scanner',name:'Receipt Scanner'},
-  {key:'feature_cashflow_forecast',name:'Cash Flow Forecast'},
-  {key:'feature_invoice_designer',name:'Invoice Template Designer'},
-  {key:'feature_client_happiness',name:'Client Happiness Score'},
-  {key:'feature_financing',name:'Invoice Financing'},
-  {key:'feature_time_tracking',name:'Time Tracking'},
-  {key:'feature_recurring',name:'Recurring Invoices'},
-  {key:'feature_year_review',name:'Year in Review'},
-]
-
-async function loadFeatures() {
-  var flags = {}
-  try {
-    var d = await api('/admin/feature-flags')
-    d.forEach(function(f) { try { flags[f.key] = JSON.parse(f.value) } catch(e) { flags[f.key] = true } })
-  } catch(e) {}
-  el('featureList').innerHTML = FEATURES.map(function(f) {
-    var on = flags[f.key] !== false
-    return '<div class="sr"><div style="font-size:13px;font-weight:500">' + f.name + '</div><button class="tog ' + (on?'on':'off') + '" onclick="doToggleFeature(\'' + f.key + '\',this)"></button></div>'
-  }).join('')
-}
-
-async function doToggleFeature(key, btn) {
-  var isOn = btn.classList.contains('on')
-  btn.classList.toggle('on', !isOn); btn.classList.toggle('off', isOn)
-  try { await api('/admin/feature-flags/' + key, { method: 'PUT', body: JSON.stringify({ value: !isOn }) }) }
-  catch(e) { btn.classList.toggle('on', isOn); btn.classList.toggle('off', !isOn); alert('Failed: ' + e.message) }
+var FEATS=[
+  {k:'feature_ai_assistant',n:'AI Invoice Assistant'},
+  {k:'feature_whatsapp_sms',n:'WhatsApp & SMS'},
+  {k:'feature_receipt_scanner',n:'Receipt Scanner'},
+  {k:'feature_cashflow_forecast',n:'Cash Flow Forecast'},
+  {k:'feature_invoice_designer',n:'Invoice Designer'},
+  {k:'feature_client_happiness',n:'Client Happiness Score'},
+  {k:'feature_financing',n:'Invoice Financing'},
+  {k:'feature_time_tracking',n:'Time Tracking'},
+  {k:'feature_recurring',n:'Recurring Invoices'},
+  {k:'feature_year_review',n:'Year in Review'},
+];
+function loadFeatures(){
+  request('/admin/feature-flags').then(function(d){
+    var flags={};
+    d.forEach(function(f){try{flags[f.key]=JSON.parse(f.value);}catch(e){flags[f.key]=true;}});
+    q('featureToggles').innerHTML=FEATS.map(function(f){
+      var on=flags[f.k]!==false;
+      return '<div class="sr"><div style="font-size:13px;font-weight:500">'+f.n+'</div><button class="tog '+(on?'on':'off')+'" data-key="'+f.k+'"></button></div>';
+    }).join('');
+    q('featureToggles').querySelectorAll('.tog').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var isOn=this.classList.contains('on');
+        this.classList.toggle('on',!isOn); this.classList.toggle('off',isOn);
+        var key=this.dataset.key; var self=this;
+        request('/admin/feature-flags/'+key,{method:'PUT',body:JSON.stringify({value:!isOn})})
+          .catch(function(e){ self.classList.toggle('on',isOn); self.classList.toggle('off',!isOn); alert('Failed: '+e.message); });
+      });
+    });
+  }).catch(function(){});
 }
 
 // ── PLANS ────────────────────────────────────────────────
-async function loadPlans() {
-  try {
-    var d = await api('/admin/plans')
-    el('plansGrid').innerHTML = d.map(function(p) {
-      var colors = { free:'#b8b2a3', starter:'#1d4ed8', pro:'#7c3aed', enterprise:'#b45309' }
-      return '<div class="kcard" style="border-top:3px solid ' + (colors[p.slug]||'#888') + '"><div class="kl">' + p.name + '</div><div class="kv">£' + p.price_monthly + '<span style="font-size:12px;color:#888">/mo</span></div><div class="ks" style="margin-bottom:12px">£' + p.price_yearly + '/yr</div><label style="font-size:12px;font-weight:500;color:#666;display:block;margin-bottom:4px">Monthly price (£)</label><input class="fi" id="price_' + p.id + '" value="' + p.price_monthly + '" type="number" step="0.01" style="font-size:12px;padding:7px 10px;margin-bottom:8px"/><button class="abtn abtn-p abtn-sm" style="width:100%;justify-content:center" onclick="doSavePlan(\'' + p.id + '\')">Save</button></div>'
-    }).join('')
-  } catch(e) {}
+function loadPlans(){
+  request('/admin/plans').then(function(d){
+    var cols={free:'#b8b2a3',starter:'#1d4ed8',pro:'#7c3aed',enterprise:'#b45309'};
+    q('planCards').innerHTML=d.map(function(p){
+      return '<div class="kc" style="border-top:3px solid '+(cols[p.slug]||'#888')+'"><div class="kl">'+p.name+'</div><div class="kv">£'+p.price_monthly+'<span style="font-size:12px;color:#888">/mo</span></div><div class="ks" style="margin-bottom:12px">£'+p.price_yearly+'/yr · '+(p.max_invoices===-1?'∞':p.max_invoices)+' invoices/mo</div><label style="font-size:12px;font-weight:500;color:#666;display:block;margin-bottom:4px">Monthly price (£)</label><input class="fi" id="pi_'+p.id+'" value="'+p.price_monthly+'" type="number" step="0.01" style="font-size:12px;padding:7px 10px;margin-bottom:8px"/><button class="ab ab-p ab-sm" style="width:100%;justify-content:center" onclick="savePlan(\''+p.id+'\')">Save</button></div>';
+    }).join('');
+  }).catch(function(){});
 }
-
-async function doSavePlan(id) {
-  var price = +(el('price_' + id).value)
-  try { await api('/admin/plans/' + id, { method: 'PUT', body: JSON.stringify({ price_monthly: price }) }); alert('Saved!') }
-  catch(e) { alert(e.message) }
+function savePlan(id){
+  var price=+(q('pi_'+id).value);
+  request('/admin/plans/'+id,{method:'PUT',body:JSON.stringify({price_monthly:price})})
+    .then(function(){alert('Price saved!');}).catch(function(e){alert(e.message);});
 }
 
 // ── ANNOUNCEMENT ─────────────────────────────────────────
-async function loadAnnouncement() {
-  try {
-    var d = await api('/admin/settings')
-    var ann = d.find(function(s) { return s.key === 'platform_announcement' })
-    if (ann) {
-      var val = JSON.parse(ann.value)
-      var active = new Date(val.expires_at) > new Date()
-      el('annPreview').innerHTML = '<div style="padding:12px;border-radius:8px;background:#eff6ff;border:1px solid #bfdbfe;margin-bottom:8px"><div style="font-weight:600;margin-bottom:4px">' + val.title + '</div><div style="font-size:12.5px">' + val.message + '</div><div style="font-size:11px;color:#888;margin-top:6px">Expires: ' + fmtTime(val.expires_at) + '</div></div><span class="badge ' + (active?'b-ok':'b-err') + '">' + (active?'✅ Active':'⏰ Expired') + '</span>'
-      if (active) el('annBadge').classList.remove('hidden')
+function loadAnnounce(){
+  request('/admin/settings').then(function(d){
+    var ann=d.find(function(s){return s.key==='platform_announcement';});
+    if(ann){
+      var v=JSON.parse(ann.value);
+      var active=new Date(v.expires_at)>new Date();
+      q('annCurrent').innerHTML='<div style="padding:12px;border-radius:8px;background:#eff6ff;border:1px solid #bfdbfe;margin-bottom:8px"><strong>'+v.title+'</strong><p style="font-size:12.5px;margin-top:4px">'+v.message+'</p><div style="font-size:11px;color:#888;margin-top:6px">Expires: '+dTime(v.expires_at)+'</div></div><span class="bdg b-'+(active?'ok':'err')+'">'+(active?'✅ Active':'⏰ Expired')+'</span>';
+      if(active) q('annBadge').classList.remove('hidden');
     } else {
-      el('annPreview').innerHTML = '<div class="empty" style="padding:20px">No active announcement</div>'
-      el('annBadge').classList.add('hidden')
+      q('annCurrent').innerHTML='<div class="empty" style="padding:20px">No active announcement</div>';
+      q('annBadge').classList.add('hidden');
     }
-  } catch(e) {}
+  }).catch(function(){});
 }
-
-async function doPublishAnn() {
-  var title = el('annTitle').value
-  var msg = el('annMsg').value
-  if (!title || !msg) { el('annResult').innerHTML = '<div class="alert a-err">Title and message required</div>'; return }
-  try {
-    await api('/admin/announcement', { method: 'POST', body: JSON.stringify({ title: title, message: msg, type: el('annType').value, expires_hours: +(el('annHours').value) }) })
-    el('annResult').innerHTML = '<div class="alert a-ok">✅ Published!</div>'
-    el('annBadge').classList.remove('hidden')
-    loadAnnouncement()
-  } catch(e) { el('annResult').innerHTML = '<div class="alert a-err">' + e.message + '</div>' }
+function publishAnn(){
+  var title=q('annTitle').value.trim(), msg=q('annMsg').value.trim();
+  if(!title||!msg){showErr('annFeedback','Title and message required');return;}
+  request('/admin/announcement',{method:'POST',body:JSON.stringify({title:title,message:msg,type:q('annType').value,expires_hours:+(q('annHours').value)})})
+    .then(function(){showOk('annFeedback','Published!');q('annBadge').classList.remove('hidden');loadAnnounce();})
+    .catch(function(e){showErr('annFeedback',e.message);});
 }
-
-async function doRemoveAnn() {
-  if (!confirm('Remove the announcement?')) return
-  try { await api('/admin/announcement', { method: 'DELETE' }); el('annResult').innerHTML = '<div class="alert a-ok">✅ Removed</div>'; el('annBadge').classList.add('hidden'); loadAnnouncement() }
-  catch(e) { el('annResult').innerHTML = '<div class="alert a-err">' + e.message + '</div>' }
+function removeAnn(){
+  if(!confirm('Remove the announcement?'))return;
+  request('/admin/announcement',{method:'DELETE'})
+    .then(function(){showOk('annFeedback','Removed');q('annBadge').classList.add('hidden');loadAnnounce();})
+    .catch(function(e){showErr('annFeedback',e.message);});
 }
 
 // ── TICKETS ───────────────────────────────────────────────
-async function loadTickets() {
-  var status = el('tickFilter').value
-  try {
-    var d = await api('/admin/tickets' + (status ? '?status=' + status : ''))
-    el('tickTbody').innerHTML = (d||[]).map(function(t) {
-      return '<tr><td style="font-size:12px">' + (t.profiles?.full_name||'—') + '<div style="font-size:11px;color:#888">' + (t.profiles?.email||'') + '</div></td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + t.subject + '</td><td>' + statusBadge(t.status) + '</td><td style="font-size:11px;color:#888">' + fmtDate(t.created_at) + '</td><td><button class="abtn abtn-sm" onclick="openTicket(\'' + t.id + '\',\'' + t.subject.replace(/'/g,"\\'") + '\',\'' + (t.message||'').replace(/'/g,"\\'").substring(0,200) + '\')">Reply</button></td></tr>'
-    }).join('') || '<tr><td colspan="5" class="empty">No tickets</td></tr>'
-  } catch(e) {}
+function loadTickets(){
+  var f=q('tickFilter').value;
+  request('/admin/tickets'+(f?'?status='+f:'')).then(function(d){
+    q('tickRows').innerHTML=(d||[]).map(function(t){
+      var subject=(t.subject||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      var msg=(t.message||'').substring(0,200).replace(/'/g,"\\'");
+      return '<tr><td style="font-size:12px">'+(t.profiles&&t.profiles.full_name||'—')+'<div style="font-size:11px;color:#888">'+(t.profiles&&t.profiles.email||'')+'</div></td><td>'+t.subject+'</td><td>'+sBadge(t.status)+'</td><td style="font-size:11px;color:#888">'+dDate(t.created_at)+'</td><td><button class="ab ab-sm" onclick="openTicket(\''+t.id+'\',\''+subject+'\',\''+msg+'\')">Reply</button></td></tr>';
+    }).join('')||'<tr><td colspan="5" class="empty">No tickets</td></tr>';
+  }).catch(function(){});
 }
-
-function openTicket(id, subject, message) {
-  currentTicketId = id
-  el('tickContent').innerHTML = '<strong>' + subject + '</strong><p style="margin-top:8px;color:#666;line-height:1.6">' + message + '</p>'
-  el('tickReply').value = ''
-  el('tickModal').classList.add('show')
+function openTicket(id,subj,msg){
+  curTicketId=id;
+  q('ticketContent').innerHTML='<strong>'+subj+'</strong><p style="margin-top:8px;color:#666;line-height:1.6">'+msg+'</p>';
+  q('tickReply').value='';
+  openMo('mTicket');
 }
-
-async function doReplyTicket() {
-  var reply = el('tickReply').value.trim()
-  if (!reply) { alert('Enter a reply'); return }
-  try { await api('/admin/tickets/' + currentTicketId, { method: 'PUT', body: JSON.stringify({ admin_reply: reply, status: el('tickStat').value }) }); el('tickModal').classList.remove('show'); loadTickets() }
-  catch(e) { alert(e.message) }
+function sendTicket(){
+  var reply=q('tickReply').value.trim();
+  if(!reply){alert('Enter a reply');return;}
+  request('/admin/tickets/'+curTicketId,{method:'PUT',body:JSON.stringify({admin_reply:reply,status:q('tickStat').value})})
+    .then(function(){closeMo('mTicket');loadTickets();}).catch(function(e){alert(e.message);});
 }
 
 // ── SATISFACTION ──────────────────────────────────────────
-async function loadSatisfaction() {
-  try {
-    var d = await api('/admin/satisfaction')
-    el('satStats').innerHTML = [
-      { l: 'Average score', v: (d.average||0) + ' / 5', c: d.average >= 4 ? '#16a34a' : d.average >= 3 ? '#b45309' : '#dc2626' },
-      { l: 'Total responses', v: d.total || 0 },
-      { l: 'Best score', v: d.distribution ? (d.distribution.find(function(x) { return x.score === 5 }) || {count:0}).count + ' × ★★★★★' : '—' },
-    ].map(function(s) { return '<div class="kcard"><div class="kl">' + s.l + '</div><div class="kv"' + (s.c?' style="color:'+s.c+'"':'') + '>' + s.v + '</div></div>' }).join('')
-    el('satTbody').innerHTML = (d.scores||[]).map(function(s) {
-      return '<tr><td style="font-size:12px">' + (s.profiles?.company_name||s.profiles?.full_name||'—') + '</td><td style="color:#f59e0b">' + starsStr(s.score) + '</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#666">' + (s.comment||'—') + '</td><td style="font-size:11px;color:#888">' + fmtDate(s.responded_at) + '</td></tr>'
-    }).join('') || '<tr><td colspan="4" class="empty">No responses yet</td></tr>'
-  } catch(e) {}
+function loadSat(){
+  request('/admin/satisfaction').then(function(d){
+    q('satCards').innerHTML=[
+      {l:'Average score',v:(d.average||0)+' / 5',c:d.average>=4?'#16a34a':d.average>=3?'#b45309':'#dc2626'},
+      {l:'Total responses',v:d.total||0},
+      {l:'5-star reviews',v:(d.distribution&&d.distribution.find(function(x){return x.score===5;})||{count:0}).count},
+    ].map(function(x){ return '<div class="kc"><div class="kl">'+x.l+'</div><div class="kv"'+(x.c?' style="color:'+x.c+'"':'')+'>'+x.v+'</div></div>'; }).join('');
+    q('satRows').innerHTML=(d.scores||[]).map(function(s){
+      return '<tr><td style="font-size:12px">'+(s.profiles&&(s.profiles.company_name||s.profiles.full_name)||'—')+'</td><td style="color:#f59e0b">'+'★'.repeat(s.score)+'☆'.repeat(5-s.score)+'</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#666">'+(s.comment||'—')+'</td><td style="font-size:11px;color:#888">'+dDate(s.responded_at)+'</td></tr>';
+    }).join('')||'<tr><td colspan="4" class="empty">No responses yet</td></tr>';
+  }).catch(function(){});
 }
 
 // ── BROADCAST ─────────────────────────────────────────────
-async function doBroadcast() {
-  var subject = el('bSubject').value
-  var msg = el('bMsg').value
-  var plan = el('bPlan').value
-  if (!subject || !msg) { el('bResult').innerHTML = '<div class="alert a-err">Subject and message required</div>'; return }
-  if (!confirm('Send broadcast to ' + (plan||'ALL') + ' users?')) return
-  try {
-    var d = await api('/admin/broadcast', { method: 'POST', body: JSON.stringify({ subject: subject, message: msg, plan_filter: plan }) })
-    el('bResult').innerHTML = '<div class="alert a-ok">✅ Queued for ' + d.recipients + ' users</div>'
-    el('bSubject').value = ''; el('bMsg').value = ''
-  } catch(e) { el('bResult').innerHTML = '<div class="alert a-err">' + e.message + '</div>' }
+function sendBroadcast(){
+  var subj=q('bSubj').value, msg=q('bMsg').value, plan=q('bPlan').value;
+  if(!subj||!msg){showErr('broadcastRes','Subject and message required');return;}
+  if(!confirm('Send to '+(plan||'ALL')+' users?'))return;
+  request('/admin/broadcast',{method:'POST',body:JSON.stringify({subject:subj,message:msg,plan_filter:plan})})
+    .then(function(d){showOk('broadcastRes','Queued for '+d.recipients+' users');q('bSubj').value='';q('bMsg').value='';})
+    .catch(function(e){showErr('broadcastRes',e.message);});
 }
 
 // ── ADMINS ────────────────────────────────────────────────
-async function loadAdmins() {
-  try {
-    var d = await api('/admin/admins')
-    el('adminsTbody').innerHTML = (d||[]).map(function(a) {
-      return '<tr><td style="font-weight:500">' + (a.full_name||'—') + '</td><td style="color:#1d4ed8;font-size:12px">' + a.email + '</td><td>' + badge('b-'+a.role, a.role) + '</td><td style="font-size:11px;color:#888">' + (a.last_login ? fmtTime(a.last_login) : 'Never') + '</td><td>' + badge(a.is_active?'ok':'err', a.is_active?'Active':'Disabled') + '</td><td><button class="abtn abtn-sm ' + (a.is_active?'abtn-d':'abtn-s') + '" onclick="doToggleAdmin(\'' + a.id + '\')">' + (a.is_active?'Disable':'Enable') + '</button></td></tr>'
-    }).join('') || '<tr><td colspan="6" class="empty">No admins</td></tr>'
-  } catch(e) { el('adminsTbody').innerHTML = '<tr><td colspan="6" class="empty">Error: ' + e.message + '</td></tr>' }
+function loadAdmins(){
+  request('/admin/admins').then(function(d){
+    q('adminRows').innerHTML=(d||[]).map(function(a){
+      return '<tr><td style="font-weight:500">'+(a.full_name||'—')+'</td><td style="color:#1d4ed8;font-size:12px">'+a.email+'</td><td>'+badge('b-'+(a.role||'support'),a.role)+'</td><td style="font-size:11px;color:#888">'+(a.last_login?dTime(a.last_login):'Never')+'</td><td>'+badge(a.is_active?'ok':'err',a.is_active?'Active':'Disabled')+'</td><td><button class="ab ab-sm '+(a.is_active?'ab-d':'ab-s')+'" onclick="toggleAdmin(\''+a.id+'\')">'+(a.is_active?'Disable':'Enable')+'</button></td></tr>';
+    }).join('')||'<tr><td colspan="6" class="empty">No admins</td></tr>';
+  }).catch(function(e){q('adminRows').innerHTML='<tr><td colspan="6" class="empty">'+e.message+'</td></tr>';});
 }
-
-async function doToggleAdmin(id) {
-  try { await api('/admin/admins/' + id + '/toggle', { method: 'PUT' }); loadAdmins() }
-  catch(e) { alert(e.message) }
+function toggleAdmin(id){
+  request('/admin/admins/'+id+'/toggle',{method:'PUT'}).then(loadAdmins).catch(function(e){alert(e.message);});
 }
-
-async function doAddAdmin() {
-  var email = el('newAdminEmail').value
-  var password = el('newAdminPw').value
-  var full_name = el('newAdminName').value
-  var role = el('newAdminRole').value
-  try {
-    await api('/admin/admins', { method: 'POST', body: JSON.stringify({ email: email, password: password, full_name: full_name, role: role }) })
-    el('addAdminModal').classList.remove('show')
-    loadAdmins()
-    alert('Admin created for ' + email)
-  } catch(e) { el('addAdminMsg').innerHTML = '<div class="alert a-err">' + e.message + '</div>' }
+function addAdmin(){
+  var email=q('naEmail').value, pw=q('naPw').value, name=q('naName').value, role=q('naRole').value;
+  if(!email||!pw){showErr('naMsg','Email and password required');return;}
+  request('/admin/admins',{method:'POST',body:JSON.stringify({email:email,password:pw,full_name:name,role:role})})
+    .then(function(){closeMo('mAddAdmin');loadAdmins();alert('Admin created: '+email);})
+    .catch(function(e){showErr('naMsg',e.message);});
 }
 
 // ── AUDIT ─────────────────────────────────────────────────
-async function loadAudit() {
-  try {
-    var d = await api('/admin/audit')
-    el('auditTbody').innerHTML = (d||[]).map(function(a) {
-      return '<tr><td style="font-size:12px">' + (a.admin_users?.email||'—') + '</td><td><code style="font-family:monospace;font-size:11px;background:#f0f0f0;padding:2px 6px;border-radius:4px">' + a.action + '</code></td><td style="font-size:12px;color:#666">' + (a.entity_type||'—') + '</td><td style="font-size:11px;color:#888">' + fmtTime(a.created_at) + '</td></tr>'
-    }).join('') || '<tr><td colspan="4" class="empty">No audit logs</td></tr>'
-  } catch(e) {}
+function loadAudit(){
+  request('/admin/audit').then(function(d){
+    q('auditRows').innerHTML=(d||[]).map(function(a){
+      return '<tr><td style="font-size:12px">'+(a.admin_users&&a.admin_users.email||'—')+'</td><td><code style="font-family:monospace;font-size:11px;background:#f0f0f0;padding:2px 6px;border-radius:4px">'+a.action+'</code></td><td style="font-size:12px;color:#666">'+(a.entity_type||'—')+'</td><td style="font-size:11px;color:#888">'+dTime(a.created_at)+'</td></tr>';
+    }).join('')||'<tr><td colspan="4" class="empty">No audit logs</td></tr>';
+  }).catch(function(){});
 }
 
-// ── WIRE UP EVENT LISTENERS ───────────────────────────────
-window.addEventListener('DOMContentLoaded', function() {
-  // Login button
-  el('loginBtn').addEventListener('click', doLogin)
-  el('loginPassword').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin() })
-  el('loginEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin() })
+// ── TEST EMAIL ────────────────────────────────────────────
+function testEmail(){
+  var to=q('testEmailTo').value.trim();
+  if(!to){q('testEmailRes').innerHTML='<div class="al al-err">Enter an email address</div>';return;}
+  q('testEmailRes').innerHTML='<div class="al al-info">Sending...</div>';
+  request('/admin/test-email',{method:'POST',body:JSON.stringify({to:to})})
+    .then(function(d){q('testEmailRes').innerHTML='<div class="al al-ok">✅ '+d.message+'</div>';})
+    .catch(function(e){q('testEmailRes').innerHTML='<div class="al al-err">❌ '+e.message+'</div>';});
+}
 
-  // Forgot password
-  el('forgotBtn').addEventListener('click', showForgotForm)
-  el('backToLoginBtn').addEventListener('click', showLoginForm)
-  el('forgotSendBtn').addEventListener('click', doForgotPassword)
+// ── WIRE ALL EVENTS ───────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
 
-  // Reset password
-  el('resetBtn').addEventListener('click', doResetPassword)
+  // Login page
+  q('btnLogin').addEventListener('click', doLogin);
+  q('iEmail').addEventListener('keydown', function(e){if(e.key==='Enter')doLogin();});
+  q('iPw').addEventListener('keydown', function(e){if(e.key==='Enter')doLogin();});
+  q('btnShowForgot').addEventListener('click', function(){ q('fLogin').classList.add('hidden'); q('fForgot').classList.remove('hidden'); });
+  q('btnBackLogin').addEventListener('click', function(){ q('fForgot').classList.add('hidden'); q('fLogin').classList.remove('hidden'); });
+  q('btnSendReset').addEventListener('click', doForgot);
+  q('btnDoReset').addEventListener('click', doResetPw);
 
-  // Logout
-  el('logoutBtn').addEventListener('click', doLogout)
+  // Sidebar nav
+  document.querySelectorAll('.nv[data-pg]').forEach(function(btn){
+    btn.addEventListener('click', function(){ goPage(this.dataset.pg); });
+  });
 
-  // Change password
-  el('changePwBtn').addEventListener('click', function() { el('changePwModal').classList.add('show') })
+  // Top-level app buttons
+  q('btnLogout').addEventListener('click', doLogout);
+  q('btnChangePw').addEventListener('click', function(){ openMo('mChangePw'); });
 
-  // Refresh button
-  el('refreshBtn').addEventListener('click', function() {
-    var activePage = document.querySelector('.nav-item.active')
-    if (activePage) navigate(activePage.dataset.page)
-  })
+  // Change password modal
+  q('btnClosePwMo').addEventListener('click', function(){ closeMo('mChangePw'); });
+  q('btnCancelPw').addEventListener('click', function(){ closeMo('mChangePw'); });
+  q('btnSavePw').addEventListener('click', doChangePw);
 
-  // Navigation
-  document.querySelectorAll('.nav-item').forEach(function(btn) {
-    btn.addEventListener('click', function() { navigate(this.dataset.page) })
-  })
+  // Add admin modal
+  q('btnAddAdmin').addEventListener('click', function(){ openMo('mAddAdmin'); });
+  q('btnCloseAddAdmin').addEventListener('click', function(){ closeMo('mAddAdmin'); });
+  q('btnCancelAddAdmin').addEventListener('click', function(){ closeMo('mAddAdmin'); });
+  q('btnSaveAdmin').addEventListener('click', addAdmin);
 
-  // Check for password reset token in URL
-  var hash = window.location.hash
+  // Ticket modal
+  q('btnCloseTicket').addEventListener('click', function(){ closeMo('mTicket'); });
+  q('btnCancelTicket').addEventListener('click', function(){ closeMo('mTicket'); });
+  q('btnSendTicket').addEventListener('click', sendTicket);
+
+  // Health
+  q('btnTestEmail').addEventListener('click', testEmail);
+
+  // Announcement
+  q('btnPublishAnn').addEventListener('click', publishAnn);
+  q('btnRemoveAnn').addEventListener('click', removeAnn);
+
+  // Broadcast
+  q('btnBroadcast').addEventListener('click', sendBroadcast);
+
+  // Users search/filter
+  var uTimer;
+  q('uSearch').addEventListener('input', function(){ clearTimeout(uTimer); uTimer=setTimeout(loadUsers,400); });
+  q('uPlan').addEventListener('change', function(){ uPage=1; loadUsers(); });
+
+  // Invoices filter
+  q('invFilter').addEventListener('change', function(){ iPage=1; loadInv(); });
+
+  // Tickets filter
+  q('tickFilter').addEventListener('change', loadTickets);
+
+  // Close modals on background click
+  document.querySelectorAll('.mo-bg').forEach(function(bg){
+    bg.addEventListener('click', function(e){ if(e.target===this) closeMo(this.id); });
+  });
+
+  // Close modals on Escape
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') document.querySelectorAll('.mo-bg.show').forEach(function(m){ closeMo(m.id); }); });
+
+  // Check for password reset token in URL hash
+  var hash = window.location.hash;
   if (hash.includes('reset=')) {
-    var token = hash.split('reset=')[1]
+    var token = hash.split('reset=')[1];
     if (token) {
-      fetch(API + '/admin/reset-password/' + token)
-        .then(function(r) { return r.json() })
-        .then(function(d) {
-          if (d.valid) {
-            el('loginForm').classList.add('hidden')
-            el('resetForm').classList.remove('hidden')
-          } else {
-            el('loginErr').textContent = 'Invalid or expired reset link. Request a new one.'
-          }
-        })
-        .catch(function() {})
+      fetch(API+'/admin/reset-password/'+token)
+        .then(function(r){return r.json();})
+        .then(function(d){
+          if(d.valid){ q('fLogin').classList.add('hidden'); q('fReset').classList.remove('hidden'); }
+          else { q('loginErr').textContent='Invalid or expired reset link. Request a new one.'; }
+        }).catch(function(){});
     }
   }
 
-  // Auto-login if token exists
-  var savedToken = localStorage.getItem('ipAdminToken')
-  if (savedToken) {
-    authToken = savedToken
-    fetch(API + '/admin/stats', { headers: { 'Authorization': 'Bearer ' + savedToken, 'Content-Type': 'application/json' } })
-      .then(function(r) { return r.json() })
-      .then(function() {
-        // Get admin info
-        return fetch(API + '/admin/admins', { headers: { 'Authorization': 'Bearer ' + savedToken, 'Content-Type': 'application/json' } })
+  // Auto-login if token saved
+  var saved = localStorage.getItem('ipat');
+  if (saved) {
+    tok = saved;
+    fetch(API+'/admin/stats', {headers:{'Authorization':'Bearer '+saved,'Content-Type':'application/json'}})
+      .then(function(r){ if(!r.ok) throw new Error('expired'); return r.json(); })
+      .then(function(){
+        q('loginPage').style.display='none';
+        q('app').style.display='block';
+        loadDash();
       })
-      .then(function(r) { return r.json() })
-      .then(function(admins) {
-        // Show app with stored info
-        el('loginPage').style.display = 'none'
-        el('app').style.display = 'block'
-        el('adminName').textContent = 'Admin'
-        el('adminRole').textContent = 'super_admin'
-        el('adminAvatar').textContent = 'A'
-        loadDashboard()
-      })
-      .catch(function() {
-        authToken = null
-        localStorage.removeItem('ipAdminToken')
-      })
+      .catch(function(){ tok=null; localStorage.removeItem('ipat'); });
   }
-})
+});
 </script>
 </body>
 </html>

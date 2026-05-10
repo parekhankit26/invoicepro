@@ -1,4 +1,5 @@
 import express from 'express'
+import path from 'path'
 import cors from 'cors'
 import helmet from 'helmet'
 import dotenv from 'dotenv'
@@ -19,6 +20,7 @@ import enterpriseRoutes from './routes/enterprise'
 import aiAssistantRoutes from './routes/aiAssistant'
 import notificationsRoutes from './routes/notifications'
 import featuresRoutes from './routes/features'
+import adminRoutes from './routes/admin'
 import { reminderService } from './services/reminderService'
 import { recurringService } from './services/recurringService'
 
@@ -56,6 +58,11 @@ app.use('/api/enterprise', enterpriseRoutes)
 app.use('/api/ai', aiAssistantRoutes)
 app.use('/api/notify', notificationsRoutes)
 app.use('/api/features', featuresRoutes)
+app.use('/api/admin', adminRoutes)
+
+// Serve admin panel HTML at /admin
+app.use('/admin', express.static(path.join(__dirname, '../admin-panel')))
+app.get('/admin/*', (_req, res) => res.sendFile(path.join(__dirname, '../admin-panel/index.html')))
 
 app.get('/health', (_, res) => res.json({ status: 'ok', version: '2.0.0', features: ['ai-assistant','whatsapp-sms','receipt-scanner','cashflow','financing','milestones','early-payment','happiness-score','year-review'], timestamp: new Date().toISOString() }))
 

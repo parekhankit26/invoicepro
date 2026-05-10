@@ -483,7 +483,7 @@ router.put('/change-password', adminAuth, async (req: any, res: Response) => {
 router.get('/clients', adminAuth, async (req: any, res: Response) => {
   try {
     const search = req.query.search || ''
-    let query = supabase.from('clients').select('*, profiles!user_id(full_name, company_name, email)', { count: 'exact' })
+    let query = supabase.from('clients').select('*', { count: 'exact' })
       .eq('is_archived', false).order('created_at', { ascending: false }).limit(100)
     if (search) query = query.ilike('name', `%${search}%`)
     const { data, error, count } = await query
@@ -506,10 +506,16 @@ router.get('/payments', adminAuth, async (req: any, res: Response) => {
   try {
     const limit = parseInt(req.query.limit as string) || 50
     const { data, error, count } = await supabase.from('payments')
-      .select('*, profiles!user_id(full_name, company_name), invoices!invoice_id(invoice_number)', { count: 'exact' })
+      .select('*, invoices(invoice_number)', { count: 'exact' })
       .order('paid_at', { ascending: false }).limit(limit)
     if (error) return res.status(400).json({ error: error.message })
-    return res.json({ data, total: count })
+    // Enrich with profiles
+    const userIds = [...new Set((data||[]).map((p:any) => p.user_id))]
+    const { data: profiles } = await supabase.from('profiles').select('id, full_name, company_name').in('id', userIds)
+    const profileMap: any = {}
+    ;(profiles||[]).forEach((p:any) => { profileMap[p.id] = p })
+    const enriched = (data||[]).map((p:any) => ({ ...p, profiles: profileMap[p.user_id] || null }))
+    return res.json({ data: enriched, total: count })
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
 
@@ -518,7 +524,7 @@ router.get('/quotes', adminAuth, async (req: any, res: Response) => {
   try {
     const limit = parseInt(req.query.limit as string) || 50
     const { data, error, count } = await supabase.from('quotes')
-      .select('*, clients!client_id(name), profiles!user_id(full_name, company_name)', { count: 'exact' })
+      .select('*, clients(name)', { count: 'exact' })
       .order('created_at', { ascending: false }).limit(limit)
     if (error) return res.status(400).json({ error: error.message })
     return res.json({ data, total: count })
@@ -530,7 +536,7 @@ router.get('/expenses', adminAuth, async (req: any, res: Response) => {
   try {
     const limit = parseInt(req.query.limit as string) || 50
     const { data, error, count } = await supabase.from('expenses')
-      .select('*, profiles!user_id(full_name, company_name)', { count: 'exact' })
+      .select('*', { count: 'exact' })
       .order('created_at', { ascending: false }).limit(limit)
     if (error) return res.status(400).json({ error: error.message })
     return res.json({ data, total: count })
@@ -562,7 +568,7 @@ router.put('/feature-flags/:key', adminAuth, async (req: any, res: Response) => 
 router.get('/satisfaction', adminAuth, async (_req: any, res: Response) => {
   try {
     const { data: scores } = await supabase.from('satisfaction_scores')
-      .select('*, profiles!user_id(full_name, company_name), clients!client_id(name)')
+      .select('*, profiles(full_name, company_name), clients(name)')
       .order('responded_at', { ascending: false }).limit(100)
     const all = scores || []
     const avg = all.length ? (all.reduce((s, r: any) => s + r.score, 0) / all.length).toFixed(1) : 0
@@ -602,7 +608,7 @@ router.put('/financing/:id/status', adminAuth, async (req: any, res: Response) =
 router.get('/tickets', adminAuth, async (req: any, res: Response) => {
   try {
     let query = supabase.from('support_tickets')
-      .select('*, profiles!user_id(full_name, email, plan, company_name)')
+      .select('*, profiles(full_name, email, plan, company_name)')
       .order('created_at', { ascending: false })
     if (req.query.status) query = query.eq('status', req.query.status as string)
     const { data, error } = await query

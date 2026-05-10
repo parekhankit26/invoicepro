@@ -6,13 +6,39 @@ const router = Router()
 
 router.post('/register', async (req: Request, res: Response) => {
   const { email, password, full_name, company_name } = (req as any).body
-  if (!email || !password || !full_name) return res.status(400).json({ error: 'Email, password and name required' })
+  if (!email || !password || !full_name) return res.status(400).json({ error: 'Email, password and name are required' })
+  if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' })
+
+  // Check if user already exists
+  const { data: existing } = await supabase.auth.admin.listUsers()
+  const alreadyExists = existing?.users?.find((u: any) => u.email?.toLowerCase() === email.toLowerCase())
+  if (alreadyExists) {
+    return res.status(400).json({ error: 'An account with this email already exists. Please sign in instead.' })
+  }
+
   const { data, error } = await supabase.auth.admin.createUser({
     email, password, email_confirm: true,
     user_metadata: { full_name, company_name }
   })
-  if (error) return res.status(400).json({ error: error.message })
-  return res.status(201).json({ message: 'Account created', user: data.user })
+  if (error) {
+    if (error.message.includes('already') || error.message.includes('duplicate')) {
+      return res.status(400).json({ error: 'An account with this email already exists. Please sign in instead.' })
+    }
+    return res.status(400).json({ error: error.message })
+  }
+
+  // Manually create profile in case trigger didnt fire
+  if (data.user) {
+    try {
+      await supabase.from('profiles').upsert({
+        id: data.user.id, email, full_name,
+        company_name: company_name || null,
+        plan: 'free', default_currency: 'GBP', country_code: 'GB'
+      })
+    } catch(pe) { console.error('Profile creation error:', pe) }
+  }
+
+  return res.status(201).json({ message: 'Account created successfully', user: data.user })
 })
 
 router.post('/login', async (req: Request, res: Response) => {

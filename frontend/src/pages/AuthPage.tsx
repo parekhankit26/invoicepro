@@ -82,7 +82,21 @@ export default function AuthPage() {
         reset()
       }
     } catch (err: any) {
-      toast.error(err.message || 'Something went wrong')
+      let msg = err.message || 'Something went wrong'
+      // Friendly error messages
+      if (msg.includes('already exists') || msg.includes('already registered')) {
+        msg = 'This email is already registered. Click "Sign in" below.'
+        setMode('login')
+        reset({ email: data.email })
+      } else if (msg.includes('Invalid login') || msg.includes('Invalid credentials')) {
+        msg = 'Wrong email or password. Try again.'
+      } else if (msg.includes('Email not confirmed')) {
+        msg = 'Please check your email and click the confirmation link.'
+      } else if (msg.includes('Database error')) {
+        msg = 'Account creation failed. This email may already be registered — try signing in instead.'
+        setMode('login')
+      }
+      toast.error(msg, { duration: 5000 })
     } finally {
       setLoading(false)
     }

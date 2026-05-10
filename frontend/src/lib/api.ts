@@ -21,11 +21,15 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   })
   if (!res.ok) {
     let errMsg = `Request failed: ${res.status}`
+    let upgradeRequired = false
     try {
       const err = await res.json()
       errMsg = err.error || err.message || errMsg
+      upgradeRequired = err.upgrade_required || false
     } catch {}
-    throw new Error(errMsg)
+    const error = new Error(errMsg) as any
+    error.upgradeRequired = upgradeRequired
+    throw error
   }
   return res.json()
 }

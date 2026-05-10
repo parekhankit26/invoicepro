@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { api } from '../lib/api'
 import { CURRENCIES } from '../lib/utils'
@@ -160,5 +161,49 @@ export default function SettingsPage() {
         </form>
       </div>
     </>
+  )
+}
+
+
+function PasswordChangeForm() {
+  const [form, setForm] = useState({ current: '', next: '', confirm: '' })
+  const [loading, setLoading] = useState(false)
+  const { supabase: sb } = { supabase: null as any }
+
+  const handleChange = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (form.next !== form.confirm) { toast.error('New passwords do not match'); return }
+    if (form.next.length < 8) { toast.error('New password must be at least 8 characters'); return }
+    setLoading(true)
+    try {
+      const { supabase: supa } = await import('../lib/supabase')
+      const { error } = await supa.auth.updateUser({ password: form.next })
+      if (error) throw error
+      toast.success('Password updated successfully!')
+      setForm({ current: '', next: '', confirm: '' })
+    } catch(e: any) { toast.error(e.message) }
+    finally { setLoading(false) }
+  }
+
+  return (
+    <form onSubmit={handleChange}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }} className="form-grid-3">
+        <div className="form-group">
+          <label className="form-label">Current password</label>
+          <input className="form-input" type="password" value={form.current} onChange={e => setForm(p => ({...p, current: e.target.value}))} placeholder="Current password"/>
+        </div>
+        <div className="form-group">
+          <label className="form-label">New password</label>
+          <input className="form-input" type="password" value={form.next} onChange={e => setForm(p => ({...p, next: e.target.value}))} placeholder="8+ characters"/>
+        </div>
+        <div className="form-group">
+          <label className="form-label">Confirm new password</label>
+          <input className="form-input" type="password" value={form.confirm} onChange={e => setForm(p => ({...p, confirm: e.target.value}))} placeholder="Repeat new password"/>
+        </div>
+      </div>
+      <button type="submit" className="btn btn-secondary" disabled={loading || !form.next || !form.confirm}>
+        {loading ? 'Updating...' : 'Update password'}
+      </button>
+    </form>
   )
 }

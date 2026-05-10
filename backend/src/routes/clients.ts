@@ -29,6 +29,20 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
 })
 
 router.post('/', requirePermission('manage_clients'), async (req: AuthRequest, res: Response) => {
+  // Plan limits check
+  try {
+    const { data: profile } = await supabase.from('profiles').select('plan').eq('id', (req as any).user!.id).single()
+    const plan = profile?.plan || 'free'
+    const limits: Record<string, number> = { free: 2, starter: -1, pro: -1, enterprise: -1 }
+    const limit = limits[plan]
+    if (limit > 0) {
+      const { count } = await supabase.from('clients').select('*', { count: 'exact', head: true })
+        .eq('user_id', (req as any).user!.id).eq('is_archived', false)
+      if ((count || 0) >= limit) {
+        return res.status(403).json({ error: `Free plan allows ${limit} active clients. Upgrade to add unlimited clients.`, upgrade_required: true })
+      }
+    }
+  } catch(e) {}
   const { data, error } = await supabase.from('clients').insert({ ...(req as any).body, user_id: (req as any).user!.id }).select().single()
   if (error) return res.status(400).json({ error: error.message })
   return res.status(201).json(data)

@@ -102,14 +102,37 @@ code{font-family:monospace;font-size:11px;background:var(--bg);padding:2px 6px;b
 
 <!-- LOGIN -->
 <div id="login">
-  <div class="lbox">
+  <div class="lbox" id="loginBox">
     <div class="lmark">IP</div>
     <h1 style="font-size:22px;font-weight:800;margin-bottom:4px;letter-spacing:-.02em">Super Admin</h1>
     <p style="font-size:13px;color:var(--ink2);margin-bottom:24px">InvoicePro control panel</p>
     <div class="fg"><label>Email</label><input type="email" id="lemail" placeholder="admin@yourdomain.com"/></div>
     <div class="fg"><label>Password</label><input type="password" id="lpw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
     <button class="btn bp" style="width:100%;justify-content:center;padding:12px;margin-top:6px;font-size:14px" onclick="doLogin()">Sign in →</button>
+    <button type="button" onclick="showForgot()" style="background:none;border:none;color:var(--ink3);font-size:12px;cursor:pointer;margin-top:10px;font-family:inherit">Forgot password?</button>
     <div id="lerr" style="color:var(--red);font-size:12px;margin-top:10px"></div>
+  </div>
+
+  <!-- FORGOT PASSWORD FORM -->
+  <div id="forgotBox" class="lbox" style="display:none">
+    <div class="lmark" style="background:#b45309">?</div>
+    <h1 style="font-size:20px;font-weight:800;margin-bottom:4px">Reset password</h1>
+    <p style="font-size:13px;color:var(--ink2);margin-bottom:20px">Enter your admin email to receive a reset link</p>
+    <div class="fg"><label>Admin email</label><input type="email" id="resetEmail" placeholder="admin@yourdomain.com"/></div>
+    <button class="btn bp" style="width:100%;justify-content:center;padding:12px;margin-top:6px" onclick="sendReset()">Send reset link</button>
+    <div id="resetMsg" style="margin-top:12px;font-size:13px"></div>
+    <button onclick="showLogin()" style="background:none;border:none;color:var(--ink3);font-size:12px;cursor:pointer;margin-top:14px;font-family:inherit">← Back to login</button>
+  </div>
+
+  <!-- RESET PASSWORD FORM (triggered by token in URL) -->
+  <div id="resetBox" class="lbox" style="display:none">
+    <div class="lmark" style="background:var(--green)">✓</div>
+    <h1 style="font-size:20px;font-weight:800;margin-bottom:4px">New password</h1>
+    <p style="font-size:13px;color:var(--ink2);margin-bottom:20px">Enter your new admin password</p>
+    <div class="fg"><label>New password (8+ characters)</label><input type="password" id="newPwField" placeholder="••••••••"/></div>
+    <div class="fg"><label>Confirm password</label><input type="password" id="newPwConfirm" placeholder="••••••••"/></div>
+    <button class="btn bp" style="width:100%;justify-content:center;padding:12px;margin-top:6px" onclick="completeReset()">Set new password</button>
+    <div id="resetDoneMsg" style="margin-top:12px;font-size:13px"></div>
   </div>
 </div>
 
@@ -152,7 +175,10 @@ code{font-family:monospace;font-size:11px;background:var(--bg);padding:2px 6px;b
         <div style="width:28px;height:28px;border-radius:8px;background:var(--ink);color:var(--lime);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0" id="adminAvatar">A</div>
         <div style="min-width:0"><div style="font-size:12.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="aname">—</div><div style="font-size:10px;color:var(--ink3)" id="arole">—</div></div>
       </div>
-      <button class="btn btn-sm" style="width:100%;justify-content:center" onclick="logout()">Sign out</button>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm" style="flex:1;justify-content:center" onclick="logout()">Sign out</button>
+        <button class="btn btn-sm" title="Change password" onclick="$('changePwMo').style.display='flex'">🔑</button>
+      </div>
     </div>
   </aside>
 
@@ -458,6 +484,28 @@ code{font-family:monospace;font-size:11px;background:var(--bg);padding:2px 6px;b
   </div>
 </div>
 
+<!-- Change Password Modal -->
+<div class="mo" id="changePwMo" style="display:none" onclick="if(event.target===this)closeMo('changePwMo')">
+  <div class="mb" style="max-width:420px">
+    <div class="mh"><div style="font-size:16px;font-weight:700">🔑 Change password</div><button class="btn btn-sm" onclick="closeMo('changePwMo')">✕</button></div>
+    <div class="mbody">
+      <div class="fg"><label>Current password</label><input type="password" id="cpCurrent" placeholder="Your current password"/></div>
+      <div class="fg"><label>New password (8+ characters)</label><input type="password" id="cpNew" placeholder="New password"/></div>
+      <div class="fg"><label>Confirm new password</label><input type="password" id="cpConfirm" placeholder="Repeat new password"/></div>
+      <div id="cpMsg" style="margin-top:8px"></div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closeMo('changePwMo')">Cancel</button>
+      <button class="btn bp" onclick="changeMyPassword()">Update password</button>
+    </div>
+  </div>
+</div>
+
+<!-- Session timeout warning -->
+<div id="sessionWarn" style="display:none;position:fixed;bottom:20px;right:20px;background:#1a1814;color:white;padding:14px 20px;border-radius:10px;z-index:1000;font-size:13px;box-shadow:0 4px 20px rgba(0,0,0,.3)">
+  ⏰ Session expires in <span id="sessionCountdown">5:00</span> — <button onclick="refreshSession()" style="background:var(--lime);border:none;border-radius:5px;padding:4px 10px;cursor:pointer;font-size:12px;font-weight:600;color:var(--ink);font-family:inherit;margin-left:8px">Stay logged in</button>
+</div>
+
 <script>
 const API = '/api'
 let token = localStorage.getItem('adminToken')
@@ -498,6 +546,7 @@ async function doLogin() {
     $('adminAvatar').textContent = (d.admin.full_name || d.admin.email)[0].toUpperCase()
     loadDashboard()
     checkAnnouncement()
+    startSessionTimer()
   } catch(e) { $('lerr').textContent = e.message }
 }
 
@@ -506,7 +555,7 @@ function logout() { localStorage.removeItem('adminToken'); location.reload() }
 // Auto-login if token exists
 if (token) {
   $('login').style.display = 'none'; $('app').style.display = 'block'
-  apiFetch('/admin/stats').then(d => { loadDashboard(); checkAnnouncement() }).catch(() => { localStorage.removeItem('adminToken'); location.reload() })
+  apiFetch('/admin/stats').then(d => { loadDashboard(); checkAnnouncement(); startSessionTimer() }).catch(() => { localStorage.removeItem('adminToken'); location.reload() })
 }
 
 // ── NAVIGATION ───────────────────────────────────────────

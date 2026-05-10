@@ -470,3 +470,8 @@ CREATE TRIGGER on_auth_user_created
 NOTIFY pgrst, 'reload schema';
 
 SELECT 'Migration complete ✅' as status;
+
+-- ── ADMIN PASSWORD RESET COLUMNS ─────────────────────────
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS password_reset_token TEXT;
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS password_reset_expires TIMESTAMPTZ;
+CREATE INDEX IF NOT EXISTS idx_admin_reset_token ON admin_users(password_reset_token);

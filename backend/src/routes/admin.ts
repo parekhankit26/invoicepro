@@ -353,3 +353,128 @@ router.post('/users/:id/extend-trial', adminAuth, async (req: any, res: Response
     return res.json({ message: `Trial extended: ${plan} plan for ${days} days`, data })
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
+
+// ── ADMIN PASSWORD RESET (emergency — no auth needed) ────
+// Rate limited by checking last attempt in DB
+router.post('/forgot-password', async (req: Request, res: Response) => {
+  try {
+    const { email } = (req as any).body
+    if (!email) return res.status(400).json({ error: 'Email required' })
+    
+    const { data: admin } = await supabase.from('admin_users')
+      .select('id, email, full_name').eq('email', email).eq('is_active', true).single()
+    
+    // Always return same response (don't reveal if email exists)
+    if (!admin) return res.json({ message: 'If that email exists, a reset link has been sent.' })
+    
+    // Generate secure reset token (valid 1 hour)
+    const crypto = await import('crypto')
+    const token = crypto.randomBytes(32).toString('hex')
+    const expires = new Date(Date.now() + 3600000).toISOString()
+    
+    // Store token in DB
+    await supabase.from('admin_users').update({
+      password_reset_token: token,
+      password_reset_expires: expires
+    }).eq('id', admin.id)
+    
+    const resetUrl = `${process.env.BACKEND_URL || 'https://invoicepro-production-2ed7.up.railway.app'}/admin#reset=${token}`
+    
+    // Send email if SMTP configured
+    if (process.env.SMTP_HOST && process.env.SMTP_USER) {
+      try {
+        const { emailService } = await import('../services/emailService')
+        await (emailService as any).sendMail({
+          to: admin.email,
+          subject: 'InvoicePro Admin — Password Reset',
+          html: `
+            <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px">
+              <h2 style="color:#1a1814">Password Reset Request</h2>
+              <p>Hi ${admin.full_name || 'Admin'},</p>
+              <p>Click below to reset your InvoicePro admin password. Link expires in 1 hour.</p>
+              <a href="${resetUrl}" style="display:inline-block;margin:20px 0;padding:12px 24px;background:#1a1814;color:white;border-radius:8px;text-decoration:none;font-weight:600">Reset Password →</a>
+              <p style="color:#888;font-size:12px">If you didn't request this, ignore this email. Your password won't change.</p>
+              <hr style="border:none;border-top:1px solid #eee;margin:20px 0"/>
+              <p style="color:#888;font-size:11px">InvoicePro Admin Panel</p>
+            </div>`
+        })
+      } catch(emailErr) { console.error('Reset email failed:', emailErr) }
+    }
+    
+    // Log the attempt
+    try { await supabase.from('admin_audit_log').insert({ admin_id: admin.id, action: 'password_reset_requested', entity_type: 'admin_user', entity_id: admin.id, new_value: { email: admin.email } }) } catch(_) {}
+    
+    return res.json({
+      message: 'If that email exists, a reset link has been sent.',
+      // In development/no-SMTP: return the reset URL directly
+      ...(!process.env.SMTP_HOST ? { dev_reset_url: resetUrl } : {})
+    })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// ── VERIFY RESET TOKEN ───────────────────────────────────
+router.get('/reset-password/:token', async (req: Request, res: Response) => {
+  try {
+    const { data: admin } = await supabase.from('admin_users')
+      .select('id, email, full_name, password_reset_expires')
+      .eq('password_reset_token', req.params.token)
+      .single()
+    
+    if (!admin) return res.status(400).json({ error: 'Invalid or expired reset link' })
+    if (new Date(admin.password_reset_expires) < new Date()) {
+      return res.status(400).json({ error: 'Reset link has expired. Request a new one.' })
+    }
+    return res.json({ valid: true, email: admin.email, name: admin.full_name })
+  } catch(e: any) { return res.status(400).json({ error: 'Invalid reset link' }) }
+})
+
+// ── COMPLETE PASSWORD RESET ──────────────────────────────
+router.post('/reset-password/:token', async (req: Request, res: Response) => {
+  try {
+    const { password } = (req as any).body
+    if (!password || password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' })
+    
+    const { data: admin } = await supabase.from('admin_users')
+      .select('id, email, password_reset_expires')
+      .eq('password_reset_token', req.params.token)
+      .single()
+    
+    if (!admin) return res.status(400).json({ error: 'Invalid or expired reset link' })
+    if (new Date(admin.password_reset_expires) < new Date()) {
+      return res.status(400).json({ error: 'Reset link expired. Request a new one.' })
+    }
+    
+    const hash = await bcrypt.hash(password, 12)
+    await supabase.from('admin_users').update({
+      password_hash: hash,
+      password_reset_token: null,
+      password_reset_expires: null
+    }).eq('id', admin.id)
+    
+    try { await supabase.from('admin_audit_log').insert({ admin_id: admin.id, action: 'password_reset_completed', entity_type: 'admin_user', entity_id: admin.id, new_value: {} }) } catch(_) {}
+    
+    return res.json({ message: 'Password updated successfully. You can now log in.' })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// ── CHANGE OWN PASSWORD (logged-in admin) ────────────────
+router.put('/change-password', adminAuth, async (req: any, res: Response) => {
+  try {
+    const { current_password, new_password } = (req as any).body
+    if (!current_password || !new_password || new_password.length < 8) {
+      return res.status(400).json({ error: 'Current password and new password (8+ chars) required' })
+    }
+    const { data: admin } = await supabase.from('admin_users').select('password_hash').eq('id', req.admin.id).single()
+    if (!admin) return res.status(404).json({ error: 'Admin not found' })
+    
+    const valid = await bcrypt.compare(current_password, admin.password_hash)
+    if (!valid) return res.status(400).json({ error: 'Current password is incorrect' })
+    
+    const hash = await bcrypt.hash(new_password, 12)
+    await supabase.from('admin_users').update({ password_hash: hash }).eq('id', req.admin.id)
+    
+    try { await supabase.from('admin_audit_log').insert({ admin_id: req.admin.id, action: 'password_changed', entity_type: 'admin_user', entity_id: req.admin.id, new_value: {} }) } catch(_) {}
+    
+    return res.json({ message: 'Password changed successfully' })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})

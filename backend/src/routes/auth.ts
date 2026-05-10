@@ -137,3 +137,26 @@ router.get('/setup-status', async (req: Request, res: Response) => {
     return res.status(500).json({ error: err.message })
   }
 })
+
+// ── EMERGENCY DIRECT PASSWORD RESET (admin tool) ──────────
+// Use this to reset any user's password directly via service role
+router.post('/reset-user-password', async (req: Request, res: Response) => {
+  try {
+    const { email, new_password, admin_key } = (req as any).body
+    // Simple security check
+    if (admin_key !== (process.env.ADMIN_SETUP_KEY || 'InvoiceProSetup2024')) {
+      return res.status(403).json({ error: 'Invalid admin key' })
+    }
+    if (!email || !new_password || new_password.length < 8) {
+      return res.status(400).json({ error: 'Email and new password (8+ chars) required' })
+    }
+    // Find user by email
+    const { data: users } = await supabase.auth.admin.listUsers()
+    const user = users?.users?.find((u: any) => u.email?.toLowerCase() === email.toLowerCase())
+    if (!user) return res.status(404).json({ error: `No user found with email: ${email}` })
+    // Reset password directly
+    const { data, error } = await supabase.auth.admin.updateUserById(user.id, { password: new_password })
+    if (error) return res.status(400).json({ error: error.message })
+    return res.json({ message: `✅ Password reset for ${email}. You can now login with the new password.`, user_id: user.id })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})

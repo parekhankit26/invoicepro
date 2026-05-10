@@ -5,41 +5,41 @@
 <title>InvoicePro Super Admin</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--ink:#1a1814;--ink2:#756d5c;--ink3:#b8b2a3;--bg:#f8f7f4;--white:#fff;--border:#e8e5de;--green:#16a34a;--gbg:#f0fdf4;--red:#dc2626;--rbg:#fef2f2;--amber:#b45309;--abg:#fffbeb;--blue:#1d4ed8;--bbg:#eff6ff;--lime:#a3e635}
+:root{--ink:#1a1814;--ink2:#756d5c;--ink3:#b8b2a3;--bg:#f8f7f4;--white:#fff;--border:#e8e5de;--green:#16a34a;--gbg:#f0fdf4;--red:#dc2626;--rbg:#fef2f2;--amber:#b45309;--abg:#fffbeb;--blue:#1d4ed8;--bbg:#eff6ff;--purple:#7c3aed;--lime:#a3e635}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);font-size:13px}
 #login{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--ink)}
 .lbox{background:var(--white);border-radius:16px;padding:40px;width:380px;text-align:center}
-.lmark{width:48px;height:48px;background:var(--ink);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:var(--lime);font-weight:800;font-size:20px}
+.lmark{width:52px;height:52px;background:var(--ink);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:var(--lime);font-weight:900;font-size:22px}
 #app{display:none}
 .layout{display:flex;min-height:100vh}
-.sidebar{width:230px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:10}
+.sidebar{width:240px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:10}
 .logo{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.logo-icon{width:32px;height:32px;background:var(--ink);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--lime);font-weight:800;font-size:13px;flex-shrink:0}
+.logo-icon{width:34px;height:34px;background:var(--ink);border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--lime);font-weight:900;font-size:14px;flex-shrink:0}
 .ns{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);padding:10px 14px 3px;margin-top:6px}
-.ni{display:flex;align-items:center;gap:8px;padding:8px 12px;margin:1px 8px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--ink2);transition:all .12s;user-select:none}
-.ni:hover{background:var(--bg);color:var(--ink)}
-.ni.on{background:var(--ink);color:white}
-.nb{margin-left:auto;background:var(--red);color:white;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700}
-.nb.a{background:var(--amber)}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 12px;margin:1px 8px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--ink2);transition:all .12s;user-select:none}
+.ni:hover{background:var(--bg);color:var(--ink)}.ni.on{background:var(--ink);color:white}
+.nb{margin-left:auto;background:var(--red);color:white;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700}.nb.a{background:var(--amber)}
 .sfoot{padding:12px;border-top:1px solid var(--border);margin-top:auto}
-.main{margin-left:230px;flex:1;padding:28px 32px}
-.pg{display:none}.pg.on{display:block}
-.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
-.pt{font-size:20px;font-weight:700;letter-spacing:-.02em}
-.ps{font-size:13px;color:var(--ink2);margin-top:2px}
+.main{margin-left:240px;flex:1;min-width:0}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}
+.pg{display:none;padding:24px 28px 40px}.pg.on{display:block}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
+.pt{font-size:20px;font-weight:700;letter-spacing:-.02em}.ps{font-size:13px;color:var(--ink2);margin-top:2px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
 .card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px}
 .kl{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px}
-.kv{font-size:24px;font-weight:700;letter-spacing:-.03em}
-.ks{font-size:12px;color:var(--ink3);margin-top:4px}
+.kv{font-size:26px;font-weight:700;letter-spacing:-.03em}.ks{font-size:12px;color:var(--ink3);margin-top:4px}
+.kd{font-size:12px;color:var(--green);margin-top:3px}
+.kdr{font-size:12px;color:var(--red);margin-top:3px}
 table{width:100%;border-collapse:collapse}
 th{text-align:left;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);padding:9px 12px;border-bottom:1px solid var(--border);background:var(--bg);white-space:nowrap}
 td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#fafaf8}
-.badge{display:inline-flex;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge{display:inline-flex;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
 .b-free{background:var(--bg);color:var(--ink3);border:1px solid var(--border)}
 .b-starter{background:var(--bbg);color:var(--blue)}
 .b-pro{background:#ede9fe;color:#5b21b6}
@@ -52,39 +52,50 @@ tr:hover td{background:#fafaf8}
 .b-ok{background:var(--gbg);color:var(--green)}
 .b-warn{background:var(--abg);color:var(--amber)}
 .b-err{background:var(--rbg);color:var(--red)}
-.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:7px;font-size:12.5px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--white);color:var(--ink);font-family:inherit;transition:all .12s;white-space:nowrap}
-.btn:hover{background:var(--bg)}
-.btn:disabled{opacity:.5;cursor:not-allowed}
+.b-info{background:var(--bbg);color:var(--blue)}
+.b-super_admin{background:var(--ink);color:white}
+.b-admin{background:#ede9fe;color:#5b21b6}
+.b-support{background:var(--bbg);color:var(--blue)}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--white);color:var(--ink);font-family:inherit;transition:all .12s;white-space:nowrap}
+.btn:hover{background:var(--bg)}.btn:disabled{opacity:.5;cursor:not-allowed}
 .bp{background:var(--ink);color:white;border-color:var(--ink)}.bp:hover{background:#2d2a24}
 .bs{background:var(--gbg);color:var(--green);border-color:#bbf7d0}
 .bd{background:var(--rbg);color:var(--red);border-color:#fecaca}
 .ba{background:var(--abg);color:var(--amber);border-color:#fcd34d}
+.bpu{background:#ede9fe;color:#5b21b6;border-color:#ddd6fe}
 .btn-sm{padding:4px 10px;font-size:11.5px}
 input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;background:var(--white);color:var(--ink);outline:none;transition:border-color .12s}
-input:focus,select:focus,textarea:focus{border-color:var(--ink)}
+input:focus,select:focus,textarea:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(26,24,20,.08)}
 label{font-size:12px;font-weight:500;color:var(--ink2);display:block;margin-bottom:4px}
 .fg{margin-bottom:12px}
-.mo{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}
-.mb{background:var(--white);border-radius:14px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
+.mb{background:var(--white);border-radius:14px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.18)}
 .mh{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--white);border-radius:14px 14px 0 0}
-.mbody{padding:20px}
-.mf{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+.mbody{padding:20px}.mf{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
 .tog{width:42px;height:23px;border-radius:12px;cursor:pointer;border:none;position:relative;transition:background .2s;flex-shrink:0}
 .tog.on{background:var(--green)}.tog.off{background:var(--border)}
 .tog::after{content:'';position:absolute;width:17px;height:17px;border-radius:50%;background:white;top:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .tog.on::after{left:22px}.tog.off::after{left:3px}
-.sr{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.sr{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:12px}
 .sr:last-child{border:none}
-.alert{padding:10px 14px;border-radius:7px;font-size:12.5px;margin-bottom:12px;border-left:3px solid}
+.alert{padding:10px 14px;border-radius:7px;font-size:12.5px;margin-bottom:12px;border-left:3px solid;line-height:1.5}
 .ai{background:var(--bbg);border-color:var(--blue);color:var(--blue)}
 .as{background:var(--gbg);border-color:var(--green);color:var(--green)}
 .aw{background:var(--abg);border-color:var(--amber);color:var(--amber)}
-.tab-row{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.ar{background:var(--rbg);border-color:var(--red);color:var(--red)}
+.tab-row{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px}
 .tab{padding:9px 16px;cursor:pointer;font-size:13px;font-weight:500;color:var(--ink2);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .12s}
-.tab.on{color:var(--ink);border-bottom-color:var(--ink)}
-.tab:hover{color:var(--ink)}
-.pbar{height:5px;border-radius:3px;background:var(--border);overflow:hidden;margin-top:4px}
-.pfill{height:100%;border-radius:3px}
+.tab.on{color:var(--ink);border-bottom-color:var(--ink)}.tab:hover{color:var(--ink)}
+.pbar{height:6px;border-radius:3px;background:var(--border);overflow:hidden;margin-top:5px}
+.pfill{height:100%;border-radius:3px;transition:width .4s}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+.dot-ok{background:var(--green)}.dot-err{background:var(--red)}.dot-warn{background:var(--amber)}
+.searchbar{position:relative}.searchbar input{padding-left:32px}
+.searchbar::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;z-index:1}
+code{font-family:monospace;font-size:11px;background:var(--bg);padding:2px 6px;border-radius:4px}
+.empty{text-align:center;padding:40px 20px;color:var(--ink3)}
+.stat-trend{display:flex;align-items:center;gap:4px;font-size:11px;margin-top:4px}
+.trend-up{color:var(--green)}.trend-dn{color:var(--red)}
 </style>
 </head>
 <body>
@@ -93,11 +104,11 @@ label{font-size:12px;font-weight:500;color:var(--ink2);display:block;margin-bott
 <div id="login">
   <div class="lbox">
     <div class="lmark">IP</div>
-    <h1 style="font-size:22px;font-weight:700;margin-bottom:4px">Super Admin</h1>
+    <h1 style="font-size:22px;font-weight:800;margin-bottom:4px;letter-spacing:-.02em">Super Admin</h1>
     <p style="font-size:13px;color:var(--ink2);margin-bottom:24px">InvoicePro control panel</p>
-    <div class="fg"><input type="email" id="lemail" placeholder="Admin email" /></div>
-    <div class="fg"><input type="password" id="lpw" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()" /></div>
-    <button class="btn bp" style="width:100%;justify-content:center;padding:11px;margin-top:4px" onclick="doLogin()">Sign in →</button>
+    <div class="fg"><label>Email</label><input type="email" id="lemail" placeholder="admin@yourdomain.com"/></div>
+    <div class="fg"><label>Password</label><input type="password" id="lpw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <button class="btn bp" style="width:100%;justify-content:center;padding:12px;margin-top:6px;font-size:14px" onclick="doLogin()">Sign in →</button>
     <div id="lerr" style="color:var(--red);font-size:12px;margin-top:10px"></div>
   </div>
 </div>
@@ -108,674 +119,700 @@ label{font-size:12px;font-weight:500;color:var(--ink2);display:block;margin-bott
   <aside class="sidebar">
     <div class="logo">
       <div class="logo-icon">IP</div>
-      <div><div style="font-size:14px;font-weight:700">InvoicePro</div><div style="font-size:10px;color:var(--ink3)">Super Admin v3</div></div>
+      <div><div style="font-size:14px;font-weight:800;letter-spacing:-.02em">InvoicePro</div><div style="font-size:10px;color:var(--ink3)">Super Admin v4</div></div>
     </div>
     <div class="ns">Overview</div>
     <div class="ni on" onclick="show('dashboard')">📊 Dashboard</div>
-    <div class="ni" onclick="show('revenue')">💰 Revenue</div>
-    <div class="ns">Users & Clients</div>
-    <div class="ni" onclick="show('users')">👥 Users</div>
+    <div class="ni" onclick="show('health')">🟢 System health</div>
+    <div class="ni" onclick="show('revenue')">💰 Revenue & MRR</div>
+    <div class="ni" onclick="show('churn')">📉 Churn & retention</div>
+    <div class="ns">Users & Data</div>
+    <div class="ni" onclick="show('users')">👥 All users</div>
     <div class="ni" onclick="show('clients')">🏢 All clients</div>
     <div class="ns">Transactions</div>
     <div class="ni" onclick="show('invoices')">🧾 Invoices</div>
     <div class="ni" onclick="show('quotes')">📄 Quotes</div>
     <div class="ni" onclick="show('payments')">💳 Payments</div>
     <div class="ni" onclick="show('expenses')">🧮 Expenses</div>
-    <div class="ns">Features</div>
+    <div class="ns">Product</div>
     <div class="ni" onclick="show('features')">🚦 Feature flags</div>
-    <div class="ni" onclick="show('satisfaction')">⭐ Satisfaction</div>
-    <div class="ni" onclick="show('financing')">🏦 Financing</div>
+    <div class="ni" onclick="show('plans')">📋 Plans & pricing</div>
+    <div class="ni" onclick="show('announcement')">📣 Announcement</div>
     <div class="ns">Support</div>
     <div class="ni" onclick="show('tickets')">🎫 Tickets <span class="nb" id="tbadge" style="display:none">0</span></div>
+    <div class="ni" onclick="show('satisfaction')">⭐ Satisfaction</div>
+    <div class="ni" onclick="show('financing')">🏦 Financing</div>
     <div class="ni" onclick="show('broadcast')">📢 Broadcast</div>
-    <div class="ns">System</div>
-    <div class="ni" onclick="show('plans')">📋 Plans</div>
-    <div class="ni" onclick="show('currencies')">💱 Currencies</div>
-    <div class="ni" onclick="show('settings')">⚙️ Settings</div>
+    <div class="ns">Admin System</div>
+    <div class="ni" onclick="show('admins')">🔐 Admin accounts</div>
     <div class="ni" onclick="show('audit')">📝 Audit log</div>
+    <div class="ni" onclick="show('settings')">⚙️ Settings</div>
     <div class="sfoot">
-      <div style="font-size:12px;color:var(--ink3);margin-bottom:8px" id="aname">—</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div style="width:28px;height:28px;border-radius:8px;background:var(--ink);color:var(--lime);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0" id="adminAvatar">A</div>
+        <div style="min-width:0"><div style="font-size:12.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="aname">—</div><div style="font-size:10px;color:var(--ink3)" id="arole">—</div></div>
+      </div>
       <button class="btn btn-sm" style="width:100%;justify-content:center" onclick="logout()">Sign out</button>
     </div>
   </aside>
 
-  <main class="main">
+  <!-- TOP BAR -->
+  <div style="margin-left:240px">
+  <div class="topbar">
+    <div style="font-size:12px;color:var(--ink3)">InvoicePro Admin Panel</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span id="announcementBadge" style="display:none;font-size:11px" class="badge b-warn">📣 Announcement active</span>
+      <button class="btn btn-sm" onclick="show('health')">🟢 System status</button>
+    </div>
+  </div>
 
-   <!-- DASHBOARD -->
-   <div class="pg on" id="pg-dashboard">
-    <div class="ph"><div><div class="pt">Dashboard</div><div class="ps">Platform overview</div></div><button class="btn btn-sm" onclick="loadDashboard();this.textContent='✓ Done';setTimeout(()=>this.textContent='↻ Refresh',1000)">↻ Refresh</button></div>
-    <div class="g4" id="statsGrid" style="margin-bottom:16px"></div>
+  <!-- DASHBOARD -->
+  <div class="pg on" id="pg-dashboard">
+    <div class="ph"><div><div class="pt">Dashboard</div><div class="ps" id="dashDate">—</div></div>
+      <button class="btn btn-sm bp" onclick="loadDashboard()">↻ Refresh</button>
+    </div>
+    <div class="g5" id="statsGrid" style="margin-bottom:16px"></div>
     <div class="g2" style="margin-bottom:16px">
-      <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:12px">Plan breakdown</div><div id="planChart"></div></div>
-      <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:12px">Quick actions</div>
+      <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Plan breakdown</div><div id="planChart"></div></div>
+      <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Quick actions</div>
         <div style="display:flex;flex-direction:column;gap:8px">
           <button class="btn" onclick="show('users')">👥 Manage all users</button>
-          <button class="btn" onclick="show('clients')">🏢 View all clients</button>
-          <button class="btn" onclick="show('invoices')">🧾 View all invoices</button>
+          <button class="btn" onclick="show('churn')">📉 View at-risk users</button>
           <button class="btn" onclick="show('tickets')">🎫 Support tickets</button>
           <button class="btn" onclick="show('features')">🚦 Toggle features</button>
+          <button class="btn" onclick="show('announcement')">📣 Post announcement</button>
           <button class="btn" onclick="show('broadcast')">📢 Send broadcast</button>
         </div>
       </div>
     </div>
-   </div>
+    <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Recent signups</div><div id="recentSignups"></div></div>
+  </div>
 
-   <!-- REVENUE -->
-   <div class="pg" id="pg-revenue">
-    <div class="ph"><div><div class="pt">Revenue analytics</div></div></div>
-    <div class="g3" id="revStats" style="margin-bottom:16px"></div>
-    <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:12px">Monthly revenue (last 12 months)</div><div id="revChart"></div></div>
-   </div>
+  <!-- SYSTEM HEALTH -->
+  <div class="pg" id="pg-health">
+    <div class="ph"><div><div class="pt">System health</div><div class="ps">Real-time status of all services</div></div>
+      <button class="btn btn-sm bp" onclick="loadHealth()">↻ Refresh</button>
+    </div>
+    <div class="g3" style="margin-bottom:16px" id="healthGrid"></div>
+    <div class="card" id="healthDetails"></div>
+  </div>
 
-   <!-- USERS -->
-   <div class="pg" id="pg-users">
+  <!-- REVENUE -->
+  <div class="pg" id="pg-revenue">
+    <div class="ph"><div><div class="pt">Revenue & MRR</div></div></div>
+    <div class="g4" id="revStats" style="margin-bottom:16px"></div>
+    <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Monthly revenue</div><div id="revChart" style="height:200px;display:flex;align-items:flex-end;gap:8px"></div></div>
+  </div>
+
+  <!-- CHURN & RETENTION -->
+  <div class="pg" id="pg-churn">
+    <div class="ph"><div><div class="pt">Churn & Retention</div><div class="ps">At-risk users and recent signups</div></div></div>
+    <div class="g3" style="margin-bottom:16px" id="churnStats"></div>
+    <div class="g2" style="margin-bottom:16px">
+      <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:14px;color:var(--red)">⚠ At-risk users (paid, inactive 30+ days)</div><div id="atRiskList"></div></div>
+      <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:14px;color:var(--green)">✨ New signups (last 7 days)</div><div id="newSignupList"></div></div>
+    </div>
+  </div>
+
+  <!-- USERS -->
+  <div class="pg" id="pg-users">
     <div class="ph">
       <div><div class="pt">Users</div><div class="ps" id="userCount">—</div></div>
-      <div style="display:flex;gap:8px">
-        <input id="userSearch" placeholder="Search name, email, company..." style="width:240px" oninput="debounce(loadUsers,400)()"/>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div class="searchbar" style="flex:1;min-width:220px"><input id="userSearch" placeholder="Search name, email, company..." oninput="debounce(loadUsers,400)()"/></div>
         <select id="planFilter" style="width:140px" onchange="loadUsers()">
           <option value="">All plans</option>
           <option value="free">Free</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option>
         </select>
       </div>
     </div>
-    <div class="card" style="padding:0;overflow:hidden">
+    <div class="card" style="padding:0;overflow:auto">
       <table><thead><tr><th>User / Company</th><th>Plan</th><th>Email</th><th>Joined</th><th>Actions</th></tr></thead><tbody id="usersTbody"></tbody></table>
     </div>
-    <div id="usersPager" style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"></div>
-   </div>
+    <div id="usersPager" style="display:flex;gap:6px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap"></div>
+  </div>
 
-   <!-- CLIENTS (platform-wide) -->
-   <div class="pg" id="pg-clients">
+  <!-- CLIENTS -->
+  <div class="pg" id="pg-clients">
     <div class="ph">
       <div><div class="pt">All clients</div><div class="ps" id="clientCount">—</div></div>
-      <input id="clientSearch" placeholder="Search clients..." style="width:240px" oninput="debounce(loadClients,400)()"/>
+      <div class="searchbar" style="width:260px"><input id="clientSearch" placeholder="Search clients..." oninput="debounce(loadClients,400)()"/></div>
     </div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <table><thead><tr><th>Client name</th><th>Email</th><th>Business owner</th><th>Currency</th><th>Actions</th></tr></thead><tbody id="clientsTbody"></tbody></table>
+    <div class="card" style="padding:0;overflow:auto">
+      <table><thead><tr><th>Client name</th><th>Email</th><th>Owner</th><th>Currency</th><th>Actions</th></tr></thead><tbody id="clientsTbody"></tbody></table>
     </div>
-   </div>
+  </div>
 
-   <!-- INVOICES -->
-   <div class="pg" id="pg-invoices">
+  <!-- INVOICES -->
+  <div class="pg" id="pg-invoices">
     <div class="ph">
       <div><div class="pt">All invoices</div><div class="ps" id="invCount">—</div></div>
       <div style="display:flex;gap:8px">
-        <input id="invSearch" placeholder="Invoice number..." style="width:180px" oninput="debounce(loadInvoices,400)()"/>
-        <select id="invStatus" style="width:150px" onchange="loadInvoices()">
+        <div class="searchbar" style="width:200px"><input id="invSearch" placeholder="Invoice number..." oninput="debounce(loadInvoices,400)()"/></div>
+        <select id="invStatus" style="width:140px" onchange="loadInvoices()">
           <option value="">All statuses</option>
-          <option value="paid">Paid</option><option value="sent">Sent</option><option value="overdue">Overdue</option><option value="draft">Draft</option><option value="cancelled">Cancelled</option>
+          <option value="draft">Draft</option><option value="sent">Sent</option><option value="paid">Paid</option><option value="overdue">Overdue</option>
         </select>
       </div>
     </div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <table><thead><tr><th>Invoice</th><th>Business</th><th>Client</th><th>Amount</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody id="invTbody"></tbody></table>
+    <div class="card" style="padding:0;overflow:auto">
+      <table><thead><tr><th>Invoice #</th><th>Client</th><th>Owner</th><th>Amount</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody id="invTbody"></tbody></table>
     </div>
-   </div>
+    <div id="invPager" style="display:flex;gap:6px;justify-content:flex-end;margin-top:12px"></div>
+  </div>
 
-   <!-- QUOTES -->
-   <div class="pg" id="pg-quotes">
-    <div class="ph"><div><div class="pt">All quotes</div><div class="ps" id="qCount">—</div></div>
-      <select id="qStatus" style="width:160px" onchange="loadQuotes()"><option value="">All statuses</option><option value="draft">Draft</option><option value="sent">Sent</option><option value="accepted">Accepted</option><option value="declined">Declined</option><option value="converted">Converted</option></select>
+  <!-- QUOTES -->
+  <div class="pg" id="pg-quotes">
+    <div class="ph"><div><div class="pt">All quotes</div><div class="ps" id="quoCount">—</div></div></div>
+    <div class="card" style="padding:0;overflow:auto">
+      <table><thead><tr><th>Quote #</th><th>Client</th><th>Owner</th><th>Amount</th><th>Status</th><th>Expires</th></tr></thead><tbody id="quoTbody"></tbody></table>
     </div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <table><thead><tr><th>Quote #</th><th>Business</th><th>Client</th><th>Amount</th><th>Status</th><th>Expiry</th></tr></thead><tbody id="qTbody"></tbody></table>
-    </div>
-   </div>
+  </div>
 
-   <!-- PAYMENTS -->
-   <div class="pg" id="pg-payments">
+  <!-- PAYMENTS -->
+  <div class="pg" id="pg-payments">
     <div class="ph"><div><div class="pt">All payments</div><div class="ps" id="payCount">—</div></div></div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <table><thead><tr><th>Business</th><th>Invoice</th><th>Amount</th><th>Method</th><th>Date</th></tr></thead><tbody id="payTbody"></tbody></table>
+    <div class="card" style="padding:0;overflow:auto">
+      <table><thead><tr><th>Owner</th><th>Invoice</th><th>Amount</th><th>Method</th><th>Date</th></tr></thead><tbody id="payTbody"></tbody></table>
     </div>
-   </div>
+  </div>
 
-   <!-- EXPENSES -->
-   <div class="pg" id="pg-expenses">
+  <!-- EXPENSES -->
+  <div class="pg" id="pg-expenses">
     <div class="ph"><div><div class="pt">All expenses</div><div class="ps" id="expCount">—</div></div></div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <table><thead><tr><th>Business</th><th>Category</th><th>Description</th><th>Amount</th><th>Date</th><th>Billable</th></tr></thead><tbody id="expTbody"></tbody></table>
+    <div class="card" style="padding:0;overflow:auto">
+      <table><thead><tr><th>Owner</th><th>Category</th><th>Description</th><th>Amount</th><th>Date</th><th>Billable</th></tr></thead><tbody id="expTbody"></tbody></table>
     </div>
-   </div>
+  </div>
 
-   <!-- FEATURE FLAGS -->
-   <div class="pg" id="pg-features">
-    <div class="ph"><div><div class="pt">Feature flags</div><div class="ps">Toggle features on/off platform-wide instantly</div></div></div>
-    <div class="card"><div class="alert ai" style="margin-bottom:16px">Changes apply immediately to all users. Disabling a feature hides it from the app UI.</div><div id="featureList"></div></div>
-   </div>
+  <!-- FEATURE FLAGS -->
+  <div class="pg" id="pg-features">
+    <div class="ph"><div><div class="pt">Feature flags</div><div class="ps">Enable or disable features platform-wide</div></div></div>
+    <div class="card"><div id="featureList"></div></div>
+  </div>
 
-   <!-- SATISFACTION -->
-   <div class="pg" id="pg-satisfaction">
-    <div class="ph"><div><div class="pt">Client satisfaction</div></div></div>
-    <div class="g3" id="satStats" style="margin-bottom:16px"></div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <table><thead><tr><th>Business</th><th>Client</th><th>Score</th><th>Comment</th><th>Date</th></tr></thead><tbody id="satTbody"></tbody></table>
-    </div>
-   </div>
-
-   <!-- FINANCING -->
-   <div class="pg" id="pg-financing">
-    <div class="ph"><div><div class="pt">Financing applications</div></div></div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <table><thead><tr><th>Business</th><th>Amount</th><th>Status</th><th>Applied</th><th>Actions</th></tr></thead><tbody id="finTbody"></tbody></table>
-    </div>
-   </div>
-
-   <!-- TICKETS -->
-   <div class="pg" id="pg-tickets">
-    <div class="ph"><div><div class="pt">Support tickets</div></div>
-      <select id="ticketStatus" style="width:160px" onchange="loadTickets()"><option value="">All</option><option value="open">Open</option><option value="resolved">Resolved</option></select>
-    </div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <table><thead><tr><th>User</th><th>Subject</th><th>Priority</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody id="tickTbody"></tbody></table>
-    </div>
-   </div>
-
-   <!-- BROADCAST -->
-   <div class="pg" id="pg-broadcast">
-    <div class="ph"><div><div class="pt">Broadcast message</div></div></div>
-    <div class="card" style="max-width:600px">
-      <div class="g2" style="margin-bottom:12px">
-        <div class="fg"><label>Target audience</label><select id="bPlan"><option value="">All users</option><option value="free">Free only</option><option value="starter">Starter only</option><option value="pro">Pro only</option><option value="enterprise">Enterprise only</option></select></div>
-        <div class="fg"><label>Subject *</label><input id="bSubject" placeholder="Subject line..."/></div>
-      </div>
-      <div class="fg"><label>Message *</label><textarea id="bMsg" rows="5" placeholder="Your message..."></textarea></div>
-      <div class="alert aw">This will be sent to all matching users. Cannot be undone.</div>
-      <button class="btn bp" onclick="sendBroadcast()">📢 Send broadcast</button>
-      <div id="bResult" style="margin-top:10px"></div>
-    </div>
-   </div>
-
-   <!-- PLANS -->
-   <div class="pg" id="pg-plans">
+  <!-- PLANS -->
+  <div class="pg" id="pg-plans">
     <div class="ph"><div><div class="pt">Plans & pricing</div></div></div>
     <div class="g4" id="plansGrid"></div>
-   </div>
+  </div>
 
-   <!-- CURRENCIES -->
-   <div class="pg" id="pg-currencies">
-    <div class="ph"><div><div class="pt">Currencies</div></div></div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <table><thead><tr><th>Code</th><th>Name</th><th>Symbol</th><th>Active</th><th>Actions</th></tr></thead><tbody id="curTbody"></tbody></table>
+  <!-- ANNOUNCEMENT -->
+  <div class="pg" id="pg-announcement">
+    <div class="ph"><div><div class="pt">Platform announcement</div><div class="ps">Show a banner to all users in the app</div></div></div>
+    <div class="g2">
+      <div class="card">
+        <div style="font-size:13px;font-weight:600;margin-bottom:16px">Publish announcement</div>
+        <div class="fg"><label>Title</label><input id="annTitle" placeholder="e.g. Scheduled maintenance"/></div>
+        <div class="fg"><label>Message</label><textarea id="annMsg" rows="3" placeholder="We'll be doing maintenance on..."></textarea></div>
+        <div class="fg"><label>Type</label>
+          <select id="annType"><option value="info">ℹ Info (blue)</option><option value="warning">⚠ Warning (amber)</option><option value="success">✅ Success (green)</option><option value="error">🚨 Alert (red)</option></select>
+        </div>
+        <div class="fg"><label>Expires after (hours)</label><input id="annHours" type="number" value="24" min="1"/></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn bp" style="flex:1;justify-content:center" onclick="publishAnnouncement()">📣 Publish</button>
+          <button class="btn bd" style="flex:1;justify-content:center" onclick="removeAnnouncement()">🗑 Remove</button>
+        </div>
+        <div id="annResult" style="margin-top:10px"></div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:600;margin-bottom:14px">Current announcement</div>
+        <div id="annPreview"></div>
+      </div>
     </div>
-   </div>
+  </div>
 
-   <!-- SETTINGS -->
-   <div class="pg" id="pg-settings">
-    <div class="ph"><div><div class="pt">App settings</div></div><button class="btn bp" onclick="saveSettings()">Save all</button></div>
-    <div class="g2" id="settingsGrid"></div>
-   </div>
+  <!-- SATISFACTION -->
+  <div class="pg" id="pg-satisfaction">
+    <div class="ph"><div><div class="pt">Client satisfaction</div></div></div>
+    <div class="g3" id="satStats" style="margin-bottom:16px"></div>
+    <div class="card" style="padding:0;overflow:auto">
+      <table><thead><tr><th>Business</th><th>Client</th><th>Score</th><th>Comment</th><th>Date</th></tr></thead><tbody id="satTbody"></tbody></table>
+    </div>
+  </div>
 
-   <!-- AUDIT -->
-   <div class="pg" id="pg-audit">
-    <div class="ph"><div><div class="pt">Audit log</div><div class="ps">Every admin action recorded</div></div></div>
-    <div class="card" style="padding:0;overflow:hidden">
+  <!-- FINANCING -->
+  <div class="pg" id="pg-financing">
+    <div class="ph"><div><div class="pt">Invoice financing applications</div></div></div>
+    <div class="card" style="padding:0;overflow:auto">
+      <table><thead><tr><th>Business</th><th>Amount</th><th>Status</th><th>Applied</th><th>Actions</th></tr></thead><tbody id="finTbody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- TICKETS -->
+  <div class="pg" id="pg-tickets">
+    <div class="ph">
+      <div><div class="pt">Support tickets</div></div>
+      <select id="ticketStatus" style="width:160px" onchange="loadTickets()">
+        <option value="">All tickets</option><option value="open">Open</option><option value="resolved">Resolved</option>
+      </select>
+    </div>
+    <div class="card" style="padding:0;overflow:auto">
+      <table><thead><tr><th>User</th><th>Subject</th><th>Priority</th><th>Status</th><th>Date</th><th>Action</th></tr></thead><tbody id="tickTbody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- BROADCAST -->
+  <div class="pg" id="pg-broadcast">
+    <div class="ph"><div><div class="pt">Broadcast email</div><div class="ps">Send an email to all or filtered users</div></div></div>
+    <div class="g2">
+      <div class="card">
+        <div class="fg"><label>Subject line</label><input id="bSubject" placeholder="New feature: Time tracking"/></div>
+        <div class="fg"><label>Plan filter (optional)</label>
+          <select id="bPlan"><option value="">All users</option><option value="free">Free only</option><option value="starter">Starter only</option><option value="pro">Pro only</option><option value="enterprise">Enterprise only</option></select>
+        </div>
+        <div class="fg"><label>Message body</label><textarea id="bMsg" rows="5" placeholder="Hi there,&#10;&#10;We're excited to announce..."></textarea></div>
+        <button class="btn bp" style="width:100%;justify-content:center" onclick="sendBroadcast()">📢 Send broadcast</button>
+        <div id="bResult" style="margin-top:10px"></div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px">Tips</div>
+        <div class="alert ai">Use plan filter to target specific segments — don't spam free users with upgrade messages.</div>
+        <div class="alert aw">SMTP must be configured in Railway env vars for email delivery.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN ACCOUNTS -->
+  <div class="pg" id="pg-admins">
+    <div class="ph">
+      <div><div class="pt">Admin accounts</div><div class="ps">Manage who can access this panel</div></div>
+      <button class="btn bp" onclick="$('addAdminMo').style.display='flex'">+ Add admin</button>
+    </div>
+    <div class="card" style="padding:0;overflow:auto;margin-bottom:14px">
+      <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Last login</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminsTbody"></tbody></table>
+    </div>
+    <div class="alert ai">Super Admin can create/disable other admins. Support role has read-only access.</div>
+  </div>
+
+  <!-- AUDIT LOG -->
+  <div class="pg" id="pg-audit">
+    <div class="ph"><div><div class="pt">Audit log</div><div class="ps">All admin actions recorded</div></div></div>
+    <div class="card" style="padding:0;overflow:auto">
       <table><thead><tr><th>Admin</th><th>Action</th><th>Entity</th><th>Time</th></tr></thead><tbody id="audTbody"></tbody></table>
     </div>
-   </div>
+  </div>
 
-  </main>
- </div>
-</div>
+  <!-- SETTINGS -->
+  <div class="pg" id="pg-settings">
+    <div class="ph"><div><div class="pt">App settings</div></div><button class="btn bp" onclick="saveSettings()">Save settings</button></div>
+    <div id="settingsGrid" class="g2"></div>
+  </div>
 
-<!-- USER MODAL -->
+  </div><!-- end margin-left -->
+ </div><!-- end layout -->
+</div><!-- end app -->
+
+<!-- MODALS -->
+<!-- User detail modal -->
 <div class="mo" id="userMo" style="display:none" onclick="if(event.target===this)closeMo('userMo')">
- <div class="mb" style="max-width:720px">
-  <div class="mh"><strong id="userMoTitle">User</strong><button class="btn btn-sm" onclick="closeMo('userMo')">✕</button></div>
-  <div class="mbody">
-   <div class="tab-row">
-    <div class="tab on" onclick="uTab('profile')">Profile</div>
-    <div class="tab" onclick="uTab('invoices')">Invoices</div>
-    <div class="tab" onclick="uTab('clients')">Clients</div>
-    <div class="tab" onclick="uTab('payments')">Payments</div>
-    <div class="tab" onclick="uTab('expenses')">Expenses</div>
-    <div class="tab" onclick="uTab('quotes')">Quotes</div>
-    <div class="tab" onclick="uTab('team')">👥 Team</div>
-    <div class="tab" onclick="uTab('actions')">⚡ Actions</div>
-   </div>
-   <div id="uTabContent"></div>
+  <div class="mb" style="max-width:780px">
+    <div class="mh"><div style="font-size:16px;font-weight:700" id="userMoTitle">User</div><button class="btn btn-sm" onclick="closeMo('userMo')">✕ Close</button></div>
+    <div class="mbody">
+      <div class="tab-row">
+        <div class="tab on" onclick="uTab('overview',this)">Overview</div>
+        <div class="tab" onclick="uTab('invoices',this)">Invoices</div>
+        <div class="tab" onclick="uTab('clients',this)">Clients</div>
+        <div class="tab" onclick="uTab('edit',this)">Edit & Actions</div>
+      </div>
+      <div id="ut-overview"></div>
+      <div id="ut-invoices" style="display:none"></div>
+      <div id="ut-clients" style="display:none"></div>
+      <div id="ut-edit" style="display:none"></div>
+    </div>
   </div>
- </div>
 </div>
 
-<!-- INVOICE EDIT MODAL -->
-<div class="mo" id="invEditMo" style="display:none" onclick="if(event.target===this)closeMo('invEditMo')">
- <div class="mb" style="max-width:480px">
-  <div class="mh"><strong>Edit invoice</strong><button class="btn btn-sm" onclick="closeMo('invEditMo')">✕</button></div>
-  <div class="mbody" id="invEditBody"></div>
-  <div class="mf"><button class="btn" onclick="closeMo('invEditMo')">Cancel</button><button class="btn bp" onclick="saveInvoiceEdit()">Save changes</button></div>
- </div>
-</div>
-
-<!-- CLIENT EDIT MODAL -->
-<div class="mo" id="clientEditMo" style="display:none" onclick="if(event.target===this)closeMo('clientEditMo')">
- <div class="mb" style="max-width:480px">
-  <div class="mh"><strong>Edit client</strong><button class="btn btn-sm" onclick="closeMo('clientEditMo')">✕</button></div>
-  <div class="mbody" id="clientEditBody"></div>
-  <div class="mf"><button class="btn" onclick="closeMo('clientEditMo')">Cancel</button><button class="btn bp" onclick="saveClientEdit()">Save changes</button></div>
- </div>
-</div>
-
-<!-- TICKET MODAL -->
+<!-- Ticket modal -->
 <div class="mo" id="tickMo" style="display:none" onclick="if(event.target===this)closeMo('tickMo')">
- <div class="mb" style="max-width:500px">
-  <div class="mh"><strong>Reply to ticket</strong><button class="btn btn-sm" onclick="closeMo('tickMo')">✕</button></div>
-  <div class="mbody">
-   <div id="tickMoContent" style="margin-bottom:14px;padding:12px;background:var(--bg);border-radius:8px;font-size:13px"></div>
-   <div class="fg"><label>Your reply *</label><textarea id="tickReply" rows="4"></textarea></div>
-   <div class="fg"><label>Status</label><select id="tickStatus"><option value="resolved">Resolved</option><option value="open">Keep open</option></select></div>
+  <div class="mb">
+    <div class="mh"><div style="font-size:16px;font-weight:700">Reply to ticket</div><button class="btn btn-sm" onclick="closeMo('tickMo')">✕</button></div>
+    <div class="mbody">
+      <div id="tickMoContent" style="background:var(--bg);padding:12px;border-radius:8px;margin-bottom:14px;font-size:13px;line-height:1.6"></div>
+      <div class="fg"><label>Your reply</label><textarea id="tickReply" rows="4" placeholder="Type your response..."></textarea></div>
+      <div class="fg"><label>Update status</label>
+        <select id="tickStatus"><option value="resolved">Resolved</option><option value="open">Keep open</option></select>
+      </div>
+    </div>
+    <div class="mf"><button class="btn" onclick="closeMo('tickMo')">Cancel</button><button class="btn bp" onclick="submitTicket()">Send reply</button></div>
   </div>
-  <div class="mf"><button class="btn" onclick="closeMo('tickMo')">Cancel</button><button class="btn bs" onclick="submitTicket()">Send reply</button></div>
- </div>
+</div>
+
+<!-- Add admin modal -->
+<div class="mo" id="addAdminMo" style="display:none" onclick="if(event.target===this)closeMo('addAdminMo')">
+  <div class="mb" style="max-width:440px">
+    <div class="mh"><div style="font-size:16px;font-weight:700">Add admin account</div><button class="btn btn-sm" onclick="closeMo('addAdminMo')">✕</button></div>
+    <div class="mbody">
+      <div class="fg"><label>Full name</label><input id="newAdminName" placeholder="Support Agent"/></div>
+      <div class="fg"><label>Email</label><input id="newAdminEmail" type="email" placeholder="support@yourdomain.com"/></div>
+      <div class="fg"><label>Password</label><input id="newAdminPw" type="password" placeholder="8+ characters"/></div>
+      <div class="fg"><label>Role</label>
+        <select id="newAdminRole">
+          <option value="support">Support (read-only view)</option>
+          <option value="admin">Admin (full access)</option>
+          <option value="super_admin">Super Admin (everything)</option>
+        </select>
+      </div>
+    </div>
+    <div class="mf"><button class="btn" onclick="closeMo('addAdminMo')">Cancel</button><button class="btn bp" onclick="createAdmin()">Create admin</button></div>
+  </div>
 </div>
 
 <script>
 const API = '/api'
 let token = localStorage.getItem('adminToken')
-let currentUserId = null, currentInvId = null, currentClientId = null, currentTickId = null
-let settingsData = [], currentUserData = null
+let adminData = null
+let currentTickId = null
+let usersPage = 1
+let invPage = 1
+let settingsData = []
 
 const $ = id => document.getElementById(id)
-const fmt = n => '£' + (+n||0).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2})
+const fmt = (n, currency = '£') => `${currency}${(+n||0).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2})}`
 const fmtDate = d => d ? new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'
 const fmtTime = d => d ? new Date(d).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—'
-const stars = n => '★'.repeat(n||0)+'☆'.repeat(5-(n||0))
-
-function planBadge(p) {
-  const m = {free:'b-free',starter:'b-starter',pro:'b-pro',enterprise:'b-enterprise'}
-  return `<span class="badge ${m[p]||'b-free'}">${p||'free'}</span>`
-}
-function statusBadge(s) {
-  const m = {paid:'b-paid',open:'b-open',draft:'b-draft',overdue:'b-overdue',sent:'b-sent',resolved:'b-ok',pending:'b-warn',accepted:'b-ok',declined:'b-err',converted:'b-sent',cancelled:'b-draft'}
-  return `<span class="badge ${m[s]||'b-draft'}">${s||'—'}</span>`
-}
-
-let debTimers = {}
-function debounce(fn, ms) {
-  return function() {
-    clearTimeout(debTimers[fn.name])
-    debTimers[fn.name] = setTimeout(fn, ms)
-  }
-}
+const stars = n => '★'.repeat(n) + '☆'.repeat(5-n)
+const planBadge = p => `<span class="badge b-${p||'free'}">${p||'free'}</span>`
+const statusBadge = s => `<span class="badge b-${s||'draft'}">${s||'—'}</span>`
+const esc = str => String(str||'').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/</g,'&lt;')
+function debounce(fn, delay){ let t; return function(...args){ clearTimeout(t); t = setTimeout(()=>fn(...args), delay) } }
+function closeMo(id) { $(id).style.display='none' }
 
 async function apiFetch(path, opts = {}) {
   const res = await fetch(API + path, { ...opts, headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...opts.headers } })
-  const data = await res.json()
-  if (!res.ok) throw new Error(data.error || 'Request failed')
-  return data
+  if (!res.ok) { const e = await res.json().catch(()=>({error:res.statusText})); throw new Error(e.error || 'Request failed') }
+  return res.json()
 }
 
+// ── AUTH ─────────────────────────────────────────────────
 async function doLogin() {
-  $('lerr').textContent = ''
+  const email = $('lemail').value, password = $('lpw').value
+  if (!email || !password) { $('lerr').textContent = 'Enter email and password'; return }
   try {
-    const d = await apiFetch('/admin/login', { method: 'POST', body: JSON.stringify({ email: $('lemail').value, password: $('lpw').value }) })
-    token = d.token
+    const d = await apiFetch('/admin/login', { method:'POST', body: JSON.stringify({ email, password }) })
+    token = d.token; adminData = d.admin
     localStorage.setItem('adminToken', token)
+    $('login').style.display = 'none'; $('app').style.display = 'block'
     $('aname').textContent = d.admin.full_name || d.admin.email
-    $('login').style.display = 'none'
-    $('app').style.display = 'block'
+    $('arole').textContent = d.admin.role
+    $('adminAvatar').textContent = (d.admin.full_name || d.admin.email)[0].toUpperCase()
     loadDashboard()
+    checkAnnouncement()
   } catch(e) { $('lerr').textContent = e.message }
 }
 
-function logout() { localStorage.removeItem('adminToken'); token = null; location.reload() }
+function logout() { localStorage.removeItem('adminToken'); location.reload() }
 
-if (token) { 
-  $('login').style.display = 'none'; 
-  $('app').style.display = 'block'; 
-  loadDashboard()
-  // Auto-refresh dashboard every 30 seconds
-  setInterval(() => {
-    const activePage = document.querySelector('.pg.on')
-    if (activePage && activePage.id === 'pg-dashboard') loadDashboard()
-  }, 30000)
+// Auto-login if token exists
+if (token) {
+  $('login').style.display = 'none'; $('app').style.display = 'block'
+  apiFetch('/admin/stats').then(d => { loadDashboard(); checkAnnouncement() }).catch(() => { localStorage.removeItem('adminToken'); location.reload() })
+}
+
+// ── NAVIGATION ───────────────────────────────────────────
+const loaders = {
+  dashboard: loadDashboard, health: loadHealth, revenue: loadRevenue,
+  churn: loadChurn, users: loadUsers, clients: loadClients,
+  invoices: loadInvoices, quotes: loadQuotes, payments: loadPayments,
+  expenses: loadExpenses, features: loadFeatures, plans: loadPlans,
+  announcement: loadAnnouncement, satisfaction: loadSatisfaction,
+  financing: loadFinancing, tickets: loadTickets, admins: loadAdmins,
+  audit: loadAudit, settings: loadSettings
 }
 
 function show(page) {
   document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'))
   document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'))
   $('pg-' + page).classList.add('on')
-  const loaders = { dashboard:loadDashboard, revenue:loadRevenue, users:loadUsers, clients:loadClients, invoices:loadInvoices, quotes:loadQuotes, payments:loadPayments, expenses:loadExpenses, features:loadFeatures, satisfaction:loadSatisfaction, financing:loadFinancing, tickets:loadTickets, plans:loadPlans, currencies:loadCurrencies, settings:loadSettings, audit:loadAudit }
+  document.querySelectorAll('.ni').forEach(n => { if (n.textContent.trim().includes(page === 'health' ? 'health' : page === 'revenue' ? 'Revenue' : page === 'churn' ? 'Churn' : page === 'users' ? 'users' : page === 'admins' ? 'Admin' : page)) n.classList.add('on') })
   if (loaders[page]) loaders[page]()
 }
 
-function closeMo(id) { $(id).style.display = 'none' }
-
-// ── DASHBOARD ────────────────────────────────────────────
+// ── DASHBOARD ─────────────────────────────────────────────
 async function loadDashboard() {
   try {
     const d = await apiFetch('/admin/stats')
-    const stats = [
-      {label:'Total users',val:d.total_users,sub:`+${d.new_users_30d} this month`},
-      {label:'MRR',val:fmt(d.mrr),sub:`ARR: ${fmt(d.arr)}`,color:'var(--green)'},
-      {label:'Revenue (30d)',val:fmt(d.revenue_30d),sub:'last 30 days',color:'var(--blue)'},
-      {label:'Total revenue',val:fmt(d.total_revenue),sub:'all time'},
-      {label:'Total invoices',val:d.total_invoices,sub:`${d.paid_invoices} paid`},
-      {label:'Overdue',val:d.overdue_invoices,sub:'need chasing',color:d.overdue_invoices>0?'var(--red)':'var(--green)'},
-      {label:'Satisfaction',val:(d.avg_satisfaction||0)+'/5',sub:'avg score',color:d.avg_satisfaction>=4?'var(--green)':d.avg_satisfaction>=3?'var(--amber)':'var(--red)'},
-      {label:'Open tickets',val:d.open_tickets,sub:'need reply',color:d.open_tickets>0?'var(--red)':'var(--green)'},
-    ]
-    $('statsGrid').innerHTML = stats.map(s => `<div class="card"><div class="kl">${s.label}</div><div class="kv" style="font-size:20px;${s.color?'color:'+s.color:''}">${s.val}</div><div class="ks">${s.sub}</div></div>`).join('')
-    const plans = ['free','starter','pro','enterprise'], colors = ['#b8b2a3','#1d4ed8','#7c3aed','#b45309']
-    const total = Math.max(Object.values(d.plan_breakdown||{}).reduce((a,b)=>+a+(+b),0),1)
-    $('planChart').innerHTML = plans.map((p,i)=>{const c=d.plan_breakdown?.[p]||0;const pct=Math.round(c/total*100);return`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="font-weight:500;text-transform:capitalize">${p}</span><span style="color:var(--ink2)">${c} users (${pct}%)</span></div><div class="pbar"><div class="pfill" style="width:${pct}%;background:${colors[i]}"></div></div></div>`}).join('')
-    if (d.open_tickets > 0) { $('tbadge').textContent = d.open_tickets; $('tbadge').style.display = 'inline' }
+    $('dashDate').textContent = 'Last updated ' + fmtTime(new Date())
+    const plans = d.plan_breakdown || {}
+    $('statsGrid').innerHTML = [
+      { label:'Total users', val: d.total_users, sub: `+${d.new_users_30d||0} this month`, color:'' },
+      { label:'MRR', val: fmt(d.mrr), sub: `ARR: ${fmt(d.arr)}`, color:'var(--green)' },
+      { label:'Total revenue', val: fmt(d.total_revenue), sub: `${d.total_invoices||0} invoices`, color:'' },
+      { label:'Revenue 30d', val: fmt(d.revenue_30d), sub: 'Last 30 days', color:'var(--blue)' },
+      { label:'Overdue', val: d.overdue_invoices||0, sub: 'invoices overdue', color: d.overdue_invoices > 0 ? 'var(--red)' : '' },
+    ].map(s => `<div class="card"><div class="kl">${s.label}</div><div class="kv" ${s.color?`style="color:${s.color}"`:''}>${s.val}</div><div class="ks">${s.sub}</div></div>`).join('')
+
+    const total = Object.values(plans).reduce((a:any, b:any) => a+b, 0) || 1
+    const pColors = { free:'#b8b2a3', starter:'#1d4ed8', pro:'#7c3aed', enterprise:'#b45309' }
+    $('planChart').innerHTML = Object.entries(plans).map(([plan, count]: any) => `
+      <div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+          <span>${planBadge(plan)}</span><span style="font-weight:600">${count} users (${Math.round(count/total*100)}%)</span>
+        </div>
+        <div class="pbar"><div class="pfill" style="width:${count/total*100}%;background:${(pColors as any)[plan]||'var(--ink)'}"></div></div>
+      </div>`).join('')
+
+    // Recent signups
+    try {
+      const users = await apiFetch('/admin/users?limit=5&page=1')
+      $('recentSignups').innerHTML = (users.data||[]).map((u: any) => `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+          <div style="width:32px;height:32px;border-radius:8px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">${(u.full_name||u.email||'?')[0].toUpperCase()}</div>
+          <div style="flex:1;min-width:0"><div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.company_name||u.full_name||'—'}</div><div style="font-size:11px;color:var(--ink3)">${u.email}</div></div>
+          <div>${planBadge(u.plan)}</div>
+          <div style="font-size:11px;color:var(--ink3)">${fmtDate(u.created_at)}</div>
+        </div>`).join('')
+    } catch(e) { $('recentSignups').innerHTML = '<div class="empty">No data</div>' }
   } catch(e) { console.error(e) }
 }
 
-// ── REVENUE ──────────────────────────────────────────────
-async function loadRevenue() {
+// ── SYSTEM HEALTH ─────────────────────────────────────────
+async function loadHealth() {
   try {
-    const d = await apiFetch('/admin/revenue')
-    const months = Object.entries(d.monthly_revenue||{}).sort((a,b)=>a[0].localeCompare(b[0])).slice(-12)
-    const maxVal = Math.max(...months.map(m=>m[1]),1)
-    $('revStats').innerHTML = `
-      <div class="card"><div class="kl">Total processed</div><div class="kv" style="color:var(--green)">${fmt(d.total_processed)}</div></div>
-      <div class="card"><div class="kl">Best month</div><div class="kv" style="font-size:16px">${months.sort((a,b)=>b[1]-a[1])[0]?.[0]||'—'}</div><div class="ks">${fmt(months.sort((a,b)=>b[1]-a[1])[0]?.[1]||0)}</div></div>
-      <div class="card"><div class="kl">Months tracked</div><div class="kv">${months.length}</div></div>`
-    $('revChart').innerHTML = `<div style="display:flex;align-items:flex-end;gap:6px;height:160px">${months.map(([m,v])=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;background:var(--ink);border-radius:3px 3px 0 0;height:${Math.max(Math.round(v/maxVal*130),2)}px" title="${fmt(v)}"></div><div style="font-size:9px;color:var(--ink3);transform:rotate(-45deg);white-space:nowrap;margin-top:4px">${m.slice(5)}</div></div>`).join('')}</div>`
-  } catch(e) {}
+    const d = await apiFetch('/admin/health')
+    const db = d.checks?.database || {}
+    $('healthGrid').innerHTML = [
+      { label:'Database', status: db.error ? 'error' : 'ok', detail: db.error || `${db.latency}ms latency` },
+      { label:'SMTP / Email', status: d.checks?.smtp_configured ? 'ok' : 'warn', detail: d.checks?.smtp_configured ? 'Configured' : 'Not configured — emails disabled' },
+      { label:'Stripe', status: d.checks?.stripe_configured ? 'ok' : 'warn', detail: d.checks?.stripe_configured ? 'Configured' : 'Not configured — payments disabled' },
+      { label:'AI Assistant', status: d.checks?.ai_configured ? 'ok' : 'warn', detail: d.checks?.ai_configured ? 'Configured' : 'No Anthropic key — AI disabled' },
+      { label:'Twilio SMS', status: d.checks?.twilio_configured ? 'ok' : 'warn', detail: d.checks?.twilio_configured ? 'Configured' : 'Not configured — SMS/WhatsApp disabled' },
+      { label:'API Server', status: 'ok', detail: `Running · ${fmtTime(d.timestamp)}` },
+    ].map(h => `<div class="card">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+        <span class="status-dot dot-${h.status==='ok'?'ok':h.status==='warn'?'warn':'err'}"></span>
+        <span style="font-weight:600;font-size:13px">${h.label}</span>
+        <span class="badge b-${h.status==='ok'?'ok':h.status==='warn'?'warn':'err'}" style="margin-left:auto">${h.status}</span>
+      </div>
+      <div style="font-size:12px;color:var(--ink3)">${h.detail}</div>
+    </div>`).join('')
+    $('healthDetails').innerHTML = `
+      <div style="font-size:13px;font-weight:600;margin-bottom:14px">Platform activity</div>
+      <div class="g3">
+        <div><div class="kl">Active users (24h)</div><div class="kv">${d.checks?.active_users_24h||0}</div></div>
+        <div><div class="kl">Invoices today</div><div class="kv">${d.checks?.invoices_today||0}</div></div>
+        <div><div class="kl">Server time</div><div class="kv" style="font-size:16px">${fmtTime(d.timestamp)}</div></div>
+      </div>`
+  } catch(e) { $('healthGrid').innerHTML = `<div class="alert ar" style="grid-column:1/-1">Failed to load health: ${e.message}</div>` }
 }
 
-// ── USERS ────────────────────────────────────────────────
-let usersPage = 1
+// ── REVENUE ───────────────────────────────────────────────
+async function loadRevenue() {
+  try {
+    const [rev, stats] = await Promise.all([apiFetch('/admin/revenue'), apiFetch('/admin/stats')])
+    $('revStats').innerHTML = [
+      { label:'Total processed', val: fmt(rev.total_processed) },
+      { label:'MRR', val: fmt(stats.mrr), color:'var(--green)' },
+      { label:'ARR', val: fmt(stats.arr) },
+      { label:'Revenue (30d)', val: fmt(stats.revenue_30d) },
+    ].map(s=>`<div class="card"><div class="kl">${s.label}</div><div class="kv" ${s.color?`style="color:${s.color}"`:''}>${s.val}</div></div>`).join('')
+    const months = Object.entries(rev.monthly_revenue||{}).sort().slice(-12)
+    const max = Math.max(...months.map(([,v]:any)=>v), 1)
+    $('revChart').innerHTML = months.map(([month, val]:any)=>`
+      <div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:6px">
+        <div style="font-size:10px;color:var(--ink3)">${fmt(val)}</div>
+        <div style="width:100%;background:var(--ink);border-radius:4px 4px 0 0;height:${Math.max(4,val/max*160)}px"></div>
+        <div style="font-size:10px;color:var(--ink3);white-space:nowrap">${month.slice(5)}</div>
+      </div>`).join('')
+  } catch(e) { $('revStats').innerHTML = `<div class="alert ar" style="grid-column:1/-1">Failed: ${e.message}</div>` }
+}
+
+// ── CHURN ─────────────────────────────────────────────────
+async function loadChurn() {
+  try {
+    const d = await apiFetch('/admin/churn')
+    $('churnStats').innerHTML = [
+      { label:'At-risk users', val: (d.at_risk||[]).length, color: (d.at_risk||[]).length > 0 ? 'var(--red)' : 'var(--green)' },
+      { label:'New signups (7d)', val: (d.new_signups_7d||[]).length, color:'var(--green)' },
+      { label:'Churn rate (est.)', val: (d.churn_rate||0) + '%', color: +d.churn_rate > 10 ? 'var(--red)' : 'var(--amber)' },
+    ].map(s=>`<div class="card"><div class="kl">${s.label}</div><div class="kv" style="color:${s.color}">${s.val}</div></div>`).join('')
+    const renderUser = (u: any) => `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><div style="flex:1;min-width:0"><div style="font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.company_name||u.full_name||'—'}</div><div style="font-size:11px;color:var(--ink3)">${u.email}</div></div>${planBadge(u.plan)}<button class="btn btn-sm" onclick="viewUser('${u.id}')">View</button></div>`
+    $('atRiskList').innerHTML = (d.at_risk||[]).length ? (d.at_risk||[]).map(renderUser).join('') : '<div class="empty">No at-risk users 🎉</div>'
+    $('newSignupList').innerHTML = (d.new_signups_7d||[]).length ? (d.new_signups_7d||[]).map(renderUser).join('') : '<div class="empty">No new signups this week</div>'
+  } catch(e) { $('churnStats').innerHTML = `<div class="alert ar" style="grid-column:1/-1">Failed: ${e.message}</div>` }
+}
+
+// ── USERS ─────────────────────────────────────────────────
 async function loadUsers() {
   try {
     const search = $('userSearch').value, plan = $('planFilter').value
     const d = await apiFetch(`/admin/users?search=${encodeURIComponent(search)}&plan=${plan}&page=${usersPage}&limit=25`)
     $('userCount').textContent = `${d.total} users`
-    $('usersTbody').innerHTML = (d.data||[]).map(u => `<tr>
-      <td><div style="font-weight:500">${u.full_name||'—'}</div>${u.company_name?`<div style="font-size:11px;color:var(--ink3)">${u.company_name}</div>`:''}</td>
+    $('usersTbody').innerHTML = (d.data||[]).map((u: any) => `<tr>
+      <td><div style="font-weight:500">${u.company_name||u.full_name||'—'}</div><div style="font-size:11px;color:var(--ink3)">${u.full_name||''}</div></td>
       <td>${planBadge(u.plan)}</td>
-      <td style="color:var(--ink2);font-size:12px">${u.email||'—'}</td>
-      <td style="color:var(--ink3);font-size:11px">${fmtDate(u.created_at)}</td>
-      <td><div style="display:flex;gap:4px">
-        <button class="btn btn-sm" onclick="openUserModal('${u.id}','${esc(u.full_name||u.email)}')">🔍 View</button>
-        <select class="btn btn-sm" style="padding:4px 6px" onchange="quickPlan('${u.id}',this.value);this.value=''">
-          <option value="">Change plan</option>
-          <option value="free">→ Free</option><option value="starter">→ Starter</option><option value="pro">→ Pro</option><option value="enterprise">→ Enterprise</option>
-        </select>
+      <td style="color:var(--blue);font-size:12px">${u.email||'—'}</td>
+      <td style="font-size:11px;color:var(--ink3)">${fmtDate(u.created_at)}</td>
+      <td><div style="display:flex;gap:4px;flex-wrap:wrap">
+        <button class="btn btn-sm" onclick="viewUser('${u.id}')">View</button>
+        <button class="btn btn-sm bpu" onclick="quickChangePlan('${u.id}','${u.plan}')">Plan</button>
+        <button class="btn btn-sm ba" onclick="extendTrial('${u.id}')">Trial+</button>
+        <button class="btn btn-sm" onclick="exportUser('${u.id}','${esc(u.email)}')">Export</button>
       </div></td>
     </tr>`).join('')
-    const pages = Math.ceil(d.total/25)
+    const pages = Math.ceil((d.total||0)/25)
     $('usersPager').innerHTML = pages > 1 ? Array.from({length:Math.min(pages,10)},(_,i)=>`<button class="btn btn-sm ${i+1===usersPage?'bp':''}" onclick="usersPage=${i+1};loadUsers()">${i+1}</button>`).join('') : ''
-  } catch(e) { console.error(e) }
+  } catch(e) { $('usersTbody').innerHTML = `<tr><td colspan="5" class="empty">Error: ${e.message}</td></tr>` }
 }
 
-async function openUserModal(userId, name) {
-  currentUserId = userId
-  $('userMoTitle').textContent = name
-  $('userMo').style.display = 'flex'
-  uTab('profile')
+async function viewUser(id: string) {
+  try {
+    const d = await apiFetch(`/admin/users/${id}`)
+    const u = d.profile || {}
+    $('userMoTitle').textContent = u.company_name || u.full_name || u.email
+    $('ut-overview').innerHTML = `
+      <div class="g3" style="margin-bottom:14px">
+        <div class="card"><div class="kl">Revenue</div><div class="kv">${fmt(d.stats?.total_revenue||0)}</div></div>
+        <div class="card"><div class="kl">Invoices</div><div class="kv">${d.stats?.total_invoices||0} <span style="font-size:13px;color:var(--green)">(${d.stats?.paid_invoices||0} paid)</span></div></div>
+        <div class="card"><div class="kl">Clients</div><div class="kv">${d.stats?.total_clients||0}</div></div>
+      </div>
+      <div class="g2">
+        <div><div class="fg"><label>Email</label><div style="font-size:13px;color:var(--blue)">${u.email||'—'}</div></div>
+          <div class="fg"><label>Company</label><div>${u.company_name||'—'}</div></div>
+          <div class="fg"><label>Plan</label>${planBadge(u.plan)}</div>
+          <div class="fg"><label>Joined</label><div>${fmtDate(u.created_at)}</div></div>
+          <div class="fg"><label>Currency</label><div>${u.default_currency||'GBP'}</div></div>
+        </div>
+        <div>
+          <div class="fg"><label>Actions</label></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="btn bs" onclick="impersonateUser('${id}')">🔐 Get login link</button>
+            <button class="btn ba" onclick="extendTrial('${id}')">⏰ Extend trial</button>
+            <button class="btn" onclick="exportUser('${id}','${esc(u.email)}')">📦 Export all data</button>
+            <button class="btn bd" onclick="suspendUser('${id}')">🚫 Suspend account</button>
+          </div>
+        </div>
+      </div>`
+    $('ut-invoices').innerHTML = `<div style="overflow:auto"><table><thead><tr><th>Invoice #</th><th>Client</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>${(d.invoices||[]).map((i:any)=>`<tr><td style="font-family:monospace;font-size:12px">${i.invoice_number}</td><td>${i.clients?.name||'—'}</td><td>${fmt(i.total)}</td><td>${statusBadge(i.status)}</td><td style="font-size:11px;color:var(--ink3)">${fmtDate(i.created_at)}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">No invoices</td></tr>'}</tbody></table></div>`
+    $('ut-clients').innerHTML = `<div style="overflow:auto"><table><thead><tr><th>Name</th><th>Email</th><th>Currency</th></tr></thead><tbody>${(d.clients||[]).map((c:any)=>`<tr><td style="font-weight:500">${c.name}</td><td style="color:var(--blue);font-size:12px">${c.email||'—'}</td><td>${c.currency||'GBP'}</td></tr>`).join('') || '<tr><td colspan="3" class="empty">No clients</td></tr>'}</tbody></table></div>`
+    $('ut-edit').innerHTML = `
+      <div class="g2">
+        <div>
+          <div class="fg"><label>Full name</label><input id="eu_name" value="${esc(u.full_name||'')}"/></div>
+          <div class="fg"><label>Company</label><input id="eu_company" value="${esc(u.company_name||'')}"/></div>
+          <div class="fg"><label>Plan</label><select id="eu_plan"><option value="free" ${u.plan==='free'?'selected':''}>Free</option><option value="starter" ${u.plan==='starter'?'selected':''}>Starter</option><option value="pro" ${u.plan==='pro'?'selected':''}>Pro</option><option value="enterprise" ${u.plan==='enterprise'?'selected':''}>Enterprise</option></select></div>
+          <button class="btn bp" onclick="saveUser('${id}')">Save changes</button>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:10px">Danger zone</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="btn bd" onclick="if(confirm('Suspend this user?'))apiFetch('/admin/users/${id}/suspend',{method:'PUT',body:JSON.stringify({suspended:true})}).then(()=>{alert('Suspended');closeMo('userMo');loadUsers()}).catch(e=>alert(e.message))">🚫 Suspend account</button>
+            <button class="btn bd" onclick="if(confirm('PERMANENTLY DELETE this user? This cannot be undone!'))apiFetch('/admin/users/${id}',{method:'DELETE'}).then(()=>{alert('Deleted');closeMo('userMo');loadUsers()}).catch(e=>alert(e.message))">🗑 Delete account</button>
+          </div>
+        </div>
+      </div>`
+    $('userMo').style.display = 'flex'
+  } catch(e) { alert('Failed to load user: ' + e.message) }
 }
 
-async function uTab(tab) {
+function uTab(tab: string, el: any) {
   document.querySelectorAll('#userMo .tab').forEach(t => t.classList.remove('on'))
-  document.querySelectorAll('#userMo .tab').forEach(t => { if (t.textContent.toLowerCase().includes(tab.toLowerCase().replace('⚡ ',''))) t.classList.add('on') })
-  $('uTabContent').innerHTML = '<div style="color:var(--ink3);padding:20px">Loading...</div>'
+  el.classList.add('on')
+  ;['overview','invoices','clients','edit'].forEach(t => { $('ut-'+t).style.display = t===tab ? 'block' : 'none' })
+}
+
+async function saveUser(id: string) {
   try {
-    if (!currentUserData || currentUserData.profile?.id !== currentUserId) {
-      currentUserData = await apiFetch(`/admin/users/${currentUserId}`)
-    }
-    const d = currentUserData
-    const p = d.profile || {}, s = d.stats || {}
-
-    if (tab === 'profile') {
-      $('uTabContent').innerHTML = `
-        <div class="g2" style="margin-bottom:14px">
-          ${[['Full name',p.full_name],['Company',p.company_name||'—'],['Email',p.email],['Phone',p.company_phone||'—'],['Plan',planBadge(p.plan)],['Currency',p.default_currency||'GBP'],['Tax rate',`${p.default_tax_rate||20}%`],['Payment terms',`${p.default_payment_terms||30} days`],['VAT number',p.tax_number||'—'],['Address',p.company_address||'—']].map(([l,v])=>`<div class="fg"><label>${l}</label><div style="padding:7px 0;font-size:13px">${v}</div></div>`).join('')}
-        </div>
-        <div style="border-top:1px solid var(--border);padding-top:14px;margin-bottom:14px">
-          <div style="font-size:12px;font-weight:600;margin-bottom:10px">Account stats</div>
-          <div class="g4">
-            ${[['Invoices',s.total_invoices],['Paid',s.paid_invoices],['Revenue',fmt(s.total_revenue)],['Clients',s.total_clients],['Overdue',s.overdue_invoices],['Expenses',fmt(s.total_expenses)],['Satisfaction',s.avg_satisfaction?s.avg_satisfaction+'/5':'—'],['Joined',fmtDate(p.created_at)]].map(([l,v])=>`<div style="background:var(--bg);border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--ink3);margin-bottom:4px">${l}</div><div style="font-weight:600">${v}</div></div>`).join('')}
-          </div>
-        </div>
-        <div style="border-top:1px solid var(--border);padding-top:14px">
-          <div style="font-size:12px;font-weight:600;margin-bottom:10px">Edit profile</div>
-          <div class="g2">
-            <div class="fg"><label>Full name</label><input id="e_full_name" value="${p.full_name||''}"/></div>
-            <div class="fg"><label>Company name</label><input id="e_company_name" value="${p.company_name||''}"/></div>
-            <div class="fg"><label>Company phone</label><input id="e_company_phone" value="${p.company_phone||''}"/></div>
-            <div class="fg"><label>VAT number</label><input id="e_tax_number" value="${p.tax_number||''}"/></div>
-            <div class="fg"><label>Default currency</label><select id="e_default_currency">${['GBP','USD','EUR','CAD','AUD','INR','AED'].map(c=>`<option ${c===p.default_currency?'selected':''}>${c}</option>`).join('')}</select></div>
-            <div class="fg"><label>Default tax rate %</label><input id="e_default_tax_rate" type="number" value="${p.default_tax_rate||20}"/></div>
-            <div class="fg" style="grid-column:1/-1"><label>Company address</label><input id="e_company_address" value="${p.company_address||''}"/></div>
-          </div>
-          <button class="btn bp" onclick="saveUserProfile()">Save profile changes</button>
-        </div>`
-    }
-
-    else if (tab === 'invoices') {
-      const invs = d.invoices || []
-      $('uTabContent').innerHTML = invs.length === 0 ? '<div style="color:var(--ink3);padding:20px;text-align:center">No invoices</div>' :
-        `<table><thead><tr><th>Invoice</th><th>Client</th><th>Amount</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>
-        ${invs.map(i=>`<tr><td style="font-family:monospace;font-size:12px">${i.invoice_number}</td><td style="color:var(--ink2)">${i.clients?.name||'—'}</td><td>${fmt(i.total)}</td><td>${statusBadge(i.status)}</td><td style="font-size:11px;color:var(--ink3)">${fmtDate(i.created_at)}</td><td><div style="display:flex;gap:4px"><button class="btn btn-sm" onclick="openInvEdit('${i.id}','${i.invoice_number}','${i.status}','${i.due_date}','${i.total}')">Edit</button><button class="btn btn-sm bd" onclick="deleteInvoice('${i.id}')">Del</button></div></td></tr>`).join('')}
-        </tbody></table>`
-    }
-
-    else if (tab === 'clients') {
-      const cls = d.clients || []
-      $('uTabContent').innerHTML = `<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn bp btn-sm" onclick="addClientForUser('${currentUserId}')">+ Add client</button></div>` + (cls.length === 0 ? '<div style="color:var(--ink3);padding:20px;text-align:center">No clients</div>' :
-        `<table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Currency</th><th>Actions</th></tr></thead><tbody>
-        ${cls.map(c=>`<tr><td style="font-weight:500">${c.name}</td><td style="color:var(--ink2);font-size:12px">${c.email}</td><td style="font-size:12px">${c.phone||'—'}</td><td><span class="badge b-draft">${c.currency||'GBP'}</span></td><td><div style="display:flex;gap:4px"><button class="btn btn-sm" onclick="openClientEdit('${c.id}','${esc(c.name)}','${esc(c.email)}','${c.phone||''}','${c.currency||'GBP'}','${esc(c.company||'')}')">Edit</button><button class="btn btn-sm bd" onclick="deleteClient('${c.id}')">Del</button></div></td></tr>`).join('')}
-        </tbody></table>`)
-    }
-
-    else if (tab === 'payments') {
-      const pays = d.payments || []
-      $('uTabContent').innerHTML = pays.length === 0 ? '<div style="color:var(--ink3);padding:20px;text-align:center">No payments</div>' :
-        `<table><thead><tr><th>Invoice</th><th>Amount</th><th>Method</th><th>Date</th></tr></thead><tbody>
-        ${pays.map(p=>`<tr><td style="font-family:monospace;font-size:12px">${p.invoice_id?.slice(0,8)||'—'}...</td><td>${fmt(p.amount)}</td><td><span class="badge b-draft">${p.method}</span></td><td style="font-size:11px;color:var(--ink3)">${fmtDate(p.paid_at)}</td></tr>`).join('')}
-        </tbody></table>`
-    }
-
-    else if (tab === 'expenses') {
-      const exps = d.expenses || []
-      $('uTabContent').innerHTML = exps.length === 0 ? '<div style="color:var(--ink3);padding:20px;text-align:center">No expenses</div>' :
-        `<table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th></tr></thead><tbody>
-        ${exps.map(e=>`<tr><td style="font-size:11px;color:var(--ink3)">${fmtDate(e.date)}</td><td><span class="badge b-draft">${e.category}</span></td><td>${e.description}</td><td>${fmt(e.amount)}</td></tr>`).join('')}
-        </tbody></table>`
-    }
-
-    else if (tab === 'quotes') {
-      const qs = d.quotes || []
-      $('uTabContent').innerHTML = qs.length === 0 ? '<div style="color:var(--ink3);padding:20px;text-align:center">No quotes</div>' :
-        `<table><thead><tr><th>Quote</th><th>Client</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>
-        ${qs.map(q=>`<tr><td style="font-family:monospace;font-size:12px">${q.quote_number}</td><td style="color:var(--ink2)">${q.clients?.name||'—'}</td><td>${fmt(q.total)}</td><td>${statusBadge(q.status)}</td><td style="font-size:11px;color:var(--ink3)">${fmtDate(q.created_at)}</td></tr>`).join('')}
-        </tbody></table>`
-    }
-
-    else if (tab === 'team') {
-      const team = d.team || []
-      $('uTabContent').innerHTML = `
-        <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
-          <span style="font-size:12px;color:var(--ink3)">${team.length} team member${team.length!==1?'s':''}</span>
-        </div>` + (team.length === 0 ? '<div style="color:var(--ink3);padding:20px;text-align:center">No team members</div>' :
-        `<table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th></tr></thead><tbody>
-        ${team.map(m=>`<tr><td style="font-weight:500">${m.full_name||'—'}</td><td style="font-size:12px;color:var(--ink2)">${m.email}</td><td><span class="badge b-draft">${m.role}</span></td><td>${statusBadge(m.status)}</td><td style="font-size:11px;color:var(--ink3)">${fmtDate(m.joined_at)||'Pending'}</td></tr>`).join('')}
-        </tbody></table>`)
-    }
-
-    else if (tab === 'actions') {
-      const p = d.profile || {}
-      $('uTabContent').innerHTML = `
-        <div style="display:grid;gap:10px">
-          <div class="card" style="border-color:var(--border)">
-            <div style="font-size:12px;font-weight:600;margin-bottom:10px">Change plan</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              ${['free','starter','pro','enterprise'].map(pl=>`<button class="btn btn-sm ${p.plan===pl?'bp':''}" onclick="changePlan('${currentUserId}','${pl}')">${pl}</button>`).join('')}
-            </div>
-          </div>
-          <div class="card">
-            <div style="font-size:12px;font-weight:600;margin-bottom:10px">Reset password</div>
-            <div style="display:flex;gap:8px">
-              <input id="newPw" placeholder="New password (min 8 chars)" style="flex:1"/>
-              <button class="btn btn-sm ba" onclick="resetPw()">Reset</button>
-            </div>
-          </div>
-          <div class="card" style="border-color:#fecaca">
-            <div style="font-size:12px;font-weight:600;margin-bottom:10px;color:var(--red)">Danger zone</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button class="btn btn-sm bd" onclick="suspendUser('${currentUserId}',true)">⛔ Suspend user</button>
-              <button class="btn btn-sm bs" onclick="suspendUser('${currentUserId}',false)">✓ Unsuspend</button>
-              <button class="btn btn-sm bd" onclick="deleteUser('${currentUserId}')">🗑 Delete account permanently</button>
-            </div>
-          </div>
-        </div>`
-    }
-  } catch(e) { $('uTabContent').innerHTML = `<div style="color:var(--red);padding:20px">${e.message}</div>` }
+    await apiFetch(`/admin/users/${id}`, { method:'PUT', body: JSON.stringify({ full_name: $('eu_name').value, company_name: $('eu_company').value, plan: $('eu_plan').value }) })
+    alert('Saved!'); closeMo('userMo'); loadUsers()
+  } catch(e: any) { alert(e.message) }
 }
 
-async function saveUserProfile() {
+async function quickChangePlan(id: string, currentPlan: string) {
+  const plans = ['free','starter','pro','enterprise']
+  const newPlan = prompt(`Change plan for this user.\nCurrent: ${currentPlan}\nEnter new plan (free/starter/pro/enterprise):`, currentPlan)
+  if (!newPlan || !plans.includes(newPlan)) return
+  try { await apiFetch(`/admin/users/${id}/plan`, { method:'PUT', body: JSON.stringify({ plan: newPlan }) }); alert(`Plan updated to ${newPlan}!`); loadUsers() }
+  catch(e: any) { alert(e.message) }
+}
+
+async function extendTrial(id: string) {
+  if (!confirm('Give this user Pro plan for 14 days free?')) return
+  try { const d = await apiFetch(`/admin/users/${id}/extend-trial`, { method:'POST', body: JSON.stringify({ days:14, plan:'pro' }) }); alert(d.message); loadUsers() }
+  catch(e: any) { alert(e.message) }
+}
+
+async function impersonateUser(id: string) {
   try {
-    const updates = { full_name:$('e_full_name').value, company_name:$('e_company_name').value, company_phone:$('e_company_phone').value, tax_number:$('e_tax_number').value, default_currency:$('e_default_currency').value, default_tax_rate:+$('e_default_tax_rate').value, company_address:$('e_company_address').value }
-    await apiFetch(`/admin/users/${currentUserId}`, { method:'PUT', body:JSON.stringify(updates) })
-    currentUserData = null
-    alert('Profile updated!')
-    uTab('profile')
-  } catch(e) { alert(e.message) }
+    const d = await apiFetch(`/admin/impersonate/${id}`, { method:'POST' })
+    if (d.link) { navigator.clipboard.writeText(d.link); alert(`Login link copied to clipboard!\n\n${d.note}\n\nSend this link to log in as the user.`) }
+    else alert(d.message)
+  } catch(e: any) { alert('Impersonation failed: ' + e.message) }
 }
 
-async function quickPlan(userId, plan) {
-  if (!plan) return
-  if (!confirm(`Change to ${plan} plan?`)) return
-  try { await apiFetch(`/admin/users/${userId}/plan`, { method:'PUT', body:JSON.stringify({plan}) }); loadUsers(); alert('Plan changed!') } catch(e) { alert(e.message) }
+async function suspendUser(id: string) {
+  if (!confirm('Suspend this account?')) return
+  try { await apiFetch(`/admin/users/${id}/suspend`, { method:'PUT', body: JSON.stringify({ suspended:true }) }); alert('User suspended'); closeMo('userMo'); loadUsers() }
+  catch(e: any) { alert(e.message) }
 }
 
-async function changePlan(userId, plan) {
-  if (!confirm(`Change to ${plan} plan?`)) return
-  try { await apiFetch(`/admin/users/${userId}/plan`, { method:'PUT', body:JSON.stringify({plan}) }); currentUserData = null; uTab('actions'); loadUsers(); alert('Plan changed to ' + plan) } catch(e) { alert(e.message) }
+async function exportUser(id: string, email: string) {
+  try {
+    const res = await fetch(API + `/admin/export/${id}`, { headers: { Authorization: `Bearer ${token}` } })
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a'); a.href = url; a.download = `export-${email}.json`
+    document.body.appendChild(a); a.click(); document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  } catch(e: any) { alert('Export failed: ' + e.message) }
 }
 
-async function resetPw() {
-  const pw = $('newPw').value
-  if (pw.length < 8) return alert('Password must be at least 8 characters')
-  if (!confirm('Reset this user\'s password?')) return
-  try { await apiFetch(`/admin/users/${currentUserId}/reset-password`, { method:'PUT', body:JSON.stringify({password:pw}) }); alert('Password reset!'); $('newPw').value = '' } catch(e) { alert(e.message) }
-}
-
-async function suspendUser(userId, suspend) {
-  if (!confirm(suspend ? 'Suspend this user?' : 'Unsuspend this user?')) return
-  try { await apiFetch(`/admin/users/${userId}/suspend`, { method:'PUT', body:JSON.stringify({suspended:suspend}) }); alert(suspend ? 'User suspended' : 'User unsuspended') } catch(e) { alert(e.message) }
-}
-
-async function deleteUser(userId) {
-  if (!confirm('DELETE this user permanently? This cannot be undone.')) return
-  if (!confirm('Are you absolutely sure? All their data will be lost.')) return
-  try { await apiFetch(`/admin/users/${userId}`, { method:'DELETE' }); closeMo('userMo'); loadUsers(); alert('User deleted') } catch(e) { alert(e.message) }
-}
-
-// ── CLIENTS (platform) ───────────────────────────────────
+// ── CLIENTS ──────────────────────────────────────────────
 async function loadClients() {
   try {
-    const search = $('clientSearch').value
-    const d = await apiFetch(`/admin/clients?search=${encodeURIComponent(search)}&limit=50`)
+    const d = await apiFetch(`/admin/clients?search=${encodeURIComponent($('clientSearch')?.value||'')}`)
     $('clientCount').textContent = `${d.total} clients`
-    $('clientsTbody').innerHTML = (d.data||[]).map(c=>`<tr>
+    $('clientsTbody').innerHTML = (d.data||[]).map((c:any)=>`<tr>
       <td style="font-weight:500">${c.name}</td>
-      <td style="color:var(--ink2);font-size:12px">${c.email}</td>
-      <td style="color:var(--ink3);font-size:12px">${c.profiles?.company_name||c.profiles?.full_name||'—'}</td>
-      <td><span class="badge b-draft">${c.currency||'GBP'}</span></td>
-      <td><div style="display:flex;gap:4px">
-        <button class="btn btn-sm" onclick="openClientEdit('${c.id}','${esc(c.name)}','${esc(c.email)}','${c.phone||''}','${c.currency||'GBP'}','${esc(c.company||'')}')">Edit</button>
-        <button class="btn btn-sm bd" onclick="deleteClient('${c.id}')">Archive</button>
-      </div></td>
+      <td style="color:var(--blue);font-size:12px">${c.email||'—'}</td>
+      <td style="font-size:12px;color:var(--ink3)">${c.profiles?.company_name||c.profiles?.full_name||'—'}</td>
+      <td>${c.currency||'GBP'}</td>
+      <td><button class="btn btn-sm bd" onclick="if(confirm('Archive?'))apiFetch('/admin/clients/${c.id}',{method:'DELETE'}).then(()=>loadClients())">Archive</button></td>
     </tr>`).join('')
-  } catch(e) {}
-}
-
-function openClientEdit(id, name, email, phone, currency, company) {
-  currentClientId = id
-  $('clientEditBody').innerHTML = `
-    <div class="fg"><label>Name *</label><input id="ce_name" value="${name}"/></div>
-    <div class="fg"><label>Email *</label><input id="ce_email" value="${email}"/></div>
-    <div class="fg"><label>Phone</label><input id="ce_phone" value="${phone}"/></div>
-    <div class="fg"><label>Company</label><input id="ce_company" value="${company}"/></div>
-    <div class="fg"><label>Currency</label><select id="ce_currency">${['GBP','USD','EUR','CAD','AUD','INR','AED'].map(c=>`<option ${c===currency?'selected':''}>${c}</option>`).join('')}</select></div>`
-  $('clientEditMo').style.display = 'flex'
-}
-
-async function saveClientEdit() {
-  try {
-    await apiFetch(`/admin/clients/${currentClientId}`, { method:'PUT', body:JSON.stringify({ name:$('ce_name').value, email:$('ce_email').value, phone:$('ce_phone').value, company:$('ce_company').value, currency:$('ce_currency').value }) })
-    closeMo('clientEditMo'); currentUserData = null; loadClients(); if (currentUserId) uTab('clients')
-    alert('Client updated!')
-  } catch(e) { alert(e.message) }
-}
-
-async function deleteClient(id) {
-  if (!confirm('Archive this client?')) return
-  try { await apiFetch(`/admin/clients/${id}`, { method:'DELETE' }); currentUserData = null; loadClients(); if (currentUserId) uTab('clients') } catch(e) { alert(e.message) }
-}
-
-async function addClientForUser(userId) {
-  const name = prompt('Client name:')
-  const email = prompt('Client email:')
-  if (!name || !email) return
-  try { await apiFetch(`/admin/users/${userId}/clients`, { method:'POST', body:JSON.stringify({ name, email, currency:'GBP' }) }); currentUserData = null; uTab('clients'); alert('Client added!') } catch(e) { alert(e.message) }
+  } catch(e: any) { $('clientsTbody').innerHTML = `<tr><td colspan="5" class="empty">Error: ${e.message}</td></tr>` }
 }
 
 // ── INVOICES ─────────────────────────────────────────────
 async function loadInvoices() {
   try {
-    const status = $('invStatus').value, search = $('invSearch').value
-    const d = await apiFetch(`/admin/invoices?status=${status}&search=${encodeURIComponent(search)}&limit=50`)
+    const d = await apiFetch(`/admin/invoices?status=${$('invStatus').value}&search=${encodeURIComponent($('invSearch')?.value||'')}&page=${invPage}&limit=25`)
     $('invCount').textContent = `${d.total} invoices`
-    $('invTbody').innerHTML = (d.data||[]).map(i=>`<tr>
-      <td style="font-family:monospace;font-size:12px;font-weight:600">${i.invoice_number}</td>
-      <td style="font-size:12px">${i.profiles?.company_name||i.profiles?.full_name||'—'}</td>
-      <td style="color:var(--ink2);font-size:12px">${i.clients?.name||'—'}</td>
+    $('invTbody').innerHTML = (d.data||[]).map((i:any)=>`<tr>
+      <td style="font-family:monospace;font-weight:600;font-size:12px">${i.invoice_number}</td>
+      <td style="font-size:12px">${i.clients?.name||'—'}</td>
+      <td style="font-size:11px;color:var(--ink3)">${i.profiles?.company_name||i.profiles?.full_name||'—'}</td>
       <td style="font-weight:500">${fmt(i.total)}</td>
       <td>${statusBadge(i.status)}</td>
       <td style="font-size:11px;color:var(--ink3)">${fmtDate(i.created_at)}</td>
       <td><div style="display:flex;gap:4px">
-        <button class="btn btn-sm" onclick="openInvEdit('${i.id}','${i.invoice_number}','${i.status}','${i.due_date}','${i.total}')">Edit</button>
-        <button class="btn btn-sm bd" onclick="deleteInvoice('${i.id}')">Del</button>
+        ${i.status!=='paid'?`<button class="btn btn-sm bs" onclick="markInvPaid('${i.id}')">✓ Paid</button>`:''}
+        <button class="btn btn-sm bd" onclick="if(confirm('Delete?'))apiFetch('/admin/invoices/${i.id}',{method:'DELETE'}).then(()=>loadInvoices())">Del</button>
       </div></td>
     </tr>`).join('')
-  } catch(e) {}
+    const pages = Math.ceil((d.total||0)/25)
+    $('invPager').innerHTML = pages > 1 ? Array.from({length:Math.min(pages,10)},(_,i)=>`<button class="btn btn-sm ${i+1===invPage?'bp':''}" onclick="invPage=${i+1};loadInvoices()">${i+1}</button>`).join('') : ''
+  } catch(e: any) { $('invTbody').innerHTML = `<tr><td colspan="7" class="empty">Error: ${e.message}</td></tr>` }
 }
 
-function openInvEdit(id, number, status, dueDate, total) {
-  currentInvId = id
-  $('invEditBody').innerHTML = `
-    <div class="fg"><label>Invoice number</label><input value="${number}" disabled style="background:var(--bg);color:var(--ink2)"/></div>
-    <div class="fg"><label>Status</label><select id="ie_status"><option value="draft" ${status==='draft'?'selected':''}>Draft</option><option value="sent" ${status==='sent'?'selected':''}>Sent</option><option value="paid" ${status==='paid'?'selected':''}>Paid</option><option value="overdue" ${status==='overdue'?'selected':''}>Overdue</option><option value="cancelled" ${status==='cancelled'?'selected':''}>Cancelled</option></select></div>
-    <div class="fg"><label>Due date</label><input id="ie_due" type="date" value="${dueDate?.slice(0,10)||''}"/></div>
-    <div class="fg"><label>Total amount</label><input id="ie_total" type="number" value="${total}" step="0.01"/></div>
-    <div class="fg"><label>Notes (optional)</label><textarea id="ie_notes" rows="2"></textarea></div>`
-  $('invEditMo').style.display = 'flex'
+async function markInvPaid(id: string) {
+  try { await apiFetch(`/admin/invoices/${id}`, { method:'PUT', body:JSON.stringify({status:'paid'}) }); loadInvoices() }
+  catch(e: any) { alert(e.message) }
 }
 
-async function saveInvoiceEdit() {
-  try {
-    await apiFetch(`/admin/invoices/${currentInvId}`, { method:'PUT', body:JSON.stringify({ status:$('ie_status').value, due_date:$('ie_due').value, total:+$('ie_total').value, notes:$('ie_notes').value }) })
-    closeMo('invEditMo'); loadInvoices(); alert('Invoice updated!')
-  } catch(e) { alert(e.message) }
-}
-
-async function deleteInvoice(id) {
-  if (!confirm('Delete this invoice permanently?')) return
-  try { await apiFetch(`/admin/invoices/${id}`, { method:'DELETE' }); loadInvoices(); alert('Invoice deleted') } catch(e) { alert(e.message) }
-}
-
-// ── QUOTES ────────────────────────────────────────────────
+// ── QUOTES ───────────────────────────────────────────────
 async function loadQuotes() {
   try {
-    const status = $('qStatus').value
-    const d = await apiFetch(`/admin/quotes?status=${status}&limit=50`)
-    $('qCount').textContent = `${d.total} quotes`
-    $('qTbody').innerHTML = (d.data||[]).map(q=>`<tr>
+    const d = await apiFetch('/admin/quotes?limit=50')
+    $('quoCount').textContent = `${d.total} quotes`
+    $('quoTbody').innerHTML = (d.data||[]).map((q:any)=>`<tr>
       <td style="font-family:monospace;font-size:12px">${q.quote_number}</td>
-      <td style="font-size:12px">${q.profiles?.company_name||q.profiles?.full_name||'—'}</td>
-      <td style="color:var(--ink2)">${q.clients?.name||'—'}</td>
+      <td>${q.clients?.name||'—'}</td>
+      <td style="font-size:11px;color:var(--ink3)">${q.profiles?.company_name||'—'}</td>
       <td>${fmt(q.total)}</td>
       <td>${statusBadge(q.status)}</td>
       <td style="font-size:11px;color:var(--ink3)">${fmtDate(q.expiry_date)}</td>
     </tr>`).join('')
-  } catch(e) {}
+  } catch(e: any) {}
 }
 
 // ── PAYMENTS ─────────────────────────────────────────────
@@ -783,14 +820,14 @@ async function loadPayments() {
   try {
     const d = await apiFetch('/admin/payments?limit=50')
     $('payCount').textContent = `${d.total} payments`
-    $('payTbody').innerHTML = (d.data||[]).map(p=>`<tr>
+    $('payTbody').innerHTML = (d.data||[]).map((p:any)=>`<tr>
       <td style="font-size:12px">${p.profiles?.company_name||p.profiles?.full_name||'—'}</td>
-      <td style="font-family:monospace;font-size:11px;color:var(--ink3)">${p.invoices?.invoice_number||'—'}</td>
-      <td style="font-weight:500">${fmt(p.amount)}</td>
-      <td><span class="badge b-draft">${p.method||'—'}</span></td>
+      <td style="font-family:monospace;font-size:11px">${p.invoices?.invoice_number||'—'}</td>
+      <td style="font-weight:600;color:var(--green)">${fmt(p.amount)}</td>
+      <td><span class="badge b-draft">${p.method||'manual'}</span></td>
       <td style="font-size:11px;color:var(--ink3)">${fmtDate(p.paid_at)}</td>
     </tr>`).join('')
-  } catch(e) {}
+  } catch(e: any) {}
 }
 
 // ── EXPENSES ─────────────────────────────────────────────
@@ -798,7 +835,7 @@ async function loadExpenses() {
   try {
     const d = await apiFetch('/admin/expenses?limit=50')
     $('expCount').textContent = `${d.total} expenses`
-    $('expTbody').innerHTML = (d.data||[]).map(e=>`<tr>
+    $('expTbody').innerHTML = (d.data||[]).map((e:any)=>`<tr>
       <td style="font-size:12px">${e.profiles?.company_name||e.profiles?.full_name||'—'}</td>
       <td><span class="badge b-draft">${e.category}</span></td>
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.description}</td>
@@ -806,75 +843,159 @@ async function loadExpenses() {
       <td style="font-size:11px;color:var(--ink3)">${fmtDate(e.date)}</td>
       <td>${e.is_billable?'<span class="badge b-sent">Billable</span>':'—'}</td>
     </tr>`).join('')
-  } catch(e) {}
+  } catch(e: any) {}
 }
 
-// ── FEATURE FLAGS ────────────────────────────────────────
+// ── FEATURE FLAGS ─────────────────────────────────────────
 const FEATURES = [
-  {key:'feature_ai_assistant',name:'AI Invoice Assistant',desc:'Claude chat widget on every page — create invoices by typing'},
-  {key:'feature_whatsapp_sms',name:'WhatsApp & SMS reminders',desc:'Send reminders via WhatsApp/SMS (requires Twilio keys)'},
-  {key:'feature_receipt_scanner',name:'AI Receipt Scanner',desc:'Upload receipt photo, AI extracts expense data automatically'},
-  {key:'feature_cashflow_forecast',name:'Cash Flow Forecast',desc:'90-day income forecast page'},
-  {key:'feature_invoice_designer',name:'Invoice Template Designer',desc:'Custom templates with brand colours and fonts'},
-  {key:'feature_client_happiness',name:'Client Happiness Score',desc:'NPS surveys sent after invoice payment'},
-  {key:'feature_financing',name:'Invoice Financing (Get Paid Now)',desc:'Advance 90% of invoice within 24 hours'},
-  {key:'feature_milestones',name:'Milestone Billing',desc:'Split projects into phased invoice milestones'},
+  {key:'feature_ai_assistant',name:'AI Invoice Assistant',desc:'Claude chat widget — create invoices by typing'},
+  {key:'feature_whatsapp_sms',name:'WhatsApp & SMS reminders',desc:'Requires Twilio credentials in Railway env'},
+  {key:'feature_receipt_scanner',name:'AI Receipt Scanner',desc:'Upload receipt photo, AI extracts data'},
+  {key:'feature_cashflow_forecast',name:'Cash Flow Forecast',desc:'90-day income & expense forecast'},
+  {key:'feature_invoice_designer',name:'Invoice Template Designer',desc:'Custom templates with brand colours'},
+  {key:'feature_client_happiness',name:'Client Happiness Score',desc:'NPS surveys after invoice payment'},
+  {key:'feature_financing',name:'Invoice Financing',desc:'Advance 90% of invoice value'},
+  {key:'feature_milestones',name:'Milestone Billing',desc:'Split projects into phased invoices'},
   {key:'feature_early_payment',name:'Early Payment Discount',desc:'Offer % discount for early payment'},
-  {key:'feature_view_tracking',name:'Invoice View Tracking',desc:'See when client opened invoice email'},
-  {key:'feature_year_review',name:'Year in Review',desc:'Annual revenue report on Jan 1st'},
+  {key:'feature_view_tracking',name:'Invoice View Tracking',desc:'See when client opened invoice'},
+  {key:'feature_year_review',name:'Year in Review',desc:'Annual revenue summary'},
   {key:'feature_time_tracking',name:'Time Tracking',desc:'Log hours and convert to invoices'},
-  {key:'feature_recurring',name:'Recurring Invoices',desc:'Auto-generate invoices on schedule'},
-  {key:'feature_xero_export',name:'Xero/QuickBooks Export',desc:'Export in accountant-friendly formats (Enterprise)'},
+  {key:'feature_recurring',name:'Recurring Invoices',desc:'Auto-generate on schedule'},
   {key:'feature_white_label',name:'White Label Branding',desc:'Custom logo, domain, colours (Enterprise)'},
-  {key:'feature_api_access',name:'REST API Access',desc:'Programmatic access with API keys (Enterprise)'},
+  {key:'feature_api_access',name:'REST API Access',desc:'API keys for programmatic access (Enterprise)'},
 ]
 
 async function loadFeatures() {
-  let flags = {}
-  try { const d = await apiFetch('/admin/feature-flags'); d.forEach(f => { try { flags[f.key] = JSON.parse(f.value) } catch { flags[f.key] = true } }) } catch {}
-  $('featureList').innerHTML = FEATURES.map(f => {
+  let flags:any = {}
+  try { const d = await apiFetch('/admin/feature-flags'); d.forEach((f:any)=>{ try{flags[f.key]=JSON.parse(f.value)}catch{flags[f.key]=true} }) } catch{}
+  $('featureList').innerHTML = FEATURES.map(f=>{
     const enabled = flags[f.key] !== false
     return `<div class="sr"><div style="flex:1"><div style="font-size:13px;font-weight:500">${f.name}</div><div style="font-size:11px;color:var(--ink3);margin-top:2px">${f.desc}</div></div><button class="tog ${enabled?'on':'off'}" onclick="toggleFeature('${f.key}',this)"></button></div>`
   }).join('')
 }
 
-async function toggleFeature(key, btn) {
+async function toggleFeature(key: string, btn: any) {
   const isOn = btn.classList.contains('on')
   btn.classList.toggle('on', !isOn); btn.classList.toggle('off', isOn)
   try { await apiFetch(`/admin/feature-flags/${key}`, { method:'PUT', body:JSON.stringify({value:!isOn}) }) }
-  catch(e) { btn.classList.toggle('on', isOn); btn.classList.toggle('off', !isOn); alert('Failed: ' + e.message) }
+  catch(e: any) { btn.classList.toggle('on', isOn); btn.classList.toggle('off', !isOn); alert('Failed: '+e.message) }
 }
 
-// ── SATISFACTION ─────────────────────────────────────────
+// ── PLANS ────────────────────────────────────────────────
+async function loadPlans() {
+  const d = await apiFetch('/admin/plans').catch(()=>[])
+  const colors:any = { free:'#b8b2a3', starter:'var(--blue)', pro:'var(--purple)', enterprise:'var(--amber)' }
+  $('plansGrid').innerHTML = (d||[]).map((p:any)=>`<div class="card" style="border-top:3px solid ${colors[p.slug]||'var(--border)'}">
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink3);margin-bottom:6px">${p.name}</div>
+    <div style="font-size:26px;font-weight:700">£${p.price_monthly}<span style="font-size:12px;color:var(--ink3)">/mo</span></div>
+    <div style="font-size:12px;color:var(--ink3);margin:4px 0 12px">£${p.price_yearly}/yr · ${p.max_invoices===-1?'∞':p.max_invoices} invoices/mo</div>
+    <div style="font-size:12px">
+      <div class="sr"><span>Clients</span><span>${p.max_clients===-1?'Unlimited':p.max_clients}</span></div>
+      <div class="sr"><span>Team members</span><span>${p.max_team_members===-1?'Unlimited':p.max_team_members}</span></div>
+    </div>
+    <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
+      <label style="margin:0">Monthly price (£)</label>
+      <input id="price_${p.id}" value="${p.price_monthly}" type="number" step="0.01" style="font-size:12px;padding:6px 8px"/>
+      <button class="btn btn-sm bp" onclick="savePlan('${p.id}')">Save price</button>
+    </div>
+  </div>`).join('')
+}
+
+async function savePlan(id: string) {
+  const price = +($('price_'+id) as HTMLInputElement).value
+  try { await apiFetch(`/admin/plans/${id}`, { method:'PUT', body:JSON.stringify({price_monthly:price}) }); alert('Plan price updated!') } catch(e: any) { alert(e.message) }
+}
+
+// ── ANNOUNCEMENT ─────────────────────────────────────────
+async function checkAnnouncement() {
+  try {
+    const d = await apiFetch('/admin/settings')
+    const ann = d.find((s:any) => s.key === 'platform_announcement')
+    if (ann) {
+      const val = JSON.parse(ann.value)
+      if (new Date(val.expires_at) > new Date()) $('announcementBadge').style.display = 'inline-flex'
+    }
+  } catch {}
+}
+
+async function loadAnnouncement() {
+  try {
+    const d = await apiFetch('/admin/settings')
+    const ann = d.find((s:any) => s.key === 'platform_announcement')
+    if (ann) {
+      const val = JSON.parse(ann.value)
+      const active = new Date(val.expires_at) > new Date()
+      const typeColors:any = { info:'var(--bbg),var(--blue)', warning:'var(--abg),var(--amber)', success:'var(--gbg),var(--green)', error:'var(--rbg),var(--red)' }
+      const [bg, color] = (typeColors[val.type] || 'var(--bg),var(--ink)').split(',')
+      $('annPreview').innerHTML = `
+        <div style="padding:14px;border-radius:10px;background:${bg};border:1px solid ${color};color:${color};margin-bottom:12px">
+          <div style="font-weight:600;margin-bottom:4px">${val.title}</div>
+          <div style="font-size:12.5px">${val.message}</div>
+          <div style="font-size:11px;margin-top:6px;opacity:.7">Expires: ${fmtTime(val.expires_at)}</div>
+        </div>
+        <div class="badge ${active?'b-ok':'b-err'}">${active?'✅ Active':'⏰ Expired'}</div>`
+    } else {
+      $('annPreview').innerHTML = '<div class="empty" style="padding:20px">No active announcement</div>'
+    }
+  } catch(e: any) { $('annPreview').innerHTML = '<div class="empty">Load error</div>' }
+}
+
+async function publishAnnouncement() {
+  const title = $('annTitle').value, message = $('annMsg').value
+  if (!title || !message) { $('annResult').innerHTML = '<div class="alert ar">Title and message required</div>'; return }
+  try {
+    await apiFetch('/admin/announcement', { method:'POST', body:JSON.stringify({ title, message, type: $('annType').value, expires_hours: +$('annHours').value }) })
+    $('annResult').innerHTML = '<div class="alert as">✅ Announcement published!</div>'
+    $('announcementBadge').style.display = 'inline-flex'
+    loadAnnouncement()
+  } catch(e: any) { $('annResult').innerHTML = `<div class="alert ar">${e.message}</div>` }
+}
+
+async function removeAnnouncement() {
+  if (!confirm('Remove the announcement?')) return
+  try {
+    await apiFetch('/admin/announcement', { method:'DELETE' })
+    $('annResult').innerHTML = '<div class="alert as">✅ Removed</div>'
+    $('announcementBadge').style.display = 'none'
+    loadAnnouncement()
+  } catch(e: any) { $('annResult').innerHTML = `<div class="alert ar">${e.message}</div>` }
+}
+
+// ── SATISFACTION ──────────────────────────────────────────
 async function loadSatisfaction() {
   try {
     const d = await apiFetch('/admin/satisfaction')
-    $('satStats').innerHTML = `
-      <div class="card"><div class="kl">Platform average</div><div class="kv" style="color:${d.average>=4?'var(--green)':d.average>=3?'var(--amber)':'var(--red)'}">${d.average}/5</div></div>
-      <div class="card"><div class="kl">Total responses</div><div class="kv">${d.total}</div></div>
-      <div class="card"><div class="kl">Score distribution</div><div style="display:flex;gap:6px;margin-top:8px">${(d.distribution||[]).map(s=>`<div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--ink3)">${s.score}★</div><div style="font-weight:600;font-size:14px">${s.count}</div></div>`).join('')}</div></div>`
-    $('satTbody').innerHTML = (d.scores||[]).length === 0 ? '<tr><td colspan="5" style="text-align:center;color:var(--ink3);padding:30px">No responses yet</td></tr>' :
-      (d.scores||[]).map(s=>`<tr><td style="font-size:12px">${s.profiles?.company_name||s.profiles?.full_name||'—'}</td><td style="color:var(--ink2)">${s.clients?.name||'—'}</td><td style="color:#f59e0b;font-size:16px">${stars(s.score)}</td><td style="color:var(--ink3);font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.comment||'—'}</td><td style="font-size:11px;color:var(--ink3)">${fmtDate(s.responded_at)}</td></tr>`).join('')
-  } catch(e) {}
+    $('satStats').innerHTML = [
+      { label:'Platform average', val:`${d.average}/5`, color: +d.average>=4?'var(--green)':+d.average>=3?'var(--amber)':'var(--red)' },
+      { label:'Total responses', val: d.total },
+      { label:'Distribution', val: (d.distribution||[]).map((s:any)=>`<span style="margin-right:4px;font-size:11px">${s.score}★ <strong>${s.count}</strong></span>`).join('') }
+    ].map(s=>`<div class="card"><div class="kl">${s.label}</div><div class="kv" ${s.color?`style="color:${s.color}"`:''}>${s.val}</div></div>`).join('')
+    $('satTbody').innerHTML = (d.scores||[]).length ? (d.scores||[]).map((s:any)=>`<tr>
+      <td style="font-size:12px">${s.profiles?.company_name||s.profiles?.full_name||'—'}</td>
+      <td>${s.clients?.name||'—'}</td>
+      <td style="color:#f59e0b">${stars(s.score)}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)">${s.comment||'—'}</td>
+      <td style="font-size:11px;color:var(--ink3)">${fmtDate(s.responded_at)}</td>
+    </tr>`).join('') : '<tr><td colspan="5" class="empty">No survey responses yet</td></tr>'
+  } catch(e: any) {}
 }
 
-// ── FINANCING ────────────────────────────────────────────
+// ── FINANCING ─────────────────────────────────────────────
 async function loadFinancing() {
   try {
     const d = await apiFetch('/admin/financing')
-    $('finTbody').innerHTML = !d.length ? '<tr><td colspan="5" style="text-align:center;color:var(--ink3);padding:30px">No applications yet</td></tr>' :
-      d.map(a=>`<tr>
+    $('finTbody').innerHTML = !d.length ? '<tr><td colspan="5" class="empty">No applications yet</td></tr>' :
+      d.map((a:any)=>`<tr>
         <td><div style="font-weight:500">${a.profiles?.company_name||a.profiles?.full_name||'—'}</div><div style="font-size:11px;color:var(--ink3)">${a.profiles?.email||''}</div></td>
         <td>${fmt(a.metadata?.amount||0)}</td>
         <td>${a.metadata?.status ? statusBadge(a.metadata.status) : '<span class="badge b-warn">pending</span>'}</td>
         <td style="font-size:11px;color:var(--ink3)">${fmtDate(a.created_at)}</td>
-        <td><div style="display:flex;gap:4px"><button class="btn btn-sm bs" onclick="updateFin('${a.id}','approved')">✓ Approve</button><button class="btn btn-sm bd" onclick="updateFin('${a.id}','rejected')">✗ Reject</button></div></td>
+        <td><div style="display:flex;gap:4px">
+          <button class="btn btn-sm bs" onclick="apiFetch('/admin/financing/${a.id}/status',{method:'PUT',body:JSON.stringify({status:'approved'})}).then(()=>loadFinancing())">✓ Approve</button>
+          <button class="btn btn-sm bd" onclick="apiFetch('/admin/financing/${a.id}/status',{method:'PUT',body:JSON.stringify({status:'rejected'})}).then(()=>loadFinancing())">✗ Reject</button>
+        </div></td>
       </tr>`).join('')
-  } catch(e) {}
-}
-
-async function updateFin(id, status) {
-  try { await apiFetch(`/admin/financing/${id}/status`, { method:'PUT', body:JSON.stringify({status}) }); loadFinancing() } catch(e) { alert(e.message) }
+  } catch(e: any) {}
 }
 
 // ── TICKETS ──────────────────────────────────────────────
@@ -882,8 +1003,10 @@ async function loadTickets() {
   try {
     const status = $('ticketStatus').value
     const d = await apiFetch('/admin/tickets' + (status ? `?status=${status}` : ''))
-    $('tickTbody').innerHTML = !d.length ? '<tr><td colspan="6" style="text-align:center;color:var(--ink3);padding:30px">No tickets</td></tr>' :
-      d.map(t=>`<tr>
+    const open = d.filter((t:any)=>t.status==='open').length
+    if (open > 0) { $('tbadge').textContent = String(open); $('tbadge').style.display='inline-flex' } else { $('tbadge').style.display='none' }
+    $('tickTbody').innerHTML = !d.length ? '<tr><td colspan="6" class="empty">No tickets</td></tr>' :
+      d.map((t:any)=>`<tr>
         <td><div style="font-size:12px;font-weight:500">${t.profiles?.full_name||'—'}</div><div style="font-size:11px;color:var(--ink3)">${t.profiles?.email||''}</div>${planBadge(t.profiles?.plan)}</td>
         <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.subject}</td>
         <td>${statusBadge(t.priority==='urgent'?'overdue':t.priority||'normal')}</td>
@@ -891,112 +1014,101 @@ async function loadTickets() {
         <td style="font-size:11px;color:var(--ink3)">${fmtDate(t.created_at)}</td>
         <td><button class="btn btn-sm" onclick="openTicket('${t.id}','${esc(t.subject)}','${esc(t.message)}')">Reply</button></td>
       </tr>`).join('')
-  } catch(e) {}
+  } catch(e: any) {}
 }
 
-function openTicket(id, subject, message) {
+function openTicket(id: string, subject: string, message: string) {
   currentTickId = id
-  $('tickMoContent').innerHTML = `<strong>${subject}</strong><p style="margin-top:6px;color:var(--ink2)">${message}</p>`
+  $('tickMoContent').innerHTML = `<strong>${subject}</strong><p style="margin-top:8px;color:var(--ink2);line-height:1.6">${message}</p>`
   $('tickReply').value = ''
   $('tickMo').style.display = 'flex'
 }
 
 async function submitTicket() {
   const reply = $('tickReply').value
-  if (!reply.trim()) return alert('Enter a reply')
-  try { await apiFetch(`/admin/tickets/${currentTickId}`, { method:'PUT', body:JSON.stringify({admin_reply:reply,status:$('tickStatus').value}) }); closeMo('tickMo'); loadTickets(); alert('Reply sent!') } catch(e) { alert(e.message) }
+  if (!reply.trim()) { alert('Enter a reply'); return }
+  try { await apiFetch(`/admin/tickets/${currentTickId}`, { method:'PUT', body:JSON.stringify({admin_reply:reply,status:$('tickStatus').value}) }); closeMo('tickMo'); loadTickets() }
+  catch(e: any) { alert(e.message) }
 }
 
 // ── BROADCAST ────────────────────────────────────────────
 async function sendBroadcast() {
   const subject = $('bSubject').value, message = $('bMsg').value, plan_filter = $('bPlan').value
-  if (!subject || !message) return alert('Subject and message required')
-  if (!confirm(`Send to ${plan_filter||'ALL'} users?`)) return
+  if (!subject || !message) { $('bResult').innerHTML = '<div class="alert ar">Subject and message required</div>'; return }
+  if (!confirm(`Send broadcast to ${plan_filter||'ALL'} users?`)) return
   try {
     const d = await apiFetch('/admin/broadcast', { method:'POST', body:JSON.stringify({subject,message,plan_filter}) })
-    $('bResult').innerHTML = `<div class="alert as">✓ Broadcast sent to ${d.recipients} users</div>`
+    $('bResult').innerHTML = `<div class="alert as">✅ Broadcast queued for ${d.recipients} users</div>`
     $('bSubject').value = ''; $('bMsg').value = ''
-  } catch(e) { $('bResult').innerHTML = `<div class="alert" style="background:var(--rbg);border-color:var(--red);color:var(--red)">${e.message}</div>` }
+  } catch(e: any) { $('bResult').innerHTML = `<div class="alert ar">${e.message}</div>` }
 }
 
-// ── PLANS ────────────────────────────────────────────────
-async function loadPlans() {
-  const d = await apiFetch('/admin/plans')
-  const colors = {free:'#b8b2a3',starter:'var(--blue)',pro:'#7c3aed',enterprise:'var(--amber)'}
-  $('plansGrid').innerHTML = (d||[]).map(p=>`<div class="card" style="border-top:3px solid ${colors[p.slug]||'var(--border)'}">
-    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin-bottom:6px">${p.name}</div>
-    <div style="font-size:26px;font-weight:700">£${p.price_monthly}<span style="font-size:12px;color:var(--ink3)">/mo</span></div>
-    <div style="font-size:12px;color:var(--ink3);margin-bottom:12px">£${p.price_yearly}/yr · ${p.max_invoices===-1?'Unlimited':p.max_invoices} invoices</div>
-    <div style="font-size:12px;color:var(--ink2)">
-      <div class="sr"><span>Clients</span><span>${p.max_clients===-1?'Unlimited':p.max_clients}</span></div>
-      <div class="sr"><span>Team members</span><span>${p.max_team_members===-1?'Unlimited':p.max_team_members}</span></div>
-      <div class="sr"><span>Active</span><span>${p.is_active?'✓ Yes':'✗ No'}</span></div>
-    </div>
-    <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
-      <input id="price_${p.id}" value="${p.price_monthly}" type="number" step="0.01" style="font-size:12px;padding:6px 8px"/>
-      <button class="btn btn-sm bp" onclick="savePlan('${p.id}')">Save price</button>
-    </div>
-  </div>`).join('')
+// ── ADMIN ACCOUNTS ───────────────────────────────────────
+async function loadAdmins() {
+  try {
+    const d = await apiFetch('/admin/admins')
+    $('adminsTbody').innerHTML = (d||[]).map((a:any)=>`<tr>
+      <td style="font-weight:500">${a.full_name||'—'}</td>
+      <td style="color:var(--blue);font-size:12px">${a.email}</td>
+      <td><span class="badge b-${a.role}">${a.role}</span></td>
+      <td style="font-size:11px;color:var(--ink3)">${a.last_login ? fmtTime(a.last_login) : 'Never'}</td>
+      <td>${a.is_active ? '<span class="badge b-ok">Active</span>' : '<span class="badge b-err">Disabled</span>'}</td>
+      <td><button class="btn btn-sm ${a.is_active?'bd':'bs'}" onclick="toggleAdmin('${a.id}')">${a.is_active?'Disable':'Enable'}</button></td>
+    </tr>`).join('')
+  } catch(e: any) { $('adminsTbody').innerHTML = `<tr><td colspan="6" class="empty">${e.message}</td></tr>` }
 }
 
-async function savePlan(id) {
-  const price = +$('price_'+id).value
-  try { await apiFetch(`/admin/plans/${id}`, { method:'PUT', body:JSON.stringify({price_monthly:price}) }); alert('Plan updated!') } catch(e) { alert(e.message) }
+async function toggleAdmin(id: string) {
+  try { await apiFetch(`/admin/admins/${id}/toggle`, { method:'PUT' }); loadAdmins() }
+  catch(e: any) { alert(e.message) }
 }
 
-// ── CURRENCIES ───────────────────────────────────────────
-async function loadCurrencies() {
-  const d = await apiFetch('/admin/currencies')
-  $('curTbody').innerHTML = (d||[]).map(c=>`<tr>
-    <td style="font-family:monospace;font-weight:700">${c.code}</td>
-    <td>${c.name}</td>
-    <td style="font-size:18px">${c.symbol}</td>
-    <td>${c.is_active?'<span class="badge b-paid">Active</span>':'<span class="badge b-draft">Inactive</span>'}</td>
-    <td><button class="btn btn-sm ${c.is_active?'bd':'bs'}" onclick="toggleCurrency('${c.code}',${!c.is_active})">${c.is_active?'Disable':'Enable'}</button></td>
-  </tr>`).join('')
-}
-
-async function toggleCurrency(code, active) {
-  try { await apiFetch(`/admin/currencies/${code}`, { method:'PUT', body:JSON.stringify({is_active:active}) }); loadCurrencies() } catch(e) { alert(e.message) }
-}
-
-// ── SETTINGS ─────────────────────────────────────────────
-async function loadSettings() {
-  settingsData = await apiFetch('/admin/settings')
-  const grouped = {}
-  settingsData.forEach(s => { if (!grouped[s.category]) grouped[s.category] = []; grouped[s.category].push(s) })
-  $('settingsGrid').innerHTML = Object.entries(grouped).map(([cat,items])=>`
-    <div class="card">
-      <div style="font-size:12px;font-weight:700;text-transform:capitalize;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)">${cat}</div>
-      ${items.map(s=>{
-        let val=s.value; try{val=JSON.parse(s.value)}catch{}
-        const isB = val===true||val===false
-        return `<div class="sr"><div><div style="font-size:13px;font-weight:500">${s.label||s.key}</div></div>${isB?`<button class="tog ${val?'on':'off'}" id="setting_${s.key}" onclick="this.classList.toggle('on');this.classList.toggle('off')"></button>`:`<input id="setting_${s.key}" value="${val||''}" style="width:180px"/>`}</div>`
-      }).join('')}
-    </div>`).join('')
-}
-
-async function saveSettings() {
-  const updates = settingsData.map(s => {
-    const el = $('setting_' + s.key); if (!el) return null
-    const val = el.tagName === 'BUTTON' ? el.classList.contains('on') : el.value
-    return { key: s.key, value: val }
-  }).filter(Boolean)
-  try { await apiFetch('/admin/settings', { method:'PUT', body:JSON.stringify(updates) }); alert('Settings saved!') } catch(e) { alert(e.message) }
+async function createAdmin() {
+  const email = $('newAdminEmail').value, password = $('newAdminPw').value, full_name = $('newAdminName').value, role = $('newAdminRole').value
+  try {
+    await apiFetch('/admin/admins', { method:'POST', body: JSON.stringify({ email, password, full_name, role }) })
+    closeMo('addAdminMo'); loadAdmins(); alert(`Admin account created for ${email}`)
+  } catch(e: any) { alert('Failed: ' + e.message) }
 }
 
 // ── AUDIT ─────────────────────────────────────────────────
 async function loadAudit() {
-  const d = await apiFetch('/admin/audit')
-  $('audTbody').innerHTML = (d||[]).map(a=>`<tr>
-    <td style="font-size:12px">${a.admin_users?.email||'—'}</td>
-    <td><code style="font-size:11px;background:var(--bg);padding:2px 6px;border-radius:4px">${a.action}</code></td>
-    <td style="font-size:12px;color:var(--ink2)">${a.entity_type||'—'}${a.entity_id?' · '+a.entity_id.slice(0,8)+'...':''}</td>
-    <td style="font-size:11px;color:var(--ink3)">${fmtTime(a.created_at)}</td>
-  </tr>`).join('')
+  try {
+    const d = await apiFetch('/admin/audit')
+    $('audTbody').innerHTML = (d||[]).map((a:any)=>`<tr>
+      <td style="font-size:12px">${a.admin_users?.email||'—'}</td>
+      <td><code>${a.action}</code></td>
+      <td style="font-size:12px;color:var(--ink2)">${a.entity_type||'—'}${a.entity_id?' · '+a.entity_id.slice(0,8)+'...':''}</td>
+      <td style="font-size:11px;color:var(--ink3)">${fmtTime(a.created_at)}</td>
+    </tr>`).join('')
+  } catch(e: any) {}
 }
 
-function esc(str) { return String(str||'').replace(/'/g,"\\'").replace(/"/g,'&quot;') }
+// ── SETTINGS ─────────────────────────────────────────────
+async function loadSettings() {
+  try {
+    settingsData = await apiFetch('/admin/settings')
+    const grouped:any = {}
+    settingsData.forEach((s:any) => { if (!grouped[s.category]) grouped[s.category]=[]; grouped[s.category].push(s) })
+    $('settingsGrid').innerHTML = Object.entries(grouped).map(([cat,items]:any)=>`
+      <div class="card">
+        <div style="font-size:12px;font-weight:700;text-transform:capitalize;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)">${cat}</div>
+        ${items.map((s:any)=>{ let val=s.value; try{val=JSON.parse(s.value)}catch{}; const isB=val===true||val===false
+          return `<div class="sr"><div><div style="font-size:13px;font-weight:500">${s.label||s.key}</div></div>${isB?`<button class="tog ${val?'on':'off'}" id="setting_${s.key}" onclick="this.classList.toggle('on');this.classList.toggle('off')"></button>`:`<input id="setting_${s.key}" value="${val||''}" style="width:200px"/>`}</div>`
+        }).join('')}
+      </div>`).join('')
+  } catch(e: any) { $('settingsGrid').innerHTML = `<div class="alert ar">${e.message}</div>` }
+}
+
+async function saveSettings() {
+  const updates = settingsData.map((s:any) => {
+    const el = $('setting_' + s.key); if (!el) return null
+    const val = el.tagName === 'BUTTON' ? el.classList.contains('on') : (el as HTMLInputElement).value
+    return { key: s.key, value: val }
+  }).filter(Boolean)
+  try { await apiFetch('/admin/settings', { method:'PUT', body:JSON.stringify(updates) }); alert('Settings saved!') }
+  catch(e: any) { alert(e.message) }
+}
 </script>
 </body>
 </html>

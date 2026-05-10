@@ -194,3 +194,162 @@ router.post('/broadcast', adminAuth, async (req: any, res: Response) => {
 })
 
 export default router
+
+// ── HEALTH CHECK ─────────────────────────────────────────
+router.get('/health', adminAuth, async (_req: any, res: Response) => {
+  try {
+    const checks: any = {}
+    // DB check
+    const start = Date.now()
+    const { error: dbErr } = await supabase.from('profiles').select('id').limit(1)
+    checks.database = { status: dbErr ? 'error' : 'ok', latency: Date.now() - start, error: dbErr?.message }
+    // Count active users in last 24h
+    const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
+      .gte('updated_at', new Date(Date.now() - 24 * 3600000).toISOString())
+    checks.active_users_24h = count || 0
+    // Invoice count today
+    const { count: invCount } = await supabase.from('invoices').select('*', { count: 'exact', head: true })
+      .gte('created_at', new Date(Date.now() - 24 * 3600000).toISOString())
+    checks.invoices_today = invCount || 0
+    checks.smtp_configured = !!(process.env.SMTP_HOST && process.env.SMTP_USER)
+    checks.stripe_configured = !!process.env.STRIPE_SECRET_KEY
+    checks.ai_configured = !!process.env.ANTHROPIC_API_KEY
+    checks.twilio_configured = !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN)
+    return res.json({ status: 'ok', timestamp: new Date().toISOString(), checks })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// ── CHURN ANALYTICS ──────────────────────────────────────
+router.get('/churn', adminAuth, async (_req: any, res: Response) => {
+  try {
+    const { data: users } = await supabase.from('profiles').select('id, plan, created_at, updated_at, email, full_name, company_name')
+    const now = Date.now()
+    const inactive = (users || []).filter((u: any) => {
+      const lastActive = new Date(u.updated_at).getTime()
+      return (now - lastActive) > 30 * 24 * 3600000 && u.plan !== 'free'
+    })
+    const recent = (users || []).filter((u: any) => {
+      return new Date(u.created_at).getTime() > now - 7 * 24 * 3600000
+    })
+    const { data: recentPayments } = await supabase.from('payments').select('amount, paid_at, user_id').gte('paid_at', new Date(Date.now() - 30 * 24 * 3600000).toISOString())
+    return res.json({
+      at_risk: inactive,
+      new_signups_7d: recent,
+      recent_payments: recentPayments || [],
+      churn_rate: users?.length ? ((inactive.length / users.length) * 100).toFixed(1) : 0
+    })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// ── IMPERSONATE USER (generate token) ───────────────────
+router.post('/impersonate/:userId', adminAuth, async (req: any, res: Response) => {
+  try {
+    const { data: profile } = await supabase.from('profiles').select('*').eq('id', req.params.userId).single()
+    if (!profile) return res.status(404).json({ error: 'User not found' })
+    const { data: session, error } = await supabase.auth.admin.generateLink({
+      type: 'magiclink', email: profile.email
+    })
+    if (error) return res.status(400).json({ error: error.message })
+    await log(req.admin.id, 'user_impersonated', 'user', req.params.userId, { email: profile.email })
+    return res.json({ message: `Impersonation link for ${profile.email}`, link: session.properties?.action_link, note: 'Link expires in 1 hour' })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// ── DATA EXPORT (GDPR) ───────────────────────────────────
+router.get('/export/:userId', adminAuth, async (req: any, res: Response) => {
+  try {
+    const uid = req.params.userId
+    const [profileRes, invoicesRes, clientsRes, expensesRes, quotesRes, paymentsRes, timeRes] = await Promise.all([
+      supabase.from('profiles').select('*').eq('id', uid).single(),
+      supabase.from('invoices').select('*, invoice_items(*)').eq('user_id', uid),
+      supabase.from('clients').select('*').eq('user_id', uid),
+      supabase.from('expenses').select('*').eq('user_id', uid),
+      supabase.from('quotes').select('*, quote_items(*)').eq('user_id', uid),
+      supabase.from('payments').select('*').eq('user_id', uid),
+      supabase.from('time_entries').select('*').eq('user_id', uid),
+    ])
+    const exportData = {
+      exported_at: new Date().toISOString(),
+      profile: profileRes.data,
+      invoices: invoicesRes.data || [],
+      clients: clientsRes.data || [],
+      expenses: expensesRes.data || [],
+      quotes: quotesRes.data || [],
+      payments: paymentsRes.data || [],
+      time_entries: timeRes.data || [],
+    }
+    await log(req.admin.id, 'data_exported', 'user', uid, { email: profileRes.data?.email })
+    res.setHeader('Content-Type', 'application/json')
+    res.setHeader('Content-Disposition', `attachment; filename="invoicepro-export-${uid.slice(0,8)}.json"`)
+    return res.json(exportData)
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// ── PLATFORM ANNOUNCEMENT ────────────────────────────────
+router.post('/announcement', adminAuth, async (req: any, res: Response) => {
+  try {
+    const { title, message, type = 'info', expires_hours = 24 } = (req as any).body
+    const expires_at = new Date(Date.now() + expires_hours * 3600000).toISOString()
+    const { data, error } = await supabase.from('app_settings').upsert({
+      key: 'platform_announcement',
+      value: JSON.stringify({ title, message, type, expires_at, created_at: new Date().toISOString() }),
+      label: 'Platform Announcement',
+      category: 'notifications'
+    }).select().single()
+    if (error) return res.status(400).json({ error: error.message })
+    await log(req.admin.id, 'announcement_created', 'platform', 'global', { title })
+    return res.json({ message: 'Announcement published', data })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+router.delete('/announcement', adminAuth, async (req: any, res: Response) => {
+  try {
+    await supabase.from('app_settings').delete().eq('key', 'platform_announcement')
+    await log(req.admin.id, 'announcement_removed', 'platform', 'global', {})
+    return res.json({ message: 'Announcement removed' })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// ── ADMIN USER MANAGEMENT ────────────────────────────────
+router.get('/admins', adminAuth, async (req: any, res: Response) => {
+  if (req.admin.role !== 'super_admin') return res.status(403).json({ error: 'Super admin only' })
+  try {
+    const { data, error } = await supabase.from('admin_users').select('id, email, full_name, role, last_login, is_active, created_at').order('created_at')
+    if (error) return res.status(400).json({ error: error.message })
+    return res.json(data || [])
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+router.post('/admins', adminAuth, async (req: any, res: Response) => {
+  if (req.admin.role !== 'super_admin') return res.status(403).json({ error: 'Super admin only' })
+  try {
+    const { email, password, full_name, role = 'support' } = (req as any).body
+    if (!email || !password || password.length < 8) return res.status(400).json({ error: 'Email and password required (8+ chars)' })
+    const hash = await bcrypt.hash(password, 12)
+    const { data, error } = await supabase.from('admin_users').insert({ email, password_hash: hash, full_name, role, is_active: true }).select('id, email, full_name, role').single()
+    if (error) return res.status(400).json({ error: error.message })
+    await log(req.admin.id, 'admin_created', 'admin_user', data.id, { email, role })
+    return res.json(data)
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+router.put('/admins/:id/toggle', adminAuth, async (req: any, res: Response) => {
+  if (req.admin.role !== 'super_admin') return res.status(403).json({ error: 'Super admin only' })
+  try {
+    const { data: current } = await supabase.from('admin_users').select('is_active').eq('id', req.params.id).single()
+    const { data, error } = await supabase.from('admin_users').update({ is_active: !current?.is_active }).eq('id', req.params.id).select().single()
+    if (error) return res.status(400).json({ error: error.message })
+    return res.json(data)
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// ── EXTEND TRIAL / CHANGE PLAN FREE ─────────────────────
+router.post('/users/:id/extend-trial', adminAuth, async (req: any, res: Response) => {
+  try {
+    const { days = 14, plan = 'pro' } = (req as any).body
+    const { data, error } = await supabase.from('profiles').update({ plan }).eq('id', req.params.id).select().single()
+    if (error) return res.status(400).json({ error: error.message })
+    await log(req.admin.id, 'trial_extended', 'user', req.params.id, { days, plan })
+    return res.json({ message: `Trial extended: ${plan} plan for ${days} days`, data })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})

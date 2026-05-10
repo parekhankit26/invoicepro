@@ -138,25 +138,48 @@ router.get('/setup-status', async (req: Request, res: Response) => {
   }
 })
 
-// ── EMERGENCY DIRECT PASSWORD RESET (admin tool) ──────────
-// Use this to reset any user's password directly via service role
+// ── EMERGENCY USER SETUP / PASSWORD RESET ─────────────────
 router.post('/reset-user-password', async (req: Request, res: Response) => {
   try {
     const { email, new_password, admin_key } = (req as any).body
-    // Simple security check
     if (admin_key !== (process.env.ADMIN_SETUP_KEY || 'InvoiceProSetup2024')) {
       return res.status(403).json({ error: 'Invalid admin key' })
     }
     if (!email || !new_password || new_password.length < 8) {
       return res.status(400).json({ error: 'Email and new password (8+ chars) required' })
     }
-    // Find user by email
+
+    // Check if user exists in Supabase auth
     const { data: users } = await supabase.auth.admin.listUsers()
-    const user = users?.users?.find((u: any) => u.email?.toLowerCase() === email.toLowerCase())
-    if (!user) return res.status(404).json({ error: `No user found with email: ${email}` })
-    // Reset password directly
-    const { data, error } = await supabase.auth.admin.updateUserById(user.id, { password: new_password })
-    if (error) return res.status(400).json({ error: error.message })
-    return res.json({ message: `✅ Password reset for ${email}. You can now login with the new password.`, user_id: user.id })
+    const existing = users?.users?.find((u: any) => u.email?.toLowerCase() === email.toLowerCase())
+
+    if (existing) {
+      // User exists — just update password
+      const { error } = await supabase.auth.admin.updateUserById(existing.id, { password: new_password, email_confirm: true })
+      if (error) return res.status(400).json({ error: error.message })
+
+      // Also ensure profile exists
+      await supabase.from('profiles').upsert({ id: existing.id, email, plan: 'free', default_currency: 'GBP', country_code: 'GB' })
+
+      return res.json({ message: `✅ Password updated for ${email}. Login at invoicepro-ten.vercel.app/auth`, action: 'updated' })
+    } else {
+      // User does NOT exist in Supabase auth — create them
+      const { data: newUser, error } = await supabase.auth.admin.createUser({
+        email, password: new_password, email_confirm: true,
+        user_metadata: { full_name: email.split('@')[0] }
+      })
+      if (error) return res.status(400).json({ error: error.message })
+
+      // Create profile
+      if (newUser?.user) {
+        await supabase.from('profiles').upsert({
+          id: newUser.user.id, email,
+          full_name: email.split('@')[0],
+          plan: 'free', default_currency: 'GBP', country_code: 'GB'
+        })
+      }
+
+      return res.json({ message: `✅ Account created for ${email}. Login at invoicepro-ten.vercel.app/auth`, action: 'created' })
+    }
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })

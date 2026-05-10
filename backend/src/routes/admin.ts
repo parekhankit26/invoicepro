@@ -478,3 +478,201 @@ router.put('/change-password', adminAuth, async (req: any, res: Response) => {
     return res.json({ message: 'Password changed successfully' })
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
+
+// ── CLIENTS (platform-wide) ──────────────────────────────
+router.get('/clients', adminAuth, async (req: any, res: Response) => {
+  try {
+    const search = req.query.search || ''
+    let query = supabase.from('clients').select('*, profiles!user_id(full_name, company_name, email)', { count: 'exact' })
+      .eq('is_archived', false).order('created_at', { ascending: false }).limit(100)
+    if (search) query = query.ilike('name', `%${search}%`)
+    const { data, error, count } = await query
+    if (error) return res.status(400).json({ error: error.message })
+    return res.json({ data, total: count })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+router.delete('/clients/:id', adminAuth, async (req: any, res: Response) => {
+  try {
+    const { error } = await supabase.from('clients').update({ is_archived: true }).eq('id', req.params.id)
+    if (error) return res.status(400).json({ error: error.message })
+    await log(req.admin.id, 'client_archived', 'client', req.params.id, {})
+    return res.json({ message: 'Client archived' })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// ── PAYMENTS (platform-wide) ─────────────────────────────
+router.get('/payments', adminAuth, async (req: any, res: Response) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 50
+    const { data, error, count } = await supabase.from('payments')
+      .select('*, profiles!user_id(full_name, company_name), invoices!invoice_id(invoice_number)', { count: 'exact' })
+      .order('paid_at', { ascending: false }).limit(limit)
+    if (error) return res.status(400).json({ error: error.message })
+    return res.json({ data, total: count })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// ── QUOTES (platform-wide) ───────────────────────────────
+router.get('/quotes', adminAuth, async (req: any, res: Response) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 50
+    const { data, error, count } = await supabase.from('quotes')
+      .select('*, clients!client_id(name), profiles!user_id(full_name, company_name)', { count: 'exact' })
+      .order('created_at', { ascending: false }).limit(limit)
+    if (error) return res.status(400).json({ error: error.message })
+    return res.json({ data, total: count })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// ── EXPENSES (platform-wide) ─────────────────────────────
+router.get('/expenses', adminAuth, async (req: any, res: Response) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 50
+    const { data, error, count } = await supabase.from('expenses')
+      .select('*, profiles!user_id(full_name, company_name)', { count: 'exact' })
+      .order('created_at', { ascending: false }).limit(limit)
+    if (error) return res.status(400).json({ error: error.message })
+    return res.json({ data, total: count })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// ── FEATURE FLAGS ─────────────────────────────────────────
+router.get('/feature-flags', adminAuth, async (_req: any, res: Response) => {
+  try {
+    const { data } = await supabase.from('app_settings').select('key, value').like('key', 'feature_%')
+    return res.json(data || [])
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+router.put('/feature-flags/:key', adminAuth, async (req: any, res: Response) => {
+  try {
+    const { value } = (req as any).body
+    const { data, error } = await supabase.from('app_settings').upsert({
+      key: req.params.key, value: JSON.stringify(value),
+      label: req.params.key.replace(/_/g, ' ').replace('feature ', ''), category: 'features'
+    }).select().single()
+    if (error) return res.status(400).json({ error: error.message })
+    await log(req.admin.id, 'feature_toggled', 'feature', req.params.key, { value })
+    return res.json(data)
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// ── SATISFACTION ──────────────────────────────────────────
+router.get('/satisfaction', adminAuth, async (_req: any, res: Response) => {
+  try {
+    const { data: scores } = await supabase.from('satisfaction_scores')
+      .select('*, profiles!user_id(full_name, company_name), clients!client_id(name)')
+      .order('responded_at', { ascending: false }).limit(100)
+    const all = scores || []
+    const avg = all.length ? (all.reduce((s, r: any) => s + r.score, 0) / all.length).toFixed(1) : 0
+    const dist: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+    all.forEach((r: any) => { if (dist[r.score] !== undefined) dist[r.score]++ })
+    return res.json({
+      scores: all, average: avg, total: all.length,
+      distribution: Object.entries(dist).map(([score, count]) => ({ score: +score, count }))
+    })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// ── FINANCING APPLICATIONS ───────────────────────────────
+router.get('/financing', adminAuth, async (_req: any, res: Response) => {
+  try {
+    const { data } = await supabase.from('activity_logs')
+      .select('*, profiles!user_id(full_name, company_name, email)')
+      .eq('action', 'financing_applied').order('created_at', { ascending: false })
+    return res.json(data || [])
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+router.put('/financing/:id/status', adminAuth, async (req: any, res: Response) => {
+  try {
+    const { status } = (req as any).body
+    const { data } = await supabase.from('activity_logs').select('metadata').eq('id', req.params.id).single()
+    const { error } = await supabase.from('activity_logs').update({
+      metadata: { ...(data?.metadata || {}), status }
+    }).eq('id', req.params.id)
+    if (error) return res.status(400).json({ error: error.message })
+    await log(req.admin.id, `financing_${status}`, 'financing', req.params.id, { status })
+    return res.json({ message: `Application ${status}` })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// ── SUPPORT TICKETS ───────────────────────────────────────
+router.get('/tickets', adminAuth, async (req: any, res: Response) => {
+  try {
+    let query = supabase.from('support_tickets')
+      .select('*, profiles!user_id(full_name, email, plan, company_name)')
+      .order('created_at', { ascending: false })
+    if (req.query.status) query = query.eq('status', req.query.status as string)
+    const { data, error } = await query
+    if (error) return res.status(400).json({ error: error.message })
+    return res.json(data || [])
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+router.put('/tickets/:id', adminAuth, async (req: any, res: Response) => {
+  try {
+    const { admin_reply, status } = (req as any).body
+    const { data, error } = await supabase.from('support_tickets').update({
+      admin_reply, status, resolved_at: status === 'resolved' ? new Date().toISOString() : null,
+      replied_by: req.admin.email, replied_at: new Date().toISOString()
+    }).eq('id', req.params.id).select().single()
+    if (error) return res.status(400).json({ error: error.message })
+    await log(req.admin.id, 'ticket_replied', 'ticket', req.params.id, { status })
+    return res.json(data)
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// ── PLANS ─────────────────────────────────────────────────
+router.get('/plans', adminAuth, async (_req: any, res: Response) => {
+  try {
+    const { data, error } = await supabase.from('plans').select('*').order('price_monthly')
+    if (error) {
+      // Plans table might not exist yet — return defaults
+      return res.json([
+        { id: '1', slug: 'free', name: 'Free', price_monthly: 0, price_yearly: 0, max_invoices: 5, max_clients: 2, max_team_members: 0, is_active: true },
+        { id: '2', slug: 'starter', name: 'Starter', price_monthly: 9, price_yearly: 90, max_invoices: -1, max_clients: -1, max_team_members: 3, is_active: true },
+        { id: '3', slug: 'pro', name: 'Pro', price_monthly: 19, price_yearly: 190, max_invoices: -1, max_clients: -1, max_team_members: 10, is_active: true },
+        { id: '4', slug: 'enterprise', name: 'Enterprise', price_monthly: 49, price_yearly: 490, max_invoices: -1, max_clients: -1, max_team_members: -1, is_active: true },
+      ])
+    }
+    return res.json(data)
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+router.put('/plans/:id', adminAuth, async (req: any, res: Response) => {
+  try {
+    const { price_monthly, price_yearly, max_invoices, max_clients, max_team_members } = (req as any).body
+    const updates: any = {}
+    if (price_monthly !== undefined) updates.price_monthly = price_monthly
+    if (price_yearly !== undefined) updates.price_yearly = price_yearly
+    if (max_invoices !== undefined) updates.max_invoices = max_invoices
+    if (max_clients !== undefined) updates.max_clients = max_clients
+    if (max_team_members !== undefined) updates.max_team_members = max_team_members
+    const { data, error } = await supabase.from('plans').update(updates).eq('id', req.params.id).select().single()
+    if (error) return res.status(400).json({ error: error.message })
+    await log(req.admin.id, 'plan_updated', 'plan', req.params.id, updates)
+    return res.json(data)
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// ── APP SETTINGS ──────────────────────────────────────────
+router.get('/settings', adminAuth, async (_req: any, res: Response) => {
+  try {
+    const { data, error } = await supabase.from('app_settings').select('*').order('category').order('key')
+    if (error) return res.status(400).json({ error: error.message })
+    return res.json(data || [])
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+router.put('/settings', adminAuth, async (req: any, res: Response) => {
+  try {
+    const updates = (req as any).body as Array<{ key: string; value: any }>
+    for (const u of updates) {
+      await supabase.from('app_settings').upsert({ key: u.key, value: JSON.stringify(u.value) })
+    }
+    await log(req.admin.id, 'settings_updated', 'settings', 'global', { count: updates.length })
+    return res.json({ message: `${updates.length} settings saved` })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})

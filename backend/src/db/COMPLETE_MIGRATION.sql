@@ -475,3 +475,49 @@ SELECT 'Migration complete ✅' as status;
 ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS password_reset_token TEXT;
 ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS password_reset_expires TIMESTAMPTZ;
 CREATE INDEX IF NOT EXISTS idx_admin_reset_token ON admin_users(password_reset_token);
+
+-- ── SUPPORT TICKETS EXTRA COLUMNS ─────────────────────────
+ALTER TABLE support_tickets ADD COLUMN IF NOT EXISTS resolved_at TIMESTAMPTZ;
+ALTER TABLE support_tickets ADD COLUMN IF NOT EXISTS replied_by TEXT;
+
+-- ── PLANS TABLE ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS plans (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  slug TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  price_monthly DECIMAL(8,2) DEFAULT 0,
+  price_yearly DECIMAL(8,2) DEFAULT 0,
+  max_invoices INTEGER DEFAULT 5,
+  max_clients INTEGER DEFAULT 2,
+  max_team_members INTEGER DEFAULT 0,
+  features JSONB DEFAULT '[]',
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+INSERT INTO plans (slug, name, price_monthly, price_yearly, max_invoices, max_clients, max_team_members, is_active)
+VALUES
+  ('free',       'Free',       0,  0,   5,  2,  0, true),
+  ('starter',    'Starter',    9,  90, -1, -1,  3, true),
+  ('pro',        'Pro',       19, 190, -1, -1, 10, true),
+  ('enterprise', 'Enterprise',49, 490,-1, -1, -1, true)
+ON CONFLICT (slug) DO NOTHING;
+
+-- ── APP SETTINGS DEFAULTS ────────────────────────────────────
+INSERT INTO app_settings (key, value, label, category) VALUES
+  ('feature_ai_assistant',     'true',  'AI Assistant',          'features'),
+  ('feature_whatsapp_sms',     'false', 'WhatsApp & SMS',         'features'),
+  ('feature_receipt_scanner',  'true',  'Receipt Scanner',        'features'),
+  ('feature_cashflow_forecast','true',  'Cash Flow Forecast',     'features'),
+  ('feature_invoice_designer', 'true',  'Invoice Designer',       'features'),
+  ('feature_client_happiness', 'true',  'Client Happiness',       'features'),
+  ('feature_financing',        'false', 'Invoice Financing',      'features'),
+  ('feature_time_tracking',    'true',  'Time Tracking',          'features'),
+  ('feature_recurring',        'false', 'Recurring Invoices',     'features'),
+  ('site_name',    '"InvoicePro"',    'Site name',    'general'),
+  ('support_email','"support@invoicepro.app"','Support email','general'),
+  ('max_free_invoices','5',    'Free plan invoice limit',  'limits'),
+  ('max_free_clients', '2',   'Free plan client limit',   'limits')
+ON CONFLICT (key) DO NOTHING;
+
+SELECT 'Full migration complete ✅' as status;

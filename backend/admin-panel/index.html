@@ -1166,6 +1166,95 @@ async function saveSettings() {
   try { await apiFetch('/admin/settings', { method:'PUT', body:JSON.stringify(updates) }); alert('Settings saved!') }
   catch(e: any) { alert(e.message) }
 }
+
+// ── FORGOT PASSWORD ───────────────────────────────────────
+function showForgot() {
+  $('loginBox').style.display='none'
+  $('forgotBox').style.display='block'
+  $('resetBox').style.display='none'
+}
+
+function showLogin() {
+  $('forgotBox').style.display='none'
+  $('resetBox').style.display='none'
+  $('loginBox').style.display='block'
+}
+
+async function sendReset() {
+  const email = $('resetEmail').value
+  if (!email) { $('resetMsg').innerHTML='<div class="alert ar">Enter your email</div>'; return }
+  $('resetMsg').innerHTML = '<div class="alert ai">Sending...</div>'
+  try {
+    const res = await fetch(API + '/admin/forgot-password', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email})
+    })
+    const d = await res.json()
+    if (d.dev_reset_url) {
+      $('resetMsg').innerHTML = `
+        <div class="alert as" style="margin-bottom:8px">✅ Reset link generated!</div>
+        <div class="alert ai">
+          <strong>Click this link to reset your password:</strong><br/><br/>
+          <a href="${d.dev_reset_url}" target="_blank" style="color:var(--blue);font-weight:700;font-size:12px;word-break:break-all">${d.dev_reset_url}</a>
+          <br/><br/>
+          <button onclick="navigator.clipboard.writeText('${d.dev_reset_url}').then(()=>alert('Link copied!'))" class="btn btn-sm" style="margin-top:4px">📋 Copy link</button>
+        </div>`
+    } else {
+      $('resetMsg').innerHTML = `<div class="alert as">✅ ${d.message} Check your email inbox.</div>`
+    }
+  } catch(e) { $('resetMsg').innerHTML=`<div class="alert ar">Error: ${e.message}</div>` }
+}
+
+async function completeReset() {
+  const pw = $('newPwField').value, pw2 = $('newPwConfirm').value
+  const hash = window.location.hash
+  const token = new URLSearchParams(hash.replace('#','?')).get('reset') || hash.split('reset=')[1]
+  if (!token) { $('resetDoneMsg').innerHTML='<div class="alert ar">Invalid reset link</div>'; return }
+  if (pw !== pw2) { $('resetDoneMsg').innerHTML='<div class="alert ar">Passwords do not match</div>'; return }
+  if (pw.length < 8) { $('resetDoneMsg').innerHTML='<div class="alert ar">Password must be 8+ characters</div>'; return }
+  try {
+    const res = await fetch(API + `/admin/reset-password/${token}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({password:pw})
+    })
+    const d = await res.json()
+    if (d.error) throw new Error(d.error)
+    $('resetDoneMsg').innerHTML=`<div class="alert as">✅ ${d.message}</div>`
+    setTimeout(() => { window.history.replaceState(null,'',window.location.pathname); showLogin() }, 2000)
+  } catch(e) { $('resetDoneMsg').innerHTML=`<div class="alert ar">${e.message}</div>` }
+}
+
+async function changeMyPassword() {
+  const current = $('cpCurrent').value, next = $('cpNew').value, confirm = $('cpConfirm').value
+  if (!current || !next || !confirm) { $('cpMsg').innerHTML='<div class="alert ar">Fill all fields</div>'; return }
+  if (next !== confirm) { $('cpMsg').innerHTML='<div class="alert ar">Passwords do not match</div>'; return }
+  if (next.length < 8) { $('cpMsg').innerHTML='<div class="alert ar">8+ characters required</div>'; return }
+  try {
+    const d = await apiFetch('/admin/change-password', {method:'PUT', body:JSON.stringify({current_password:current,new_password:next})})
+    $('cpMsg').innerHTML=`<div class="alert as">✅ ${d.message}</div>`
+    $('cpCurrent').value=''; $('cpNew').value=''; $('cpConfirm').value=''
+    setTimeout(()=>closeMo('changePwMo'), 1500)
+  } catch(e) { $('cpMsg').innerHTML=`<div class="alert ar">${e.message}</div>` }
+}
+
+// Check URL for reset token on page load
+;(function() {
+  const hash = window.location.hash
+  if (hash.includes('reset=')) {
+    const token = hash.split('reset=')[1]
+    if (token) {
+      fetch(API + `/admin/reset-password/${token}`)
+        .then(r=>r.json())
+        .then(d => {
+          if (d.valid) {
+            $('loginBox').style.display='none'
+            $('resetBox').style.display='block'
+          } else { alert('Invalid or expired reset link. Request a new one.') }
+        }).catch(()=>{})
+    }
+  }
+})()
+
 </script>
 </body>
 </html>

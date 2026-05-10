@@ -220,7 +220,15 @@ code{font-family:monospace;font-size:11px;background:var(--bg);padding:2px 6px;b
       <button class="btn btn-sm bp" onclick="loadHealth()">↻ Refresh</button>
     </div>
     <div class="g3" style="margin-bottom:16px" id="healthGrid"></div>
-    <div class="card" id="healthDetails"></div>
+    <div class="card" id="healthDetails" style="margin-bottom:14px"></div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Test email sending</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="testEmailAddr" type="email" placeholder="Enter email to send test to..." style="flex:1"/>
+        <button class="btn bp" onclick="sendTestEmail()">Send test email</button>
+      </div>
+      <div id="testEmailResult" style="margin-top:10px"></div>
+    </div>
   </div>
 
   <!-- REVENUE -->

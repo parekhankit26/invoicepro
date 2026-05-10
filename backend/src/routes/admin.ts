@@ -676,3 +676,37 @@ router.put('/settings', adminAuth, async (req: any, res: Response) => {
     return res.json({ message: `${updates.length} settings saved` })
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
+
+// ── TEST EMAIL CONFIG ─────────────────────────────────────
+router.post('/test-email', adminAuth, async (req: any, res: Response) => {
+  try {
+    const { to } = (req as any).body
+    if (!to) return res.status(400).json({ error: 'Recipient email required' })
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      return res.status(400).json({ error: 'SMTP not configured. Add SMTP_HOST, SMTP_USER, SMTP_PASS to Railway env vars.' })
+    }
+    const nodemailer = await import('nodemailer')
+    const transporter = nodemailer.default.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || '587'),
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+    })
+    await transporter.verify()
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || process.env.SMTP_USER,
+      to,
+      subject: '✅ InvoicePro email test — it works!',
+      html: `<div style="font-family:sans-serif;padding:32px;max-width:500px">
+        <h2 style="color:#1a1814">✅ Email is working!</h2>
+        <p>Your InvoicePro SMTP configuration is working correctly.</p>
+        <p style="color:#666;font-size:13px">Sent at: ${new Date().toLocaleString()}</p>
+        <p style="color:#666;font-size:13px">SMTP: ${process.env.SMTP_HOST}</p>
+      </div>`
+    })
+    await log(req.admin.id, 'test_email_sent', 'system', 'email', { to })
+    return res.json({ message: `✅ Test email sent successfully to ${to}` })
+  } catch(e: any) {
+    return res.status(500).json({ error: `Email failed: ${e.message}` })
+  }
+})

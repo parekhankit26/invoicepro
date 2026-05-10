@@ -1,1297 +1,1040 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>InvoicePro Super Admin</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--ink:#1a1814;--ink2:#756d5c;--ink3:#b8b2a3;--bg:#f8f7f4;--white:#fff;--border:#e8e5de;--green:#16a34a;--gbg:#f0fdf4;--red:#dc2626;--rbg:#fef2f2;--amber:#b45309;--abg:#fffbeb;--blue:#1d4ed8;--bbg:#eff6ff;--purple:#7c3aed;--lime:#a3e635}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);font-size:13px}
-#login{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--ink)}
-.lbox{background:var(--white);border-radius:16px;padding:40px;width:380px;text-align:center}
-.lmark{width:52px;height:52px;background:var(--ink);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:var(--lime);font-weight:900;font-size:22px}
-#app{display:none}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f7f4;color:#1a1814;font-size:13px}
+.center{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#1a1814}
+.card{background:#fff;border-radius:16px;padding:36px;width:100%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.logo{width:52px;height:52px;background:#1a1814;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#a3e635;font-weight:900;font-size:22px;letter-spacing:-1px}
+h1{text-align:center;font-size:22px;font-weight:800;margin-bottom:4px}
+.sub{text-align:center;font-size:13px;color:#888;margin-bottom:28px}
+label{display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:4px}
+input{width:100%;padding:11px 14px;border:1.5px solid #e8e5de;border-radius:9px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s;margin-bottom:14px}
+input:focus{border-color:#1a1814}
+.btn{width:100%;padding:13px;background:#1a1814;color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn:active{opacity:.7}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.err{color:#dc2626;font-size:13px;margin-top:10px;text-align:center;min-height:20px}
+.link{background:none;border:none;color:#888;font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline;display:block;text-align:center;margin-top:12px}
+.link:hover{color:#1a1814}
+.hidden{display:none}
+/* App layout */
+#app{display:none;min-height:100vh}
 .layout{display:flex;min-height:100vh}
-.sidebar{width:240px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:10}
-.logo{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.logo-icon{width:34px;height:34px;background:var(--ink);border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--lime);font-weight:900;font-size:14px;flex-shrink:0}
-.ns{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);padding:10px 14px 3px;margin-top:6px}
-.ni{display:flex;align-items:center;gap:9px;padding:8px 12px;margin:1px 8px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--ink2);transition:all .12s;user-select:none}
-.ni:hover{background:var(--bg);color:var(--ink)}.ni.on{background:var(--ink);color:white}
-.nb{margin-left:auto;background:var(--red);color:white;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700}.nb.a{background:var(--amber)}
-.sfoot{padding:12px;border-top:1px solid var(--border);margin-top:auto}
-.main{margin-left:240px;flex:1;min-width:0}
-.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}
-.pg{display:none;padding:24px 28px 40px}.pg.on{display:block}
-.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
-.pt{font-size:20px;font-weight:700;letter-spacing:-.02em}.ps{font-size:13px;color:var(--ink2);margin-top:2px}
+.sidebar{width:230px;background:#fff;border-right:1px solid #e8e5de;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto}
+.s-logo{padding:16px;border-bottom:1px solid #e8e5de;display:flex;align-items:center;gap:10px}
+.s-logo-icon{width:34px;height:34px;background:#1a1814;border-radius:9px;color:#a3e635;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#b8b2a3;padding:10px 14px 3px;margin-top:4px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:9px 12px;margin:1px 8px;border-radius:8px;cursor:pointer;font-size:13px;color:#756d5c;transition:all .12s;user-select:none;border:none;background:none;width:calc(100% - 16px);text-align:left;font-family:inherit}
+.nav-item:hover{background:#f8f7f4;color:#1a1814}
+.nav-item.active{background:#1a1814;color:#fff}
+.s-footer{padding:12px;border-top:1px solid #e8e5de;margin-top:auto}
+.main{margin-left:230px;flex:1}
+.topbar{background:#fff;border-bottom:1px solid #e8e5de;padding:0 28px;height:50px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}
+.page{display:none;padding:24px 28px 40px}
+.page.active{display:block}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.pt{font-size:20px;font-weight:700;letter-spacing:-.02em}
+.ps{font-size:13px;color:#888;margin-top:2px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
-.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
-.card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px}
-.kl{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px}
-.kv{font-size:26px;font-weight:700;letter-spacing:-.03em}.ks{font-size:12px;color:var(--ink3);margin-top:4px}
-.kd{font-size:12px;color:var(--green);margin-top:3px}
-.kdr{font-size:12px;color:var(--red);margin-top:3px}
+.kcard{background:#fff;border:1px solid #e8e5de;border-radius:12px;padding:16px}
+.kl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b8b2a3;margin-bottom:8px}
+.kv{font-size:24px;font-weight:700;letter-spacing:-.03em}
+.ks{font-size:11px;color:#b8b2a3;margin-top:4px}
+.bcard{background:#fff;border:1px solid #e8e5de;border-radius:12px;padding:20px;margin-bottom:14px}
 table{width:100%;border-collapse:collapse}
-th{text-align:left;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);padding:9px 12px;border-bottom:1px solid var(--border);background:var(--bg);white-space:nowrap}
-td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+th{text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b8b2a3;padding:9px 12px;border-bottom:1px solid #e8e5de;background:#f8f7f4;white-space:nowrap}
+td{padding:11px 12px;border-bottom:1px solid #e8e5de;font-size:13px}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#fafaf8}
-.badge{display:inline-flex;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
-.b-free{background:var(--bg);color:var(--ink3);border:1px solid var(--border)}
-.b-starter{background:var(--bbg);color:var(--blue)}
-.b-pro{background:#ede9fe;color:#5b21b6}
-.b-enterprise{background:var(--abg);color:var(--amber)}
-.b-paid{background:var(--gbg);color:var(--green)}
-.b-open{background:#fef3c7;color:#b45309}
-.b-draft{background:var(--bg);color:var(--ink3)}
-.b-overdue{background:var(--rbg);color:var(--red)}
-.b-sent{background:var(--bbg);color:var(--blue)}
-.b-ok{background:var(--gbg);color:var(--green)}
-.b-warn{background:var(--abg);color:var(--amber)}
-.b-err{background:var(--rbg);color:var(--red)}
-.b-info{background:var(--bbg);color:var(--blue)}
-.b-super_admin{background:var(--ink);color:white}
-.b-admin{background:#ede9fe;color:#5b21b6}
-.b-support{background:var(--bbg);color:var(--blue)}
-.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--white);color:var(--ink);font-family:inherit;transition:all .12s;white-space:nowrap}
-.btn:hover{background:var(--bg)}.btn:disabled{opacity:.5;cursor:not-allowed}
-.bp{background:var(--ink);color:white;border-color:var(--ink)}.bp:hover{background:#2d2a24}
-.bs{background:var(--gbg);color:var(--green);border-color:#bbf7d0}
-.bd{background:var(--rbg);color:var(--red);border-color:#fecaca}
-.ba{background:var(--abg);color:var(--amber);border-color:#fcd34d}
-.bpu{background:#ede9fe;color:#5b21b6;border-color:#ddd6fe}
-.btn-sm{padding:4px 10px;font-size:11.5px}
-input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;background:var(--white);color:var(--ink);outline:none;transition:border-color .12s}
-input:focus,select:focus,textarea:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(26,24,20,.08)}
-label{font-size:12px;font-weight:500;color:var(--ink2);display:block;margin-bottom:4px}
+.badge{display:inline-flex;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.b-free{background:#f0f0f0;color:#888}
+.b-starter{background:#eff6ff;color:#1d4ed8}
+.b-pro{background:#ede9fe;color:#7c3aed}
+.b-enterprise{background:#fffbeb;color:#b45309}
+.b-paid{background:#f0fdf4;color:#16a34a}
+.b-sent{background:#eff6ff;color:#1d4ed8}
+.b-draft{background:#f0f0f0;color:#888}
+.b-overdue{background:#fef2f2;color:#dc2626}
+.b-ok{background:#f0fdf4;color:#16a34a}
+.b-warn{background:#fffbeb;color:#b45309}
+.b-err{background:#fef2f2;color:#dc2626}
+.b-super_admin{background:#1a1814;color:#fff}
+.b-admin{background:#ede9fe;color:#7c3aed}
+.b-support{background:#eff6ff;color:#1d4ed8}
+.abtn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;border:1px solid #e8e5de;background:#fff;color:#1a1814;font-family:inherit;transition:all .12s;white-space:nowrap}
+.abtn:hover{background:#f8f7f4}
+.abtn-p{background:#1a1814;color:#fff;border-color:#1a1814}
+.abtn-p:hover{background:#2d2a24}
+.abtn-s{background:#f0fdf4;color:#16a34a;border-color:#bbf7d0}
+.abtn-d{background:#fef2f2;color:#dc2626;border-color:#fecaca}
+.abtn-sm{padding:5px 10px;font-size:12px}
+.fi{width:100%;padding:9px 12px;border:1.5px solid #e8e5de;border-radius:8px;font-size:13px;font-family:inherit;outline:none}
+.fi:focus{border-color:#1a1814}
 .fg{margin-bottom:12px}
-.mo{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
-.mb{background:var(--white);border-radius:14px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.18)}
-.mh{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--white);border-radius:14px 14px 0 0}
-.mbody{padding:20px}.mf{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
-.tog{width:42px;height:23px;border-radius:12px;cursor:pointer;border:none;position:relative;transition:background .2s;flex-shrink:0}
-.tog.on{background:var(--green)}.tog.off{background:var(--border)}
-.tog::after{content:'';position:absolute;width:17px;height:17px;border-radius:50%;background:white;top:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-.tog.on::after{left:22px}.tog.off::after{left:3px}
-.sr{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:12px}
-.sr:last-child{border:none}
-.alert{padding:10px 14px;border-radius:7px;font-size:12.5px;margin-bottom:12px;border-left:3px solid;line-height:1.5}
-.ai{background:var(--bbg);border-color:var(--blue);color:var(--blue)}
-.as{background:var(--gbg);border-color:var(--green);color:var(--green)}
-.aw{background:var(--abg);border-color:var(--amber);color:var(--amber)}
-.ar{background:var(--rbg);border-color:var(--red);color:var(--red)}
-.tab-row{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px}
-.tab{padding:9px 16px;cursor:pointer;font-size:13px;font-weight:500;color:var(--ink2);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .12s}
-.tab.on{color:var(--ink);border-bottom-color:var(--ink)}.tab:hover{color:var(--ink)}
-.pbar{height:6px;border-radius:3px;background:var(--border);overflow:hidden;margin-top:5px}
-.pfill{height:100%;border-radius:3px;transition:width .4s}
+.fg label{font-size:12px;font-weight:500;color:#666;display:block;margin-bottom:4px}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
+.modal-bg.show{display:flex}
+.modal-box{background:#fff;border-radius:14px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.18)}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e8e5de;position:sticky;top:0;background:#fff;border-radius:14px 14px 0 0}
+.modal-body{padding:20px}
+.modal-ftr{padding:14px 20px;border-top:1px solid #e8e5de;display:flex;gap:8px;justify-content:flex-end}
 .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
-.dot-ok{background:var(--green)}.dot-err{background:var(--red)}.dot-warn{background:var(--amber)}
-.searchbar{position:relative}.searchbar input{padding-left:32px}
-.searchbar::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;z-index:1}
-code{font-family:monospace;font-size:11px;background:var(--bg);padding:2px 6px;border-radius:4px}
-.empty{text-align:center;padding:40px 20px;color:var(--ink3)}
-.stat-trend{display:flex;align-items:center;gap:4px;font-size:11px;margin-top:4px}
-.trend-up{color:var(--green)}.trend-dn{color:var(--red)}
+.dot-ok{background:#16a34a}
+.dot-warn{background:#b45309}
+.dot-err{background:#dc2626}
+.alert{padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:10px;border-left:3px solid;line-height:1.5}
+.a-ok{background:#f0fdf4;border-color:#16a34a;color:#15803d}
+.a-err{background:#fef2f2;border-color:#dc2626;color:#dc2626}
+.a-info{background:#eff6ff;border-color:#1d4ed8;color:#1d4ed8}
+.a-warn{background:#fffbeb;border-color:#b45309;color:#b45309}
+.empty{text-align:center;padding:40px;color:#b8b2a3}
+.tog{width:42px;height:23px;border-radius:12px;cursor:pointer;border:none;position:relative;transition:background .2s;flex-shrink:0;vertical-align:middle}
+.tog.on{background:#16a34a}
+.tog.off{background:#e8e5de}
+.tog::after{content:'';position:absolute;width:17px;height:17px;border-radius:50%;background:#fff;top:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tog.on::after{left:22px}
+.tog.off::after{left:3px}
+.sr{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e8e5de;gap:12px}
+.sr:last-child{border:none}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="login">
-  <div class="lbox" id="loginBox">
-    <div class="lmark">IP</div>
-    <h1 style="font-size:22px;font-weight:800;margin-bottom:4px;letter-spacing:-.02em">Super Admin</h1>
-    <p style="font-size:13px;color:var(--ink2);margin-bottom:24px">InvoicePro control panel</p>
-    <div class="fg"><label>Email</label><input type="email" id="lemail" placeholder="admin@yourdomain.com"/></div>
-    <div class="fg"><label>Password</label><input type="password" id="lpw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
-    <button class="btn bp" style="width:100%;justify-content:center;padding:12px;margin-top:6px;font-size:14px" onclick="doLogin()">Sign in →</button>
-    <button type="button" onclick="showForgot()" style="background:none;border:none;color:var(--ink3);font-size:12px;cursor:pointer;margin-top:10px;font-family:inherit">Forgot password?</button>
-    <div id="lerr" style="color:var(--red);font-size:12px;margin-top:10px"></div>
-  </div>
-
-  <!-- FORGOT PASSWORD FORM -->
-  <div id="forgotBox" class="lbox" style="display:none">
-    <div class="lmark" style="background:#b45309">?</div>
-    <h1 style="font-size:20px;font-weight:800;margin-bottom:4px">Reset password</h1>
-    <p style="font-size:13px;color:var(--ink2);margin-bottom:20px">Enter your admin email to receive a reset link</p>
-    <div class="fg"><label>Admin email</label><input type="email" id="resetEmail" placeholder="admin@yourdomain.com"/></div>
-    <button class="btn bp" style="width:100%;justify-content:center;padding:12px;margin-top:6px" onclick="sendReset()">Send reset link</button>
-    <div id="resetMsg" style="margin-top:12px;font-size:13px"></div>
-    <button onclick="showLogin()" style="background:none;border:none;color:var(--ink3);font-size:12px;cursor:pointer;margin-top:14px;font-family:inherit">← Back to login</button>
-  </div>
-
-  <!-- RESET PASSWORD FORM (triggered by token in URL) -->
-  <div id="resetBox" class="lbox" style="display:none">
-    <div class="lmark" style="background:var(--green)">✓</div>
-    <h1 style="font-size:20px;font-weight:800;margin-bottom:4px">New password</h1>
-    <p style="font-size:13px;color:var(--ink2);margin-bottom:20px">Enter your new admin password</p>
-    <div class="fg"><label>New password (8+ characters)</label><input type="password" id="newPwField" placeholder="••••••••"/></div>
-    <div class="fg"><label>Confirm password</label><input type="password" id="newPwConfirm" placeholder="••••••••"/></div>
-    <button class="btn bp" style="width:100%;justify-content:center;padding:12px;margin-top:6px" onclick="completeReset()">Set new password</button>
-    <div id="resetDoneMsg" style="margin-top:12px;font-size:13px"></div>
+<!-- ── LOGIN ─────────────────────────────────────────────── -->
+<div id="loginPage" class="center">
+  <div class="card">
+    <div class="logo">IP</div>
+    <h1>Super Admin</h1>
+    <p class="sub">InvoicePro control panel</p>
+    <div id="loginForm">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="admin@yourdomain.com" autocomplete="email"/>
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password"/>
+      <button class="btn" id="loginBtn">Sign in →</button>
+      <button class="link" id="forgotBtn">Forgot password?</button>
+      <div class="err" id="loginErr"></div>
+    </div>
+    <div id="forgotForm" class="hidden">
+      <label>Your admin email</label>
+      <input type="email" id="forgotEmail" placeholder="admin@yourdomain.com"/>
+      <button class="btn" id="forgotSendBtn">Send reset link</button>
+      <button class="link" id="backToLoginBtn">← Back to sign in</button>
+      <div class="err" id="forgotMsg" style="color:#16a34a"></div>
+    </div>
+    <div id="resetForm" class="hidden">
+      <label>New password</label>
+      <input type="password" id="newPw1" placeholder="••••••••"/>
+      <label>Confirm password</label>
+      <input type="password" id="newPw2" placeholder="••••••••"/>
+      <button class="btn" id="resetBtn">Set new password</button>
+      <div class="err" id="resetMsg" style="color:#16a34a"></div>
+    </div>
   </div>
 </div>
 
-<!-- APP -->
+<!-- ── APP ───────────────────────────────────────────────── -->
 <div id="app">
  <div class="layout">
   <aside class="sidebar">
-    <div class="logo">
-      <div class="logo-icon">IP</div>
-      <div><div style="font-size:14px;font-weight:800;letter-spacing:-.02em">InvoicePro</div><div style="font-size:10px;color:var(--ink3)">Super Admin v4</div></div>
+    <div class="s-logo">
+      <div class="s-logo-icon">IP</div>
+      <div>
+        <div style="font-size:14px;font-weight:800;letter-spacing:-.02em">InvoicePro</div>
+        <div style="font-size:10px;color:#b8b2a3">Super Admin</div>
+      </div>
     </div>
-    <div class="ns">Overview</div>
-    <div class="ni on" onclick="show('dashboard')">📊 Dashboard</div>
-    <div class="ni" onclick="show('health')">🟢 System health</div>
-    <div class="ni" onclick="show('revenue')">💰 Revenue & MRR</div>
-    <div class="ni" onclick="show('churn')">📉 Churn & retention</div>
-    <div class="ns">Users & Data</div>
-    <div class="ni" onclick="show('users')">👥 All users</div>
-    <div class="ni" onclick="show('clients')">🏢 All clients</div>
-    <div class="ns">Transactions</div>
-    <div class="ni" onclick="show('invoices')">🧾 Invoices</div>
-    <div class="ni" onclick="show('quotes')">📄 Quotes</div>
-    <div class="ni" onclick="show('payments')">💳 Payments</div>
-    <div class="ni" onclick="show('expenses')">🧮 Expenses</div>
-    <div class="ns">Product</div>
-    <div class="ni" onclick="show('features')">🚦 Feature flags</div>
-    <div class="ni" onclick="show('plans')">📋 Plans & pricing</div>
-    <div class="ni" onclick="show('announcement')">📣 Announcement</div>
-    <div class="ns">Support</div>
-    <div class="ni" onclick="show('tickets')">🎫 Tickets <span class="nb" id="tbadge" style="display:none">0</span></div>
-    <div class="ni" onclick="show('satisfaction')">⭐ Satisfaction</div>
-    <div class="ni" onclick="show('financing')">🏦 Financing</div>
-    <div class="ni" onclick="show('broadcast')">📢 Broadcast</div>
-    <div class="ns">Admin System</div>
-    <div class="ni" onclick="show('admins')">🔐 Admin accounts</div>
-    <div class="ni" onclick="show('audit')">📝 Audit log</div>
-    <div class="ni" onclick="show('settings')">⚙️ Settings</div>
-    <div class="sfoot">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-        <div style="width:28px;height:28px;border-radius:8px;background:var(--ink);color:var(--lime);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0" id="adminAvatar">A</div>
-        <div style="min-width:0"><div style="font-size:12.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="aname">—</div><div style="font-size:10px;color:var(--ink3)" id="arole">—</div></div>
+    <div class="nav-label">Overview</div>
+    <button class="nav-item active" data-page="dashboard">📊 Dashboard</button>
+    <button class="nav-item" data-page="health">🟢 System health</button>
+    <button class="nav-item" data-page="revenue">💰 Revenue & MRR</button>
+    <button class="nav-item" data-page="churn">📉 Churn & retention</button>
+    <div class="nav-label">Users</div>
+    <button class="nav-item" data-page="users">👥 All users</button>
+    <button class="nav-item" data-page="clients">🏢 All clients</button>
+    <div class="nav-label">Transactions</div>
+    <button class="nav-item" data-page="invoices">🧾 Invoices</button>
+    <button class="nav-item" data-page="payments">💳 Payments</button>
+    <div class="nav-label">Product</div>
+    <button class="nav-item" data-page="features">🚦 Feature flags</button>
+    <button class="nav-item" data-page="plans">📋 Plans</button>
+    <button class="nav-item" data-page="announcement">📣 Announcement</button>
+    <div class="nav-label">Support</div>
+    <button class="nav-item" data-page="tickets">🎫 Tickets</button>
+    <button class="nav-item" data-page="satisfaction">⭐ Satisfaction</button>
+    <button class="nav-item" data-page="broadcast">📢 Broadcast</button>
+    <div class="nav-label">System</div>
+    <button class="nav-item" data-page="admins">🔐 Admin accounts</button>
+    <button class="nav-item" data-page="audit">📝 Audit log</button>
+    <div class="s-footer">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <div style="width:30px;height:30px;border-radius:8px;background:#1a1814;color:#a3e635;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px" id="adminAvatar">A</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="adminName">Admin</div>
+          <div style="font-size:10px;color:#b8b2a3" id="adminRole">super_admin</div>
+        </div>
       </div>
       <div style="display:flex;gap:6px">
-        <button class="btn btn-sm" style="flex:1;justify-content:center" onclick="logout()">Sign out</button>
-        <button class="btn btn-sm" title="Change password" onclick="$('changePwMo').style.display='flex'">🔑</button>
+        <button class="abtn abtn-sm" style="flex:1;justify-content:center" id="logoutBtn">Sign out</button>
+        <button class="abtn abtn-sm" id="changePwBtn" title="Change password">🔑</button>
       </div>
     </div>
   </aside>
 
-  <!-- TOP BAR -->
-  <div style="margin-left:240px">
-  <div class="topbar">
-    <div style="font-size:12px;color:var(--ink3)">InvoicePro Admin Panel</div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <span id="announcementBadge" style="display:none;font-size:11px" class="badge b-warn">📣 Announcement active</span>
-      <button class="btn btn-sm" onclick="show('health')">🟢 System status</button>
-    </div>
-  </div>
-
-  <!-- DASHBOARD -->
-  <div class="pg on" id="pg-dashboard">
-    <div class="ph"><div><div class="pt">Dashboard</div><div class="ps" id="dashDate">—</div></div>
-      <button class="btn btn-sm bp" onclick="loadDashboard()">↻ Refresh</button>
-    </div>
-    <div class="g5" id="statsGrid" style="margin-bottom:16px"></div>
-    <div class="g2" style="margin-bottom:16px">
-      <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Plan breakdown</div><div id="planChart"></div></div>
-      <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Quick actions</div>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <button class="btn" onclick="show('users')">👥 Manage all users</button>
-          <button class="btn" onclick="show('churn')">📉 View at-risk users</button>
-          <button class="btn" onclick="show('tickets')">🎫 Support tickets</button>
-          <button class="btn" onclick="show('features')">🚦 Toggle features</button>
-          <button class="btn" onclick="show('announcement')">📣 Post announcement</button>
-          <button class="btn" onclick="show('broadcast')">📢 Send broadcast</button>
-        </div>
-      </div>
-    </div>
-    <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Recent signups</div><div id="recentSignups"></div></div>
-  </div>
-
-  <!-- SYSTEM HEALTH -->
-  <div class="pg" id="pg-health">
-    <div class="ph"><div><div class="pt">System health</div><div class="ps">Real-time status of all services</div></div>
-      <button class="btn btn-sm bp" onclick="loadHealth()">↻ Refresh</button>
-    </div>
-    <div class="g3" style="margin-bottom:16px" id="healthGrid"></div>
-    <div class="card" id="healthDetails" style="margin-bottom:14px"></div>
-    <div class="card">
-      <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Test email sending</div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input id="testEmailAddr" type="email" placeholder="Enter email to send test to..." style="flex:1"/>
-        <button class="btn bp" onclick="sendTestEmail()">Send test email</button>
-      </div>
-      <div id="testEmailResult" style="margin-top:10px"></div>
-    </div>
-  </div>
-
-  <!-- REVENUE -->
-  <div class="pg" id="pg-revenue">
-    <div class="ph"><div><div class="pt">Revenue & MRR</div></div></div>
-    <div class="g4" id="revStats" style="margin-bottom:16px"></div>
-    <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Monthly revenue</div><div id="revChart" style="height:200px;display:flex;align-items:flex-end;gap:8px"></div></div>
-  </div>
-
-  <!-- CHURN & RETENTION -->
-  <div class="pg" id="pg-churn">
-    <div class="ph"><div><div class="pt">Churn & Retention</div><div class="ps">At-risk users and recent signups</div></div></div>
-    <div class="g3" style="margin-bottom:16px" id="churnStats"></div>
-    <div class="g2" style="margin-bottom:16px">
-      <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:14px;color:var(--red)">⚠ At-risk users (paid, inactive 30+ days)</div><div id="atRiskList"></div></div>
-      <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:14px;color:var(--green)">✨ New signups (last 7 days)</div><div id="newSignupList"></div></div>
-    </div>
-  </div>
-
-  <!-- USERS -->
-  <div class="pg" id="pg-users">
-    <div class="ph">
-      <div><div class="pt">Users</div><div class="ps" id="userCount">—</div></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <div class="searchbar" style="flex:1;min-width:220px"><input id="userSearch" placeholder="Search name, email, company..." oninput="debounce(loadUsers,400)()"/></div>
-        <select id="planFilter" style="width:140px" onchange="loadUsers()">
-          <option value="">All plans</option>
-          <option value="free">Free</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option>
-        </select>
-      </div>
-    </div>
-    <div class="card" style="padding:0;overflow:auto">
-      <table><thead><tr><th>User / Company</th><th>Plan</th><th>Email</th><th>Joined</th><th>Actions</th></tr></thead><tbody id="usersTbody"></tbody></table>
-    </div>
-    <div id="usersPager" style="display:flex;gap:6px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap"></div>
-  </div>
-
-  <!-- CLIENTS -->
-  <div class="pg" id="pg-clients">
-    <div class="ph">
-      <div><div class="pt">All clients</div><div class="ps" id="clientCount">—</div></div>
-      <div class="searchbar" style="width:260px"><input id="clientSearch" placeholder="Search clients..." oninput="debounce(loadClients,400)()"/></div>
-    </div>
-    <div class="card" style="padding:0;overflow:auto">
-      <table><thead><tr><th>Client name</th><th>Email</th><th>Owner</th><th>Currency</th><th>Actions</th></tr></thead><tbody id="clientsTbody"></tbody></table>
-    </div>
-  </div>
-
-  <!-- INVOICES -->
-  <div class="pg" id="pg-invoices">
-    <div class="ph">
-      <div><div class="pt">All invoices</div><div class="ps" id="invCount">—</div></div>
+  <div class="main">
+    <div class="topbar">
+      <div style="font-size:12px;color:#888">InvoicePro Admin Panel</div>
       <div style="display:flex;gap:8px">
-        <div class="searchbar" style="width:200px"><input id="invSearch" placeholder="Invoice number..." oninput="debounce(loadInvoices,400)()"/></div>
-        <select id="invStatus" style="width:140px" onchange="loadInvoices()">
+        <span id="annBadge" class="badge b-warn hidden">📣 Announcement active</span>
+        <button class="abtn abtn-sm" id="refreshBtn">↻ Refresh</button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="ph"><div><div class="pt">Dashboard</div><div class="ps" id="dashTime"></div></div></div>
+      <div class="g4" id="statsGrid"></div>
+      <div class="g2">
+        <div class="bcard"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Plan breakdown</div><div id="planChart"></div></div>
+        <div class="bcard"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Quick actions</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="abtn" onclick="navigate('users')">👥 Manage users</button>
+            <button class="abtn" onclick="navigate('churn')">📉 At-risk users</button>
+            <button class="abtn" onclick="navigate('features')">🚦 Feature flags</button>
+            <button class="abtn" onclick="navigate('announcement')">📣 Post announcement</button>
+            <button class="abtn" onclick="navigate('broadcast')">📢 Broadcast email</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HEALTH -->
+    <div class="page" id="page-health">
+      <div class="ph"><div><div class="pt">System health</div></div><button class="abtn abtn-p" onclick="loadHealth()">↻ Refresh</button></div>
+      <div class="g3" id="healthGrid" style="margin-bottom:14px"></div>
+      <div class="bcard">
+        <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Test email</div>
+        <div style="display:flex;gap:8px">
+          <input class="fi" id="testEmailTo" type="email" placeholder="Enter email to send test to..." style="flex:1"/>
+          <button class="abtn abtn-p" onclick="doTestEmail()">Send test</button>
+        </div>
+        <div id="testEmailResult" style="margin-top:8px"></div>
+      </div>
+    </div>
+
+    <!-- REVENUE -->
+    <div class="page" id="page-revenue">
+      <div class="ph"><div><div class="pt">Revenue & MRR</div></div></div>
+      <div class="g4" id="revStats"></div>
+      <div class="bcard"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Monthly revenue</div><div id="revBars" style="display:flex;align-items:flex-end;gap:6px;height:180px"></div></div>
+    </div>
+
+    <!-- CHURN -->
+    <div class="page" id="page-churn">
+      <div class="ph"><div><div class="pt">Churn & Retention</div></div></div>
+      <div class="g3" id="churnStats" style="margin-bottom:14px"></div>
+      <div class="g2">
+        <div class="bcard"><div style="font-size:13px;font-weight:600;color:#dc2626;margin-bottom:12px">⚠ At-risk (paid, inactive 30d+)</div><div id="atRisk"></div></div>
+        <div class="bcard"><div style="font-size:13px;font-weight:600;color:#16a34a;margin-bottom:12px">✨ New signups (7d)</div><div id="newSigs"></div></div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="page" id="page-users">
+      <div class="ph">
+        <div><div class="pt">Users</div><div class="ps" id="userTotal"></div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input class="fi" id="userSearch" placeholder="Search..." style="width:220px" oninput="clearTimeout(window.uSt);window.uSt=setTimeout(loadUsers,400)"/>
+          <select class="fi" id="planFilter" style="width:140px" onchange="loadUsers()">
+            <option value="">All plans</option>
+            <option value="free">Free</option><option value="starter">Starter</option>
+            <option value="pro">Pro</option><option value="enterprise">Enterprise</option>
+          </select>
+        </div>
+      </div>
+      <div class="bcard" style="padding:0;overflow:auto">
+        <table><thead><tr><th>User / Company</th><th>Plan</th><th>Email</th><th>Joined</th><th>Actions</th></tr></thead>
+        <tbody id="usersTbody"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
+      </div>
+      <div id="usersPager" style="display:flex;gap:6px;justify-content:flex-end;margin-top:10px;flex-wrap:wrap"></div>
+    </div>
+
+    <!-- CLIENTS -->
+    <div class="page" id="page-clients">
+      <div class="ph"><div><div class="pt">All clients</div><div class="ps" id="clientTotal"></div></div></div>
+      <div class="bcard" style="padding:0;overflow:auto">
+        <table><thead><tr><th>Name</th><th>Email</th><th>Owner</th><th>Currency</th></tr></thead>
+        <tbody id="clientsTbody"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <!-- INVOICES -->
+    <div class="page" id="page-invoices">
+      <div class="ph">
+        <div><div class="pt">All invoices</div><div class="ps" id="invTotal"></div></div>
+        <select class="fi" id="invStatus" style="width:160px" onchange="loadInvoices()">
           <option value="">All statuses</option>
-          <option value="draft">Draft</option><option value="sent">Sent</option><option value="paid">Paid</option><option value="overdue">Overdue</option>
+          <option value="paid">Paid</option><option value="sent">Sent</option>
+          <option value="draft">Draft</option><option value="overdue">Overdue</option>
         </select>
       </div>
+      <div class="bcard" style="padding:0;overflow:auto">
+        <table><thead><tr><th>Invoice #</th><th>Owner</th><th>Amount</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+        <tbody id="invTbody"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
+      </div>
     </div>
-    <div class="card" style="padding:0;overflow:auto">
-      <table><thead><tr><th>Invoice #</th><th>Client</th><th>Owner</th><th>Amount</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody id="invTbody"></tbody></table>
+
+    <!-- PAYMENTS -->
+    <div class="page" id="page-payments">
+      <div class="ph"><div><div class="pt">All payments</div></div></div>
+      <div class="bcard" style="padding:0;overflow:auto">
+        <table><thead><tr><th>Owner</th><th>Invoice</th><th>Amount</th><th>Method</th><th>Date</th></tr></thead>
+        <tbody id="payTbody"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
+      </div>
     </div>
-    <div id="invPager" style="display:flex;gap:6px;justify-content:flex-end;margin-top:12px"></div>
-  </div>
 
-  <!-- QUOTES -->
-  <div class="pg" id="pg-quotes">
-    <div class="ph"><div><div class="pt">All quotes</div><div class="ps" id="quoCount">—</div></div></div>
-    <div class="card" style="padding:0;overflow:auto">
-      <table><thead><tr><th>Quote #</th><th>Client</th><th>Owner</th><th>Amount</th><th>Status</th><th>Expires</th></tr></thead><tbody id="quoTbody"></tbody></table>
+    <!-- FEATURES -->
+    <div class="page" id="page-features">
+      <div class="ph"><div><div class="pt">Feature flags</div><div class="ps">Toggle features platform-wide</div></div></div>
+      <div class="bcard"><div id="featureList"><div class="empty">Loading...</div></div></div>
     </div>
-  </div>
 
-  <!-- PAYMENTS -->
-  <div class="pg" id="pg-payments">
-    <div class="ph"><div><div class="pt">All payments</div><div class="ps" id="payCount">—</div></div></div>
-    <div class="card" style="padding:0;overflow:auto">
-      <table><thead><tr><th>Owner</th><th>Invoice</th><th>Amount</th><th>Method</th><th>Date</th></tr></thead><tbody id="payTbody"></tbody></table>
+    <!-- PLANS -->
+    <div class="page" id="page-plans">
+      <div class="ph"><div><div class="pt">Plans & pricing</div></div></div>
+      <div class="g4" id="plansGrid"></div>
     </div>
-  </div>
 
-  <!-- EXPENSES -->
-  <div class="pg" id="pg-expenses">
-    <div class="ph"><div><div class="pt">All expenses</div><div class="ps" id="expCount">—</div></div></div>
-    <div class="card" style="padding:0;overflow:auto">
-      <table><thead><tr><th>Owner</th><th>Category</th><th>Description</th><th>Amount</th><th>Date</th><th>Billable</th></tr></thead><tbody id="expTbody"></tbody></table>
-    </div>
-  </div>
-
-  <!-- FEATURE FLAGS -->
-  <div class="pg" id="pg-features">
-    <div class="ph"><div><div class="pt">Feature flags</div><div class="ps">Enable or disable features platform-wide</div></div></div>
-    <div class="card"><div id="featureList"></div></div>
-  </div>
-
-  <!-- PLANS -->
-  <div class="pg" id="pg-plans">
-    <div class="ph"><div><div class="pt">Plans & pricing</div></div></div>
-    <div class="g4" id="plansGrid"></div>
-  </div>
-
-  <!-- ANNOUNCEMENT -->
-  <div class="pg" id="pg-announcement">
-    <div class="ph"><div><div class="pt">Platform announcement</div><div class="ps">Show a banner to all users in the app</div></div></div>
-    <div class="g2">
-      <div class="card">
-        <div style="font-size:13px;font-weight:600;margin-bottom:16px">Publish announcement</div>
-        <div class="fg"><label>Title</label><input id="annTitle" placeholder="e.g. Scheduled maintenance"/></div>
-        <div class="fg"><label>Message</label><textarea id="annMsg" rows="3" placeholder="We'll be doing maintenance on..."></textarea></div>
-        <div class="fg"><label>Type</label>
-          <select id="annType"><option value="info">ℹ Info (blue)</option><option value="warning">⚠ Warning (amber)</option><option value="success">✅ Success (green)</option><option value="error">🚨 Alert (red)</option></select>
+    <!-- ANNOUNCEMENT -->
+    <div class="page" id="page-announcement">
+      <div class="ph"><div><div class="pt">Platform announcement</div><div class="ps">Show a banner to all app users</div></div></div>
+      <div class="g2">
+        <div class="bcard">
+          <div class="fg"><label>Title</label><input class="fi" id="annTitle" placeholder="e.g. Scheduled maintenance"/></div>
+          <div class="fg"><label>Message</label><textarea class="fi" id="annMsg" rows="3" placeholder="Details..."></textarea></div>
+          <div class="fg"><label>Type</label>
+            <select class="fi" id="annType"><option value="info">ℹ Info</option><option value="warning">⚠ Warning</option><option value="success">✅ Success</option></select>
+          </div>
+          <div class="fg"><label>Expires after (hours)</label><input class="fi" id="annHours" type="number" value="24"/></div>
+          <div style="display:flex;gap:8px">
+            <button class="abtn abtn-p" style="flex:1;justify-content:center" onclick="doPublishAnn()">📣 Publish</button>
+            <button class="abtn abtn-d" style="flex:1;justify-content:center" onclick="doRemoveAnn()">🗑 Remove</button>
+          </div>
+          <div id="annResult" style="margin-top:10px"></div>
         </div>
-        <div class="fg"><label>Expires after (hours)</label><input id="annHours" type="number" value="24" min="1"/></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn bp" style="flex:1;justify-content:center" onclick="publishAnnouncement()">📣 Publish</button>
-          <button class="btn bd" style="flex:1;justify-content:center" onclick="removeAnnouncement()">🗑 Remove</button>
+        <div class="bcard"><div style="font-size:13px;font-weight:600;margin-bottom:10px">Current</div><div id="annPreview"></div></div>
+      </div>
+    </div>
+
+    <!-- TICKETS -->
+    <div class="page" id="page-tickets">
+      <div class="ph"><div><div class="pt">Support tickets</div></div>
+        <select class="fi" id="tickFilter" style="width:160px" onchange="loadTickets()">
+          <option value="">All</option><option value="open">Open</option><option value="resolved">Resolved</option>
+        </select>
+      </div>
+      <div class="bcard" style="padding:0;overflow:auto">
+        <table><thead><tr><th>User</th><th>Subject</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+        <tbody id="tickTbody"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <!-- SATISFACTION -->
+    <div class="page" id="page-satisfaction">
+      <div class="ph"><div><div class="pt">Client satisfaction</div></div></div>
+      <div class="g3" id="satStats" style="margin-bottom:14px"></div>
+      <div class="bcard" style="padding:0;overflow:auto">
+        <table><thead><tr><th>Business</th><th>Score</th><th>Comment</th><th>Date</th></tr></thead>
+        <tbody id="satTbody"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <!-- BROADCAST -->
+    <div class="page" id="page-broadcast">
+      <div class="ph"><div><div class="pt">Broadcast email</div><div class="ps">Send email to all or filtered users</div></div></div>
+      <div class="g2">
+        <div class="bcard">
+          <div class="fg"><label>Subject</label><input class="fi" id="bSubject" placeholder="New feature announcement"/></div>
+          <div class="fg"><label>Filter by plan (optional)</label>
+            <select class="fi" id="bPlan"><option value="">All users</option><option value="free">Free only</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select>
+          </div>
+          <div class="fg"><label>Message</label><textarea class="fi" id="bMsg" rows="5" placeholder="Hi there..."></textarea></div>
+          <button class="abtn abtn-p" style="width:100%;justify-content:center" onclick="doBroadcast()">📢 Send broadcast</button>
+          <div id="bResult" style="margin-top:10px"></div>
         </div>
-        <div id="annResult" style="margin-top:10px"></div>
-      </div>
-      <div class="card">
-        <div style="font-size:13px;font-weight:600;margin-bottom:14px">Current announcement</div>
-        <div id="annPreview"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SATISFACTION -->
-  <div class="pg" id="pg-satisfaction">
-    <div class="ph"><div><div class="pt">Client satisfaction</div></div></div>
-    <div class="g3" id="satStats" style="margin-bottom:16px"></div>
-    <div class="card" style="padding:0;overflow:auto">
-      <table><thead><tr><th>Business</th><th>Client</th><th>Score</th><th>Comment</th><th>Date</th></tr></thead><tbody id="satTbody"></tbody></table>
-    </div>
-  </div>
-
-  <!-- FINANCING -->
-  <div class="pg" id="pg-financing">
-    <div class="ph"><div><div class="pt">Invoice financing applications</div></div></div>
-    <div class="card" style="padding:0;overflow:auto">
-      <table><thead><tr><th>Business</th><th>Amount</th><th>Status</th><th>Applied</th><th>Actions</th></tr></thead><tbody id="finTbody"></tbody></table>
-    </div>
-  </div>
-
-  <!-- TICKETS -->
-  <div class="pg" id="pg-tickets">
-    <div class="ph">
-      <div><div class="pt">Support tickets</div></div>
-      <select id="ticketStatus" style="width:160px" onchange="loadTickets()">
-        <option value="">All tickets</option><option value="open">Open</option><option value="resolved">Resolved</option>
-      </select>
-    </div>
-    <div class="card" style="padding:0;overflow:auto">
-      <table><thead><tr><th>User</th><th>Subject</th><th>Priority</th><th>Status</th><th>Date</th><th>Action</th></tr></thead><tbody id="tickTbody"></tbody></table>
-    </div>
-  </div>
-
-  <!-- BROADCAST -->
-  <div class="pg" id="pg-broadcast">
-    <div class="ph"><div><div class="pt">Broadcast email</div><div class="ps">Send an email to all or filtered users</div></div></div>
-    <div class="g2">
-      <div class="card">
-        <div class="fg"><label>Subject line</label><input id="bSubject" placeholder="New feature: Time tracking"/></div>
-        <div class="fg"><label>Plan filter (optional)</label>
-          <select id="bPlan"><option value="">All users</option><option value="free">Free only</option><option value="starter">Starter only</option><option value="pro">Pro only</option><option value="enterprise">Enterprise only</option></select>
+        <div class="bcard">
+          <div class="alert a-info">Use plan filter to target specific segments.</div>
+          <div class="alert a-warn" style="margin-top:8px">SMTP must be configured in Railway for delivery.</div>
         </div>
-        <div class="fg"><label>Message body</label><textarea id="bMsg" rows="5" placeholder="Hi there,&#10;&#10;We're excited to announce..."></textarea></div>
-        <button class="btn bp" style="width:100%;justify-content:center" onclick="sendBroadcast()">📢 Send broadcast</button>
-        <div id="bResult" style="margin-top:10px"></div>
-      </div>
-      <div class="card">
-        <div style="font-size:13px;font-weight:600;margin-bottom:10px">Tips</div>
-        <div class="alert ai">Use plan filter to target specific segments — don't spam free users with upgrade messages.</div>
-        <div class="alert aw">SMTP must be configured in Railway env vars for email delivery.</div>
       </div>
     </div>
-  </div>
 
-  <!-- ADMIN ACCOUNTS -->
-  <div class="pg" id="pg-admins">
-    <div class="ph">
-      <div><div class="pt">Admin accounts</div><div class="ps">Manage who can access this panel</div></div>
-      <button class="btn bp" onclick="$('addAdminMo').style.display='flex'">+ Add admin</button>
+    <!-- ADMINS -->
+    <div class="page" id="page-admins">
+      <div class="ph"><div><div class="pt">Admin accounts</div></div>
+        <button class="abtn abtn-p" onclick="document.getElementById('addAdminModal').classList.add('show')">+ Add admin</button>
+      </div>
+      <div class="bcard" style="padding:0;overflow:auto">
+        <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Last login</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="adminsTbody"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
+      </div>
     </div>
-    <div class="card" style="padding:0;overflow:auto;margin-bottom:14px">
-      <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Last login</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminsTbody"></tbody></table>
+
+    <!-- AUDIT -->
+    <div class="page" id="page-audit">
+      <div class="ph"><div><div class="pt">Audit log</div></div></div>
+      <div class="bcard" style="padding:0;overflow:auto">
+        <table><thead><tr><th>Admin</th><th>Action</th><th>Entity</th><th>Time</th></tr></thead>
+        <tbody id="auditTbody"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
+      </div>
     </div>
-    <div class="alert ai">Super Admin can create/disable other admins. Support role has read-only access.</div>
-  </div>
 
-  <!-- AUDIT LOG -->
-  <div class="pg" id="pg-audit">
-    <div class="ph"><div><div class="pt">Audit log</div><div class="ps">All admin actions recorded</div></div></div>
-    <div class="card" style="padding:0;overflow:auto">
-      <table><thead><tr><th>Admin</th><th>Action</th><th>Entity</th><th>Time</th></tr></thead><tbody id="audTbody"></tbody></table>
-    </div>
-  </div>
-
-  <!-- SETTINGS -->
-  <div class="pg" id="pg-settings">
-    <div class="ph"><div><div class="pt">App settings</div></div><button class="btn bp" onclick="saveSettings()">Save settings</button></div>
-    <div id="settingsGrid" class="g2"></div>
-  </div>
-
-  </div><!-- end margin-left -->
+  </div><!-- end main -->
  </div><!-- end layout -->
 </div><!-- end app -->
 
-<!-- MODALS -->
-<!-- User detail modal -->
-<div class="mo" id="userMo" style="display:none" onclick="if(event.target===this)closeMo('userMo')">
-  <div class="mb" style="max-width:780px">
-    <div class="mh"><div style="font-size:16px;font-weight:700" id="userMoTitle">User</div><button class="btn btn-sm" onclick="closeMo('userMo')">✕ Close</button></div>
-    <div class="mbody">
-      <div class="tab-row">
-        <div class="tab on" onclick="uTab('overview',this)">Overview</div>
-        <div class="tab" onclick="uTab('invoices',this)">Invoices</div>
-        <div class="tab" onclick="uTab('clients',this)">Clients</div>
-        <div class="tab" onclick="uTab('edit',this)">Edit & Actions</div>
-      </div>
-      <div id="ut-overview"></div>
-      <div id="ut-invoices" style="display:none"></div>
-      <div id="ut-clients" style="display:none"></div>
-      <div id="ut-edit" style="display:none"></div>
+<!-- Change Password Modal -->
+<div class="modal-bg" id="changePwModal">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-hdr"><span style="font-size:16px;font-weight:700">🔑 Change password</span><button class="abtn abtn-sm" onclick="document.getElementById('changePwModal').classList.remove('show')">✕</button></div>
+    <div class="modal-body">
+      <div class="fg"><label>Current password</label><input class="fi" type="password" id="cpCurrent"/></div>
+      <div class="fg"><label>New password (8+ chars)</label><input class="fi" type="password" id="cpNew"/></div>
+      <div class="fg"><label>Confirm new password</label><input class="fi" type="password" id="cpConfirm"/></div>
+      <div id="cpMsg"></div>
+    </div>
+    <div class="modal-ftr">
+      <button class="abtn" onclick="document.getElementById('changePwModal').classList.remove('show')">Cancel</button>
+      <button class="abtn abtn-p" onclick="doChangePw()">Update password</button>
     </div>
   </div>
 </div>
 
-<!-- Ticket modal -->
-<div class="mo" id="tickMo" style="display:none" onclick="if(event.target===this)closeMo('tickMo')">
-  <div class="mb">
-    <div class="mh"><div style="font-size:16px;font-weight:700">Reply to ticket</div><button class="btn btn-sm" onclick="closeMo('tickMo')">✕</button></div>
-    <div class="mbody">
-      <div id="tickMoContent" style="background:var(--bg);padding:12px;border-radius:8px;margin-bottom:14px;font-size:13px;line-height:1.6"></div>
-      <div class="fg"><label>Your reply</label><textarea id="tickReply" rows="4" placeholder="Type your response..."></textarea></div>
-      <div class="fg"><label>Update status</label>
-        <select id="tickStatus"><option value="resolved">Resolved</option><option value="open">Keep open</option></select>
-      </div>
-    </div>
-    <div class="mf"><button class="btn" onclick="closeMo('tickMo')">Cancel</button><button class="btn bp" onclick="submitTicket()">Send reply</button></div>
-  </div>
-</div>
-
-<!-- Add admin modal -->
-<div class="mo" id="addAdminMo" style="display:none" onclick="if(event.target===this)closeMo('addAdminMo')">
-  <div class="mb" style="max-width:440px">
-    <div class="mh"><div style="font-size:16px;font-weight:700">Add admin account</div><button class="btn btn-sm" onclick="closeMo('addAdminMo')">✕</button></div>
-    <div class="mbody">
-      <div class="fg"><label>Full name</label><input id="newAdminName" placeholder="Support Agent"/></div>
-      <div class="fg"><label>Email</label><input id="newAdminEmail" type="email" placeholder="support@yourdomain.com"/></div>
-      <div class="fg"><label>Password</label><input id="newAdminPw" type="password" placeholder="8+ characters"/></div>
+<!-- Add Admin Modal -->
+<div class="modal-bg" id="addAdminModal">
+  <div class="modal-box" style="max-width:440px">
+    <div class="modal-hdr"><span style="font-size:16px;font-weight:700">Add admin</span><button class="abtn abtn-sm" onclick="document.getElementById('addAdminModal').classList.remove('show')">✕</button></div>
+    <div class="modal-body">
+      <div class="fg"><label>Full name</label><input class="fi" id="newAdminName" placeholder="Support Agent"/></div>
+      <div class="fg"><label>Email</label><input class="fi" type="email" id="newAdminEmail"/></div>
+      <div class="fg"><label>Password</label><input class="fi" type="password" id="newAdminPw"/></div>
       <div class="fg"><label>Role</label>
-        <select id="newAdminRole">
-          <option value="support">Support (read-only view)</option>
+        <select class="fi" id="newAdminRole">
+          <option value="support">Support (read-only)</option>
           <option value="admin">Admin (full access)</option>
-          <option value="super_admin">Super Admin (everything)</option>
+          <option value="super_admin">Super Admin</option>
         </select>
       </div>
+      <div id="addAdminMsg"></div>
     </div>
-    <div class="mf"><button class="btn" onclick="closeMo('addAdminMo')">Cancel</button><button class="btn bp" onclick="createAdmin()">Create admin</button></div>
-  </div>
-</div>
-
-<!-- Change Password Modal -->
-<div class="mo" id="changePwMo" style="display:none" onclick="if(event.target===this)closeMo('changePwMo')">
-  <div class="mb" style="max-width:420px">
-    <div class="mh"><div style="font-size:16px;font-weight:700">🔑 Change password</div><button class="btn btn-sm" onclick="closeMo('changePwMo')">✕</button></div>
-    <div class="mbody">
-      <div class="fg"><label>Current password</label><input type="password" id="cpCurrent" placeholder="Your current password"/></div>
-      <div class="fg"><label>New password (8+ characters)</label><input type="password" id="cpNew" placeholder="New password"/></div>
-      <div class="fg"><label>Confirm new password</label><input type="password" id="cpConfirm" placeholder="Repeat new password"/></div>
-      <div id="cpMsg" style="margin-top:8px"></div>
-    </div>
-    <div class="mf">
-      <button class="btn" onclick="closeMo('changePwMo')">Cancel</button>
-      <button class="btn bp" onclick="changeMyPassword()">Update password</button>
+    <div class="modal-ftr">
+      <button class="abtn" onclick="document.getElementById('addAdminModal').classList.remove('show')">Cancel</button>
+      <button class="abtn abtn-p" onclick="doAddAdmin()">Create admin</button>
     </div>
   </div>
 </div>
 
-<!-- Session timeout warning -->
-<div id="sessionWarn" style="display:none;position:fixed;bottom:20px;right:20px;background:#1a1814;color:white;padding:14px 20px;border-radius:10px;z-index:1000;font-size:13px;box-shadow:0 4px 20px rgba(0,0,0,.3)">
-  ⏰ Session expires in <span id="sessionCountdown">5:00</span> — <button onclick="refreshSession()" style="background:var(--lime);border:none;border-radius:5px;padding:4px 10px;cursor:pointer;font-size:12px;font-weight:600;color:var(--ink);font-family:inherit;margin-left:8px">Stay logged in</button>
+<!-- Ticket Reply Modal -->
+<div class="modal-bg" id="tickModal">
+  <div class="modal-box" style="max-width:500px">
+    <div class="modal-hdr"><span style="font-size:16px;font-weight:700">Reply to ticket</span><button class="abtn abtn-sm" onclick="document.getElementById('tickModal').classList.remove('show')">✕</button></div>
+    <div class="modal-body">
+      <div id="tickContent" style="background:#f8f7f4;padding:12px;border-radius:8px;margin-bottom:14px;font-size:13px;line-height:1.6"></div>
+      <div class="fg"><label>Your reply</label><textarea class="fi" id="tickReply" rows="4"></textarea></div>
+      <div class="fg"><label>Status</label><select class="fi" id="tickStat"><option value="resolved">Resolved</option><option value="open">Keep open</option></select></div>
+    </div>
+    <div class="modal-ftr">
+      <button class="abtn" onclick="document.getElementById('tickModal').classList.remove('show')">Cancel</button>
+      <button class="abtn abtn-p" onclick="doReplyTicket()">Send reply</button>
+    </div>
+  </div>
 </div>
 
 <script>
+// ── CONFIG ────────────────────────────────────────────────
 const API = '/api'
-let token = localStorage.getItem('adminToken')
-let adminData = null
-let currentTickId = null
+let authToken = null
+let currentTicketId = null
 let usersPage = 1
 let invPage = 1
-let settingsData = []
 
-const $ = id => document.getElementById(id)
-const fmt = (n, currency = '£') => `${currency}${(+n||0).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2})}`
-const fmtDate = d => d ? new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'
-const fmtTime = d => d ? new Date(d).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—'
-const stars = n => '★'.repeat(n) + '☆'.repeat(5-n)
-const planBadge = p => `<span class="badge b-${p||'free'}">${p||'free'}</span>`
-const statusBadge = s => `<span class="badge b-${s||'draft'}">${s||'—'}</span>`
-const esc = str => String(str||'').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/</g,'&lt;')
-function debounce(fn, delay){ let t; return function(...args){ clearTimeout(t); t = setTimeout(()=>fn(...args), delay) } }
-function closeMo(id) { $(id).style.display='none' }
+// ── HELPERS ───────────────────────────────────────────────
+function el(id) { return document.getElementById(id) }
+function fmtMoney(n) { return '£' + (+n||0).toLocaleString('en-GB', {minimumFractionDigits:2, maximumFractionDigits:2}) }
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}) : '—' }
+function fmtTime(d) { return d ? new Date(d).toLocaleString('en-GB', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}) : '—' }
+function badge(cls, text) { return '<span class="badge b-' + cls + '">' + text + '</span>' }
+function planBadge(p) { return badge(p||'free', p||'free') }
+function statusBadge(s) { return badge(s||'draft', s||'—') }
+function starsStr(n) { return '★'.repeat(n) + '☆'.repeat(5-n) }
 
-async function apiFetch(path, opts = {}) {
-  const res = await fetch(API + path, { ...opts, headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...opts.headers } })
-  if (!res.ok) { const e = await res.json().catch(()=>({error:res.statusText})); throw new Error(e.error || 'Request failed') }
-  return res.json()
+async function api(path, opts) {
+  opts = opts || {}
+  var headers = { 'Content-Type': 'application/json' }
+  if (authToken) headers['Authorization'] = 'Bearer ' + authToken
+  var res = await fetch(API + path, Object.assign({}, opts, { headers: Object.assign(headers, opts.headers || {}) }))
+  var data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Request failed')
+  return data
+}
+
+// ── NAVIGATION ────────────────────────────────────────────
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active') })
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active') })
+  var pageEl = el('page-' + page)
+  if (pageEl) pageEl.classList.add('active')
+  document.querySelectorAll('.nav-item').forEach(function(n) {
+    if (n.dataset.page === page) n.classList.add('active')
+  })
+  var loaders = {
+    dashboard: loadDashboard, health: loadHealth, revenue: loadRevenue,
+    churn: loadChurn, users: loadUsers, clients: loadClients,
+    invoices: loadInvoices, payments: loadPayments, features: loadFeatures,
+    plans: loadPlans, announcement: loadAnnouncement, tickets: loadTickets,
+    satisfaction: loadSatisfaction, admins: loadAdmins, audit: loadAudit
+  }
+  if (loaders[page]) loaders[page]()
 }
 
 // ── AUTH ─────────────────────────────────────────────────
+function showApp(adminObj) {
+  el('loginPage').style.display = 'none'
+  el('app').style.display = 'block'
+  el('adminName').textContent = adminObj.full_name || adminObj.email
+  el('adminRole').textContent = adminObj.role
+  el('adminAvatar').textContent = (adminObj.full_name || adminObj.email)[0].toUpperCase()
+  loadDashboard()
+}
+
 async function doLogin() {
-  const email = $('lemail').value, password = $('lpw').value
-  if (!email || !password) { $('lerr').textContent = 'Enter email and password'; return }
+  var email = el('loginEmail').value.trim()
+  var password = el('loginPassword').value
+  var errEl = el('loginErr')
+  var btn = el('loginBtn')
+
+  errEl.textContent = ''
+  if (!email || !password) { errEl.textContent = 'Enter email and password'; return }
+
+  btn.disabled = true
+  btn.textContent = 'Signing in...'
+
   try {
-    const d = await apiFetch('/admin/login', { method:'POST', body: JSON.stringify({ email, password }) })
-    token = d.token; adminData = d.admin
-    localStorage.setItem('adminToken', token)
-    $('login').style.display = 'none'; $('app').style.display = 'block'
-    $('aname').textContent = d.admin.full_name || d.admin.email
-    $('arole').textContent = d.admin.role
-    $('adminAvatar').textContent = (d.admin.full_name || d.admin.email)[0].toUpperCase()
-    loadDashboard()
-    checkAnnouncement()
-    startSessionTimer()
-  } catch(e) { $('lerr').textContent = e.message }
+    var data = await api('/admin/login', { method: 'POST', body: JSON.stringify({ email: email, password: password }) })
+    authToken = data.token
+    localStorage.setItem('ipAdminToken', authToken)
+    showApp(data.admin)
+  } catch(e) {
+    errEl.textContent = e.message || 'Invalid email or password'
+    btn.disabled = false
+    btn.textContent = 'Sign in →'
+  }
 }
 
-function logout() { localStorage.removeItem('adminToken'); location.reload() }
-
-// Auto-login if token exists
-if (token) {
-  $('login').style.display = 'none'; $('app').style.display = 'block'
-  apiFetch('/admin/stats').then(d => { loadDashboard(); checkAnnouncement(); startSessionTimer() }).catch(() => { localStorage.removeItem('adminToken'); location.reload() })
+function doLogout() {
+  authToken = null
+  localStorage.removeItem('ipAdminToken')
+  location.reload()
 }
 
-// ── NAVIGATION ───────────────────────────────────────────
-const loaders = {
-  dashboard: loadDashboard, health: loadHealth, revenue: loadRevenue,
-  churn: loadChurn, users: loadUsers, clients: loadClients,
-  invoices: loadInvoices, quotes: loadQuotes, payments: loadPayments,
-  expenses: loadExpenses, features: loadFeatures, plans: loadPlans,
-  announcement: loadAnnouncement, satisfaction: loadSatisfaction,
-  financing: loadFinancing, tickets: loadTickets, admins: loadAdmins,
-  audit: loadAudit, settings: loadSettings
+function showForgotForm() {
+  el('loginForm').classList.add('hidden')
+  el('forgotForm').classList.remove('hidden')
 }
 
-function show(page) {
-  document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'))
-  document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'))
-  $('pg-' + page).classList.add('on')
-  document.querySelectorAll('.ni').forEach(n => { if (n.textContent.trim().includes(page === 'health' ? 'health' : page === 'revenue' ? 'Revenue' : page === 'churn' ? 'Churn' : page === 'users' ? 'users' : page === 'admins' ? 'Admin' : page)) n.classList.add('on') })
-  if (loaders[page]) loaders[page]()
+function showLoginForm() {
+  el('forgotForm').classList.add('hidden')
+  el('resetForm').classList.add('hidden')
+  el('loginForm').classList.remove('hidden')
+}
+
+async function doForgotPassword() {
+  var email = el('forgotEmail').value.trim()
+  var msgEl = el('forgotMsg')
+  if (!email) { msgEl.style.color = '#dc2626'; msgEl.textContent = 'Enter your email'; return }
+  msgEl.style.color = '#888'; msgEl.textContent = 'Sending...'
+  try {
+    var data = await api('/admin/forgot-password', { method: 'POST', body: JSON.stringify({ email: email }) })
+    if (data.dev_reset_url) {
+      msgEl.style.color = '#1d4ed8'
+      msgEl.innerHTML = 'Reset link: <a href="' + data.dev_reset_url + '" target="_blank" style="color:#1d4ed8;font-weight:600">Click here to reset</a>'
+    } else {
+      msgEl.style.color = '#16a34a'
+      msgEl.textContent = data.message
+    }
+  } catch(e) { msgEl.style.color = '#dc2626'; msgEl.textContent = e.message }
+}
+
+async function doResetPassword() {
+  var pw1 = el('newPw1').value
+  var pw2 = el('newPw2').value
+  var msgEl = el('resetMsg')
+  var hash = window.location.hash
+  var token = hash.split('reset=')[1]
+  if (!token) { msgEl.style.color = '#dc2626'; msgEl.textContent = 'Invalid reset link'; return }
+  if (pw1 !== pw2) { msgEl.style.color = '#dc2626'; msgEl.textContent = 'Passwords do not match'; return }
+  if (pw1.length < 8) { msgEl.style.color = '#dc2626'; msgEl.textContent = '8+ characters required'; return }
+  try {
+    var data = await api('/admin/reset-password/' + token, { method: 'POST', body: JSON.stringify({ password: pw1 }) })
+    msgEl.style.color = '#16a34a'; msgEl.textContent = data.message + ' Redirecting to login...'
+    setTimeout(function() { window.history.replaceState(null, '', window.location.pathname); showLoginForm() }, 2000)
+  } catch(e) { msgEl.style.color = '#dc2626'; msgEl.textContent = e.message }
+}
+
+async function doChangePw() {
+  var current = el('cpCurrent').value
+  var next = el('cpNew').value
+  var confirm = el('cpConfirm').value
+  var msgEl = el('cpMsg')
+  if (!current || !next || !confirm) { msgEl.innerHTML = '<div class="alert a-err">Fill all fields</div>'; return }
+  if (next !== confirm) { msgEl.innerHTML = '<div class="alert a-err">Passwords do not match</div>'; return }
+  if (next.length < 8) { msgEl.innerHTML = '<div class="alert a-err">8+ characters required</div>'; return }
+  try {
+    var data = await api('/admin/change-password', { method: 'PUT', body: JSON.stringify({ current_password: current, new_password: next }) })
+    msgEl.innerHTML = '<div class="alert a-ok">✅ ' + data.message + '</div>'
+    el('cpCurrent').value = ''; el('cpNew').value = ''; el('cpConfirm').value = ''
+    setTimeout(function() { el('changePwModal').classList.remove('show') }, 1500)
+  } catch(e) { msgEl.innerHTML = '<div class="alert a-err">' + e.message + '</div>' }
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────
 async function loadDashboard() {
+  el('dashTime').textContent = 'Updated ' + fmtTime(new Date())
   try {
-    const d = await apiFetch('/admin/stats')
-    $('dashDate').textContent = 'Last updated ' + fmtTime(new Date())
-    const plans = d.plan_breakdown || {}
-    $('statsGrid').innerHTML = [
-      { label:'Total users', val: d.total_users, sub: `+${d.new_users_30d||0} this month`, color:'' },
-      { label:'MRR', val: fmt(d.mrr), sub: `ARR: ${fmt(d.arr)}`, color:'var(--green)' },
-      { label:'Total revenue', val: fmt(d.total_revenue), sub: `${d.total_invoices||0} invoices`, color:'' },
-      { label:'Revenue 30d', val: fmt(d.revenue_30d), sub: 'Last 30 days', color:'var(--blue)' },
-      { label:'Overdue', val: d.overdue_invoices||0, sub: 'invoices overdue', color: d.overdue_invoices > 0 ? 'var(--red)' : '' },
-    ].map(s => `<div class="card"><div class="kl">${s.label}</div><div class="kv" ${s.color?`style="color:${s.color}"`:''}>${s.val}</div><div class="ks">${s.sub}</div></div>`).join('')
+    var d = await api('/admin/stats')
+    var plans = d.plan_breakdown || {}
+    el('statsGrid').innerHTML = [
+      { l: 'Total users', v: d.total_users || 0, s: '+' + (d.new_users_30d||0) + ' this month' },
+      { l: 'MRR', v: fmtMoney(d.mrr), s: 'ARR: ' + fmtMoney(d.arr), c: '#16a34a' },
+      { l: 'Total revenue', v: fmtMoney(d.total_revenue), s: (d.total_invoices||0) + ' invoices' },
+      { l: 'Overdue', v: d.overdue_invoices || 0, s: 'invoices', c: d.overdue_invoices > 0 ? '#dc2626' : null },
+    ].map(function(s) {
+      return '<div class="kcard"><div class="kl">' + s.l + '</div><div class="kv"' + (s.c ? ' style="color:' + s.c + '"' : '') + '>' + s.v + '</div><div class="ks">' + s.s + '</div></div>'
+    }).join('')
 
-    const total = Object.values(plans).reduce((a, b) => a+b, 0) || 1
-    const pColors = { free:'#b8b2a3', starter:'#1d4ed8', pro:'#7c3aed', enterprise:'#b45309' }
-    $('planChart').innerHTML = Object.entries(plans).map(([plan, count]) => `
-      <div style="margin-bottom:10px">
-        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
-          <span>${planBadge(plan)}</span><span style="font-weight:600">${count} users (${Math.round(count/total*100)}%)</span>
-        </div>
-        <div class="pbar"><div class="pfill" style="width:${count/total*100}%;background:${(pColors )[plan]||'var(--ink)'}"></div></div>
-      </div>`).join('')
-
-    // Recent signups
-    try {
-      const users = await apiFetch('/admin/users?limit=5&page=1')
-      $('recentSignups').innerHTML = (users.data||[]).map((u) => `
-        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
-          <div style="width:32px;height:32px;border-radius:8px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">${(u.full_name||u.email||'?')[0].toUpperCase()}</div>
-          <div style="flex:1;min-width:0"><div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.company_name||u.full_name||'—'}</div><div style="font-size:11px;color:var(--ink3)">${u.email}</div></div>
-          <div>${planBadge(u.plan)}</div>
-          <div style="font-size:11px;color:var(--ink3)">${fmtDate(u.created_at)}</div>
-        </div>`).join('')
-    } catch(e) { $('recentSignups').innerHTML = '<div class="empty">No data</div>' }
-  } catch(e) { console.error(e) }
+    var total = Object.values(plans).reduce(function(a, b) { return a + b }, 0) || 1
+    var pColors = { free: '#b8b2a3', starter: '#1d4ed8', pro: '#7c3aed', enterprise: '#b45309' }
+    el('planChart').innerHTML = Object.entries(plans).map(function(entry) {
+      var plan = entry[0], count = entry[1]
+      var pct = Math.round(count / total * 100)
+      return '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>' + planBadge(plan) + '</span><span style="font-weight:600">' + count + ' (' + pct + '%)</span></div><div style="height:5px;background:#e8e5de;border-radius:3px;overflow:hidden"><div style="height:100%;border-radius:3px;width:' + pct + '%;background:' + (pColors[plan]||'#888') + '"></div></div></div>'
+    }).join('')
+  } catch(e) { el('statsGrid').innerHTML = '<div class="alert a-err" style="grid-column:1/-1">Failed: ' + e.message + '</div>' }
 }
 
-// ── SYSTEM HEALTH ─────────────────────────────────────────
+// ── HEALTH ────────────────────────────────────────────────
 async function loadHealth() {
   try {
-    const d = await apiFetch('/admin/health')
-    const db = d.checks?.database || {}
-    $('healthGrid').innerHTML = [
-      { label:'Database', status: db.error ? 'error' : 'ok', detail: db.error || `${db.latency}ms latency` },
-      { label:'SMTP / Email', status: d.checks?.smtp_configured ? 'ok' : 'warn', detail: d.checks?.smtp_configured ? 'Configured' : 'Not configured — emails disabled' },
-      { label:'Stripe', status: d.checks?.stripe_configured ? 'ok' : 'warn', detail: d.checks?.stripe_configured ? 'Configured' : 'Not configured — payments disabled' },
-      { label:'AI Assistant', status: d.checks?.ai_configured ? 'ok' : 'warn', detail: d.checks?.ai_configured ? 'Configured' : 'No Anthropic key — AI disabled' },
-      { label:'Twilio SMS', status: d.checks?.twilio_configured ? 'ok' : 'warn', detail: d.checks?.twilio_configured ? 'Configured' : 'Not configured — SMS/WhatsApp disabled' },
-      { label:'API Server', status: 'ok', detail: `Running · ${fmtTime(d.timestamp)}` },
-    ].map(h => `<div class="card">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-        <span class="status-dot dot-${h.status==='ok'?'ok':h.status==='warn'?'warn':'err'}"></span>
-        <span style="font-weight:600;font-size:13px">${h.label}</span>
-        <span class="badge b-${h.status==='ok'?'ok':h.status==='warn'?'warn':'err'}" style="margin-left:auto">${h.status}</span>
-      </div>
-      <div style="font-size:12px;color:var(--ink3)">${h.detail}</div>
-    </div>`).join('')
-    $('healthDetails').innerHTML = `
-      <div style="font-size:13px;font-weight:600;margin-bottom:14px">Platform activity</div>
-      <div class="g3">
-        <div><div class="kl">Active users (24h)</div><div class="kv">${d.checks?.active_users_24h||0}</div></div>
-        <div><div class="kl">Invoices today</div><div class="kv">${d.checks?.invoices_today||0}</div></div>
-        <div><div class="kl">Server time</div><div class="kv" style="font-size:16px">${fmtTime(d.timestamp)}</div></div>
-      </div>`
-  } catch(e) { $('healthGrid').innerHTML = `<div class="alert ar" style="grid-column:1/-1">Failed to load health: ${e.message}</div>` }
+    var d = await api('/admin/health')
+    var checks = d.checks || {}
+    el('healthGrid').innerHTML = [
+      { l: 'Database', ok: !checks.database?.error, detail: checks.database?.error || (checks.database?.latency + 'ms') },
+      { l: 'Email / SMTP', ok: checks.smtp_configured, detail: checks.smtp_configured ? 'Configured' : 'Not set — emails disabled' },
+      { l: 'Stripe', ok: checks.stripe_configured, detail: checks.stripe_configured ? 'Configured' : 'Not set — payments disabled' },
+      { l: 'AI Assistant', ok: checks.ai_configured, detail: checks.ai_configured ? 'Configured' : 'No Anthropic key' },
+      { l: 'Twilio SMS', ok: checks.twilio_configured, detail: checks.twilio_configured ? 'Configured' : 'Not set' },
+      { l: 'API Server', ok: true, detail: 'Running · ' + fmtTime(d.timestamp) },
+    ].map(function(h) {
+      var dotCls = h.ok ? 'dot-ok' : 'dot-warn'
+      var badgeCls = h.ok ? 'b-ok' : 'b-warn'
+      return '<div class="kcard"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span class="status-dot ' + dotCls + '"></span><span style="font-weight:600;font-size:13px">' + h.l + '</span><span class="badge ' + badgeCls + '" style="margin-left:auto">' + (h.ok ? 'OK' : 'Not set') + '</span></div><div style="font-size:12px;color:#888">' + h.detail + '</div></div>'
+    }).join('')
+  } catch(e) { el('healthGrid').innerHTML = '<div class="alert a-err" style="grid-column:1/-1">Failed: ' + e.message + '</div>' }
+}
+
+async function doTestEmail() {
+  var to = el('testEmailTo').value.trim()
+  var res = el('testEmailResult')
+  if (!to) { res.innerHTML = '<div class="alert a-err">Enter email address</div>'; return }
+  res.innerHTML = '<div class="alert a-info">Sending...</div>'
+  try {
+    var d = await api('/admin/test-email', { method: 'POST', body: JSON.stringify({ to: to }) })
+    res.innerHTML = '<div class="alert a-ok">✅ ' + d.message + '</div>'
+  } catch(e) { res.innerHTML = '<div class="alert a-err">❌ ' + e.message + '</div>' }
 }
 
 // ── REVENUE ───────────────────────────────────────────────
 async function loadRevenue() {
   try {
-    const [rev, stats] = await Promise.all([apiFetch('/admin/revenue'), apiFetch('/admin/stats')])
-    $('revStats').innerHTML = [
-      { label:'Total processed', val: fmt(rev.total_processed) },
-      { label:'MRR', val: fmt(stats.mrr), color:'var(--green)' },
-      { label:'ARR', val: fmt(stats.arr) },
-      { label:'Revenue (30d)', val: fmt(stats.revenue_30d) },
-    ].map(s=>`<div class="card"><div class="kl">${s.label}</div><div class="kv" ${s.color?`style="color:${s.color}"`:''}>${s.val}</div></div>`).join('')
-    const months = Object.entries(rev.monthly_revenue||{}).sort().slice(-12)
-    const max = Math.max(...months.map(([,v])=>v), 1)
-    $('revChart').innerHTML = months.map(([month, val])=>`
-      <div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:6px">
-        <div style="font-size:10px;color:var(--ink3)">${fmt(val)}</div>
-        <div style="width:100%;background:var(--ink);border-radius:4px 4px 0 0;height:${Math.max(4,val/max*160)}px"></div>
-        <div style="font-size:10px;color:var(--ink3);white-space:nowrap">${month.slice(5)}</div>
-      </div>`).join('')
-  } catch(e) { $('revStats').innerHTML = `<div class="alert ar" style="grid-column:1/-1">Failed: ${e.message}</div>` }
+    var rev = await api('/admin/revenue')
+    var stats = await api('/admin/stats')
+    el('revStats').innerHTML = [
+      { l: 'Total processed', v: fmtMoney(rev.total_processed) },
+      { l: 'MRR', v: fmtMoney(stats.mrr), c: '#16a34a' },
+      { l: 'ARR', v: fmtMoney(stats.arr) },
+      { l: 'Revenue (30d)', v: fmtMoney(stats.revenue_30d) },
+    ].map(function(s) { return '<div class="kcard"><div class="kl">' + s.l + '</div><div class="kv"' + (s.c ? ' style="color:' + s.c + '"' : '') + '>' + s.v + '</div></div>' }).join('')
+
+    var months = Object.entries(rev.monthly_revenue || {}).sort().slice(-12)
+    var maxV = Math.max.apply(null, months.map(function(m) { return m[1] })) || 1
+    el('revBars').innerHTML = months.map(function(m) {
+      var pct = Math.max(4, m[1] / maxV * 160)
+      return '<div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:4px"><div style="font-size:10px;color:#888">' + fmtMoney(m[1]).split('.')[0] + '</div><div style="width:100%;background:#1a1814;border-radius:4px 4px 0 0;height:' + pct + 'px"></div><div style="font-size:10px;color:#888;white-space:nowrap">' + m[0].slice(5) + '</div></div>'
+    }).join('')
+  } catch(e) {}
 }
 
-// ── CHURN ─────────────────────────────────────────────────
+// ── CHURN ────────────────────────────────────────────────
 async function loadChurn() {
   try {
-    const d = await apiFetch('/admin/churn')
-    $('churnStats').innerHTML = [
-      { label:'At-risk users', val: (d.at_risk||[]).length, color: (d.at_risk||[]).length > 0 ? 'var(--red)' : 'var(--green)' },
-      { label:'New signups (7d)', val: (d.new_signups_7d||[]).length, color:'var(--green)' },
-      { label:'Churn rate (est.)', val: (d.churn_rate||0) + '%', color: +d.churn_rate > 10 ? 'var(--red)' : 'var(--amber)' },
-    ].map(s=>`<div class="card"><div class="kl">${s.label}</div><div class="kv" style="color:${s.color}">${s.val}</div></div>`).join('')
-    const renderUser = (u) => `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><div style="flex:1;min-width:0"><div style="font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.company_name||u.full_name||'—'}</div><div style="font-size:11px;color:var(--ink3)">${u.email}</div></div>${planBadge(u.plan)}<button class="btn btn-sm" onclick="viewUser('${u.id}')">View</button></div>`
-    $('atRiskList').innerHTML = (d.at_risk||[]).length ? (d.at_risk||[]).map(renderUser).join('') : '<div class="empty">No at-risk users 🎉</div>'
-    $('newSignupList').innerHTML = (d.new_signups_7d||[]).length ? (d.new_signups_7d||[]).map(renderUser).join('') : '<div class="empty">No new signups this week</div>'
-  } catch(e) { $('churnStats').innerHTML = `<div class="alert ar" style="grid-column:1/-1">Failed: ${e.message}</div>` }
+    var d = await api('/admin/churn')
+    var at = d.at_risk || []
+    var sigs = d.new_signups_7d || []
+    el('churnStats').innerHTML = [
+      { l: 'At-risk users', v: at.length, c: at.length > 0 ? '#dc2626' : '#16a34a' },
+      { l: 'New signups (7d)', v: sigs.length, c: '#16a34a' },
+      { l: 'Est. churn rate', v: (d.churn_rate || 0) + '%' },
+    ].map(function(s) { return '<div class="kcard"><div class="kl">' + s.l + '</div><div class="kv" style="color:' + (s.c||'inherit') + '">' + s.v + '</div></div>' }).join('')
+
+    function userRow(u) {
+      return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #e8e5de"><div style="flex:1;min-width:0"><div style="font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (u.company_name||u.full_name||'—') + '</div><div style="font-size:11px;color:#888">' + u.email + '</div></div>' + planBadge(u.plan) + '</div>'
+    }
+    el('atRisk').innerHTML = at.length ? at.map(userRow).join('') : '<div class="empty" style="padding:20px">No at-risk users 🎉</div>'
+    el('newSigs').innerHTML = sigs.length ? sigs.map(userRow).join('') : '<div class="empty" style="padding:20px">No new signups</div>'
+  } catch(e) {}
 }
 
 // ── USERS ─────────────────────────────────────────────────
 async function loadUsers() {
+  var search = el('userSearch').value
+  var plan = el('planFilter').value
   try {
-    const search = $('userSearch').value, plan = $('planFilter').value
-    const d = await apiFetch(`/admin/users?search=${encodeURIComponent(search)}&plan=${plan}&page=${usersPage}&limit=25`)
-    $('userCount').textContent = `${d.total} users`
-    $('usersTbody').innerHTML = (d.data||[]).map((u) => `<tr>
-      <td><div style="font-weight:500">${u.company_name||u.full_name||'—'}</div><div style="font-size:11px;color:var(--ink3)">${u.full_name||''}</div></td>
-      <td>${planBadge(u.plan)}</td>
-      <td style="color:var(--blue);font-size:12px">${u.email||'—'}</td>
-      <td style="font-size:11px;color:var(--ink3)">${fmtDate(u.created_at)}</td>
-      <td><div style="display:flex;gap:4px;flex-wrap:wrap">
-        <button class="btn btn-sm" onclick="viewUser('${u.id}')">View</button>
-        <button class="btn btn-sm bpu" onclick="quickChangePlan('${u.id}','${u.plan}')">Plan</button>
-        <button class="btn btn-sm ba" onclick="extendTrial('${u.id}')">Trial+</button>
-        <button class="btn btn-sm" onclick="exportUser('${u.id}','${esc(u.email)}')">Export</button>
-      </div></td>
-    </tr>`).join('')
-    const pages = Math.ceil((d.total||0)/25)
-    $('usersPager').innerHTML = pages > 1 ? Array.from({length:Math.min(pages,10)},(_,i)=>`<button class="btn btn-sm ${i+1===usersPage?'bp':''}" onclick="usersPage=${i+1};loadUsers()">${i+1}</button>`).join('') : ''
-  } catch(e) { $('usersTbody').innerHTML = `<tr><td colspan="5" class="empty">Error: ${e.message}</td></tr>` }
+    var d = await api('/admin/users?search=' + encodeURIComponent(search) + '&plan=' + plan + '&page=' + usersPage + '&limit=25')
+    el('userTotal').textContent = (d.total || 0) + ' users'
+    el('usersTbody').innerHTML = (d.data || []).map(function(u) {
+      return '<tr><td><div style="font-weight:500">' + (u.company_name||u.full_name||'—') + '</div><div style="font-size:11px;color:#888">' + (u.full_name||'') + '</div></td><td>' + planBadge(u.plan) + '</td><td style="color:#1d4ed8;font-size:12px">' + (u.email||'—') + '</td><td style="font-size:11px;color:#888">' + fmtDate(u.created_at) + '</td><td><div style="display:flex;gap:4px"><button class="abtn abtn-sm" onclick="doChangePlan(\'' + u.id + '\',\'' + (u.plan||'free') + '\')">Plan</button><button class="abtn abtn-sm" onclick="doExtendTrial(\'' + u.id + '\')">Trial+</button><button class="abtn abtn-sm abtn-d" onclick="doSuspend(\'' + u.id + '\')">Suspend</button></div></td></tr>'
+    }).join('') || '<tr><td colspan="5" class="empty">No users found</td></tr>'
+
+    var pages = Math.ceil((d.total||0) / 25)
+    if (pages > 1) {
+      var html = ''
+      for (var i = 1; i <= Math.min(pages, 10); i++) {
+        html += '<button class="abtn abtn-sm' + (i === usersPage ? ' abtn-p' : '') + '" onclick="usersPage=' + i + ';loadUsers()">' + i + '</button>'
+      }
+      el('usersPager').innerHTML = html
+    } else { el('usersPager').innerHTML = '' }
+  } catch(e) { el('usersTbody').innerHTML = '<tr><td colspan="5" class="empty">Error: ' + e.message + '</td></tr>' }
 }
 
-async function viewUser(id) {
-  try {
-    const d = await apiFetch(`/admin/users/${id}`)
-    const u = d.profile || {}
-    $('userMoTitle').textContent = u.company_name || u.full_name || u.email
-    $('ut-overview').innerHTML = `
-      <div class="g3" style="margin-bottom:14px">
-        <div class="card"><div class="kl">Revenue</div><div class="kv">${fmt(d.stats?.total_revenue||0)}</div></div>
-        <div class="card"><div class="kl">Invoices</div><div class="kv">${d.stats?.total_invoices||0} <span style="font-size:13px;color:var(--green)">(${d.stats?.paid_invoices||0} paid)</span></div></div>
-        <div class="card"><div class="kl">Clients</div><div class="kv">${d.stats?.total_clients||0}</div></div>
-      </div>
-      <div class="g2">
-        <div><div class="fg"><label>Email</label><div style="font-size:13px;color:var(--blue)">${u.email||'—'}</div></div>
-          <div class="fg"><label>Company</label><div>${u.company_name||'—'}</div></div>
-          <div class="fg"><label>Plan</label>${planBadge(u.plan)}</div>
-          <div class="fg"><label>Joined</label><div>${fmtDate(u.created_at)}</div></div>
-          <div class="fg"><label>Currency</label><div>${u.default_currency||'GBP'}</div></div>
-        </div>
-        <div>
-          <div class="fg"><label>Actions</label></div>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <button class="btn bs" onclick="impersonateUser('${id}')">🔐 Get login link</button>
-            <button class="btn ba" onclick="extendTrial('${id}')">⏰ Extend trial</button>
-            <button class="btn" onclick="exportUser('${id}','${esc(u.email)}')">📦 Export all data</button>
-            <button class="btn bd" onclick="suspendUser('${id}')">🚫 Suspend account</button>
-          </div>
-        </div>
-      </div>`
-    $('ut-invoices').innerHTML = `<div style="overflow:auto"><table><thead><tr><th>Invoice #</th><th>Client</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>${(d.invoices||[]).map((i)=>`<tr><td style="font-family:monospace;font-size:12px">${i.invoice_number}</td><td>${i.clients?.name||'—'}</td><td>${fmt(i.total)}</td><td>${statusBadge(i.status)}</td><td style="font-size:11px;color:var(--ink3)">${fmtDate(i.created_at)}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">No invoices</td></tr>'}</tbody></table></div>`
-    $('ut-clients').innerHTML = `<div style="overflow:auto"><table><thead><tr><th>Name</th><th>Email</th><th>Currency</th></tr></thead><tbody>${(d.clients||[]).map((c)=>`<tr><td style="font-weight:500">${c.name}</td><td style="color:var(--blue);font-size:12px">${c.email||'—'}</td><td>${c.currency||'GBP'}</td></tr>`).join('') || '<tr><td colspan="3" class="empty">No clients</td></tr>'}</tbody></table></div>`
-    $('ut-edit').innerHTML = `
-      <div class="g2">
-        <div>
-          <div class="fg"><label>Full name</label><input id="eu_name" value="${esc(u.full_name||'')}"/></div>
-          <div class="fg"><label>Company</label><input id="eu_company" value="${esc(u.company_name||'')}"/></div>
-          <div class="fg"><label>Plan</label><select id="eu_plan"><option value="free" ${u.plan==='free'?'selected':''}>Free</option><option value="starter" ${u.plan==='starter'?'selected':''}>Starter</option><option value="pro" ${u.plan==='pro'?'selected':''}>Pro</option><option value="enterprise" ${u.plan==='enterprise'?'selected':''}>Enterprise</option></select></div>
-          <button class="btn bp" onclick="saveUser('${id}')">Save changes</button>
-        </div>
-        <div>
-          <div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:10px">Danger zone</div>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <button class="btn bd" onclick="if(confirm('Suspend this user?'))apiFetch('/admin/users/${id}/suspend',{method:'PUT',body:JSON.stringify({suspended:true})}).then(()=>{alert('Suspended');closeMo('userMo');loadUsers()}).catch(e=>alert(e.message))">🚫 Suspend account</button>
-            <button class="btn bd" onclick="if(confirm('PERMANENTLY DELETE this user? This cannot be undone!'))apiFetch('/admin/users/${id}',{method:'DELETE'}).then(()=>{alert('Deleted');closeMo('userMo');loadUsers()}).catch(e=>alert(e.message))">🗑 Delete account</button>
-          </div>
-        </div>
-      </div>`
-    $('userMo').style.display = 'flex'
-  } catch(e) { alert('Failed to load user: ' + e.message) }
-}
-
-function uTab(tab, el) {
-  document.querySelectorAll('#userMo .tab').forEach(t => t.classList.remove('on'))
-  el.classList.add('on')
-  ;['overview','invoices','clients','edit'].forEach(t => { $('ut-'+t).style.display = t===tab ? 'block' : 'none' })
-}
-
-async function saveUser(id) {
-  try {
-    await apiFetch(`/admin/users/${id}`, { method:'PUT', body: JSON.stringify({ full_name: $('eu_name').value, company_name: $('eu_company').value, plan: $('eu_plan').value }) })
-    alert('Saved!'); closeMo('userMo'); loadUsers()
-  } catch(e) { alert(e.message) }
-}
-
-async function quickChangePlan(id, currentPlan) {
-  const plans = ['free','starter','pro','enterprise']
-  const newPlan = prompt(`Change plan for this user.\nCurrent: ${currentPlan}\nEnter new plan (free/starter/pro/enterprise):`, currentPlan)
-  if (!newPlan || !plans.includes(newPlan)) return
-  try { await apiFetch(`/admin/users/${id}/plan`, { method:'PUT', body: JSON.stringify({ plan: newPlan }) }); alert(`Plan updated to ${newPlan}!`); loadUsers() }
+async function doChangePlan(id, current) {
+  var newPlan = prompt('Change plan (free/starter/pro/enterprise):', current)
+  if (!newPlan || !['free','starter','pro','enterprise'].includes(newPlan)) return
+  try { await api('/admin/users/' + id + '/plan', { method: 'PUT', body: JSON.stringify({ plan: newPlan }) }); alert('Plan updated to ' + newPlan); loadUsers() }
   catch(e) { alert(e.message) }
 }
 
-async function extendTrial(id) {
-  if (!confirm('Give this user Pro plan for 14 days free?')) return
-  try { const d = await apiFetch(`/admin/users/${id}/extend-trial`, { method:'POST', body: JSON.stringify({ days:14, plan:'pro' }) }); alert(d.message); loadUsers() }
+async function doExtendTrial(id) {
+  if (!confirm('Give this user Pro plan for 14 days?')) return
+  try { var d = await api('/admin/users/' + id + '/extend-trial', { method: 'POST', body: JSON.stringify({ days: 14, plan: 'pro' }) }); alert(d.message); loadUsers() }
   catch(e) { alert(e.message) }
 }
 
-async function impersonateUser(id) {
-  try {
-    const d = await apiFetch(`/admin/impersonate/${id}`, { method:'POST' })
-    if (d.link) { navigator.clipboard.writeText(d.link); alert(`Login link copied to clipboard!\n\n${d.note}\n\nSend this link to log in  user.`) }
-    else alert(d.message)
-  } catch(e) { alert('Impersonation failed: ' + e.message) }
-}
-
-async function suspendUser(id) {
+async function doSuspend(id) {
   if (!confirm('Suspend this account?')) return
-  try { await apiFetch(`/admin/users/${id}/suspend`, { method:'PUT', body: JSON.stringify({ suspended:true }) }); alert('User suspended'); closeMo('userMo'); loadUsers() }
+  try { await api('/admin/users/' + id + '/suspend', { method: 'PUT', body: JSON.stringify({ suspended: true }) }); alert('Suspended'); loadUsers() }
   catch(e) { alert(e.message) }
 }
 
-async function exportUser(id, email) {
-  try {
-    const res = await fetch(API + `/admin/export/${id}`, { headers: { Authorization: `Bearer ${token}` } })
-    const blob = await res.blob()
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a'); a.href = url; a.download = `export-${email}.json`
-    document.body.appendChild(a); a.click(); document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-  } catch(e) { alert('Export failed: ' + e.message) }
-}
-
-// ── CLIENTS ──────────────────────────────────────────────
+// ── CLIENTS ───────────────────────────────────────────────
 async function loadClients() {
   try {
-    const d = await apiFetch(`/admin/clients?search=${encodeURIComponent($('clientSearch')?.value||'')}`)
-    $('clientCount').textContent = `${d.total} clients`
-    $('clientsTbody').innerHTML = (d.data||[]).map((c)=>`<tr>
-      <td style="font-weight:500">${c.name}</td>
-      <td style="color:var(--blue);font-size:12px">${c.email||'—'}</td>
-      <td style="font-size:12px;color:var(--ink3)">${c.profiles?.company_name||c.profiles?.full_name||'—'}</td>
-      <td>${c.currency||'GBP'}</td>
-      <td><button class="btn btn-sm bd" onclick="if(confirm('Archive?'))apiFetch('/admin/clients/${c.id}',{method:'DELETE'}).then(()=>loadClients())">Archive</button></td>
-    </tr>`).join('')
-  } catch(e) { $('clientsTbody').innerHTML = `<tr><td colspan="5" class="empty">Error: ${e.message}</td></tr>` }
+    var d = await api('/admin/clients')
+    el('clientTotal').textContent = (d.total||0) + ' clients'
+    el('clientsTbody').innerHTML = (d.data||[]).map(function(c) {
+      return '<tr><td style="font-weight:500">' + (c.name||'—') + '</td><td style="color:#1d4ed8;font-size:12px">' + (c.email||'—') + '</td><td style="font-size:12px;color:#888">' + (c.profiles?.company_name||c.profiles?.full_name||'—') + '</td><td>' + (c.currency||'GBP') + '</td></tr>'
+    }).join('') || '<tr><td colspan="4" class="empty">No clients</td></tr>'
+  } catch(e) {}
 }
 
-// ── INVOICES ─────────────────────────────────────────────
+// ── INVOICES ──────────────────────────────────────────────
 async function loadInvoices() {
+  var status = el('invStatus').value
   try {
-    const d = await apiFetch(`/admin/invoices?status=${$('invStatus').value}&search=${encodeURIComponent($('invSearch')?.value||'')}&page=${invPage}&limit=25`)
-    $('invCount').textContent = `${d.total} invoices`
-    $('invTbody').innerHTML = (d.data||[]).map((i)=>`<tr>
-      <td style="font-family:monospace;font-weight:600;font-size:12px">${i.invoice_number}</td>
-      <td style="font-size:12px">${i.clients?.name||'—'}</td>
-      <td style="font-size:11px;color:var(--ink3)">${i.profiles?.company_name||i.profiles?.full_name||'—'}</td>
-      <td style="font-weight:500">${fmt(i.total)}</td>
-      <td>${statusBadge(i.status)}</td>
-      <td style="font-size:11px;color:var(--ink3)">${fmtDate(i.created_at)}</td>
-      <td><div style="display:flex;gap:4px">
-        ${i.status!=='paid'?`<button class="btn btn-sm bs" onclick="markInvPaid('${i.id}')">✓ Paid</button>`:''}
-        <button class="btn btn-sm bd" onclick="if(confirm('Delete?'))apiFetch('/admin/invoices/${i.id}',{method:'DELETE'}).then(()=>loadInvoices())">Del</button>
-      </div></td>
-    </tr>`).join('')
-    const pages = Math.ceil((d.total||0)/25)
-    $('invPager').innerHTML = pages > 1 ? Array.from({length:Math.min(pages,10)},(_,i)=>`<button class="btn btn-sm ${i+1===invPage?'bp':''}" onclick="invPage=${i+1};loadInvoices()">${i+1}</button>`).join('') : ''
-  } catch(e) { $('invTbody').innerHTML = `<tr><td colspan="7" class="empty">Error: ${e.message}</td></tr>` }
+    var d = await api('/admin/invoices?status=' + status + '&page=' + invPage + '&limit=25')
+    el('invTotal').textContent = (d.total||0) + ' invoices'
+    el('invTbody').innerHTML = (d.data||[]).map(function(inv) {
+      return '<tr><td style="font-family:monospace;font-size:12px;font-weight:600">' + inv.invoice_number + '</td><td style="font-size:12px">' + (inv.profiles?.company_name||inv.profiles?.full_name||'—') + '</td><td style="font-weight:500">£' + (+inv.total||0).toFixed(2) + '</td><td>' + statusBadge(inv.status) + '</td><td style="font-size:11px;color:#888">' + fmtDate(inv.created_at) + '</td><td>' + (inv.status !== 'paid' ? '<button class="abtn abtn-sm abtn-s" onclick="doMarkPaid(\'' + inv.id + '\')">✓ Paid</button>' : '') + '</td></tr>'
+    }).join('') || '<tr><td colspan="6" class="empty">No invoices</td></tr>'
+  } catch(e) {}
 }
 
-async function markInvPaid(id) {
-  try { await apiFetch(`/admin/invoices/${id}`, { method:'PUT', body:JSON.stringify({status:'paid'}) }); loadInvoices() }
+async function doMarkPaid(id) {
+  try { await api('/admin/invoices/' + id, { method: 'PUT', body: JSON.stringify({ status: 'paid' }) }); loadInvoices() }
   catch(e) { alert(e.message) }
 }
 
-// ── QUOTES ───────────────────────────────────────────────
-async function loadQuotes() {
-  try {
-    const d = await apiFetch('/admin/quotes?limit=50')
-    $('quoCount').textContent = `${d.total} quotes`
-    $('quoTbody').innerHTML = (d.data||[]).map((q)=>`<tr>
-      <td style="font-family:monospace;font-size:12px">${q.quote_number}</td>
-      <td>${q.clients?.name||'—'}</td>
-      <td style="font-size:11px;color:var(--ink3)">${q.profiles?.company_name||'—'}</td>
-      <td>${fmt(q.total)}</td>
-      <td>${statusBadge(q.status)}</td>
-      <td style="font-size:11px;color:var(--ink3)">${fmtDate(q.expiry_date)}</td>
-    </tr>`).join('')
-  } catch(e) {}
-}
-
-// ── PAYMENTS ─────────────────────────────────────────────
+// ── PAYMENTS ──────────────────────────────────────────────
 async function loadPayments() {
   try {
-    const d = await apiFetch('/admin/payments?limit=50')
-    $('payCount').textContent = `${d.total} payments`
-    $('payTbody').innerHTML = (d.data||[]).map((p)=>`<tr>
-      <td style="font-size:12px">${p.profiles?.company_name||p.profiles?.full_name||'—'}</td>
-      <td style="font-family:monospace;font-size:11px">${p.invoices?.invoice_number||'—'}</td>
-      <td style="font-weight:600;color:var(--green)">${fmt(p.amount)}</td>
-      <td><span class="badge b-draft">${p.method||'manual'}</span></td>
-      <td style="font-size:11px;color:var(--ink3)">${fmtDate(p.paid_at)}</td>
-    </tr>`).join('')
+    var d = await api('/admin/payments?limit=50')
+    el('payTbody').innerHTML = (d.data||[]).map(function(p) {
+      return '<tr><td style="font-size:12px">' + (p.profiles?.company_name||p.profiles?.full_name||'—') + '</td><td style="font-family:monospace;font-size:11px">' + (p.invoices?.invoice_number||'—') + '</td><td style="font-weight:500;color:#16a34a">£' + (+p.amount||0).toFixed(2) + '</td><td>' + badge('draft', p.method||'manual') + '</td><td style="font-size:11px;color:#888">' + fmtDate(p.paid_at) + '</td></tr>'
+    }).join('') || '<tr><td colspan="5" class="empty">No payments</td></tr>'
   } catch(e) {}
 }
 
-// ── EXPENSES ─────────────────────────────────────────────
-async function loadExpenses() {
-  try {
-    const d = await apiFetch('/admin/expenses?limit=50')
-    $('expCount').textContent = `${d.total} expenses`
-    $('expTbody').innerHTML = (d.data||[]).map((e)=>`<tr>
-      <td style="font-size:12px">${e.profiles?.company_name||e.profiles?.full_name||'—'}</td>
-      <td><span class="badge b-draft">${e.category}</span></td>
-      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.description}</td>
-      <td>${fmt(e.amount)}</td>
-      <td style="font-size:11px;color:var(--ink3)">${fmtDate(e.date)}</td>
-      <td>${e.is_billable?'<span class="badge b-sent">Billable</span>':'—'}</td>
-    </tr>`).join('')
-  } catch(e) {}
-}
-
-// ── FEATURE FLAGS ─────────────────────────────────────────
-const FEATURES = [
-  {key:'feature_ai_assistant',name:'AI Invoice Assistant',desc:'Claude chat widget — create invoices by typing'},
-  {key:'feature_whatsapp_sms',name:'WhatsApp & SMS reminders',desc:'Requires Twilio credentials in Railway env'},
-  {key:'feature_receipt_scanner',name:'AI Receipt Scanner',desc:'Upload receipt photo, AI extracts data'},
-  {key:'feature_cashflow_forecast',name:'Cash Flow Forecast',desc:'90-day income & expense forecast'},
-  {key:'feature_invoice_designer',name:'Invoice Template Designer',desc:'Custom templates with brand colours'},
-  {key:'feature_client_happiness',name:'Client Happiness Score',desc:'NPS surveys after invoice payment'},
-  {key:'feature_financing',name:'Invoice Financing',desc:'Advance 90% of invoice value'},
-  {key:'feature_milestones',name:'Milestone Billing',desc:'Split projects into phased invoices'},
-  {key:'feature_early_payment',name:'Early Payment Discount',desc:'Offer % discount for early payment'},
-  {key:'feature_view_tracking',name:'Invoice View Tracking',desc:'See when client opened invoice'},
-  {key:'feature_year_review',name:'Year in Review',desc:'Annual revenue summary'},
-  {key:'feature_time_tracking',name:'Time Tracking',desc:'Log hours and convert to invoices'},
-  {key:'feature_recurring',name:'Recurring Invoices',desc:'Auto-generate on schedule'},
-  {key:'feature_white_label',name:'White Label Branding',desc:'Custom logo, domain, colours (Enterprise)'},
-  {key:'feature_api_access',name:'REST API Access',desc:'API keys for programmatic access (Enterprise)'},
+// ── FEATURES ──────────────────────────────────────────────
+var FEATURES = [
+  {key:'feature_ai_assistant',name:'AI Invoice Assistant'},
+  {key:'feature_whatsapp_sms',name:'WhatsApp & SMS'},
+  {key:'feature_receipt_scanner',name:'Receipt Scanner'},
+  {key:'feature_cashflow_forecast',name:'Cash Flow Forecast'},
+  {key:'feature_invoice_designer',name:'Invoice Template Designer'},
+  {key:'feature_client_happiness',name:'Client Happiness Score'},
+  {key:'feature_financing',name:'Invoice Financing'},
+  {key:'feature_time_tracking',name:'Time Tracking'},
+  {key:'feature_recurring',name:'Recurring Invoices'},
+  {key:'feature_year_review',name:'Year in Review'},
 ]
 
 async function loadFeatures() {
-  let flags = {}
-  try { const d = await apiFetch('/admin/feature-flags'); d.forEach((f)=>{ try{flags[f.key]=JSON.parse(f.value)}catch{flags[f.key]=true} }) } catch{}
-  $('featureList').innerHTML = FEATURES.map(f=>{
-    const enabled = flags[f.key] !== false
-    return `<div class="sr"><div style="flex:1"><div style="font-size:13px;font-weight:500">${f.name}</div><div style="font-size:11px;color:var(--ink3);margin-top:2px">${f.desc}</div></div><button class="tog ${enabled?'on':'off'}" onclick="toggleFeature('${f.key}',this)"></button></div>`
+  var flags = {}
+  try {
+    var d = await api('/admin/feature-flags')
+    d.forEach(function(f) { try { flags[f.key] = JSON.parse(f.value) } catch(e) { flags[f.key] = true } })
+  } catch(e) {}
+  el('featureList').innerHTML = FEATURES.map(function(f) {
+    var on = flags[f.key] !== false
+    return '<div class="sr"><div style="font-size:13px;font-weight:500">' + f.name + '</div><button class="tog ' + (on?'on':'off') + '" onclick="doToggleFeature(\'' + f.key + '\',this)"></button></div>'
   }).join('')
 }
 
-async function toggleFeature(key, btn) {
-  const isOn = btn.classList.contains('on')
+async function doToggleFeature(key, btn) {
+  var isOn = btn.classList.contains('on')
   btn.classList.toggle('on', !isOn); btn.classList.toggle('off', isOn)
-  try { await apiFetch(`/admin/feature-flags/${key}`, { method:'PUT', body:JSON.stringify({value:!isOn}) }) }
-  catch(e) { btn.classList.toggle('on', isOn); btn.classList.toggle('off', !isOn); alert('Failed: '+e.message) }
+  try { await api('/admin/feature-flags/' + key, { method: 'PUT', body: JSON.stringify({ value: !isOn }) }) }
+  catch(e) { btn.classList.toggle('on', isOn); btn.classList.toggle('off', !isOn); alert('Failed: ' + e.message) }
 }
 
 // ── PLANS ────────────────────────────────────────────────
 async function loadPlans() {
-  const d = await apiFetch('/admin/plans').catch(()=>[])
-  const colors = { free:'#b8b2a3', starter:'var(--blue)', pro:'var(--purple)', enterprise:'var(--amber)' }
-  $('plansGrid').innerHTML = (d||[]).map((p)=>`<div class="card" style="border-top:3px solid ${colors[p.slug]||'var(--border)'}">
-    <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink3);margin-bottom:6px">${p.name}</div>
-    <div style="font-size:26px;font-weight:700">£${p.price_monthly}<span style="font-size:12px;color:var(--ink3)">/mo</span></div>
-    <div style="font-size:12px;color:var(--ink3);margin:4px 0 12px">£${p.price_yearly}/yr · ${p.max_invoices===-1?'∞':p.max_invoices} invoices/mo</div>
-    <div style="font-size:12px">
-      <div class="sr"><span>Clients</span><span>${p.max_clients===-1?'Unlimited':p.max_clients}</span></div>
-      <div class="sr"><span>Team members</span><span>${p.max_team_members===-1?'Unlimited':p.max_team_members}</span></div>
-    </div>
-    <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
-      <label style="margin:0">Monthly price (£)</label>
-      <input id="price_${p.id}" value="${p.price_monthly}" type="number" step="0.01" style="font-size:12px;padding:6px 8px"/>
-      <button class="btn btn-sm bp" onclick="savePlan('${p.id}')">Save price</button>
-    </div>
-  </div>`).join('')
+  try {
+    var d = await api('/admin/plans')
+    el('plansGrid').innerHTML = d.map(function(p) {
+      var colors = { free:'#b8b2a3', starter:'#1d4ed8', pro:'#7c3aed', enterprise:'#b45309' }
+      return '<div class="kcard" style="border-top:3px solid ' + (colors[p.slug]||'#888') + '"><div class="kl">' + p.name + '</div><div class="kv">£' + p.price_monthly + '<span style="font-size:12px;color:#888">/mo</span></div><div class="ks" style="margin-bottom:12px">£' + p.price_yearly + '/yr</div><label style="font-size:12px;font-weight:500;color:#666;display:block;margin-bottom:4px">Monthly price (£)</label><input class="fi" id="price_' + p.id + '" value="' + p.price_monthly + '" type="number" step="0.01" style="font-size:12px;padding:7px 10px;margin-bottom:8px"/><button class="abtn abtn-p abtn-sm" style="width:100%;justify-content:center" onclick="doSavePlan(\'' + p.id + '\')">Save</button></div>'
+    }).join('')
+  } catch(e) {}
 }
 
-async function savePlan(id) {
-  const price = +($('price_'+id) ).value
-  try { await apiFetch(`/admin/plans/${id}`, { method:'PUT', body:JSON.stringify({price_monthly:price}) }); alert('Plan price updated!') } catch(e) { alert(e.message) }
+async function doSavePlan(id) {
+  var price = +(el('price_' + id).value)
+  try { await api('/admin/plans/' + id, { method: 'PUT', body: JSON.stringify({ price_monthly: price }) }); alert('Saved!') }
+  catch(e) { alert(e.message) }
 }
 
 // ── ANNOUNCEMENT ─────────────────────────────────────────
-async function checkAnnouncement() {
-  try {
-    const d = await apiFetch('/admin/settings')
-    const ann = d.find((s) => s.key === 'platform_announcement')
-    if (ann) {
-      const val = JSON.parse(ann.value)
-      if (new Date(val.expires_at) > new Date()) $('announcementBadge').style.display = 'inline-flex'
-    }
-  } catch {}
-}
-
 async function loadAnnouncement() {
   try {
-    const d = await apiFetch('/admin/settings')
-    const ann = d.find((s) => s.key === 'platform_announcement')
+    var d = await api('/admin/settings')
+    var ann = d.find(function(s) { return s.key === 'platform_announcement' })
     if (ann) {
-      const val = JSON.parse(ann.value)
-      const active = new Date(val.expires_at) > new Date()
-      const typeColors = { info:'var(--bbg),var(--blue)', warning:'var(--abg),var(--amber)', success:'var(--gbg),var(--green)', error:'var(--rbg),var(--red)' }
-      const [bg, color] = (typeColors[val.type] || 'var(--bg),var(--ink)').split(',')
-      $('annPreview').innerHTML = `
-        <div style="padding:14px;border-radius:10px;background:${bg};border:1px solid ${color};color:${color};margin-bottom:12px">
-          <div style="font-weight:600;margin-bottom:4px">${val.title}</div>
-          <div style="font-size:12.5px">${val.message}</div>
-          <div style="font-size:11px;margin-top:6px;opacity:.7">Expires: ${fmtTime(val.expires_at)}</div>
-        </div>
-        <div class="badge ${active?'b-ok':'b-err'}">${active?'✅ Active':'⏰ Expired'}</div>`
+      var val = JSON.parse(ann.value)
+      var active = new Date(val.expires_at) > new Date()
+      el('annPreview').innerHTML = '<div style="padding:12px;border-radius:8px;background:#eff6ff;border:1px solid #bfdbfe;margin-bottom:8px"><div style="font-weight:600;margin-bottom:4px">' + val.title + '</div><div style="font-size:12.5px">' + val.message + '</div><div style="font-size:11px;color:#888;margin-top:6px">Expires: ' + fmtTime(val.expires_at) + '</div></div><span class="badge ' + (active?'b-ok':'b-err') + '">' + (active?'✅ Active':'⏰ Expired') + '</span>'
+      if (active) el('annBadge').classList.remove('hidden')
     } else {
-      $('annPreview').innerHTML = '<div class="empty" style="padding:20px">No active announcement</div>'
+      el('annPreview').innerHTML = '<div class="empty" style="padding:20px">No active announcement</div>'
+      el('annBadge').classList.add('hidden')
     }
-  } catch(e) { $('annPreview').innerHTML = '<div class="empty">Load error</div>' }
+  } catch(e) {}
 }
 
-async function publishAnnouncement() {
-  const title = $('annTitle').value, message = $('annMsg').value
-  if (!title || !message) { $('annResult').innerHTML = '<div class="alert ar">Title and message required</div>'; return }
+async function doPublishAnn() {
+  var title = el('annTitle').value
+  var msg = el('annMsg').value
+  if (!title || !msg) { el('annResult').innerHTML = '<div class="alert a-err">Title and message required</div>'; return }
   try {
-    await apiFetch('/admin/announcement', { method:'POST', body:JSON.stringify({ title, message, type: $('annType').value, expires_hours: +$('annHours').value }) })
-    $('annResult').innerHTML = '<div class="alert as">✅ Announcement published!</div>'
-    $('announcementBadge').style.display = 'inline-flex'
+    await api('/admin/announcement', { method: 'POST', body: JSON.stringify({ title: title, message: msg, type: el('annType').value, expires_hours: +(el('annHours').value) }) })
+    el('annResult').innerHTML = '<div class="alert a-ok">✅ Published!</div>'
+    el('annBadge').classList.remove('hidden')
     loadAnnouncement()
-  } catch(e) { $('annResult').innerHTML = `<div class="alert ar">${e.message}</div>` }
+  } catch(e) { el('annResult').innerHTML = '<div class="alert a-err">' + e.message + '</div>' }
 }
 
-async function removeAnnouncement() {
+async function doRemoveAnn() {
   if (!confirm('Remove the announcement?')) return
+  try { await api('/admin/announcement', { method: 'DELETE' }); el('annResult').innerHTML = '<div class="alert a-ok">✅ Removed</div>'; el('annBadge').classList.add('hidden'); loadAnnouncement() }
+  catch(e) { el('annResult').innerHTML = '<div class="alert a-err">' + e.message + '</div>' }
+}
+
+// ── TICKETS ───────────────────────────────────────────────
+async function loadTickets() {
+  var status = el('tickFilter').value
   try {
-    await apiFetch('/admin/announcement', { method:'DELETE' })
-    $('annResult').innerHTML = '<div class="alert as">✅ Removed</div>'
-    $('announcementBadge').style.display = 'none'
-    loadAnnouncement()
-  } catch(e) { $('annResult').innerHTML = `<div class="alert ar">${e.message}</div>` }
+    var d = await api('/admin/tickets' + (status ? '?status=' + status : ''))
+    el('tickTbody').innerHTML = (d||[]).map(function(t) {
+      return '<tr><td style="font-size:12px">' + (t.profiles?.full_name||'—') + '<div style="font-size:11px;color:#888">' + (t.profiles?.email||'') + '</div></td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + t.subject + '</td><td>' + statusBadge(t.status) + '</td><td style="font-size:11px;color:#888">' + fmtDate(t.created_at) + '</td><td><button class="abtn abtn-sm" onclick="openTicket(\'' + t.id + '\',\'' + t.subject.replace(/'/g,"\\'") + '\',\'' + (t.message||'').replace(/'/g,"\\'").substring(0,200) + '\')">Reply</button></td></tr>'
+    }).join('') || '<tr><td colspan="5" class="empty">No tickets</td></tr>'
+  } catch(e) {}
+}
+
+function openTicket(id, subject, message) {
+  currentTicketId = id
+  el('tickContent').innerHTML = '<strong>' + subject + '</strong><p style="margin-top:8px;color:#666;line-height:1.6">' + message + '</p>'
+  el('tickReply').value = ''
+  el('tickModal').classList.add('show')
+}
+
+async function doReplyTicket() {
+  var reply = el('tickReply').value.trim()
+  if (!reply) { alert('Enter a reply'); return }
+  try { await api('/admin/tickets/' + currentTicketId, { method: 'PUT', body: JSON.stringify({ admin_reply: reply, status: el('tickStat').value }) }); el('tickModal').classList.remove('show'); loadTickets() }
+  catch(e) { alert(e.message) }
 }
 
 // ── SATISFACTION ──────────────────────────────────────────
 async function loadSatisfaction() {
   try {
-    const d = await apiFetch('/admin/satisfaction')
-    $('satStats').innerHTML = [
-      { label:'Platform average', val:`${d.average}/5`, color: +d.average>=4?'var(--green)':+d.average>=3?'var(--amber)':'var(--red)' },
-      { label:'Total responses', val: d.total },
-      { label:'Distribution', val: (d.distribution||[]).map((s)=>`<span style="margin-right:4px;font-size:11px">${s.score}★ <strong>${s.count}</strong></span>`).join('') }
-    ].map(s=>`<div class="card"><div class="kl">${s.label}</div><div class="kv" ${s.color?`style="color:${s.color}"`:''}>${s.val}</div></div>`).join('')
-    $('satTbody').innerHTML = (d.scores||[]).length ? (d.scores||[]).map((s)=>`<tr>
-      <td style="font-size:12px">${s.profiles?.company_name||s.profiles?.full_name||'—'}</td>
-      <td>${s.clients?.name||'—'}</td>
-      <td style="color:#f59e0b">${stars(s.score)}</td>
-      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)">${s.comment||'—'}</td>
-      <td style="font-size:11px;color:var(--ink3)">${fmtDate(s.responded_at)}</td>
-    </tr>`).join('') : '<tr><td colspan="5" class="empty">No survey responses yet</td></tr>'
+    var d = await api('/admin/satisfaction')
+    el('satStats').innerHTML = [
+      { l: 'Average score', v: (d.average||0) + ' / 5', c: d.average >= 4 ? '#16a34a' : d.average >= 3 ? '#b45309' : '#dc2626' },
+      { l: 'Total responses', v: d.total || 0 },
+      { l: 'Best score', v: d.distribution ? (d.distribution.find(function(x) { return x.score === 5 }) || {count:0}).count + ' × ★★★★★' : '—' },
+    ].map(function(s) { return '<div class="kcard"><div class="kl">' + s.l + '</div><div class="kv"' + (s.c?' style="color:'+s.c+'"':'') + '>' + s.v + '</div></div>' }).join('')
+    el('satTbody').innerHTML = (d.scores||[]).map(function(s) {
+      return '<tr><td style="font-size:12px">' + (s.profiles?.company_name||s.profiles?.full_name||'—') + '</td><td style="color:#f59e0b">' + starsStr(s.score) + '</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#666">' + (s.comment||'—') + '</td><td style="font-size:11px;color:#888">' + fmtDate(s.responded_at) + '</td></tr>'
+    }).join('') || '<tr><td colspan="4" class="empty">No responses yet</td></tr>'
   } catch(e) {}
 }
 
-// ── FINANCING ─────────────────────────────────────────────
-async function loadFinancing() {
+// ── BROADCAST ─────────────────────────────────────────────
+async function doBroadcast() {
+  var subject = el('bSubject').value
+  var msg = el('bMsg').value
+  var plan = el('bPlan').value
+  if (!subject || !msg) { el('bResult').innerHTML = '<div class="alert a-err">Subject and message required</div>'; return }
+  if (!confirm('Send broadcast to ' + (plan||'ALL') + ' users?')) return
   try {
-    const d = await apiFetch('/admin/financing')
-    $('finTbody').innerHTML = !d.length ? '<tr><td colspan="5" class="empty">No applications yet</td></tr>' :
-      d.map((a)=>`<tr>
-        <td><div style="font-weight:500">${a.profiles?.company_name||a.profiles?.full_name||'—'}</div><div style="font-size:11px;color:var(--ink3)">${a.profiles?.email||''}</div></td>
-        <td>${fmt(a.metadata?.amount||0)}</td>
-        <td>${a.metadata?.status ? statusBadge(a.metadata.status) : '<span class="badge b-warn">pending</span>'}</td>
-        <td style="font-size:11px;color:var(--ink3)">${fmtDate(a.created_at)}</td>
-        <td><div style="display:flex;gap:4px">
-          <button class="btn btn-sm bs" onclick="apiFetch('/admin/financing/${a.id}/status',{method:'PUT',body:JSON.stringify({status:'approved'})}).then(()=>loadFinancing())">✓ Approve</button>
-          <button class="btn btn-sm bd" onclick="apiFetch('/admin/financing/${a.id}/status',{method:'PUT',body:JSON.stringify({status:'rejected'})}).then(()=>loadFinancing())">✗ Reject</button>
-        </div></td>
-      </tr>`).join('')
-  } catch(e) {}
+    var d = await api('/admin/broadcast', { method: 'POST', body: JSON.stringify({ subject: subject, message: msg, plan_filter: plan }) })
+    el('bResult').innerHTML = '<div class="alert a-ok">✅ Queued for ' + d.recipients + ' users</div>'
+    el('bSubject').value = ''; el('bMsg').value = ''
+  } catch(e) { el('bResult').innerHTML = '<div class="alert a-err">' + e.message + '</div>' }
 }
 
-// ── TICKETS ──────────────────────────────────────────────
-async function loadTickets() {
-  try {
-    const status = $('ticketStatus').value
-    const d = await apiFetch('/admin/tickets' + (status ? `?status=${status}` : ''))
-    const open = d.filter((t)=>t.status==='open').length
-    if (open > 0) { $('tbadge').textContent = String(open); $('tbadge').style.display='inline-flex' } else { $('tbadge').style.display='none' }
-    $('tickTbody').innerHTML = !d.length ? '<tr><td colspan="6" class="empty">No tickets</td></tr>' :
-      d.map((t)=>`<tr>
-        <td><div style="font-size:12px;font-weight:500">${t.profiles?.full_name||'—'}</div><div style="font-size:11px;color:var(--ink3)">${t.profiles?.email||''}</div>${planBadge(t.profiles?.plan)}</td>
-        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.subject}</td>
-        <td>${statusBadge(t.priority==='urgent'?'overdue':t.priority||'normal')}</td>
-        <td>${statusBadge(t.status)}</td>
-        <td style="font-size:11px;color:var(--ink3)">${fmtDate(t.created_at)}</td>
-        <td><button class="btn btn-sm" onclick="openTicket('${t.id}','${esc(t.subject)}','${esc(t.message)}')">Reply</button></td>
-      </tr>`).join('')
-  } catch(e) {}
-}
-
-function openTicket(id, subject, message) {
-  currentTickId = id
-  $('tickMoContent').innerHTML = `<strong>${subject}</strong><p style="margin-top:8px;color:var(--ink2);line-height:1.6">${message}</p>`
-  $('tickReply').value = ''
-  $('tickMo').style.display = 'flex'
-}
-
-async function submitTicket() {
-  const reply = $('tickReply').value
-  if (!reply.trim()) { alert('Enter a reply'); return }
-  try { await apiFetch(`/admin/tickets/${currentTickId}`, { method:'PUT', body:JSON.stringify({admin_reply:reply,status:$('tickStatus').value}) }); closeMo('tickMo'); loadTickets() }
-  catch(e) { alert(e.message) }
-}
-
-// ── BROADCAST ────────────────────────────────────────────
-async function sendBroadcast() {
-  const subject = $('bSubject').value, message = $('bMsg').value, plan_filter = $('bPlan').value
-  if (!subject || !message) { $('bResult').innerHTML = '<div class="alert ar">Subject and message required</div>'; return }
-  if (!confirm(`Send broadcast to ${plan_filter||'ALL'} users?`)) return
-  try {
-    const d = await apiFetch('/admin/broadcast', { method:'POST', body:JSON.stringify({subject,message,plan_filter}) })
-    $('bResult').innerHTML = `<div class="alert as">✅ Broadcast queued for ${d.recipients} users</div>`
-    $('bSubject').value = ''; $('bMsg').value = ''
-  } catch(e) { $('bResult').innerHTML = `<div class="alert ar">${e.message}</div>` }
-}
-
-// ── ADMIN ACCOUNTS ───────────────────────────────────────
+// ── ADMINS ────────────────────────────────────────────────
 async function loadAdmins() {
   try {
-    const d = await apiFetch('/admin/admins')
-    $('adminsTbody').innerHTML = (d||[]).map((a)=>`<tr>
-      <td style="font-weight:500">${a.full_name||'—'}</td>
-      <td style="color:var(--blue);font-size:12px">${a.email}</td>
-      <td><span class="badge b-${a.role}">${a.role}</span></td>
-      <td style="font-size:11px;color:var(--ink3)">${a.last_login ? fmtTime(a.last_login) : 'Never'}</td>
-      <td>${a.is_active ? '<span class="badge b-ok">Active</span>' : '<span class="badge b-err">Disabled</span>'}</td>
-      <td><button class="btn btn-sm ${a.is_active?'bd':'bs'}" onclick="toggleAdmin('${a.id}')">${a.is_active?'Disable':'Enable'}</button></td>
-    </tr>`).join('')
-  } catch(e) { $('adminsTbody').innerHTML = `<tr><td colspan="6" class="empty">${e.message}</td></tr>` }
+    var d = await api('/admin/admins')
+    el('adminsTbody').innerHTML = (d||[]).map(function(a) {
+      return '<tr><td style="font-weight:500">' + (a.full_name||'—') + '</td><td style="color:#1d4ed8;font-size:12px">' + a.email + '</td><td>' + badge('b-'+a.role, a.role) + '</td><td style="font-size:11px;color:#888">' + (a.last_login ? fmtTime(a.last_login) : 'Never') + '</td><td>' + badge(a.is_active?'ok':'err', a.is_active?'Active':'Disabled') + '</td><td><button class="abtn abtn-sm ' + (a.is_active?'abtn-d':'abtn-s') + '" onclick="doToggleAdmin(\'' + a.id + '\')">' + (a.is_active?'Disable':'Enable') + '</button></td></tr>'
+    }).join('') || '<tr><td colspan="6" class="empty">No admins</td></tr>'
+  } catch(e) { el('adminsTbody').innerHTML = '<tr><td colspan="6" class="empty">Error: ' + e.message + '</td></tr>' }
 }
 
-async function toggleAdmin(id) {
-  try { await apiFetch(`/admin/admins/${id}/toggle`, { method:'PUT' }); loadAdmins() }
+async function doToggleAdmin(id) {
+  try { await api('/admin/admins/' + id + '/toggle', { method: 'PUT' }); loadAdmins() }
   catch(e) { alert(e.message) }
 }
 
-async function createAdmin() {
-  const email = $('newAdminEmail').value, password = $('newAdminPw').value, full_name = $('newAdminName').value, role = $('newAdminRole').value
+async function doAddAdmin() {
+  var email = el('newAdminEmail').value
+  var password = el('newAdminPw').value
+  var full_name = el('newAdminName').value
+  var role = el('newAdminRole').value
   try {
-    await apiFetch('/admin/admins', { method:'POST', body: JSON.stringify({ email, password, full_name, role }) })
-    closeMo('addAdminMo'); loadAdmins(); alert(`Admin account created for ${email}`)
-  } catch(e) { alert('Failed: ' + e.message) }
+    await api('/admin/admins', { method: 'POST', body: JSON.stringify({ email: email, password: password, full_name: full_name, role: role }) })
+    el('addAdminModal').classList.remove('show')
+    loadAdmins()
+    alert('Admin created for ' + email)
+  } catch(e) { el('addAdminMsg').innerHTML = '<div class="alert a-err">' + e.message + '</div>' }
 }
 
 // ── AUDIT ─────────────────────────────────────────────────
 async function loadAudit() {
   try {
-    const d = await apiFetch('/admin/audit')
-    $('audTbody').innerHTML = (d||[]).map((a)=>`<tr>
-      <td style="font-size:12px">${a.admin_users?.email||'—'}</td>
-      <td><code>${a.action}</code></td>
-      <td style="font-size:12px;color:var(--ink2)">${a.entity_type||'—'}${a.entity_id?' · '+a.entity_id.slice(0,8)+'...':''}</td>
-      <td style="font-size:11px;color:var(--ink3)">${fmtTime(a.created_at)}</td>
-    </tr>`).join('')
+    var d = await api('/admin/audit')
+    el('auditTbody').innerHTML = (d||[]).map(function(a) {
+      return '<tr><td style="font-size:12px">' + (a.admin_users?.email||'—') + '</td><td><code style="font-family:monospace;font-size:11px;background:#f0f0f0;padding:2px 6px;border-radius:4px">' + a.action + '</code></td><td style="font-size:12px;color:#666">' + (a.entity_type||'—') + '</td><td style="font-size:11px;color:#888">' + fmtTime(a.created_at) + '</td></tr>'
+    }).join('') || '<tr><td colspan="4" class="empty">No audit logs</td></tr>'
   } catch(e) {}
 }
 
-// ── SETTINGS ─────────────────────────────────────────────
-async function loadSettings() {
-  try {
-    settingsData = await apiFetch('/admin/settings')
-    const grouped = {}
-    settingsData.forEach((s) => { if (!grouped[s.category]) grouped[s.category]=[]; grouped[s.category].push(s) })
-    $('settingsGrid').innerHTML = Object.entries(grouped).map(([cat,items])=>`
-      <div class="card">
-        <div style="font-size:12px;font-weight:700;text-transform:capitalize;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)">${cat}</div>
-        ${items.map((s)=>{ let val=s.value; try{val=JSON.parse(s.value)}catch{}; const isB=val===true||val===false
-          return `<div class="sr"><div><div style="font-size:13px;font-weight:500">${s.label||s.key}</div></div>${isB?`<button class="tog ${val?'on':'off'}" id="setting_${s.key}" onclick="this.classList.toggle('on');this.classList.toggle('off')"></button>`:`<input id="setting_${s.key}" value="${val||''}" style="width:200px"/>`}</div>`
-        }).join('')}
-      </div>`).join('')
-  } catch(e) { $('settingsGrid').innerHTML = `<div class="alert ar">${e.message}</div>` }
-}
+// ── WIRE UP EVENT LISTENERS ───────────────────────────────
+window.addEventListener('DOMContentLoaded', function() {
+  // Login button
+  el('loginBtn').addEventListener('click', doLogin)
+  el('loginPassword').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin() })
+  el('loginEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin() })
 
-async function saveSettings() {
-  const updates = settingsData.map((s) => {
-    const el = $('setting_' + s.key); if (!el) return null
-    const val = el.tagName === 'BUTTON' ? el.classList.contains('on') : (el ).value
-    return { key: s.key, value: val }
-  }).filter(Boolean)
-  try { await apiFetch('/admin/settings', { method:'PUT', body:JSON.stringify(updates) }); alert('Settings saved!') }
-  catch(e) { alert(e.message) }
-}
+  // Forgot password
+  el('forgotBtn').addEventListener('click', showForgotForm)
+  el('backToLoginBtn').addEventListener('click', showLoginForm)
+  el('forgotSendBtn').addEventListener('click', doForgotPassword)
 
-// ── FORGOT PASSWORD ───────────────────────────────────────
-function showForgot() {
-  $('loginBox').style.display='none'
-  $('forgotBox').style.display='block'
-  $('resetBox').style.display='none'
-}
+  // Reset password
+  el('resetBtn').addEventListener('click', doResetPassword)
 
-function showLogin() {
-  $('forgotBox').style.display='none'
-  $('resetBox').style.display='none'
-  $('loginBox').style.display='block'
-}
+  // Logout
+  el('logoutBtn').addEventListener('click', doLogout)
 
-async function sendReset() {
-  const email = $('resetEmail').value
-  if (!email) { $('resetMsg').innerHTML='<div class="alert ar">Enter your email</div>'; return }
-  $('resetMsg').innerHTML = '<div class="alert ai">Sending...</div>'
-  try {
-    const res = await fetch(API + '/admin/forgot-password', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({email})
-    })
-    const d = await res.json()
-    if (d.dev_reset_url) {
-      $('resetMsg').innerHTML = `
-        <div class="alert as" style="margin-bottom:8px">✅ Reset link generated!</div>
-        <div class="alert ai">
-          <strong>Click this link to reset your password:</strong><br/><br/>
-          <a href="${d.dev_reset_url}" target="_blank" style="color:var(--blue);font-weight:700;font-size:12px;word-break:break-all">${d.dev_reset_url}</a>
-          <br/><br/>
-          <button onclick="navigator.clipboard.writeText('${d.dev_reset_url}').then(()=>alert('Link copied!'))" class="btn btn-sm" style="margin-top:4px">📋 Copy link</button>
-        </div>`
-    } else {
-      $('resetMsg').innerHTML = `<div class="alert as">✅ ${d.message} Check your email inbox.</div>`
-    }
-  } catch(e) { $('resetMsg').innerHTML=`<div class="alert ar">Error: ${e.message}</div>` }
-}
+  // Change password
+  el('changePwBtn').addEventListener('click', function() { el('changePwModal').classList.add('show') })
 
-async function completeReset() {
-  const pw = $('newPwField').value, pw2 = $('newPwConfirm').value
-  const hash = window.location.hash
-  const token = new URLSearchParams(hash.replace('#','?')).get('reset') || hash.split('reset=')[1]
-  if (!token) { $('resetDoneMsg').innerHTML='<div class="alert ar">Invalid reset link</div>'; return }
-  if (pw !== pw2) { $('resetDoneMsg').innerHTML='<div class="alert ar">Passwords do not match</div>'; return }
-  if (pw.length < 8) { $('resetDoneMsg').innerHTML='<div class="alert ar">Password must be 8+ characters</div>'; return }
-  try {
-    const res = await fetch(API + `/admin/reset-password/${token}`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({password:pw})
-    })
-    const d = await res.json()
-    if (d.error) throw new Error(d.error)
-    $('resetDoneMsg').innerHTML=`<div class="alert as">✅ ${d.message}</div>`
-    setTimeout(() => { window.history.replaceState(null,'',window.location.pathname); showLogin() }, 2000)
-  } catch(e) { $('resetDoneMsg').innerHTML=`<div class="alert ar">${e.message}</div>` }
-}
+  // Refresh button
+  el('refreshBtn').addEventListener('click', function() {
+    var activePage = document.querySelector('.nav-item.active')
+    if (activePage) navigate(activePage.dataset.page)
+  })
 
-async function changeMyPassword() {
-  const current = $('cpCurrent').value, next = $('cpNew').value, confirm = $('cpConfirm').value
-  if (!current || !next || !confirm) { $('cpMsg').innerHTML='<div class="alert ar">Fill all fields</div>'; return }
-  if (next !== confirm) { $('cpMsg').innerHTML='<div class="alert ar">Passwords do not match</div>'; return }
-  if (next.length < 8) { $('cpMsg').innerHTML='<div class="alert ar">8+ characters required</div>'; return }
-  try {
-    const d = await apiFetch('/admin/change-password', {method:'PUT', body:JSON.stringify({current_password:current,new_password:next})})
-    $('cpMsg').innerHTML=`<div class="alert as">✅ ${d.message}</div>`
-    $('cpCurrent').value=''; $('cpNew').value=''; $('cpConfirm').value=''
-    setTimeout(()=>closeMo('changePwMo'), 1500)
-  } catch(e) { $('cpMsg').innerHTML=`<div class="alert ar">${e.message}</div>` }
-}
+  // Navigation
+  document.querySelectorAll('.nav-item').forEach(function(btn) {
+    btn.addEventListener('click', function() { navigate(this.dataset.page) })
+  })
 
-// Check URL for reset token on page load
-;(function() {
-  const hash = window.location.hash
+  // Check for password reset token in URL
+  var hash = window.location.hash
   if (hash.includes('reset=')) {
-    const token = hash.split('reset=')[1]
+    var token = hash.split('reset=')[1]
     if (token) {
-      fetch(API + `/admin/reset-password/${token}`)
-        .then(r=>r.json())
-        .then(d => {
+      fetch(API + '/admin/reset-password/' + token)
+        .then(function(r) { return r.json() })
+        .then(function(d) {
           if (d.valid) {
-            $('loginBox').style.display='none'
-            $('resetBox').style.display='block'
-          } else { alert('Invalid or expired reset link. Request a new one.') }
-        }).catch(()=>{})
+            el('loginForm').classList.add('hidden')
+            el('resetForm').classList.remove('hidden')
+          } else {
+            el('loginErr').textContent = 'Invalid or expired reset link. Request a new one.'
+          }
+        })
+        .catch(function() {})
     }
   }
-})()
 
-
-// ── SESSION TIMER ─────────────────────────────────────────
-let sessionTimer, countdownTimer
-
-function startSessionTimer() {
-  clearTimeout(sessionTimer)
-  sessionTimer = setTimeout(() => {
-    const warn = document.getElementById('sessionWarn')
-    if (warn) warn.style.display = 'block'
-    let remaining = 10 * 60
-    clearInterval(countdownTimer)
-    countdownTimer = setInterval(() => {
-      remaining--
-      const el = document.getElementById('sessionCountdown')
-      if (el) el.textContent = Math.floor(remaining/60) + ':' + String(remaining%60).padStart(2,'0')
-      if (remaining <= 0) { clearInterval(countdownTimer); logout() }
-    }, 1000)
-  }, (8 * 3600000) - (10 * 60000))
-}
-
-function refreshSession() {
-  const warn = document.getElementById('sessionWarn')
-  if (warn) warn.style.display = 'none'
-  clearInterval(countdownTimer)
-  startSessionTimer()
-}
-
-// ── TEST EMAIL ────────────────────────────────────────────
-async function sendTestEmail() {
-  const to = document.getElementById('testEmailAddr').value
-  if (!to) { document.getElementById('testEmailResult').innerHTML='<div class="alert ar">Enter an email address</div>'; return }
-  try {
-    const d = await apiFetch('/admin/test-email', { method:'POST', body:JSON.stringify({to}) })
-    document.getElementById('testEmailResult').innerHTML = '<div class="alert as">✅ ' + d.message + '</div>'
-  } catch(e) { document.getElementById('testEmailResult').innerHTML = '<div class="alert ar">❌ ' + e.message + '</div>' }
-}
-
+  // Auto-login if token exists
+  var savedToken = localStorage.getItem('ipAdminToken')
+  if (savedToken) {
+    authToken = savedToken
+    fetch(API + '/admin/stats', { headers: { 'Authorization': 'Bearer ' + savedToken, 'Content-Type': 'application/json' } })
+      .then(function(r) { return r.json() })
+      .then(function() {
+        // Get admin info
+        return fetch(API + '/admin/admins', { headers: { 'Authorization': 'Bearer ' + savedToken, 'Content-Type': 'application/json' } })
+      })
+      .then(function(r) { return r.json() })
+      .then(function(admins) {
+        // Show app with stored info
+        el('loginPage').style.display = 'none'
+        el('app').style.display = 'block'
+        el('adminName').textContent = 'Admin'
+        el('adminRole').textContent = 'super_admin'
+        el('adminAvatar').textContent = 'A'
+        loadDashboard()
+      })
+      .catch(function() {
+        authToken = null
+        localStorage.removeItem('ipAdminToken')
+      })
+  }
+})
 </script>
 </body>
 </html>

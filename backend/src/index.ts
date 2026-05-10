@@ -61,8 +61,10 @@ app.use('/api/features', featuresRoutes)
 app.use('/api/admin', adminRoutes)
 
 // Serve admin panel HTML at /admin
-app.use('/admin', express.static(path.join(__dirname, '../admin-panel')))
-app.get('/admin/*', (_req, res) => res.sendFile(path.join(__dirname, '../admin-panel/index.html')))
+const adminPanelPath = path.join(__dirname, 'admin-panel')
+app.use('/admin', express.static(adminPanelPath))
+app.get('/admin', (_req, res) => res.sendFile(path.join(adminPanelPath, 'index.html')))
+app.get('/admin/*', (_req, res) => res.sendFile(path.join(adminPanelPath, 'index.html')))
 
 app.get('/health', (_, res) => res.json({ status: 'ok', version: '2.0.0', features: ['ai-assistant','whatsapp-sms','receipt-scanner','cashflow','financing','milestones','early-payment','happiness-score','year-review'], timestamp: new Date().toISOString() }))
 

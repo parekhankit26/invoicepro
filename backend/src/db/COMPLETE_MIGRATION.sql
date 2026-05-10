@@ -387,37 +387,45 @@ DO $$ BEGIN
   -- quotes
   DROP POLICY IF EXISTS "own quotes" ON quotes;
   DROP POLICY IF EXISTS "Users manage own quotes" ON quotes;
+  DROP POLICY IF EXISTS "own quotes" ON quotes;
   CREATE POLICY "own quotes" ON quotes FOR ALL USING (auth.uid() = user_id);
   -- quote_items
   DROP POLICY IF EXISTS "own quote items" ON quote_items;
   DROP POLICY IF EXISTS "Users manage own quote items" ON quote_items;
+  DROP POLICY IF EXISTS "own quote items" ON quote_items;
   CREATE POLICY "own quote items" ON quote_items FOR ALL USING (
     EXISTS (SELECT 1 FROM quotes WHERE quotes.id = quote_items.quote_id AND quotes.user_id = auth.uid())
   );
   -- time_entries
   DROP POLICY IF EXISTS "own time entries" ON time_entries;
   DROP POLICY IF EXISTS "Users manage own time entries" ON time_entries;
+  DROP POLICY IF EXISTS "own time entries" ON time_entries;
   CREATE POLICY "own time entries" ON time_entries FOR ALL USING (auth.uid() = user_id);
   -- client_portal_tokens
   DROP POLICY IF EXISTS "own portal tokens" ON client_portal_tokens;
   DROP POLICY IF EXISTS "Users manage own portal tokens" ON client_portal_tokens;
+  DROP POLICY IF EXISTS "own portal tokens" ON client_portal_tokens;
   CREATE POLICY "own portal tokens" ON client_portal_tokens FOR ALL USING (auth.uid() = user_id);
   -- team_members
   DROP POLICY IF EXISTS "own team" ON team_members;
   DROP POLICY IF EXISTS "Users manage own team" ON team_members;
   DROP POLICY IF EXISTS "Team members can view" ON team_members;
+  DROP POLICY IF EXISTS "own team" ON team_members;
   CREATE POLICY "own team" ON team_members FOR ALL USING (auth.uid() = owner_id OR auth.uid() = member_id);
   -- api_keys
   DROP POLICY IF EXISTS "own api keys" ON api_keys;
   DROP POLICY IF EXISTS "Users manage own api keys" ON api_keys;
+  DROP POLICY IF EXISTS "own api keys" ON api_keys;
   CREATE POLICY "own api keys" ON api_keys FOR ALL USING (auth.uid() = user_id);
   -- white_label_settings
   DROP POLICY IF EXISTS "own white label" ON white_label_settings;
   DROP POLICY IF EXISTS "Users manage own white label" ON white_label_settings;
+  DROP POLICY IF EXISTS "own white label" ON white_label_settings;
   CREATE POLICY "own white label" ON white_label_settings FOR ALL USING (auth.uid() = user_id);
   -- invoice_views
   DROP POLICY IF EXISTS "own invoice views" ON invoice_views;
   DROP POLICY IF EXISTS "Users view own invoice views" ON invoice_views;
+  DROP POLICY IF EXISTS "own invoice views" ON invoice_views;
   CREATE POLICY "own invoice views" ON invoice_views FOR ALL USING (
     EXISTS (SELECT 1 FROM invoices WHERE invoices.id = invoice_views.invoice_id AND invoices.user_id = auth.uid())
   );
@@ -429,6 +437,7 @@ DO $$ BEGIN
   CREATE POLICY "own activity" ON activity_logs FOR ALL USING (auth.uid() = user_id);
   -- tax_periods
   DROP POLICY IF EXISTS "Users manage own tax periods" ON tax_periods;
+  DROP POLICY IF EXISTS "own tax periods" ON tax_periods;
   CREATE POLICY "own tax periods" ON tax_periods FOR ALL USING (auth.uid() = user_id);
 END $$;
 

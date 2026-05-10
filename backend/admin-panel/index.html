@@ -599,20 +599,20 @@ async function loadDashboard() {
       { label:'Overdue', val: d.overdue_invoices||0, sub: 'invoices overdue', color: d.overdue_invoices > 0 ? 'var(--red)' : '' },
     ].map(s => `<div class="card"><div class="kl">${s.label}</div><div class="kv" ${s.color?`style="color:${s.color}"`:''}>${s.val}</div><div class="ks">${s.sub}</div></div>`).join('')
 
-    const total = Object.values(plans).reduce((a:any, b:any) => a+b, 0) || 1
+    const total = Object.values(plans).reduce((a, b) => a+b, 0) || 1
     const pColors = { free:'#b8b2a3', starter:'#1d4ed8', pro:'#7c3aed', enterprise:'#b45309' }
-    $('planChart').innerHTML = Object.entries(plans).map(([plan, count]: any) => `
+    $('planChart').innerHTML = Object.entries(plans).map(([plan, count]) => `
       <div style="margin-bottom:10px">
         <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
           <span>${planBadge(plan)}</span><span style="font-weight:600">${count} users (${Math.round(count/total*100)}%)</span>
         </div>
-        <div class="pbar"><div class="pfill" style="width:${count/total*100}%;background:${(pColors as any)[plan]||'var(--ink)'}"></div></div>
+        <div class="pbar"><div class="pfill" style="width:${count/total*100}%;background:${(pColors )[plan]||'var(--ink)'}"></div></div>
       </div>`).join('')
 
     // Recent signups
     try {
       const users = await apiFetch('/admin/users?limit=5&page=1')
-      $('recentSignups').innerHTML = (users.data||[]).map((u: any) => `
+      $('recentSignups').innerHTML = (users.data||[]).map((u) => `
         <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
           <div style="width:32px;height:32px;border-radius:8px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">${(u.full_name||u.email||'?')[0].toUpperCase()}</div>
           <div style="flex:1;min-width:0"><div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.company_name||u.full_name||'—'}</div><div style="font-size:11px;color:var(--ink3)">${u.email}</div></div>
@@ -664,8 +664,8 @@ async function loadRevenue() {
       { label:'Revenue (30d)', val: fmt(stats.revenue_30d) },
     ].map(s=>`<div class="card"><div class="kl">${s.label}</div><div class="kv" ${s.color?`style="color:${s.color}"`:''}>${s.val}</div></div>`).join('')
     const months = Object.entries(rev.monthly_revenue||{}).sort().slice(-12)
-    const max = Math.max(...months.map(([,v]:any)=>v), 1)
-    $('revChart').innerHTML = months.map(([month, val]:any)=>`
+    const max = Math.max(...months.map(([,v])=>v), 1)
+    $('revChart').innerHTML = months.map(([month, val])=>`
       <div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:6px">
         <div style="font-size:10px;color:var(--ink3)">${fmt(val)}</div>
         <div style="width:100%;background:var(--ink);border-radius:4px 4px 0 0;height:${Math.max(4,val/max*160)}px"></div>
@@ -683,7 +683,7 @@ async function loadChurn() {
       { label:'New signups (7d)', val: (d.new_signups_7d||[]).length, color:'var(--green)' },
       { label:'Churn rate (est.)', val: (d.churn_rate||0) + '%', color: +d.churn_rate > 10 ? 'var(--red)' : 'var(--amber)' },
     ].map(s=>`<div class="card"><div class="kl">${s.label}</div><div class="kv" style="color:${s.color}">${s.val}</div></div>`).join('')
-    const renderUser = (u: any) => `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><div style="flex:1;min-width:0"><div style="font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.company_name||u.full_name||'—'}</div><div style="font-size:11px;color:var(--ink3)">${u.email}</div></div>${planBadge(u.plan)}<button class="btn btn-sm" onclick="viewUser('${u.id}')">View</button></div>`
+    const renderUser = (u) => `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><div style="flex:1;min-width:0"><div style="font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.company_name||u.full_name||'—'}</div><div style="font-size:11px;color:var(--ink3)">${u.email}</div></div>${planBadge(u.plan)}<button class="btn btn-sm" onclick="viewUser('${u.id}')">View</button></div>`
     $('atRiskList').innerHTML = (d.at_risk||[]).length ? (d.at_risk||[]).map(renderUser).join('') : '<div class="empty">No at-risk users 🎉</div>'
     $('newSignupList').innerHTML = (d.new_signups_7d||[]).length ? (d.new_signups_7d||[]).map(renderUser).join('') : '<div class="empty">No new signups this week</div>'
   } catch(e) { $('churnStats').innerHTML = `<div class="alert ar" style="grid-column:1/-1">Failed: ${e.message}</div>` }
@@ -695,7 +695,7 @@ async function loadUsers() {
     const search = $('userSearch').value, plan = $('planFilter').value
     const d = await apiFetch(`/admin/users?search=${encodeURIComponent(search)}&plan=${plan}&page=${usersPage}&limit=25`)
     $('userCount').textContent = `${d.total} users`
-    $('usersTbody').innerHTML = (d.data||[]).map((u: any) => `<tr>
+    $('usersTbody').innerHTML = (d.data||[]).map((u) => `<tr>
       <td><div style="font-weight:500">${u.company_name||u.full_name||'—'}</div><div style="font-size:11px;color:var(--ink3)">${u.full_name||''}</div></td>
       <td>${planBadge(u.plan)}</td>
       <td style="color:var(--blue);font-size:12px">${u.email||'—'}</td>
@@ -712,7 +712,7 @@ async function loadUsers() {
   } catch(e) { $('usersTbody').innerHTML = `<tr><td colspan="5" class="empty">Error: ${e.message}</td></tr>` }
 }
 
-async function viewUser(id: string) {
+async function viewUser(id) {
   try {
     const d = await apiFetch(`/admin/users/${id}`)
     const u = d.profile || {}
@@ -740,8 +740,8 @@ async function viewUser(id: string) {
           </div>
         </div>
       </div>`
-    $('ut-invoices').innerHTML = `<div style="overflow:auto"><table><thead><tr><th>Invoice #</th><th>Client</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>${(d.invoices||[]).map((i:any)=>`<tr><td style="font-family:monospace;font-size:12px">${i.invoice_number}</td><td>${i.clients?.name||'—'}</td><td>${fmt(i.total)}</td><td>${statusBadge(i.status)}</td><td style="font-size:11px;color:var(--ink3)">${fmtDate(i.created_at)}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">No invoices</td></tr>'}</tbody></table></div>`
-    $('ut-clients').innerHTML = `<div style="overflow:auto"><table><thead><tr><th>Name</th><th>Email</th><th>Currency</th></tr></thead><tbody>${(d.clients||[]).map((c:any)=>`<tr><td style="font-weight:500">${c.name}</td><td style="color:var(--blue);font-size:12px">${c.email||'—'}</td><td>${c.currency||'GBP'}</td></tr>`).join('') || '<tr><td colspan="3" class="empty">No clients</td></tr>'}</tbody></table></div>`
+    $('ut-invoices').innerHTML = `<div style="overflow:auto"><table><thead><tr><th>Invoice #</th><th>Client</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>${(d.invoices||[]).map((i)=>`<tr><td style="font-family:monospace;font-size:12px">${i.invoice_number}</td><td>${i.clients?.name||'—'}</td><td>${fmt(i.total)}</td><td>${statusBadge(i.status)}</td><td style="font-size:11px;color:var(--ink3)">${fmtDate(i.created_at)}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">No invoices</td></tr>'}</tbody></table></div>`
+    $('ut-clients').innerHTML = `<div style="overflow:auto"><table><thead><tr><th>Name</th><th>Email</th><th>Currency</th></tr></thead><tbody>${(d.clients||[]).map((c)=>`<tr><td style="font-weight:500">${c.name}</td><td style="color:var(--blue);font-size:12px">${c.email||'—'}</td><td>${c.currency||'GBP'}</td></tr>`).join('') || '<tr><td colspan="3" class="empty">No clients</td></tr>'}</tbody></table></div>`
     $('ut-edit').innerHTML = `
       <div class="g2">
         <div>
@@ -762,48 +762,48 @@ async function viewUser(id: string) {
   } catch(e) { alert('Failed to load user: ' + e.message) }
 }
 
-function uTab(tab: string, el: any) {
+function uTab(tab, el) {
   document.querySelectorAll('#userMo .tab').forEach(t => t.classList.remove('on'))
   el.classList.add('on')
   ;['overview','invoices','clients','edit'].forEach(t => { $('ut-'+t).style.display = t===tab ? 'block' : 'none' })
 }
 
-async function saveUser(id: string) {
+async function saveUser(id) {
   try {
     await apiFetch(`/admin/users/${id}`, { method:'PUT', body: JSON.stringify({ full_name: $('eu_name').value, company_name: $('eu_company').value, plan: $('eu_plan').value }) })
     alert('Saved!'); closeMo('userMo'); loadUsers()
-  } catch(e: any) { alert(e.message) }
+  } catch(e) { alert(e.message) }
 }
 
-async function quickChangePlan(id: string, currentPlan: string) {
+async function quickChangePlan(id, currentPlan) {
   const plans = ['free','starter','pro','enterprise']
   const newPlan = prompt(`Change plan for this user.\nCurrent: ${currentPlan}\nEnter new plan (free/starter/pro/enterprise):`, currentPlan)
   if (!newPlan || !plans.includes(newPlan)) return
   try { await apiFetch(`/admin/users/${id}/plan`, { method:'PUT', body: JSON.stringify({ plan: newPlan }) }); alert(`Plan updated to ${newPlan}!`); loadUsers() }
-  catch(e: any) { alert(e.message) }
+  catch(e) { alert(e.message) }
 }
 
-async function extendTrial(id: string) {
+async function extendTrial(id) {
   if (!confirm('Give this user Pro plan for 14 days free?')) return
   try { const d = await apiFetch(`/admin/users/${id}/extend-trial`, { method:'POST', body: JSON.stringify({ days:14, plan:'pro' }) }); alert(d.message); loadUsers() }
-  catch(e: any) { alert(e.message) }
+  catch(e) { alert(e.message) }
 }
 
-async function impersonateUser(id: string) {
+async function impersonateUser(id) {
   try {
     const d = await apiFetch(`/admin/impersonate/${id}`, { method:'POST' })
-    if (d.link) { navigator.clipboard.writeText(d.link); alert(`Login link copied to clipboard!\n\n${d.note}\n\nSend this link to log in as the user.`) }
+    if (d.link) { navigator.clipboard.writeText(d.link); alert(`Login link copied to clipboard!\n\n${d.note}\n\nSend this link to log in  user.`) }
     else alert(d.message)
-  } catch(e: any) { alert('Impersonation failed: ' + e.message) }
+  } catch(e) { alert('Impersonation failed: ' + e.message) }
 }
 
-async function suspendUser(id: string) {
+async function suspendUser(id) {
   if (!confirm('Suspend this account?')) return
   try { await apiFetch(`/admin/users/${id}/suspend`, { method:'PUT', body: JSON.stringify({ suspended:true }) }); alert('User suspended'); closeMo('userMo'); loadUsers() }
-  catch(e: any) { alert(e.message) }
+  catch(e) { alert(e.message) }
 }
 
-async function exportUser(id: string, email: string) {
+async function exportUser(id, email) {
   try {
     const res = await fetch(API + `/admin/export/${id}`, { headers: { Authorization: `Bearer ${token}` } })
     const blob = await res.blob()
@@ -811,7 +811,7 @@ async function exportUser(id: string, email: string) {
     const a = document.createElement('a'); a.href = url; a.download = `export-${email}.json`
     document.body.appendChild(a); a.click(); document.body.removeChild(a)
     URL.revokeObjectURL(url)
-  } catch(e: any) { alert('Export failed: ' + e.message) }
+  } catch(e) { alert('Export failed: ' + e.message) }
 }
 
 // ── CLIENTS ──────────────────────────────────────────────
@@ -819,14 +819,14 @@ async function loadClients() {
   try {
     const d = await apiFetch(`/admin/clients?search=${encodeURIComponent($('clientSearch')?.value||'')}`)
     $('clientCount').textContent = `${d.total} clients`
-    $('clientsTbody').innerHTML = (d.data||[]).map((c:any)=>`<tr>
+    $('clientsTbody').innerHTML = (d.data||[]).map((c)=>`<tr>
       <td style="font-weight:500">${c.name}</td>
       <td style="color:var(--blue);font-size:12px">${c.email||'—'}</td>
       <td style="font-size:12px;color:var(--ink3)">${c.profiles?.company_name||c.profiles?.full_name||'—'}</td>
       <td>${c.currency||'GBP'}</td>
       <td><button class="btn btn-sm bd" onclick="if(confirm('Archive?'))apiFetch('/admin/clients/${c.id}',{method:'DELETE'}).then(()=>loadClients())">Archive</button></td>
     </tr>`).join('')
-  } catch(e: any) { $('clientsTbody').innerHTML = `<tr><td colspan="5" class="empty">Error: ${e.message}</td></tr>` }
+  } catch(e) { $('clientsTbody').innerHTML = `<tr><td colspan="5" class="empty">Error: ${e.message}</td></tr>` }
 }
 
 // ── INVOICES ─────────────────────────────────────────────
@@ -834,7 +834,7 @@ async function loadInvoices() {
   try {
     const d = await apiFetch(`/admin/invoices?status=${$('invStatus').value}&search=${encodeURIComponent($('invSearch')?.value||'')}&page=${invPage}&limit=25`)
     $('invCount').textContent = `${d.total} invoices`
-    $('invTbody').innerHTML = (d.data||[]).map((i:any)=>`<tr>
+    $('invTbody').innerHTML = (d.data||[]).map((i)=>`<tr>
       <td style="font-family:monospace;font-weight:600;font-size:12px">${i.invoice_number}</td>
       <td style="font-size:12px">${i.clients?.name||'—'}</td>
       <td style="font-size:11px;color:var(--ink3)">${i.profiles?.company_name||i.profiles?.full_name||'—'}</td>
@@ -848,12 +848,12 @@ async function loadInvoices() {
     </tr>`).join('')
     const pages = Math.ceil((d.total||0)/25)
     $('invPager').innerHTML = pages > 1 ? Array.from({length:Math.min(pages,10)},(_,i)=>`<button class="btn btn-sm ${i+1===invPage?'bp':''}" onclick="invPage=${i+1};loadInvoices()">${i+1}</button>`).join('') : ''
-  } catch(e: any) { $('invTbody').innerHTML = `<tr><td colspan="7" class="empty">Error: ${e.message}</td></tr>` }
+  } catch(e) { $('invTbody').innerHTML = `<tr><td colspan="7" class="empty">Error: ${e.message}</td></tr>` }
 }
 
-async function markInvPaid(id: string) {
+async function markInvPaid(id) {
   try { await apiFetch(`/admin/invoices/${id}`, { method:'PUT', body:JSON.stringify({status:'paid'}) }); loadInvoices() }
-  catch(e: any) { alert(e.message) }
+  catch(e) { alert(e.message) }
 }
 
 // ── QUOTES ───────────────────────────────────────────────
@@ -861,7 +861,7 @@ async function loadQuotes() {
   try {
     const d = await apiFetch('/admin/quotes?limit=50')
     $('quoCount').textContent = `${d.total} quotes`
-    $('quoTbody').innerHTML = (d.data||[]).map((q:any)=>`<tr>
+    $('quoTbody').innerHTML = (d.data||[]).map((q)=>`<tr>
       <td style="font-family:monospace;font-size:12px">${q.quote_number}</td>
       <td>${q.clients?.name||'—'}</td>
       <td style="font-size:11px;color:var(--ink3)">${q.profiles?.company_name||'—'}</td>
@@ -869,7 +869,7 @@ async function loadQuotes() {
       <td>${statusBadge(q.status)}</td>
       <td style="font-size:11px;color:var(--ink3)">${fmtDate(q.expiry_date)}</td>
     </tr>`).join('')
-  } catch(e: any) {}
+  } catch(e) {}
 }
 
 // ── PAYMENTS ─────────────────────────────────────────────
@@ -877,14 +877,14 @@ async function loadPayments() {
   try {
     const d = await apiFetch('/admin/payments?limit=50')
     $('payCount').textContent = `${d.total} payments`
-    $('payTbody').innerHTML = (d.data||[]).map((p:any)=>`<tr>
+    $('payTbody').innerHTML = (d.data||[]).map((p)=>`<tr>
       <td style="font-size:12px">${p.profiles?.company_name||p.profiles?.full_name||'—'}</td>
       <td style="font-family:monospace;font-size:11px">${p.invoices?.invoice_number||'—'}</td>
       <td style="font-weight:600;color:var(--green)">${fmt(p.amount)}</td>
       <td><span class="badge b-draft">${p.method||'manual'}</span></td>
       <td style="font-size:11px;color:var(--ink3)">${fmtDate(p.paid_at)}</td>
     </tr>`).join('')
-  } catch(e: any) {}
+  } catch(e) {}
 }
 
 // ── EXPENSES ─────────────────────────────────────────────
@@ -892,7 +892,7 @@ async function loadExpenses() {
   try {
     const d = await apiFetch('/admin/expenses?limit=50')
     $('expCount').textContent = `${d.total} expenses`
-    $('expTbody').innerHTML = (d.data||[]).map((e:any)=>`<tr>
+    $('expTbody').innerHTML = (d.data||[]).map((e)=>`<tr>
       <td style="font-size:12px">${e.profiles?.company_name||e.profiles?.full_name||'—'}</td>
       <td><span class="badge b-draft">${e.category}</span></td>
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.description}</td>
@@ -900,7 +900,7 @@ async function loadExpenses() {
       <td style="font-size:11px;color:var(--ink3)">${fmtDate(e.date)}</td>
       <td>${e.is_billable?'<span class="badge b-sent">Billable</span>':'—'}</td>
     </tr>`).join('')
-  } catch(e: any) {}
+  } catch(e) {}
 }
 
 // ── FEATURE FLAGS ─────────────────────────────────────────
@@ -923,26 +923,26 @@ const FEATURES = [
 ]
 
 async function loadFeatures() {
-  let flags:any = {}
-  try { const d = await apiFetch('/admin/feature-flags'); d.forEach((f:any)=>{ try{flags[f.key]=JSON.parse(f.value)}catch{flags[f.key]=true} }) } catch{}
+  let flags = {}
+  try { const d = await apiFetch('/admin/feature-flags'); d.forEach((f)=>{ try{flags[f.key]=JSON.parse(f.value)}catch{flags[f.key]=true} }) } catch{}
   $('featureList').innerHTML = FEATURES.map(f=>{
     const enabled = flags[f.key] !== false
     return `<div class="sr"><div style="flex:1"><div style="font-size:13px;font-weight:500">${f.name}</div><div style="font-size:11px;color:var(--ink3);margin-top:2px">${f.desc}</div></div><button class="tog ${enabled?'on':'off'}" onclick="toggleFeature('${f.key}',this)"></button></div>`
   }).join('')
 }
 
-async function toggleFeature(key: string, btn: any) {
+async function toggleFeature(key, btn) {
   const isOn = btn.classList.contains('on')
   btn.classList.toggle('on', !isOn); btn.classList.toggle('off', isOn)
   try { await apiFetch(`/admin/feature-flags/${key}`, { method:'PUT', body:JSON.stringify({value:!isOn}) }) }
-  catch(e: any) { btn.classList.toggle('on', isOn); btn.classList.toggle('off', !isOn); alert('Failed: '+e.message) }
+  catch(e) { btn.classList.toggle('on', isOn); btn.classList.toggle('off', !isOn); alert('Failed: '+e.message) }
 }
 
 // ── PLANS ────────────────────────────────────────────────
 async function loadPlans() {
   const d = await apiFetch('/admin/plans').catch(()=>[])
-  const colors:any = { free:'#b8b2a3', starter:'var(--blue)', pro:'var(--purple)', enterprise:'var(--amber)' }
-  $('plansGrid').innerHTML = (d||[]).map((p:any)=>`<div class="card" style="border-top:3px solid ${colors[p.slug]||'var(--border)'}">
+  const colors = { free:'#b8b2a3', starter:'var(--blue)', pro:'var(--purple)', enterprise:'var(--amber)' }
+  $('plansGrid').innerHTML = (d||[]).map((p)=>`<div class="card" style="border-top:3px solid ${colors[p.slug]||'var(--border)'}">
     <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink3);margin-bottom:6px">${p.name}</div>
     <div style="font-size:26px;font-weight:700">£${p.price_monthly}<span style="font-size:12px;color:var(--ink3)">/mo</span></div>
     <div style="font-size:12px;color:var(--ink3);margin:4px 0 12px">£${p.price_yearly}/yr · ${p.max_invoices===-1?'∞':p.max_invoices} invoices/mo</div>
@@ -958,16 +958,16 @@ async function loadPlans() {
   </div>`).join('')
 }
 
-async function savePlan(id: string) {
-  const price = +($('price_'+id) as HTMLInputElement).value
-  try { await apiFetch(`/admin/plans/${id}`, { method:'PUT', body:JSON.stringify({price_monthly:price}) }); alert('Plan price updated!') } catch(e: any) { alert(e.message) }
+async function savePlan(id) {
+  const price = +($('price_'+id) ).value
+  try { await apiFetch(`/admin/plans/${id}`, { method:'PUT', body:JSON.stringify({price_monthly:price}) }); alert('Plan price updated!') } catch(e) { alert(e.message) }
 }
 
 // ── ANNOUNCEMENT ─────────────────────────────────────────
 async function checkAnnouncement() {
   try {
     const d = await apiFetch('/admin/settings')
-    const ann = d.find((s:any) => s.key === 'platform_announcement')
+    const ann = d.find((s) => s.key === 'platform_announcement')
     if (ann) {
       const val = JSON.parse(ann.value)
       if (new Date(val.expires_at) > new Date()) $('announcementBadge').style.display = 'inline-flex'
@@ -978,11 +978,11 @@ async function checkAnnouncement() {
 async function loadAnnouncement() {
   try {
     const d = await apiFetch('/admin/settings')
-    const ann = d.find((s:any) => s.key === 'platform_announcement')
+    const ann = d.find((s) => s.key === 'platform_announcement')
     if (ann) {
       const val = JSON.parse(ann.value)
       const active = new Date(val.expires_at) > new Date()
-      const typeColors:any = { info:'var(--bbg),var(--blue)', warning:'var(--abg),var(--amber)', success:'var(--gbg),var(--green)', error:'var(--rbg),var(--red)' }
+      const typeColors = { info:'var(--bbg),var(--blue)', warning:'var(--abg),var(--amber)', success:'var(--gbg),var(--green)', error:'var(--rbg),var(--red)' }
       const [bg, color] = (typeColors[val.type] || 'var(--bg),var(--ink)').split(',')
       $('annPreview').innerHTML = `
         <div style="padding:14px;border-radius:10px;background:${bg};border:1px solid ${color};color:${color};margin-bottom:12px">
@@ -994,7 +994,7 @@ async function loadAnnouncement() {
     } else {
       $('annPreview').innerHTML = '<div class="empty" style="padding:20px">No active announcement</div>'
     }
-  } catch(e: any) { $('annPreview').innerHTML = '<div class="empty">Load error</div>' }
+  } catch(e) { $('annPreview').innerHTML = '<div class="empty">Load error</div>' }
 }
 
 async function publishAnnouncement() {
@@ -1005,7 +1005,7 @@ async function publishAnnouncement() {
     $('annResult').innerHTML = '<div class="alert as">✅ Announcement published!</div>'
     $('announcementBadge').style.display = 'inline-flex'
     loadAnnouncement()
-  } catch(e: any) { $('annResult').innerHTML = `<div class="alert ar">${e.message}</div>` }
+  } catch(e) { $('annResult').innerHTML = `<div class="alert ar">${e.message}</div>` }
 }
 
 async function removeAnnouncement() {
@@ -1015,7 +1015,7 @@ async function removeAnnouncement() {
     $('annResult').innerHTML = '<div class="alert as">✅ Removed</div>'
     $('announcementBadge').style.display = 'none'
     loadAnnouncement()
-  } catch(e: any) { $('annResult').innerHTML = `<div class="alert ar">${e.message}</div>` }
+  } catch(e) { $('annResult').innerHTML = `<div class="alert ar">${e.message}</div>` }
 }
 
 // ── SATISFACTION ──────────────────────────────────────────
@@ -1025,16 +1025,16 @@ async function loadSatisfaction() {
     $('satStats').innerHTML = [
       { label:'Platform average', val:`${d.average}/5`, color: +d.average>=4?'var(--green)':+d.average>=3?'var(--amber)':'var(--red)' },
       { label:'Total responses', val: d.total },
-      { label:'Distribution', val: (d.distribution||[]).map((s:any)=>`<span style="margin-right:4px;font-size:11px">${s.score}★ <strong>${s.count}</strong></span>`).join('') }
+      { label:'Distribution', val: (d.distribution||[]).map((s)=>`<span style="margin-right:4px;font-size:11px">${s.score}★ <strong>${s.count}</strong></span>`).join('') }
     ].map(s=>`<div class="card"><div class="kl">${s.label}</div><div class="kv" ${s.color?`style="color:${s.color}"`:''}>${s.val}</div></div>`).join('')
-    $('satTbody').innerHTML = (d.scores||[]).length ? (d.scores||[]).map((s:any)=>`<tr>
+    $('satTbody').innerHTML = (d.scores||[]).length ? (d.scores||[]).map((s)=>`<tr>
       <td style="font-size:12px">${s.profiles?.company_name||s.profiles?.full_name||'—'}</td>
       <td>${s.clients?.name||'—'}</td>
       <td style="color:#f59e0b">${stars(s.score)}</td>
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)">${s.comment||'—'}</td>
       <td style="font-size:11px;color:var(--ink3)">${fmtDate(s.responded_at)}</td>
     </tr>`).join('') : '<tr><td colspan="5" class="empty">No survey responses yet</td></tr>'
-  } catch(e: any) {}
+  } catch(e) {}
 }
 
 // ── FINANCING ─────────────────────────────────────────────
@@ -1042,7 +1042,7 @@ async function loadFinancing() {
   try {
     const d = await apiFetch('/admin/financing')
     $('finTbody').innerHTML = !d.length ? '<tr><td colspan="5" class="empty">No applications yet</td></tr>' :
-      d.map((a:any)=>`<tr>
+      d.map((a)=>`<tr>
         <td><div style="font-weight:500">${a.profiles?.company_name||a.profiles?.full_name||'—'}</div><div style="font-size:11px;color:var(--ink3)">${a.profiles?.email||''}</div></td>
         <td>${fmt(a.metadata?.amount||0)}</td>
         <td>${a.metadata?.status ? statusBadge(a.metadata.status) : '<span class="badge b-warn">pending</span>'}</td>
@@ -1052,7 +1052,7 @@ async function loadFinancing() {
           <button class="btn btn-sm bd" onclick="apiFetch('/admin/financing/${a.id}/status',{method:'PUT',body:JSON.stringify({status:'rejected'})}).then(()=>loadFinancing())">✗ Reject</button>
         </div></td>
       </tr>`).join('')
-  } catch(e: any) {}
+  } catch(e) {}
 }
 
 // ── TICKETS ──────────────────────────────────────────────
@@ -1060,10 +1060,10 @@ async function loadTickets() {
   try {
     const status = $('ticketStatus').value
     const d = await apiFetch('/admin/tickets' + (status ? `?status=${status}` : ''))
-    const open = d.filter((t:any)=>t.status==='open').length
+    const open = d.filter((t)=>t.status==='open').length
     if (open > 0) { $('tbadge').textContent = String(open); $('tbadge').style.display='inline-flex' } else { $('tbadge').style.display='none' }
     $('tickTbody').innerHTML = !d.length ? '<tr><td colspan="6" class="empty">No tickets</td></tr>' :
-      d.map((t:any)=>`<tr>
+      d.map((t)=>`<tr>
         <td><div style="font-size:12px;font-weight:500">${t.profiles?.full_name||'—'}</div><div style="font-size:11px;color:var(--ink3)">${t.profiles?.email||''}</div>${planBadge(t.profiles?.plan)}</td>
         <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.subject}</td>
         <td>${statusBadge(t.priority==='urgent'?'overdue':t.priority||'normal')}</td>
@@ -1071,10 +1071,10 @@ async function loadTickets() {
         <td style="font-size:11px;color:var(--ink3)">${fmtDate(t.created_at)}</td>
         <td><button class="btn btn-sm" onclick="openTicket('${t.id}','${esc(t.subject)}','${esc(t.message)}')">Reply</button></td>
       </tr>`).join('')
-  } catch(e: any) {}
+  } catch(e) {}
 }
 
-function openTicket(id: string, subject: string, message: string) {
+function openTicket(id, subject, message) {
   currentTickId = id
   $('tickMoContent').innerHTML = `<strong>${subject}</strong><p style="margin-top:8px;color:var(--ink2);line-height:1.6">${message}</p>`
   $('tickReply').value = ''
@@ -1085,7 +1085,7 @@ async function submitTicket() {
   const reply = $('tickReply').value
   if (!reply.trim()) { alert('Enter a reply'); return }
   try { await apiFetch(`/admin/tickets/${currentTickId}`, { method:'PUT', body:JSON.stringify({admin_reply:reply,status:$('tickStatus').value}) }); closeMo('tickMo'); loadTickets() }
-  catch(e: any) { alert(e.message) }
+  catch(e) { alert(e.message) }
 }
 
 // ── BROADCAST ────────────────────────────────────────────
@@ -1097,14 +1097,14 @@ async function sendBroadcast() {
     const d = await apiFetch('/admin/broadcast', { method:'POST', body:JSON.stringify({subject,message,plan_filter}) })
     $('bResult').innerHTML = `<div class="alert as">✅ Broadcast queued for ${d.recipients} users</div>`
     $('bSubject').value = ''; $('bMsg').value = ''
-  } catch(e: any) { $('bResult').innerHTML = `<div class="alert ar">${e.message}</div>` }
+  } catch(e) { $('bResult').innerHTML = `<div class="alert ar">${e.message}</div>` }
 }
 
 // ── ADMIN ACCOUNTS ───────────────────────────────────────
 async function loadAdmins() {
   try {
     const d = await apiFetch('/admin/admins')
-    $('adminsTbody').innerHTML = (d||[]).map((a:any)=>`<tr>
+    $('adminsTbody').innerHTML = (d||[]).map((a)=>`<tr>
       <td style="font-weight:500">${a.full_name||'—'}</td>
       <td style="color:var(--blue);font-size:12px">${a.email}</td>
       <td><span class="badge b-${a.role}">${a.role}</span></td>
@@ -1112,12 +1112,12 @@ async function loadAdmins() {
       <td>${a.is_active ? '<span class="badge b-ok">Active</span>' : '<span class="badge b-err">Disabled</span>'}</td>
       <td><button class="btn btn-sm ${a.is_active?'bd':'bs'}" onclick="toggleAdmin('${a.id}')">${a.is_active?'Disable':'Enable'}</button></td>
     </tr>`).join('')
-  } catch(e: any) { $('adminsTbody').innerHTML = `<tr><td colspan="6" class="empty">${e.message}</td></tr>` }
+  } catch(e) { $('adminsTbody').innerHTML = `<tr><td colspan="6" class="empty">${e.message}</td></tr>` }
 }
 
-async function toggleAdmin(id: string) {
+async function toggleAdmin(id) {
   try { await apiFetch(`/admin/admins/${id}/toggle`, { method:'PUT' }); loadAdmins() }
-  catch(e: any) { alert(e.message) }
+  catch(e) { alert(e.message) }
 }
 
 async function createAdmin() {
@@ -1125,46 +1125,46 @@ async function createAdmin() {
   try {
     await apiFetch('/admin/admins', { method:'POST', body: JSON.stringify({ email, password, full_name, role }) })
     closeMo('addAdminMo'); loadAdmins(); alert(`Admin account created for ${email}`)
-  } catch(e: any) { alert('Failed: ' + e.message) }
+  } catch(e) { alert('Failed: ' + e.message) }
 }
 
 // ── AUDIT ─────────────────────────────────────────────────
 async function loadAudit() {
   try {
     const d = await apiFetch('/admin/audit')
-    $('audTbody').innerHTML = (d||[]).map((a:any)=>`<tr>
+    $('audTbody').innerHTML = (d||[]).map((a)=>`<tr>
       <td style="font-size:12px">${a.admin_users?.email||'—'}</td>
       <td><code>${a.action}</code></td>
       <td style="font-size:12px;color:var(--ink2)">${a.entity_type||'—'}${a.entity_id?' · '+a.entity_id.slice(0,8)+'...':''}</td>
       <td style="font-size:11px;color:var(--ink3)">${fmtTime(a.created_at)}</td>
     </tr>`).join('')
-  } catch(e: any) {}
+  } catch(e) {}
 }
 
 // ── SETTINGS ─────────────────────────────────────────────
 async function loadSettings() {
   try {
     settingsData = await apiFetch('/admin/settings')
-    const grouped:any = {}
-    settingsData.forEach((s:any) => { if (!grouped[s.category]) grouped[s.category]=[]; grouped[s.category].push(s) })
-    $('settingsGrid').innerHTML = Object.entries(grouped).map(([cat,items]:any)=>`
+    const grouped = {}
+    settingsData.forEach((s) => { if (!grouped[s.category]) grouped[s.category]=[]; grouped[s.category].push(s) })
+    $('settingsGrid').innerHTML = Object.entries(grouped).map(([cat,items])=>`
       <div class="card">
         <div style="font-size:12px;font-weight:700;text-transform:capitalize;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)">${cat}</div>
-        ${items.map((s:any)=>{ let val=s.value; try{val=JSON.parse(s.value)}catch{}; const isB=val===true||val===false
+        ${items.map((s)=>{ let val=s.value; try{val=JSON.parse(s.value)}catch{}; const isB=val===true||val===false
           return `<div class="sr"><div><div style="font-size:13px;font-weight:500">${s.label||s.key}</div></div>${isB?`<button class="tog ${val?'on':'off'}" id="setting_${s.key}" onclick="this.classList.toggle('on');this.classList.toggle('off')"></button>`:`<input id="setting_${s.key}" value="${val||''}" style="width:200px"/>`}</div>`
         }).join('')}
       </div>`).join('')
-  } catch(e: any) { $('settingsGrid').innerHTML = `<div class="alert ar">${e.message}</div>` }
+  } catch(e) { $('settingsGrid').innerHTML = `<div class="alert ar">${e.message}</div>` }
 }
 
 async function saveSettings() {
-  const updates = settingsData.map((s:any) => {
+  const updates = settingsData.map((s) => {
     const el = $('setting_' + s.key); if (!el) return null
-    const val = el.tagName === 'BUTTON' ? el.classList.contains('on') : (el as HTMLInputElement).value
+    const val = el.tagName === 'BUTTON' ? el.classList.contains('on') : (el ).value
     return { key: s.key, value: val }
   }).filter(Boolean)
   try { await apiFetch('/admin/settings', { method:'PUT', body:JSON.stringify(updates) }); alert('Settings saved!') }
-  catch(e: any) { alert(e.message) }
+  catch(e) { alert(e.message) }
 }
 
 // ── FORGOT PASSWORD ───────────────────────────────────────

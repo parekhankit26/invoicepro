@@ -31,7 +31,19 @@ const PORT = process.env.PORT || 3001
 // Trust Railway proxy
 app.set('trust proxy', 1)
 
-app.use(helmet({ crossOriginResourcePolicy: false }))
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https:"],
+    }
+  }
+}))
 app.use(cors({ 
   origin: (origin: any, cb: any) => cb(null, true), // Allow all origins — protected by auth tokens 
   credentials: true,

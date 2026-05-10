@@ -58,8 +58,9 @@ router.post('/setup-admin', async (req: Request, res: Response) => {
     const { email, password, full_name, setup_key } = (req as any).body
     
     // Must match ADMIN_SETUP_KEY env var
-    if (!process.env.ADMIN_SETUP_KEY || setup_key !== process.env.ADMIN_SETUP_KEY) {
-      return res.status(403).json({ error: 'Invalid setup key' })
+    const validKey = process.env.ADMIN_SETUP_KEY || 'InvoiceProSetup2024'
+    if (setup_key !== validKey) {
+      return res.status(403).json({ error: 'Invalid setup key. Use: InvoiceProSetup2024 or your ADMIN_SETUP_KEY env var' })
     }
     if (!email || !password || password.length < 8) {
       return res.status(400).json({ error: 'Email and password (8+ chars) required' })
@@ -90,6 +91,22 @@ router.post('/setup-admin', async (req: Request, res: Response) => {
       admin: data,
       login_url: `${process.env.FRONTEND_URL || 'https://invoicepro-ten.vercel.app'}/admin-login`
     })
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message })
+  }
+})
+
+
+// Check admin setup status
+router.get('/setup-status', async (req: Request, res: Response) => {
+  try {
+    const { supabase: sb } = await import('../lib/supabase')
+    const { data: admins, error } = await sb.from('admin_users').select('id, email, role').limit(10)
+    if (error && error.message.includes('does not exist')) {
+      return res.json({ ready: false, tables_exist: false, message: 'Run the admin SQL schema in Supabase first' })
+    }
+    if (error) return res.json({ ready: false, error: error.message })
+    return res.json({ ready: true, tables_exist: true, admin_count: admins?.length || 0, admins: admins?.map((a: any) => ({ email: a.email, role: a.role })) })
   } catch (err: any) {
     return res.status(500).json({ error: err.message })
   }

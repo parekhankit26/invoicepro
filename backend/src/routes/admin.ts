@@ -608,12 +608,20 @@ router.put('/financing/:id/status', adminAuth, async (req: any, res: Response) =
 router.get('/tickets', adminAuth, async (req: any, res: Response) => {
   try {
     let query = supabase.from('support_tickets')
-      .select('*, profiles(full_name, email, plan, company_name)')
+      .select('*')
       .order('created_at', { ascending: false })
     if (req.query.status) query = query.eq('status', req.query.status as string)
     const { data, error } = await query
     if (error) return res.status(400).json({ error: error.message })
-    return res.json(data || [])
+    // Enrich with profiles
+    const uids = [...new Set((data||[]).map((t:any) => t.user_id).filter(Boolean))]
+    let profileMap: any = {}
+    if (uids.length > 0) {
+      const { data: profs } = await supabase.from('profiles').select('id, full_name, email, plan, company_name').in('id', uids)
+      ;(profs||[]).forEach((p:any) => { profileMap[p.id] = p })
+    }
+    const enriched = (data||[]).map((t:any) => ({ ...t, profiles: profileMap[t.user_id] || null }))
+    return res.json(enriched)
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
 

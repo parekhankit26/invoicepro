@@ -6,402 +6,510 @@
 <title>InvoicePro Super Admin</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f7f4;color:#1a1814;font-size:13px}
-.center{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#1a1814}
-.lcard{background:#fff;border-radius:16px;padding:36px;width:100%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,.3)}
-.logo-box{width:52px;height:52px;background:#1a1814;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#a3e635;font-weight:900;font-size:22px}
-h1{text-align:center;font-size:22px;font-weight:800;margin-bottom:4px;letter-spacing:-.02em}
-.sub{text-align:center;font-size:13px;color:#888;margin-bottom:28px}
+:root{
+  --ink:#1a1814;--ink2:#756d5c;--ink3:#b8b2a3;
+  --bg:#f8f7f4;--white:#fff;--border:#e8e5de;
+  --green:#16a34a;--gbg:#f0fdf4;
+  --red:#dc2626;--rbg:#fef2f2;
+  --amber:#b45309;--abg:#fffbeb;
+  --blue:#1d4ed8;--bbg:#eff6ff;
+  --purple:#7c3aed;
+  --sidebar:224px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);font-size:13px;overflow-x:hidden}
+
+/* ── AUTH ── */
+.auth-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--ink);padding:20px}
+.auth-card{background:var(--white);border-radius:16px;padding:36px;width:100%;max-width:400px;box-shadow:0 8px 40px rgba(0,0,0,.3)}
+.auth-logo{width:52px;height:52px;background:var(--ink);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#a3e635;font-weight:900;font-size:22px}
+.auth-card h1{text-align:center;font-size:22px;font-weight:800;margin-bottom:4px;letter-spacing:-.02em}
+.auth-sub{text-align:center;font-size:13px;color:#888;margin-bottom:28px}
 .lbl{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:5px;margin-top:12px}
-.inp{width:100%;padding:11px 14px;border:1.5px solid #e8e5de;border-radius:9px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s}
-.inp:focus{border-color:#1a1814;box-shadow:0 0 0 3px rgba(26,24,20,.08)}
-.btn-full{width:100%;padding:13px;background:#1a1814;color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:16px;transition:opacity .15s}
-.btn-full:hover{opacity:.85}
-.btn-full:disabled{opacity:.4;cursor:not-allowed}
-.errtxt{color:#dc2626;font-size:12.5px;margin-top:10px;text-align:center;min-height:18px}
-.link-btn{background:none;border:none;color:#999;font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline;display:block;text-align:center;margin-top:12px;padding:4px}
-.link-btn:hover{color:#1a1814}
+.inp{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:9px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s}
+.inp:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(26,24,20,.08)}
+.btn-auth{width:100%;padding:13px;background:var(--ink);color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:16px;transition:opacity .15s}
+.btn-auth:hover{opacity:.85}
+.btn-auth:disabled{opacity:.4;cursor:not-allowed}
+.auth-err{color:var(--red);font-size:12.5px;margin-top:10px;text-align:center;min-height:18px}
+.auth-link{background:none;border:none;color:#999;font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline;display:block;text-align:center;margin-top:12px;padding:4px}
+.auth-link:hover{color:var(--ink)}
 .hidden{display:none!important}
+
+/* ── LAYOUT ── */
 #app{display:none}
 .layout{display:flex;min-height:100vh}
-.sidebar{width:224px;background:#fff;border-right:1px solid #e8e5de;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:10}
-.s-top{padding:16px;border-bottom:1px solid #e8e5de;display:flex;align-items:center;gap:10px}
-.s-icon{width:34px;height:34px;background:#1a1814;border-radius:9px;color:#a3e635;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.nav-sec{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#b8b2a3;padding:10px 14px 2px;margin-top:6px}
-.nv{display:flex;align-items:center;gap:8px;padding:9px 12px;margin:1px 8px;border-radius:8px;cursor:pointer;font-size:13px;color:#756d5c;border:none;background:none;width:calc(100% - 16px);text-align:left;font-family:inherit;transition:all .12s}
-.nv:hover{background:#f8f7f4;color:#1a1814}
-.nv.on{background:#1a1814;color:#fff}
-.s-foot{padding:12px;border-top:1px solid #e8e5de;margin-top:auto}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;transition:transform .25s ease}
+.s-top{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.s-icon{width:34px;height:34px;background:var(--ink);border-radius:9px;color:#a3e635;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.s-close{display:none;margin-left:auto;background:none;border:none;cursor:pointer;color:var(--ink2);padding:4px;border-radius:6px}
+.s-close:hover{background:var(--bg)}
+.nav-sec{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);padding:10px 14px 2px;margin-top:6px;flex-shrink:0}
+.nv{display:flex;align-items:center;gap:8px;padding:9px 12px;margin:1px 8px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--ink2);border:none;background:none;width:calc(100% - 16px);text-align:left;font-family:inherit;transition:all .12s;white-space:nowrap}
+.nv:hover{background:var(--bg);color:var(--ink)}
+.nv.on{background:var(--ink);color:#fff}
+.s-foot{padding:12px;border-top:1px solid var(--border);margin-top:auto;flex-shrink:0}
 .s-user{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.s-av{width:30px;height:30px;border-radius:8px;background:#1a1814;color:#a3e635;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0}
-.foot-btns{display:flex;gap:6px}
-.main{margin-left:224px;flex:1;min-width:0}
-.topbar{background:#fff;border-bottom:1px solid #e8e5de;padding:0 28px;height:50px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}
+.s-av{width:30px;height:30px;border-radius:8px;background:var(--ink);color:#a3e635;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0}
+.foot-row{display:flex;gap:6px}
+
+/* OVERLAY (mobile) */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;backdrop-filter:blur(2px)}
+.overlay.show{display:block}
+
+/* MOBILE TOPBAR */
+.topbar-mobile{display:none;position:fixed;top:0;left:0;right:0;height:52px;background:var(--white);border-bottom:1px solid var(--border);z-index:98;align-items:center;padding:0 16px;gap:12px}
+.hamburger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:6px}
+.hamburger span{display:block;width:20px;height:2px;background:var(--ink);border-radius:2px;transition:all .2s}
+
+/* MAIN */
+.main{margin-left:var(--sidebar);flex:1;min-width:0;transition:margin .25s ease}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:50px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+
+/* PAGES */
 .pg{display:none;padding:24px 28px 40px}
 .pg.on{display:block}
 .ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
 .pt{font-size:20px;font-weight:700;letter-spacing:-.02em}
-.ps{font-size:13px;color:#999;margin-top:2px}
+.ps{font-size:13px;color:var(--ink3);margin-top:2px}
+
+/* GRIDS */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px}
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-.bc{background:#fff;border:1px solid #e8e5de;border-radius:12px;padding:20px;margin-bottom:14px}
-.kc{background:#fff;border:1px solid #e8e5de;border-radius:12px;padding:16px}
-.kl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b8b2a3;margin-bottom:6px}
-.kv{font-size:24px;font-weight:700;letter-spacing:-.03em}
-.ks{font-size:11px;color:#b8b2a3;margin-top:4px}
-.tbl-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:500px}
-th{text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b8b2a3;padding:9px 12px;border-bottom:1px solid #e8e5de;background:#f8f7f4;white-space:nowrap}
-td{padding:11px 12px;border-bottom:1px solid #e8e5de;font-size:13px;vertical-align:middle}
+
+/* CARDS */
+.bc{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px}
+.kc{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px}
+.kl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin-bottom:6px}
+.kv{font-size:24px;font-weight:700;letter-spacing:-.03em;line-height:1.2}
+.ks{font-size:11px;color:var(--ink3);margin-top:4px}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:480px}
+th{text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);padding:9px 12px;border-bottom:1px solid var(--border);background:var(--bg);white-space:nowrap}
+td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#fafaf8}
-.bdg{display:inline-flex;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
+
+/* BADGES */
+.bdg{display:inline-flex;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
 .b-free{background:#f0f0f0;color:#888}
-.b-starter{background:#eff6ff;color:#1d4ed8}
-.b-pro{background:#ede9fe;color:#7c3aed}
-.b-enterprise{background:#fffbeb;color:#b45309}
-.b-paid{background:#f0fdf4;color:#16a34a}
-.b-open{background:#fef3c7;color:#b45309}
-.b-draft{background:#f0f0f0;color:#888}
-.b-overdue{background:#fef2f2;color:#dc2626}
-.b-sent{background:#eff6ff;color:#1d4ed8}
-.b-resolved{background:#f0fdf4;color:#16a34a}
-.b-ok{background:#f0fdf4;color:#16a34a}
-.b-warn{background:#fffbeb;color:#b45309}
-.b-err{background:#fef2f2;color:#dc2626}
-.b-super_admin{background:#1a1814;color:#fff}
-.b-admin{background:#ede9fe;color:#7c3aed}
-.b-support{background:#eff6ff;color:#1d4ed8}
-.ab{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;border:1px solid #e8e5de;background:#fff;color:#1a1814;font-family:inherit;transition:all .12s;white-space:nowrap}
-.ab:hover{background:#f8f7f4}
+.b-starter{background:var(--bbg);color:var(--blue)}
+.b-pro{background:#ede9fe;color:var(--purple)}
+.b-enterprise{background:var(--abg);color:var(--amber)}
+.b-paid{background:var(--gbg);color:var(--green)}
+.b-open{background:#fef3c7;color:var(--amber)}
+.b-draft,.b-normal{background:#f0f0f0;color:#888}
+.b-overdue{background:var(--rbg);color:var(--red)}
+.b-sent{background:var(--bbg);color:var(--blue)}
+.b-resolved{background:var(--gbg);color:var(--green)}
+.b-ok{background:var(--gbg);color:var(--green)}
+.b-warn{background:var(--abg);color:var(--amber)}
+.b-err{background:var(--rbg);color:var(--red)}
+.b-super_admin{background:var(--ink);color:#fff}
+.b-admin{background:#ede9fe;color:var(--purple)}
+.b-support{background:var(--bbg);color:var(--blue)}
+
+/* BUTTONS */
+.ab{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--white);color:var(--ink);font-family:inherit;transition:all .12s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.ab:hover{background:var(--bg)}
 .ab:disabled{opacity:.4;cursor:not-allowed}
-.ab-p{background:#1a1814!important;color:#fff!important;border-color:#1a1814!important}
+.ab-p{background:var(--ink)!important;color:#fff!important;border-color:var(--ink)!important}
 .ab-p:hover{opacity:.85}
-.ab-s{background:#f0fdf4!important;color:#16a34a!important;border-color:#bbf7d0!important}
-.ab-d{background:#fef2f2!important;color:#dc2626!important;border-color:#fecaca!important}
+.ab-s{background:var(--gbg)!important;color:var(--green)!important;border-color:#bbf7d0!important}
+.ab-d{background:var(--rbg)!important;color:var(--red)!important;border-color:#fecaca!important}
 .ab-sm{padding:5px 10px!important;font-size:12px!important}
-.fi{width:100%;padding:9px 12px;border:1.5px solid #e8e5de;border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}
-.fi:focus{border-color:#1a1814}
+
+/* FORM */
+.fi{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}
+.fi:focus{border-color:var(--ink)}
 .fg{margin-bottom:12px}
 .fg label{font-size:12px;font-weight:500;color:#666;display:block;margin-bottom:4px}
+
+/* MODALS */
 .mo-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
 .mo-bg.show{display:flex}
-.mo-box{background:#fff;border-radius:14px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.2)}
-.mo-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e8e5de;position:sticky;top:0;background:#fff;border-radius:14px 14px 0 0}
+.mo-box{background:var(--white);border-radius:14px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.2)}
+.mo-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--white);border-radius:14px 14px 0 0}
 .mo-hdr h3{font-size:16px;font-weight:700}
 .mo-body{padding:20px}
-.mo-ftr{padding:14px 20px;border-top:1px solid #e8e5de;display:flex;gap:8px;justify-content:flex-end}
+.mo-ftr{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+
+/* ALERTS */
 .al{padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:10px;border-left:3px solid;line-height:1.5}
-.al-ok{background:#f0fdf4;border-color:#16a34a;color:#15803d}
-.al-err{background:#fef2f2;border-color:#dc2626;color:#dc2626}
-.al-info{background:#eff6ff;border-color:#1d4ed8;color:#1d4ed8}
-.al-warn{background:#fffbeb;border-color:#b45309;color:#b45309}
-.empty{text-align:center;padding:40px;color:#b8b2a3}
-.tog{width:42px;height:23px;border-radius:12px;cursor:pointer;border:none;position:relative;transition:background .2s;flex-shrink:0}
-.tog.on{background:#16a34a}
-.tog.off{background:#e8e5de}
-.tog::after{content:'';position:absolute;width:17px;height:17px;border-radius:50%;background:#fff;top:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-.tog.on::after{left:22px}
-.tog.off::after{left:3px}
-.sr{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e8e5de;gap:12px}
-.sr:last-child{border:none}
+.al-ok{background:var(--gbg);border-color:var(--green);color:#15803d}
+.al-err{background:var(--rbg);border-color:var(--red);color:var(--red)}
+.al-info{background:var(--bbg);border-color:var(--blue);color:var(--blue)}
+.al-warn{background:var(--abg);border-color:var(--amber);color:var(--amber)}
+
+/* MISC */
+.empty{text-align:center;padding:40px;color:var(--ink3)}
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
-.dot-ok{background:#16a34a}
-.dot-warn{background:#b45309}
-.dot-err{background:#dc2626}
+.dot-ok{background:var(--green)}.dot-warn{background:var(--amber)}.dot-err{background:var(--red)}
+.tog{width:42px;height:23px;border-radius:12px;cursor:pointer;border:none;position:relative;transition:background .2s;flex-shrink:0}
+.tog.on{background:var(--green)}.tog.off{background:var(--border)}
+.tog::after{content:'';position:absolute;width:17px;height:17px;border-radius:50%;background:#fff;top:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tog.on::after{left:22px}.tog.off::after{left:3px}
+.sr{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:12px}
+.sr:last-child{border:none}
+
+/* ── TABLET (≤1024px) ── */
+@media(max-width:1024px){
+  :root{--sidebar:200px}
+  .g4{grid-template-columns:1fr 1fr}
+  .pg{padding:20px 20px 32px}
+  .topbar{padding:0 20px}
+}
+
+/* ── MOBILE (≤768px) ── */
+@media(max-width:768px){
+  :root{--sidebar:260px}
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0);box-shadow:4px 0 24px rgba(0,0,0,.15)}
+  .main{margin-left:0;padding-top:52px}
+  .topbar{display:none}
+  .topbar-mobile{display:flex}
+  .s-close{display:flex}
+  .g4{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:1fr 1fr}
+  .g2{grid-template-columns:1fr}
+  .pg{padding:16px 16px 28px}
+  .pt{font-size:18px}
+  .kv{font-size:20px}
+  .mo-bg{padding:0;align-items:flex-end}
+  .mo-box{border-radius:16px 16px 0 0;max-height:92vh;max-width:100%}
+  .mo-hdr{border-radius:16px 16px 0 0}
+  .mo-ftr{flex-direction:column-reverse}
+  .mo-ftr .ab{width:100%;justify-content:center;padding:12px}
+}
+
+/* ── VERY SMALL (≤480px) ── */
+@media(max-width:480px){
+  .g4{grid-template-columns:1fr}
+  .g3{grid-template-columns:1fr}
+  .ph{flex-direction:column;gap:10px}
+  .ph>div:last-child{width:100%}
+  .ph select,.ph input{width:100%}
+}
 </style>
 </head>
 <body>
 
-<!-- LOGIN PAGE -->
-<div id="loginPage" class="center">
-  <div class="lcard">
-    <div class="logo-box">IP</div>
+<!-- ── AUTH PAGE ── -->
+<div id="authPage" class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo">IP</div>
     <h1>Super Admin</h1>
-    <p class="sub">InvoicePro control panel</p>
+    <p class="auth-sub">InvoicePro control panel</p>
 
-    <!-- Login form -->
     <div id="fLogin">
       <label class="lbl">Email</label>
       <input class="inp" type="email" id="iEmail" placeholder="admin@yourdomain.com" autocomplete="email"/>
       <label class="lbl">Password</label>
       <input class="inp" type="password" id="iPw" placeholder="••••••••" autocomplete="current-password"/>
-      <button class="btn-full" id="btnLogin">Sign in →</button>
-      <button class="link-btn" id="btnShowForgot">Forgot password?</button>
-      <div class="errtxt" id="loginErr"></div>
+      <button class="btn-auth" id="btnLogin">Sign in →</button>
+      <button class="auth-link" id="btnShowForgot">Forgot password?</button>
+      <div class="auth-err" id="loginErr"></div>
     </div>
 
-    <!-- Forgot password form -->
     <div id="fForgot" class="hidden">
-      <label class="lbl">Admin email</label>
+      <label class="lbl">Your admin email</label>
       <input class="inp" type="email" id="iForgotEmail" placeholder="admin@yourdomain.com"/>
-      <button class="btn-full" id="btnSendReset">Send reset link</button>
-      <button class="link-btn" id="btnBackLogin">← Back to sign in</button>
-      <div class="errtxt" id="forgotMsg" style="color:#16a34a;min-height:40px"></div>
+      <button class="btn-auth" id="btnSendReset">Send reset link</button>
+      <button class="auth-link" id="btnBackLogin">← Back to sign in</button>
+      <div id="forgotMsg" style="margin-top:10px;font-size:13px;line-height:1.6"></div>
     </div>
 
-    <!-- Reset password form (from email link) -->
     <div id="fReset" class="hidden">
-      <label class="lbl">New password (8+ characters)</label>
+      <label class="lbl">New password (8+ chars)</label>
       <input class="inp" type="password" id="iNewPw1" placeholder="New password"/>
       <label class="lbl">Confirm new password</label>
-      <input class="inp" type="password" id="iNewPw2" placeholder="Repeat new password"/>
-      <button class="btn-full" id="btnDoReset">Set new password →</button>
-      <div class="errtxt" id="resetMsg" style="min-height:40px"></div>
+      <input class="inp" type="password" id="iNewPw2" placeholder="Repeat"/>
+      <button class="btn-auth" id="btnDoReset">Set new password →</button>
+      <div id="resetMsg" style="margin-top:10px;font-size:13px"></div>
     </div>
   </div>
 </div>
 
-<!-- MAIN APP -->
+<!-- ── APP ── -->
 <div id="app">
- <div class="layout">
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="s-top">
-      <div class="s-icon">IP</div>
-      <div><div style="font-size:14px;font-weight:800;letter-spacing:-.02em">InvoicePro</div><div style="font-size:10px;color:#b8b2a3">Super Admin</div></div>
+  <!-- Mobile overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Mobile topbar -->
+  <div class="topbar-mobile">
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="s-icon" style="width:28px;height:28px;font-size:12px">IP</div>
+      <span style="font-weight:800;font-size:14px;letter-spacing:-.02em">InvoicePro</span>
     </div>
-    <div class="nav-sec">Overview</div>
-    <button class="nv on" data-pg="dashboard">📊 Dashboard</button>
-    <button class="nv" data-pg="health">🟢 System health</button>
-    <button class="nv" data-pg="revenue">💰 Revenue & MRR</button>
-    <button class="nv" data-pg="churn">📉 Churn & retention</button>
-    <div class="nav-sec">Users</div>
-    <button class="nv" data-pg="users">👥 All users</button>
-    <button class="nv" data-pg="clients">🏢 All clients</button>
-    <div class="nav-sec">Transactions</div>
-    <button class="nv" data-pg="invoices">🧾 Invoices</button>
-    <button class="nv" data-pg="payments">💳 Payments</button>
-    <div class="nav-sec">Product</div>
-    <button class="nv" data-pg="features">🚦 Feature flags</button>
-    <button class="nv" data-pg="plans">📋 Plans</button>
-    <button class="nv" data-pg="announce">📣 Announcement</button>
-    <div class="nav-sec">Support</div>
-    <button class="nv" data-pg="tickets">🎫 Tickets</button>
-    <button class="nv" data-pg="satisfaction">⭐ Satisfaction</button>
-    <button class="nv" data-pg="broadcast">📢 Broadcast</button>
-    <div class="nav-sec">System</div>
-    <button class="nv" data-pg="admins">🔐 Admin accounts</button>
-    <button class="nv" data-pg="audit">📝 Audit log</button>
-    <div class="s-foot">
-      <div class="s-user">
-        <div class="s-av" id="sAvatar">A</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:12.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="sName">Admin</div>
-          <div style="font-size:10px;color:#b8b2a3" id="sRole">super_admin</div>
+    <span id="annBadgeMobile" class="bdg b-warn hidden" style="margin-left:auto">📣</span>
+  </div>
+
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="s-top">
+        <div class="s-icon">IP</div>
+        <div style="min-width:0">
+          <div style="font-size:14px;font-weight:800;letter-spacing:-.02em">InvoicePro</div>
+          <div style="font-size:10px;color:var(--ink3)">Super Admin</div>
+        </div>
+        <button class="s-close" id="btnCloseSidebar" aria-label="Close menu">✕</button>
+      </div>
+
+      <div class="nav-sec">Overview</div>
+      <button class="nv on" data-pg="dashboard">📊 Dashboard</button>
+      <button class="nv" data-pg="health">🟢 System health</button>
+      <button class="nv" data-pg="revenue">💰 Revenue & MRR</button>
+      <button class="nv" data-pg="churn">📉 Churn & retention</button>
+
+      <div class="nav-sec">Users</div>
+      <button class="nv" data-pg="users">👥 All users</button>
+      <button class="nv" data-pg="clients">🏢 All clients</button>
+
+      <div class="nav-sec">Transactions</div>
+      <button class="nv" data-pg="invoices">🧾 Invoices</button>
+      <button class="nv" data-pg="payments">💳 Payments</button>
+
+      <div class="nav-sec">Product</div>
+      <button class="nv" data-pg="features">🚦 Feature flags</button>
+      <button class="nv" data-pg="plans">📋 Plans</button>
+      <button class="nv" data-pg="announce">📣 Announcement</button>
+
+      <div class="nav-sec">Support</div>
+      <button class="nv" data-pg="tickets">🎫 Tickets</button>
+      <button class="nv" data-pg="satisfaction">⭐ Satisfaction</button>
+      <button class="nv" data-pg="broadcast">📢 Broadcast</button>
+
+      <div class="nav-sec">System</div>
+      <button class="nv" data-pg="admins">🔐 Admin accounts</button>
+      <button class="nv" data-pg="audit">📝 Audit log</button>
+
+      <div class="s-foot">
+        <div class="s-user">
+          <div class="s-av" id="sAvatar">A</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="sName">Admin</div>
+            <div style="font-size:10px;color:var(--ink3)" id="sRole">super_admin</div>
+          </div>
+        </div>
+        <div class="foot-row">
+          <button class="ab ab-sm" style="flex:1;justify-content:center" id="btnLogout">Sign out</button>
+          <button class="ab ab-sm" id="btnChangePw" title="Change password">🔑</button>
         </div>
       </div>
-      <div class="foot-btns">
-        <button class="ab ab-sm" style="flex:1;justify-content:center" id="btnLogout">Sign out</button>
-        <button class="ab ab-sm" id="btnChangePw" title="Change password">🔑</button>
-      </div>
-    </div>
-  </aside>
+    </aside>
 
-  <!-- MAIN CONTENT -->
-  <div class="main">
-    <div class="topbar">
-      <div style="font-size:12px;color:#999">InvoicePro Admin Panel</div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <span id="annBadge" class="bdg b-warn hidden">📣 Announcement active</span>
-      </div>
-    </div>
-
-    <!-- DASHBOARD -->
-    <div class="pg on" id="pg-dashboard">
-      <div class="ph"><div><div class="pt">Dashboard</div><div class="ps" id="dashTs">—</div></div></div>
-      <div class="g4" id="statCards"></div>
-      <div class="g2">
-        <div class="bc"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Plan breakdown</div><div id="planBars"></div></div>
-        <div class="bc"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Quick actions</div><div id="quickActions"></div></div>
-      </div>
-      <div class="bc"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Recent signups</div><div id="recentUsers"></div></div>
-    </div>
-
-    <!-- HEALTH -->
-    <div class="pg" id="pg-health">
-      <div class="ph"><div><div class="pt">System health</div></div></div>
-      <div class="g3" id="healthCards"></div>
-      <div class="bc">
-        <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Test email sending</div>
-        <div style="display:flex;gap:8px">
-          <input class="fi" type="email" id="testEmailTo" placeholder="Send test to this email..." style="flex:1"/>
-          <button class="ab ab-p" id="btnTestEmail">Send test</button>
+    <!-- MAIN -->
+    <div class="main">
+      <div class="topbar">
+        <div style="font-size:12px;color:var(--ink3)">InvoicePro Admin Panel</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="annBadge" class="bdg b-warn hidden">📣 Announcement active</span>
         </div>
-        <div id="testEmailRes" style="margin-top:8px"></div>
       </div>
-    </div>
 
-    <!-- REVENUE -->
-    <div class="pg" id="pg-revenue">
-      <div class="ph"><div><div class="pt">Revenue & MRR</div></div></div>
-      <div class="g4" id="revCards"></div>
-      <div class="bc"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Monthly revenue</div><div id="revBars" style="display:flex;align-items:flex-end;gap:6px;height:180px;overflow-x:auto"></div></div>
-    </div>
-
-    <!-- CHURN -->
-    <div class="pg" id="pg-churn">
-      <div class="ph"><div><div class="pt">Churn & Retention</div></div></div>
-      <div class="g3" id="churnCards"></div>
-      <div class="g2" style="margin-top:0">
-        <div class="bc"><div style="font-size:13px;font-weight:600;color:#dc2626;margin-bottom:10px">⚠ At-risk users</div><div id="atRiskList"></div></div>
-        <div class="bc"><div style="font-size:13px;font-weight:600;color:#16a34a;margin-bottom:10px">✨ New signups (7d)</div><div id="newSignupList"></div></div>
+      <!-- DASHBOARD -->
+      <div class="pg on" id="pg-dashboard">
+        <div class="ph"><div><div class="pt">Dashboard</div><div class="ps" id="dashTs">—</div></div></div>
+        <div class="g4" id="statCards"></div>
+        <div class="g2">
+          <div class="bc"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Plan breakdown</div><div id="planBars"></div></div>
+          <div class="bc"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Quick actions</div><div id="quickActs"></div></div>
+        </div>
+        <div class="bc"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Recent signups</div><div id="recentUsers"></div></div>
       </div>
-    </div>
 
-    <!-- USERS -->
-    <div class="pg" id="pg-users">
-      <div class="ph">
-        <div><div class="pt">All users</div><div class="ps" id="userCount">—</div></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input class="fi" id="uSearch" placeholder="Search name, email..." style="width:220px"/>
-          <select class="fi" id="uPlan" style="width:140px">
-            <option value="">All plans</option>
-            <option value="free">Free</option><option value="starter">Starter</option>
-            <option value="pro">Pro</option><option value="enterprise">Enterprise</option>
+      <!-- HEALTH -->
+      <div class="pg" id="pg-health">
+        <div class="ph"><div><div class="pt">System health</div></div></div>
+        <div class="g3" id="healthCards"></div>
+        <div class="bc">
+          <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Test email</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input class="fi" type="email" id="testEmailTo" placeholder="Send test to this email..." style="flex:1;min-width:200px"/>
+            <button class="ab ab-p" id="btnTestEmail">Send test</button>
+          </div>
+          <div id="testEmailRes" style="margin-top:8px"></div>
+        </div>
+      </div>
+
+      <!-- REVENUE -->
+      <div class="pg" id="pg-revenue">
+        <div class="ph"><div><div class="pt">Revenue & MRR</div></div></div>
+        <div class="g4" id="revCards"></div>
+        <div class="bc"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Monthly revenue</div><div id="revBars" style="display:flex;align-items:flex-end;gap:6px;height:180px;overflow-x:auto;padding-bottom:4px"></div></div>
+      </div>
+
+      <!-- CHURN -->
+      <div class="pg" id="pg-churn">
+        <div class="ph"><div><div class="pt">Churn & Retention</div></div></div>
+        <div class="g3" id="churnCards"></div>
+        <div class="g2">
+          <div class="bc"><div style="font-size:13px;font-weight:600;color:var(--red);margin-bottom:10px">⚠ At-risk users</div><div id="atRiskList"></div></div>
+          <div class="bc"><div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:10px">✨ New signups (7d)</div><div id="newSigList"></div></div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="pg" id="pg-users">
+        <div class="ph">
+          <div><div class="pt">All users</div><div class="ps" id="userCount">—</div></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input class="fi" id="uSearch" placeholder="Search name, email..." style="width:200px;max-width:100%"/>
+            <select class="fi" id="uPlan" style="width:140px">
+              <option value="">All plans</option>
+              <option value="free">Free</option><option value="starter">Starter</option>
+              <option value="pro">Pro</option><option value="enterprise">Enterprise</option>
+            </select>
+          </div>
+        </div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>User / Company</th><th>Plan</th><th>Email</th><th>Joined</th><th>Actions</th></tr></thead>
+          <tbody id="userRows"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
+        <div id="userPager" style="display:flex;gap:6px;justify-content:flex-end;margin-top:10px;flex-wrap:wrap"></div>
+      </div>
+
+      <!-- CLIENTS -->
+      <div class="pg" id="pg-clients">
+        <div class="ph"><div><div class="pt">All clients</div><div class="ps" id="clientCount">—</div></div></div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>Name</th><th>Email</th><th>Owner</th><th>Currency</th></tr></thead>
+          <tbody id="clientRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
+      </div>
+
+      <!-- INVOICES -->
+      <div class="pg" id="pg-invoices">
+        <div class="ph">
+          <div><div class="pt">All invoices</div><div class="ps" id="invCount">—</div></div>
+          <select class="fi" id="invFilter" style="width:160px">
+            <option value="">All statuses</option>
+            <option value="paid">Paid</option><option value="sent">Sent</option>
+            <option value="draft">Draft</option><option value="overdue">Overdue</option>
           </select>
         </div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>Invoice #</th><th>Owner</th><th>Amount</th><th>Status</th><th>Date</th><th></th></tr></thead>
+          <tbody id="invRows"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
       </div>
-      <div class="bc" style="padding:0"><div class="tbl-wrap">
-        <table><thead><tr><th>User / Company</th><th>Plan</th><th>Email</th><th>Joined</th><th>Actions</th></tr></thead>
-        <tbody id="userRows"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
-      </div></div>
-      <div id="userPager" style="display:flex;gap:6px;justify-content:flex-end;margin-top:10px;flex-wrap:wrap"></div>
-    </div>
 
-    <!-- CLIENTS -->
-    <div class="pg" id="pg-clients">
-      <div class="ph"><div><div class="pt">All clients</div><div class="ps" id="clientCount">—</div></div></div>
-      <div class="bc" style="padding:0"><div class="tbl-wrap">
-        <table><thead><tr><th>Name</th><th>Email</th><th>Owner</th><th>Currency</th></tr></thead>
-        <tbody id="clientRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
-      </div></div>
-    </div>
-
-    <!-- INVOICES -->
-    <div class="pg" id="pg-invoices">
-      <div class="ph">
-        <div><div class="pt">All invoices</div><div class="ps" id="invCount">—</div></div>
-        <select class="fi" id="invFilter" style="width:160px">
-          <option value="">All statuses</option>
-          <option value="paid">Paid</option><option value="sent">Sent</option>
-          <option value="draft">Draft</option><option value="overdue">Overdue</option>
-        </select>
+      <!-- PAYMENTS -->
+      <div class="pg" id="pg-payments">
+        <div class="ph"><div><div class="pt">All payments</div></div></div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>Owner</th><th>Invoice</th><th>Amount</th><th>Method</th><th>Date</th></tr></thead>
+          <tbody id="payRows"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
       </div>
-      <div class="bc" style="padding:0"><div class="tbl-wrap">
-        <table><thead><tr><th>Invoice #</th><th>Owner</th><th>Amount</th><th>Status</th><th>Date</th><th></th></tr></thead>
-        <tbody id="invRows"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
-      </div></div>
-    </div>
 
-    <!-- PAYMENTS -->
-    <div class="pg" id="pg-payments">
-      <div class="ph"><div><div class="pt">All payments</div></div></div>
-      <div class="bc" style="padding:0"><div class="tbl-wrap">
-        <table><thead><tr><th>Owner</th><th>Invoice</th><th>Amount</th><th>Method</th><th>Date</th></tr></thead>
-        <tbody id="payRows"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
-      </div></div>
-    </div>
+      <!-- FEATURES -->
+      <div class="pg" id="pg-features">
+        <div class="ph"><div><div class="pt">Feature flags</div><div class="ps">Toggle features on/off for all users</div></div></div>
+        <div class="bc"><div id="featureList"><div class="empty">Loading...</div></div></div>
+      </div>
 
-    <!-- FEATURES -->
-    <div class="pg" id="pg-features">
-      <div class="ph"><div><div class="pt">Feature flags</div><div class="ps">Toggle features on/off for all users</div></div></div>
-      <div class="bc"><div id="featureToggles"><div class="empty">Loading...</div></div></div>
-    </div>
+      <!-- PLANS -->
+      <div class="pg" id="pg-plans">
+        <div class="ph"><div><div class="pt">Plans & pricing</div></div></div>
+        <div class="g4" id="planCards"></div>
+      </div>
 
-    <!-- PLANS -->
-    <div class="pg" id="pg-plans">
-      <div class="ph"><div><div class="pt">Plans & pricing</div></div></div>
-      <div class="g4" id="planCards"></div>
-    </div>
-
-    <!-- ANNOUNCEMENT -->
-    <div class="pg" id="pg-announce">
-      <div class="ph"><div><div class="pt">Platform announcement</div><div class="ps">Show a banner to all users</div></div></div>
-      <div class="g2">
-        <div class="bc">
-          <div class="fg"><label>Title</label><input class="fi" id="annTitle" placeholder="e.g. Scheduled maintenance tonight"/></div>
-          <div class="fg"><label>Message</label><textarea class="fi" id="annMsg" rows="3" placeholder="We'll be performing maintenance..."></textarea></div>
-          <div class="fg"><label>Type</label><select class="fi" id="annType"><option value="info">ℹ Info (blue)</option><option value="warning">⚠ Warning (amber)</option><option value="success">✅ Success (green)</option></select></div>
-          <div class="fg"><label>Expires after (hours)</label><input class="fi" id="annHours" type="number" value="24" min="1"/></div>
-          <div style="display:flex;gap:8px">
-            <button class="ab ab-p" style="flex:1;justify-content:center" id="btnPublishAnn">📣 Publish</button>
-            <button class="ab ab-d" style="flex:1;justify-content:center" id="btnRemoveAnn">🗑 Remove</button>
+      <!-- ANNOUNCEMENT -->
+      <div class="pg" id="pg-announce">
+        <div class="ph"><div><div class="pt">Platform announcement</div><div class="ps">Show a banner to all app users</div></div></div>
+        <div class="g2">
+          <div class="bc">
+            <div class="fg"><label>Title</label><input class="fi" id="annTitle" placeholder="e.g. Scheduled maintenance"/></div>
+            <div class="fg"><label>Message</label><textarea class="fi" id="annMsg" rows="3" placeholder="We'll be performing..."></textarea></div>
+            <div class="fg"><label>Type</label><select class="fi" id="annType"><option value="info">ℹ Info</option><option value="warning">⚠ Warning</option><option value="success">✅ Success</option></select></div>
+            <div class="fg"><label>Expires after (hours)</label><input class="fi" id="annHours" type="number" value="24" min="1"/></div>
+            <div style="display:flex;gap:8px">
+              <button class="ab ab-p" style="flex:1;justify-content:center" id="btnPublish">📣 Publish</button>
+              <button class="ab ab-d" style="flex:1;justify-content:center" id="btnRemoveAnn">🗑 Remove</button>
+            </div>
+            <div id="annFb" style="margin-top:10px"></div>
           </div>
-          <div id="annFeedback" style="margin-top:10px"></div>
+          <div class="bc"><div style="font-size:13px;font-weight:600;margin-bottom:10px">Current</div><div id="annCurrent"></div></div>
         </div>
-        <div class="bc"><div style="font-size:13px;font-weight:600;margin-bottom:10px">Current announcement</div><div id="annCurrent"><div class="empty" style="padding:20px">No active announcement</div></div></div>
       </div>
-    </div>
 
-    <!-- TICKETS -->
-    <div class="pg" id="pg-tickets">
-      <div class="ph"><div><div class="pt">Support tickets</div></div>
-        <select class="fi" id="tickFilter" style="width:160px"><option value="">All</option><option value="open">Open</option><option value="resolved">Resolved</option></select>
-      </div>
-      <div class="bc" style="padding:0"><div class="tbl-wrap">
-        <table><thead><tr><th>User</th><th>Subject</th><th>Status</th><th>Date</th><th></th></tr></thead>
-        <tbody id="tickRows"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
-      </div></div>
-    </div>
-
-    <!-- SATISFACTION -->
-    <div class="pg" id="pg-satisfaction">
-      <div class="ph"><div><div class="pt">Client satisfaction</div></div></div>
-      <div class="g3" id="satCards"></div>
-      <div class="bc" style="padding:0"><div class="tbl-wrap">
-        <table><thead><tr><th>Business</th><th>Score</th><th>Comment</th><th>Date</th></tr></thead>
-        <tbody id="satRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
-      </div></div>
-    </div>
-
-    <!-- BROADCAST -->
-    <div class="pg" id="pg-broadcast">
-      <div class="ph"><div><div class="pt">Broadcast email</div><div class="ps">Send to all or filtered users</div></div></div>
-      <div class="g2">
-        <div class="bc">
-          <div class="fg"><label>Subject</label><input class="fi" id="bSubj" placeholder="Subject line"/></div>
-          <div class="fg"><label>Plan filter (optional)</label><select class="fi" id="bPlan"><option value="">All users</option><option value="free">Free only</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select></div>
-          <div class="fg"><label>Message</label><textarea class="fi" id="bMsg" rows="5" placeholder="Hi there..."></textarea></div>
-          <button class="ab ab-p" style="width:100%;justify-content:center" id="btnBroadcast">📢 Send broadcast</button>
-          <div id="broadcastRes" style="margin-top:10px"></div>
+      <!-- TICKETS -->
+      <div class="pg" id="pg-tickets">
+        <div class="ph">
+          <div><div class="pt">Support tickets</div></div>
+          <select class="fi" id="tickFilter" style="width:160px"><option value="">All</option><option value="open">Open</option><option value="resolved">Resolved</option></select>
         </div>
-        <div class="bc"><div class="al al-info">Target specific segments with plan filter.</div><div class="al al-warn" style="margin-top:8px">SMTP must be set in Railway for delivery.</div></div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>User</th><th>Subject</th><th>Status</th><th>Date</th><th></th></tr></thead>
+          <tbody id="tickRows"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
       </div>
-    </div>
 
-    <!-- ADMINS -->
-    <div class="pg" id="pg-admins">
-      <div class="ph"><div><div class="pt">Admin accounts</div></div><button class="ab ab-p" id="btnAddAdmin">+ Add admin</button></div>
-      <div class="bc" style="padding:0"><div class="tbl-wrap">
-        <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Last login</th><th>Status</th><th></th></tr></thead>
-        <tbody id="adminRows"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
-      </div></div>
-    </div>
+      <!-- SATISFACTION -->
+      <div class="pg" id="pg-satisfaction">
+        <div class="ph"><div><div class="pt">Client satisfaction</div></div></div>
+        <div class="g3" id="satCards"></div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>Business</th><th>Score</th><th>Comment</th><th>Date</th></tr></thead>
+          <tbody id="satRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
+      </div>
 
-    <!-- AUDIT -->
-    <div class="pg" id="pg-audit">
-      <div class="ph"><div><div class="pt">Audit log</div></div></div>
-      <div class="bc" style="padding:0"><div class="tbl-wrap">
-        <table><thead><tr><th>Admin</th><th>Action</th><th>Entity</th><th>Time</th></tr></thead>
-        <tbody id="auditRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
-      </div></div>
-    </div>
+      <!-- BROADCAST -->
+      <div class="pg" id="pg-broadcast">
+        <div class="ph"><div><div class="pt">Broadcast email</div><div class="ps">Send to all or filtered users</div></div></div>
+        <div class="g2">
+          <div class="bc">
+            <div class="fg"><label>Subject</label><input class="fi" id="bSubj" placeholder="Subject line"/></div>
+            <div class="fg"><label>Plan filter</label><select class="fi" id="bPlan"><option value="">All users</option><option value="free">Free</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select></div>
+            <div class="fg"><label>Message</label><textarea class="fi" id="bMsg" rows="5" placeholder="Hi there..."></textarea></div>
+            <button class="ab ab-p" style="width:100%;justify-content:center" id="btnBroadcast">📢 Send broadcast</button>
+            <div id="broadRes" style="margin-top:10px"></div>
+          </div>
+          <div class="bc"><div class="al al-info">Target specific segments with plan filter.</div><div class="al al-warn" style="margin-top:8px">SMTP must be configured in Railway for delivery.</div></div>
+        </div>
+      </div>
 
-  </div><!-- /main -->
- </div><!-- /layout -->
+      <!-- ADMINS -->
+      <div class="pg" id="pg-admins">
+        <div class="ph"><div><div class="pt">Admin accounts</div></div><button class="ab ab-p" id="btnAddAdmin">+ Add admin</button></div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Last login</th><th>Status</th><th></th></tr></thead>
+          <tbody id="adminRows"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
+      </div>
+
+      <!-- AUDIT -->
+      <div class="pg" id="pg-audit">
+        <div class="ph"><div><div class="pt">Audit log</div></div></div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>Admin</th><th>Action</th><th>Entity</th><th>Time</th></tr></thead>
+          <tbody id="auditRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /layout -->
 </div><!-- /app -->
 
 <!-- MODALS -->
 <div class="mo-bg" id="mChangePw">
   <div class="mo-box" style="max-width:420px">
-    <div class="mo-hdr"><h3>🔑 Change password</h3><button class="ab ab-sm" id="btnClosePwMo">✕ Close</button></div>
+    <div class="mo-hdr"><h3>🔑 Change password</h3><button class="ab ab-sm" id="btnClosePwMo">✕</button></div>
     <div class="mo-body">
       <div class="fg"><label>Current password</label><input class="fi" type="password" id="cpCur" placeholder="Current password"/></div>
       <div class="fg"><label>New password (8+ chars)</label><input class="fi" type="password" id="cpNew" placeholder="New password"/></div>
-      <div class="fg"><label>Confirm new password</label><input class="fi" type="password" id="cpCon" placeholder="Repeat new password"/></div>
+      <div class="fg"><label>Confirm new password</label><input class="fi" type="password" id="cpCon" placeholder="Repeat"/></div>
       <div id="cpMsg"></div>
     </div>
     <div class="mo-ftr">
@@ -413,7 +521,7 @@ tr:hover td{background:#fafaf8}
 
 <div class="mo-bg" id="mAddAdmin">
   <div class="mo-box" style="max-width:440px">
-    <div class="mo-hdr"><h3>Add admin account</h3><button class="ab ab-sm" id="btnCloseAddAdmin">✕ Close</button></div>
+    <div class="mo-hdr"><h3>Add admin account</h3><button class="ab ab-sm" id="btnCloseAddAdmin">✕</button></div>
     <div class="mo-body">
       <div class="fg"><label>Full name</label><input class="fi" id="naName" placeholder="Support Agent"/></div>
       <div class="fg"><label>Email</label><input class="fi" type="email" id="naEmail" placeholder="support@example.com"/></div>
@@ -430,9 +538,9 @@ tr:hover td{background:#fafaf8}
 
 <div class="mo-bg" id="mTicket">
   <div class="mo-box" style="max-width:500px">
-    <div class="mo-hdr"><h3>Reply to ticket</h3><button class="ab ab-sm" id="btnCloseTicket">✕ Close</button></div>
+    <div class="mo-hdr"><h3>Reply to ticket</h3><button class="ab ab-sm" id="btnCloseTicket">✕</button></div>
     <div class="mo-body">
-      <div id="ticketContent" style="background:#f8f7f4;padding:12px;border-radius:8px;margin-bottom:14px;font-size:13px;line-height:1.6"></div>
+      <div id="tickContent" style="background:var(--bg);padding:12px;border-radius:8px;margin-bottom:14px;font-size:13px;line-height:1.6"></div>
       <div class="fg"><label>Your reply</label><textarea class="fi" id="tickReply" rows="4" placeholder="Type your response..."></textarea></div>
       <div class="fg"><label>Update status</label><select class="fi" id="tickStat"><option value="resolved">Mark resolved</option><option value="open">Keep open</option></select></div>
     </div>
@@ -444,549 +552,363 @@ tr:hover td{background:#fafaf8}
 </div>
 
 <script>
-var API = '/api';
-var tok = null;
-var curTicketId = null;
-var uPage = 1;
-var iPage = 1;
+var API='/api', tok=null, curTick=null, uPage=1, iPage=1;
+function q(id){return document.getElementById(id);}
+function money(n){return '£'+(+(n)||0).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function dDate(d){return d?new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';}
+function dTime(d){return d?new Date(d).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—';}
+function bdg(cls,txt){return '<span class="bdg b-'+cls+'">'+txt+'</span>';}
+function pBdg(p){return bdg(p||'free',p||'free');}
+function sBdg(s){return bdg(s||'draft',s||'draft');}
+function okMsg(id,m){var e=q(id);if(e)e.innerHTML='<div class="al al-ok">✅ '+m+'</div>';}
+function errMsg(id,m){var e=q(id);if(e)e.innerHTML='<div class="al al-err">'+m+'</div>';}
+function openMo(id){var e=q(id);if(e)e.classList.add('show');}
+function closeMo(id){var e=q(id);if(e)e.classList.remove('show');}
 
-function q(id) { return document.getElementById(id); }
-function money(n) { return '£' + (+(n)||0).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function dDate(d) { return d ? new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'; }
-function dTime(d) { return d ? new Date(d).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—'; }
-function badge(cls,txt) { return '<span class="bdg b-'+cls+'">'+txt+'</span>'; }
-function pBadge(p) { return badge(p||'free', p||'free'); }
-function sBadge(s) { return badge(s||'draft', s||'draft'); }
+// MOBILE SIDEBAR
+function openSidebar(){q('sidebar').classList.add('open');q('overlay').classList.add('show');document.body.style.overflow='hidden';}
+function closeSidebar(){q('sidebar').classList.remove('open');q('overlay').classList.remove('show');document.body.style.overflow='';}
 
-function request(path, opts) {
-  opts = opts || {};
-  var hdrs = {'Content-Type':'application/json'};
-  if (tok) hdrs['Authorization'] = 'Bearer ' + tok;
-  if (opts.headers) Object.assign(hdrs, opts.headers);
-  return fetch(API + path, Object.assign({}, opts, {headers: hdrs}))
-    .then(function(r) {
-      return r.json().then(function(data) {
-        if (!r.ok) throw new Error(data.error || 'Request failed ('+r.status+')');
-        return data;
-      });
-    });
+// API
+function req(path,opts){
+  opts=opts||{};
+  var h={'Content-Type':'application/json'};
+  if(tok)h['Authorization']='Bearer '+tok;
+  return fetch(API+path,Object.assign({},opts,{headers:h}))
+    .then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error(d.error||'Error '+r.status);return d;});});
 }
 
-function showErr(elId, msg) { var el = q(elId); if(el) el.innerHTML = '<div class="al al-err">'+msg+'</div>'; }
-function showOk(elId, msg) { var el = q(elId); if(el) el.innerHTML = '<div class="al al-ok">✅ '+msg+'</div>'; }
-function openMo(id) { var el = q(id); if(el) el.classList.add('show'); }
-function closeMo(id) { var el = q(id); if(el) el.classList.remove('show'); }
-
-// ── NAVIGATION ────────────────────────────────────────────
-function goPage(page) {
-  document.querySelectorAll('.pg').forEach(function(p){ p.classList.remove('on'); });
-  document.querySelectorAll('.nv').forEach(function(n){ n.classList.remove('on'); });
-  var pg = q('pg-'+page);
-  if (pg) pg.classList.add('on');
-  document.querySelectorAll('.nv[data-pg="'+page+'"]').forEach(function(n){ n.classList.add('on'); });
-  var fn = {dashboard:loadDash, health:loadHealth, revenue:loadRev, churn:loadChurn,
-    users:loadUsers, clients:loadClients, invoices:loadInv, payments:loadPay,
-    features:loadFeatures, plans:loadPlans, announce:loadAnnounce, tickets:loadTickets,
-    satisfaction:loadSat, broadcast:function(){}, admins:loadAdmins, audit:loadAudit};
-  if (fn[page]) fn[page]();
+// NAV
+function goPage(page){
+  document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.nv').forEach(function(n){n.classList.remove('on');});
+  var pg=q('pg-'+page);if(pg)pg.classList.add('on');
+  document.querySelectorAll('.nv[data-pg="'+page+'"]').forEach(function(n){n.classList.add('on');});
+  // Close sidebar on mobile after navigation
+  if(window.innerWidth<=768)closeSidebar();
+  var fns={dashboard:loadDash,health:loadHealth,revenue:loadRev,churn:loadChurn,
+    users:loadUsers,clients:loadClients,invoices:loadInv,payments:loadPay,
+    features:loadFeatures,plans:loadPlans,announce:loadAnnounce,tickets:loadTickets,
+    satisfaction:loadSat,broadcast:function(){},admins:loadAdmins,audit:loadAudit};
+  if(fns[page])fns[page]();
 }
 
-// ── AUTH ─────────────────────────────────────────────────
-function showApp(admin) {
-  q('loginPage').style.display = 'none';
-  q('app').style.display = 'block';
-  q('sName').textContent = admin.full_name || admin.email;
-  q('sRole').textContent = admin.role;
-  q('sAvatar').textContent = (admin.full_name || admin.email)[0].toUpperCase();
-  tok = admin._tok || tok;
+// AUTH
+function showApp(admin){
+  q('authPage').style.display='none';q('app').style.display='block';
+  q('sName').textContent=admin.full_name||admin.email;
+  q('sRole').textContent=admin.role;
+  q('sAvatar').textContent=(admin.full_name||admin.email)[0].toUpperCase();
   loadDash();
 }
 
-function doLogin() {
-  var email = q('iEmail').value.trim();
-  var pw = q('iPw').value;
-  var btn = q('btnLogin');
-  q('loginErr').textContent = '';
-  if (!email || !pw) { q('loginErr').textContent = 'Enter email and password'; return; }
-  btn.disabled = true; btn.textContent = 'Signing in...';
-  request('/admin/login', {method:'POST', body:JSON.stringify({email:email, password:pw})})
-    .then(function(d) {
-      tok = d.token;
-      localStorage.setItem('ipat', tok);
-      d.admin._tok = tok;
-      showApp(d.admin);
-    })
-    .catch(function(e) {
-      q('loginErr').textContent = e.message || 'Invalid email or password';
-      btn.disabled = false; btn.textContent = 'Sign in →';
-    });
+function doLogin(){
+  var email=q('iEmail').value.trim(),pw=q('iPw').value,btn=q('btnLogin');
+  q('loginErr').textContent='';
+  if(!email||!pw){q('loginErr').textContent='Enter email and password';return;}
+  btn.disabled=true;btn.textContent='Signing in...';
+  req('/admin/login',{method:'POST',body:JSON.stringify({email:email,password:pw})})
+    .then(function(d){tok=d.token;localStorage.setItem('ipat',tok);showApp(d.admin);})
+    .catch(function(e){q('loginErr').textContent=e.message||'Invalid credentials';btn.disabled=false;btn.textContent='Sign in →';});
 }
 
-function doLogout() {
-  tok = null; localStorage.removeItem('ipat'); location.reload();
-}
+function doLogout(){tok=null;localStorage.removeItem('ipat');location.reload();}
 
-function doForgot() {
-  var email = q('iForgotEmail').value.trim();
-  var msg = q('forgotMsg');
-  if (!email) { msg.style.color='#dc2626'; msg.textContent='Enter your email'; return; }
-  msg.style.color='#888'; msg.textContent='Sending...';
-  request('/admin/forgot-password', {method:'POST', body:JSON.stringify({email:email})})
-    .then(function(d) {
-      if (d.dev_reset_url) {
-        msg.style.color='#1d4ed8';
-        msg.innerHTML = '✅ Reset link generated!<br><br><a href="'+d.dev_reset_url+'" target="_blank" style="color:#1d4ed8;font-weight:600;font-size:12px;word-break:break-all">'+d.dev_reset_url+'</a>';
-      } else {
-        msg.style.color='#16a34a'; msg.textContent='✅ '+d.message;
-      }
-    })
-    .catch(function(e) { msg.style.color='#dc2626'; msg.textContent=e.message; });
-}
-
-function doResetPw() {
-  var pw1 = q('iNewPw1').value, pw2 = q('iNewPw2').value;
-  var msg = q('resetMsg');
-  var hash = window.location.hash;
-  var token = hash.split('reset=')[1];
-  if (!token) { msg.style.color='#dc2626'; msg.textContent='Invalid reset link'; return; }
-  if (pw1 !== pw2) { msg.style.color='#dc2626'; msg.textContent='Passwords do not match'; return; }
-  if (pw1.length < 8) { msg.style.color='#dc2626'; msg.textContent='8+ characters required'; return; }
-  request('/admin/reset-password/'+token, {method:'POST', body:JSON.stringify({password:pw1})})
-    .then(function(d) {
-      msg.style.color='#16a34a'; msg.textContent='✅ '+d.message;
-      setTimeout(function(){ window.history.replaceState(null,'',window.location.pathname); location.reload(); }, 2000);
-    })
-    .catch(function(e){ msg.style.color='#dc2626'; msg.textContent=e.message; });
-}
-
-function doChangePw() {
-  var cur = q('cpCur').value, nxt = q('cpNew').value, con = q('cpCon').value;
-  var msg = q('cpMsg');
-  msg.innerHTML = '';
-  if (!cur||!nxt||!con) { showErr('cpMsg','Fill all fields'); return; }
-  if (nxt !== con) { showErr('cpMsg','Passwords do not match'); return; }
-  if (nxt.length < 8) { showErr('cpMsg','8+ characters required'); return; }
-  request('/admin/change-password', {method:'PUT', body:JSON.stringify({current_password:cur, new_password:nxt})})
-    .then(function(d) {
-      showOk('cpMsg', d.message);
-      q('cpCur').value=''; q('cpNew').value=''; q('cpCon').value='';
-      setTimeout(function(){ closeMo('mChangePw'); }, 1800);
-    })
-    .catch(function(e){ showErr('cpMsg', e.message); });
-}
-
-// ── DASHBOARD ─────────────────────────────────────────────
-function loadDash() {
-  q('dashTs').textContent = 'Updated '+dTime(new Date());
-  request('/admin/stats')
-    .then(function(d) {
-      var pb = d.plan_breakdown || {};
-      q('statCards').innerHTML = [
-        {l:'Total users', v:d.total_users||0, s:'+'+((d.new_users_30d||0))+' this month'},
-        {l:'MRR', v:money(d.mrr), s:'ARR: '+money(d.arr), c:'#16a34a'},
-        {l:'Total revenue', v:money(d.total_revenue), s:(d.total_invoices||0)+' invoices total'},
-        {l:'Overdue invoices', v:d.overdue_invoices||0, s:'Need attention', c:(d.overdue_invoices>0?'#dc2626':null)},
-      ].map(function(s){ return '<div class="kc"><div class="kl">'+s.l+'</div><div class="kv"'+(s.c?' style="color:'+s.c+'"':'')+'>'+s.v+'</div><div class="ks">'+s.s+'</div></div>'; }).join('');
-
-      var total = Object.values(pb).reduce(function(a,b){return a+b;},0)||1;
-      var pc = {free:'#b8b2a3',starter:'#1d4ed8',pro:'#7c3aed',enterprise:'#b45309'};
-      q('planBars').innerHTML = Object.entries(pb).map(function(e){
-        var pct = Math.round(e[1]/total*100);
-        return '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">'+pBadge(e[0])+'<span style="font-weight:600">'+e[1]+' ('+pct+'%)</span></div><div style="height:5px;background:#e8e5de;border-radius:3px;overflow:hidden"><div style="height:100%;border-radius:3px;width:'+pct+'%;background:'+(pc[e[0]]||'#888')+'"></div></div></div>';
-      }).join('');
-
-      q('quickActions').innerHTML = ['users','churn','features','announce','broadcast'].map(function(p){
-        var labels={users:'👥 Manage users',churn:'📉 At-risk users',features:'🚦 Feature flags',announce:'📣 Announcement',broadcast:'📢 Broadcast'};
-        return '<button class="ab" style="width:100%;margin-bottom:6px;justify-content:flex-start" onclick="goPage(\''+p+'\')">'+labels[p]+'</button>';
-      }).join('');
-    })
-    .catch(function(e){ q('statCards').innerHTML='<div class="al al-err" style="grid-column:1/-1">Error: '+e.message+'</div>'; });
-
-  // Recent users
-  request('/admin/users?page=1&limit=5')
+function doForgot(){
+  var email=q('iForgotEmail').value.trim(),msg=q('forgotMsg');
+  if(!email){msg.innerHTML='<div class="al al-err">Enter your email</div>';return;}
+  msg.innerHTML='<div class="al al-info">Sending...</div>';
+  req('/admin/forgot-password',{method:'POST',body:JSON.stringify({email:email})})
     .then(function(d){
-      q('recentUsers').innerHTML=(d.data||[]).map(function(u){
-        return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #e8e5de"><div style="flex:1;min-width:0"><div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(u.company_name||u.full_name||'—')+'</div><div style="font-size:11px;color:#888">'+u.email+'</div></div>'+pBadge(u.plan)+'<div style="font-size:11px;color:#888">'+dDate(u.created_at)+'</div></div>';
-      }).join('')||'<div class="empty">No users yet</div>';
-    }).catch(function(){});
+      if(d.dev_reset_url){msg.innerHTML='<div class="al al-ok">✅ Reset link generated!</div><div class="al al-info" style="margin-top:6px">Click to reset: <a href="'+d.dev_reset_url+'" target="_blank" style="color:var(--blue);font-weight:600;word-break:break-all">'+d.dev_reset_url+'</a></div>';}
+      else{msg.innerHTML='<div class="al al-ok">✅ '+d.message+'</div>';}
+    }).catch(function(e){msg.innerHTML='<div class="al al-err">'+e.message+'</div>';});
 }
 
-// ── HEALTH ────────────────────────────────────────────────
-function loadHealth() {
-  request('/admin/health')
-    .then(function(d){
-      var c = d.checks||{};
-      q('healthCards').innerHTML = [
-        {l:'Database',      ok:!c.database?.error,     txt:c.database?.error||((c.database?.latency||0)+'ms latency')},
-        {l:'Email / SMTP',  ok:c.smtp_configured,      txt:c.smtp_configured?'Configured':'Not configured — emails disabled'},
-        {l:'Stripe',        ok:c.stripe_configured,    txt:c.stripe_configured?'Configured':'Not configured'},
-        {l:'AI Assistant',  ok:c.ai_configured,        txt:c.ai_configured?'Configured':'No Anthropic key'},
-        {l:'Twilio SMS',    ok:c.twilio_configured,    txt:c.twilio_configured?'Configured':'Not configured'},
-        {l:'API Server',    ok:true,                   txt:'Running · '+dTime(d.timestamp)},
-      ].map(function(h){
-        return '<div class="kc"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span class="dot '+(h.ok?'dot-ok':'dot-warn')+'"></span><strong style="font-size:13px">'+h.l+'</strong><span class="bdg b-'+(h.ok?'ok':'warn')+'" style="margin-left:auto">'+(h.ok?'OK':'Not set')+'</span></div><div style="font-size:12px;color:#888">'+h.txt+'</div></div>';
-      }).join('');
-    }).catch(function(e){ q('healthCards').innerHTML='<div class="al al-err" style="grid-column:1/-1">Failed: '+e.message+'</div>'; });
+function doResetPw(){
+  var pw1=q('iNewPw1').value,pw2=q('iNewPw2').value,msg=q('resetMsg');
+  var token=window.location.hash.split('reset=')[1];
+  if(!token){msg.innerHTML='<div class="al al-err">Invalid reset link</div>';return;}
+  if(pw1!==pw2){msg.innerHTML='<div class="al al-err">Passwords do not match</div>';return;}
+  if(pw1.length<8){msg.innerHTML='<div class="al al-err">8+ characters required</div>';return;}
+  req('/admin/reset-password/'+token,{method:'POST',body:JSON.stringify({password:pw1})})
+    .then(function(d){msg.innerHTML='<div class="al al-ok">✅ '+d.message+'</div>';setTimeout(function(){window.history.replaceState(null,'',window.location.pathname);location.reload();},2000);})
+    .catch(function(e){msg.innerHTML='<div class="al al-err">'+e.message+'</div>';});
 }
 
-// ── REVENUE ───────────────────────────────────────────────
-function loadRev() {
-  Promise.all([request('/admin/revenue'), request('/admin/stats')])
-    .then(function(res){
-      var rev=res[0], s=res[1];
-      q('revCards').innerHTML=[
-        {l:'Total processed',v:money(rev.total_processed)},
-        {l:'MRR',v:money(s.mrr),c:'#16a34a'},
-        {l:'ARR',v:money(s.arr)},
-        {l:'Revenue 30d',v:money(s.revenue_30d)},
-      ].map(function(x){ return '<div class="kc"><div class="kl">'+x.l+'</div><div class="kv"'+(x.c?' style="color:'+x.c+'"':'')+'>'+x.v+'</div></div>'; }).join('');
-      var months=Object.entries(rev.monthly_revenue||{}).sort().slice(-12);
-      var maxV=Math.max.apply(null,[1].concat(months.map(function(m){return m[1];})));
-      q('revBars').innerHTML=months.map(function(m){
-        var h=Math.max(4,m[1]/maxV*160);
-        return '<div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:36px;gap:4px"><div style="font-size:10px;color:#888">'+money(m[1]).split('.')[0]+'</div><div style="width:100%;background:#1a1814;border-radius:3px 3px 0 0;height:'+h+'px"></div><div style="font-size:10px;color:#888;white-space:nowrap">'+m[0].slice(5)+'</div></div>';
-      }).join('');
-    }).catch(function(){});
+function doChangePw(){
+  var cur=q('cpCur').value,nxt=q('cpNew').value,con=q('cpCon').value;
+  q('cpMsg').innerHTML='';
+  if(!cur||!nxt||!con){errMsg('cpMsg','Fill all fields');return;}
+  if(nxt!==con){errMsg('cpMsg','Passwords do not match');return;}
+  if(nxt.length<8){errMsg('cpMsg','8+ characters required');return;}
+  req('/admin/change-password',{method:'PUT',body:JSON.stringify({current_password:cur,new_password:nxt})})
+    .then(function(d){okMsg('cpMsg',d.message);q('cpCur').value='';q('cpNew').value='';q('cpCon').value='';setTimeout(function(){closeMo('mChangePw');},1800);})
+    .catch(function(e){errMsg('cpMsg',e.message);});
 }
 
-// ── CHURN ─────────────────────────────────────────────────
-function loadChurn() {
-  request('/admin/churn')
-    .then(function(d){
-      var at=d.at_risk||[], ns=d.new_signups_7d||[];
-      q('churnCards').innerHTML=[
-        {l:'At-risk users',v:at.length,c:at.length>0?'#dc2626':'#16a34a'},
-        {l:'New signups (7d)',v:ns.length,c:'#16a34a'},
-        {l:'Est. churn rate',v:(d.churn_rate||0)+'%'},
-      ].map(function(x){ return '<div class="kc"><div class="kl">'+x.l+'</div><div class="kv"'+(x.c?' style="color:'+x.c+'"':'')+'>'+x.v+'</div></div>'; }).join('');
-      function uRow(u){ return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #e8e5de"><div style="flex:1;min-width:0"><div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(u.company_name||u.full_name||'—')+'</div><div style="font-size:11px;color:#888">'+u.email+'</div></div>'+pBadge(u.plan)+'</div>'; }
-      q('atRiskList').innerHTML=at.length?at.map(uRow).join(''):'<div class="empty" style="padding:20px">No at-risk users 🎉</div>';
-      q('newSignupList').innerHTML=ns.length?ns.map(uRow).join(''):'<div class="empty" style="padding:20px">No new signups</div>';
-    }).catch(function(){});
-}
-
-// ── USERS ─────────────────────────────────────────────────
-function loadUsers() {
-  var s=q('uSearch').value, p=q('uPlan').value;
-  request('/admin/users?search='+encodeURIComponent(s)+'&plan='+p+'&page='+uPage+'&limit=25')
-    .then(function(d){
-      q('userCount').textContent=(d.total||0)+' users';
-      q('userRows').innerHTML=(d.data||[]).map(function(u){
-        return '<tr><td><div style="font-weight:500">'+(u.company_name||u.full_name||'—')+'</div><div style="font-size:11px;color:#888">'+(u.full_name||'')+'</div></td><td>'+pBadge(u.plan)+'</td><td style="color:#1d4ed8;font-size:12px">'+(u.email||'—')+'</td><td style="font-size:11px;color:#888">'+dDate(u.created_at)+'</td><td><div style="display:flex;gap:4px"><button class="ab ab-sm" onclick="changePlan(\''+u.id+'\',\''+u.plan+'\')">Plan</button><button class="ab ab-sm ab-s" onclick="giveFreeTrial(\''+u.id+'\')">Trial+</button><button class="ab ab-sm ab-d" onclick="suspendUser(\''+u.id+'\')">Suspend</button></div></td></tr>';
-      }).join('')||'<tr><td colspan="5" class="empty">No users found</td></tr>';
-      var pages=Math.ceil((d.total||0)/25);
-      if(pages>1){
-        var h='';for(var i=1;i<=Math.min(pages,10);i++){h+='<button class="ab ab-sm'+(i===uPage?' ab-p':'')+'" onclick="uPage='+i+';loadUsers()">'+i+'</button>';}
-        q('userPager').innerHTML=h;
-      } else { q('userPager').innerHTML=''; }
-    }).catch(function(e){ q('userRows').innerHTML='<tr><td colspan="5" class="empty">Error: '+e.message+'</td></tr>'; });
-}
-
-function changePlan(id,cur){
-  var p=prompt('New plan (free/starter/pro/enterprise):',cur);
-  if(!p||!['free','starter','pro','enterprise'].includes(p))return;
-  request('/admin/users/'+id+'/plan',{method:'PUT',body:JSON.stringify({plan:p})})
-    .then(function(){alert('Plan updated to '+p);loadUsers();}).catch(function(e){alert(e.message);});
-}
-function giveFreeTrial(id){
-  if(!confirm('Give Pro plan for 14 days?'))return;
-  request('/admin/users/'+id+'/extend-trial',{method:'POST',body:JSON.stringify({days:14,plan:'pro'})})
-    .then(function(d){alert(d.message);loadUsers();}).catch(function(e){alert(e.message);});
-}
-function suspendUser(id){
-  if(!confirm('Suspend this account?'))return;
-  request('/admin/users/'+id+'/suspend',{method:'PUT',body:JSON.stringify({suspended:true})})
-    .then(function(){alert('Suspended');loadUsers();}).catch(function(e){alert(e.message);});
-}
-
-// ── CLIENTS ───────────────────────────────────────────────
-function loadClients(){
-  request('/admin/clients').then(function(d){
-    q('clientCount').textContent=(d.total||0)+' clients';
-    q('clientRows').innerHTML=(d.data||[]).map(function(c){
-      return '<tr><td style="font-weight:500">'+(c.name||'—')+'</td><td style="color:#1d4ed8;font-size:12px">'+(c.email||'—')+'</td><td style="font-size:12px;color:#888">'+(c.profiles&&(c.profiles.company_name||c.profiles.full_name)||'—')+'</td><td>'+(c.currency||'GBP')+'</td></tr>';
-    }).join('')||'<tr><td colspan="4" class="empty">No clients</td></tr>';
+// DASHBOARD
+function loadDash(){
+  q('dashTs').textContent='Updated '+dTime(new Date());
+  req('/admin/stats').then(function(d){
+    var pb=d.plan_breakdown||{};
+    q('statCards').innerHTML=[
+      {l:'Total users',v:d.total_users||0,s:'+'+((d.new_users_30d||0))+' this month'},
+      {l:'MRR',v:money(d.mrr),s:'ARR: '+money(d.arr),c:'var(--green)'},
+      {l:'Total revenue',v:money(d.total_revenue),s:(d.total_invoices||0)+' invoices total'},
+      {l:'Overdue',v:d.overdue_invoices||0,s:'invoices',c:d.overdue_invoices>0?'var(--red)':null},
+    ].map(function(s){return '<div class="kc"><div class="kl">'+s.l+'</div><div class="kv"'+(s.c?' style="color:'+s.c+'"':'')+'>'+s.v+'</div><div class="ks">'+s.s+'</div></div>';}).join('');
+    var tot=Object.values(pb).reduce(function(a,b){return a+b;},0)||1;
+    var pc={free:'#b8b2a3',starter:'#1d4ed8',pro:'#7c3aed',enterprise:'#b45309'};
+    q('planBars').innerHTML=Object.entries(pb).map(function(e){var pct=Math.round(e[1]/tot*100);return '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">'+pBdg(e[0])+'<span style="font-weight:600">'+e[1]+' ('+pct+'%)</span></div><div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;border-radius:3px;width:'+pct+'%;background:'+(pc[e[0]]||'#888')+'"></div></div></div>';}).join('');
+    q('quickActs').innerHTML=['users','churn','features','announce','broadcast'].map(function(p){var lbl={users:'👥 Manage users',churn:'📉 At-risk users',features:'🚦 Feature flags',announce:'📣 Announcement',broadcast:'📢 Broadcast email'};return '<button class="ab" style="width:100%;margin-bottom:6px;justify-content:flex-start" onclick="goPage(\''+p+'\')">'+lbl[p]+'</button>';}).join('');
+  }).catch(function(e){q('statCards').innerHTML='<div class="al al-err" style="grid-column:1/-1">Error: '+e.message+'</div>';});
+  req('/admin/users?page=1&limit=5').then(function(d){
+    q('recentUsers').innerHTML=(d.data||[]).map(function(u){return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)"><div style="flex:1;min-width:0"><div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(u.company_name||u.full_name||'—')+'</div><div style="font-size:11px;color:var(--ink3)">'+u.email+'</div></div>'+pBdg(u.plan)+'<div style="font-size:11px;color:var(--ink3)">'+dDate(u.created_at)+'</div></div>';}).join('')||'<div class="empty">No users yet</div>';
   }).catch(function(){});
 }
 
-// ── INVOICES ──────────────────────────────────────────────
-function loadInv(){
-  var f=q('invFilter').value;
-  request('/admin/invoices?status='+f+'&page='+iPage+'&limit=25').then(function(d){
-    q('invCount').textContent=(d.total||0)+' invoices';
-    q('invRows').innerHTML=(d.data||[]).map(function(inv){
-      return '<tr><td style="font-family:monospace;font-weight:600;font-size:12px">'+inv.invoice_number+'</td><td style="font-size:12px">'+(inv.profiles&&(inv.profiles.company_name||inv.profiles.full_name)||'—')+'</td><td style="font-weight:500">'+money(inv.total)+'</td><td>'+sBadge(inv.status)+'</td><td style="font-size:11px;color:#888">'+dDate(inv.created_at)+'</td><td>'+(inv.status!=='paid'?'<button class="ab ab-sm ab-s" onclick="markPaid(\''+inv.id+'\')">✓ Paid</button>':'')+'</td></tr>';
-    }).join('')||'<tr><td colspan="6" class="empty">No invoices</td></tr>';
-  }).catch(function(){});
+// HEALTH
+function loadHealth(){
+  req('/admin/health').then(function(d){
+    var c=d.checks||{};
+    q('healthCards').innerHTML=[
+      {l:'Database',ok:!c.database?.error,txt:c.database?.error||((c.database?.latency||0)+'ms latency')},
+      {l:'Email / SMTP',ok:c.smtp_configured,txt:c.smtp_configured?'Configured ✅':'Not configured — emails disabled'},
+      {l:'Stripe',ok:c.stripe_configured,txt:c.stripe_configured?'Configured ✅':'Not set — payments disabled'},
+      {l:'AI Assistant',ok:c.ai_configured,txt:c.ai_configured?'Configured ✅':'No Anthropic key'},
+      {l:'Twilio SMS',ok:c.twilio_configured,txt:c.twilio_configured?'Configured ✅':'Not set'},
+      {l:'API Server',ok:true,txt:'Running · '+dTime(d.timestamp)},
+    ].map(function(h){return '<div class="kc"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span class="dot '+(h.ok?'dot-ok':'dot-warn')+'"></span><strong style="font-size:13px">'+h.l+'</strong><span class="bdg b-'+(h.ok?'ok':'warn')+'" style="margin-left:auto">'+(h.ok?'OK':'Not set')+'</span></div><div style="font-size:12px;color:var(--ink2)">'+h.txt+'</div></div>';}).join('');
+  }).catch(function(e){q('healthCards').innerHTML='<div class="al al-err" style="grid-column:1/-1">Failed: '+e.message+'</div>';});
 }
-function markPaid(id){
-  request('/admin/invoices/'+id,{method:'PUT',body:JSON.stringify({status:'paid'})}).then(loadInv).catch(function(e){alert(e.message);});
-}
-
-// ── PAYMENTS ──────────────────────────────────────────────
-function loadPay(){
-  request('/admin/payments?limit=50').then(function(d){
-    q('payRows').innerHTML=(d.data||[]).map(function(p){
-      return '<tr><td style="font-size:12px">'+(p.profiles&&(p.profiles.company_name||p.profiles.full_name)||'—')+'</td><td style="font-family:monospace;font-size:11px">'+(p.invoices&&p.invoices.invoice_number||'—')+'</td><td style="font-weight:500;color:#16a34a">'+money(p.amount)+'</td><td>'+badge('draft',p.method||'manual')+'</td><td style="font-size:11px;color:#888">'+dDate(p.paid_at)+'</td></tr>';
-    }).join('')||'<tr><td colspan="5" class="empty">No payments</td></tr>';
-  }).catch(function(){});
-}
-
-// ── FEATURES ──────────────────────────────────────────────
-var FEATS=[
-  {k:'feature_ai_assistant',n:'AI Invoice Assistant'},
-  {k:'feature_whatsapp_sms',n:'WhatsApp & SMS'},
-  {k:'feature_receipt_scanner',n:'Receipt Scanner'},
-  {k:'feature_cashflow_forecast',n:'Cash Flow Forecast'},
-  {k:'feature_invoice_designer',n:'Invoice Designer'},
-  {k:'feature_client_happiness',n:'Client Happiness Score'},
-  {k:'feature_financing',n:'Invoice Financing'},
-  {k:'feature_time_tracking',n:'Time Tracking'},
-  {k:'feature_recurring',n:'Recurring Invoices'},
-  {k:'feature_year_review',n:'Year in Review'},
-];
-function loadFeatures(){
-  request('/admin/feature-flags').then(function(d){
-    var flags={};
-    d.forEach(function(f){try{flags[f.key]=JSON.parse(f.value);}catch(e){flags[f.key]=true;}});
-    q('featureToggles').innerHTML=FEATS.map(function(f){
-      var on=flags[f.k]!==false;
-      return '<div class="sr"><div style="font-size:13px;font-weight:500">'+f.n+'</div><button class="tog '+(on?'on':'off')+'" data-key="'+f.k+'"></button></div>';
-    }).join('');
-    q('featureToggles').querySelectorAll('.tog').forEach(function(btn){
-      btn.addEventListener('click',function(){
-        var isOn=this.classList.contains('on');
-        this.classList.toggle('on',!isOn); this.classList.toggle('off',isOn);
-        var key=this.dataset.key; var self=this;
-        request('/admin/feature-flags/'+key,{method:'PUT',body:JSON.stringify({value:!isOn})})
-          .catch(function(e){ self.classList.toggle('on',isOn); self.classList.toggle('off',!isOn); alert('Failed: '+e.message); });
-      });
-    });
-  }).catch(function(){});
-}
-
-// ── PLANS ────────────────────────────────────────────────
-function loadPlans(){
-  request('/admin/plans').then(function(d){
-    var cols={free:'#b8b2a3',starter:'#1d4ed8',pro:'#7c3aed',enterprise:'#b45309'};
-    q('planCards').innerHTML=d.map(function(p){
-      return '<div class="kc" style="border-top:3px solid '+(cols[p.slug]||'#888')+'"><div class="kl">'+p.name+'</div><div class="kv">£'+p.price_monthly+'<span style="font-size:12px;color:#888">/mo</span></div><div class="ks" style="margin-bottom:12px">£'+p.price_yearly+'/yr · '+(p.max_invoices===-1?'∞':p.max_invoices)+' invoices/mo</div><label style="font-size:12px;font-weight:500;color:#666;display:block;margin-bottom:4px">Monthly price (£)</label><input class="fi" id="pi_'+p.id+'" value="'+p.price_monthly+'" type="number" step="0.01" style="font-size:12px;padding:7px 10px;margin-bottom:8px"/><button class="ab ab-p ab-sm" style="width:100%;justify-content:center" onclick="savePlan(\''+p.id+'\')">Save</button></div>';
-    }).join('');
-  }).catch(function(){});
-}
-function savePlan(id){
-  var price=+(q('pi_'+id).value);
-  request('/admin/plans/'+id,{method:'PUT',body:JSON.stringify({price_monthly:price})})
-    .then(function(){alert('Price saved!');}).catch(function(e){alert(e.message);});
-}
-
-// ── ANNOUNCEMENT ─────────────────────────────────────────
-function loadAnnounce(){
-  request('/admin/settings').then(function(d){
-    var ann=d.find(function(s){return s.key==='platform_announcement';});
-    if(ann){
-      var v=JSON.parse(ann.value);
-      var active=new Date(v.expires_at)>new Date();
-      q('annCurrent').innerHTML='<div style="padding:12px;border-radius:8px;background:#eff6ff;border:1px solid #bfdbfe;margin-bottom:8px"><strong>'+v.title+'</strong><p style="font-size:12.5px;margin-top:4px">'+v.message+'</p><div style="font-size:11px;color:#888;margin-top:6px">Expires: '+dTime(v.expires_at)+'</div></div><span class="bdg b-'+(active?'ok':'err')+'">'+(active?'✅ Active':'⏰ Expired')+'</span>';
-      if(active) q('annBadge').classList.remove('hidden');
-    } else {
-      q('annCurrent').innerHTML='<div class="empty" style="padding:20px">No active announcement</div>';
-      q('annBadge').classList.add('hidden');
-    }
-  }).catch(function(){});
-}
-function publishAnn(){
-  var title=q('annTitle').value.trim(), msg=q('annMsg').value.trim();
-  if(!title||!msg){showErr('annFeedback','Title and message required');return;}
-  request('/admin/announcement',{method:'POST',body:JSON.stringify({title:title,message:msg,type:q('annType').value,expires_hours:+(q('annHours').value)})})
-    .then(function(){showOk('annFeedback','Published!');q('annBadge').classList.remove('hidden');loadAnnounce();})
-    .catch(function(e){showErr('annFeedback',e.message);});
-}
-function removeAnn(){
-  if(!confirm('Remove the announcement?'))return;
-  request('/admin/announcement',{method:'DELETE'})
-    .then(function(){showOk('annFeedback','Removed');q('annBadge').classList.add('hidden');loadAnnounce();})
-    .catch(function(e){showErr('annFeedback',e.message);});
-}
-
-// ── TICKETS ───────────────────────────────────────────────
-function loadTickets(){
-  var f=q('tickFilter').value;
-  request('/admin/tickets'+(f?'?status='+f:'')).then(function(d){
-    q('tickRows').innerHTML=(d||[]).map(function(t){
-      var subject=(t.subject||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
-      var msg=(t.message||'').substring(0,200).replace(/'/g,"\\'");
-      return '<tr><td style="font-size:12px">'+(t.profiles&&t.profiles.full_name||'—')+'<div style="font-size:11px;color:#888">'+(t.profiles&&t.profiles.email||'')+'</div></td><td>'+t.subject+'</td><td>'+sBadge(t.status)+'</td><td style="font-size:11px;color:#888">'+dDate(t.created_at)+'</td><td><button class="ab ab-sm" onclick="openTicket(\''+t.id+'\',\''+subject+'\',\''+msg+'\')">Reply</button></td></tr>';
-    }).join('')||'<tr><td colspan="5" class="empty">No tickets</td></tr>';
-  }).catch(function(){});
-}
-function openTicket(id,subj,msg){
-  curTicketId=id;
-  q('ticketContent').innerHTML='<strong>'+subj+'</strong><p style="margin-top:8px;color:#666;line-height:1.6">'+msg+'</p>';
-  q('tickReply').value='';
-  openMo('mTicket');
-}
-function sendTicket(){
-  var reply=q('tickReply').value.trim();
-  if(!reply){alert('Enter a reply');return;}
-  request('/admin/tickets/'+curTicketId,{method:'PUT',body:JSON.stringify({admin_reply:reply,status:q('tickStat').value})})
-    .then(function(){closeMo('mTicket');loadTickets();}).catch(function(e){alert(e.message);});
-}
-
-// ── SATISFACTION ──────────────────────────────────────────
-function loadSat(){
-  request('/admin/satisfaction').then(function(d){
-    q('satCards').innerHTML=[
-      {l:'Average score',v:(d.average||0)+' / 5',c:d.average>=4?'#16a34a':d.average>=3?'#b45309':'#dc2626'},
-      {l:'Total responses',v:d.total||0},
-      {l:'5-star reviews',v:(d.distribution&&d.distribution.find(function(x){return x.score===5;})||{count:0}).count},
-    ].map(function(x){ return '<div class="kc"><div class="kl">'+x.l+'</div><div class="kv"'+(x.c?' style="color:'+x.c+'"':'')+'>'+x.v+'</div></div>'; }).join('');
-    q('satRows').innerHTML=(d.scores||[]).map(function(s){
-      return '<tr><td style="font-size:12px">'+(s.profiles&&(s.profiles.company_name||s.profiles.full_name)||'—')+'</td><td style="color:#f59e0b">'+'★'.repeat(s.score)+'☆'.repeat(5-s.score)+'</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#666">'+(s.comment||'—')+'</td><td style="font-size:11px;color:#888">'+dDate(s.responded_at)+'</td></tr>';
-    }).join('')||'<tr><td colspan="4" class="empty">No responses yet</td></tr>';
-  }).catch(function(){});
-}
-
-// ── BROADCAST ─────────────────────────────────────────────
-function sendBroadcast(){
-  var subj=q('bSubj').value, msg=q('bMsg').value, plan=q('bPlan').value;
-  if(!subj||!msg){showErr('broadcastRes','Subject and message required');return;}
-  if(!confirm('Send to '+(plan||'ALL')+' users?'))return;
-  request('/admin/broadcast',{method:'POST',body:JSON.stringify({subject:subj,message:msg,plan_filter:plan})})
-    .then(function(d){showOk('broadcastRes','Queued for '+d.recipients+' users');q('bSubj').value='';q('bMsg').value='';})
-    .catch(function(e){showErr('broadcastRes',e.message);});
-}
-
-// ── ADMINS ────────────────────────────────────────────────
-function loadAdmins(){
-  request('/admin/admins').then(function(d){
-    q('adminRows').innerHTML=(d||[]).map(function(a){
-      return '<tr><td style="font-weight:500">'+(a.full_name||'—')+'</td><td style="color:#1d4ed8;font-size:12px">'+a.email+'</td><td>'+badge('b-'+(a.role||'support'),a.role)+'</td><td style="font-size:11px;color:#888">'+(a.last_login?dTime(a.last_login):'Never')+'</td><td>'+badge(a.is_active?'ok':'err',a.is_active?'Active':'Disabled')+'</td><td><button class="ab ab-sm '+(a.is_active?'ab-d':'ab-s')+'" onclick="toggleAdmin(\''+a.id+'\')">'+(a.is_active?'Disable':'Enable')+'</button></td></tr>';
-    }).join('')||'<tr><td colspan="6" class="empty">No admins</td></tr>';
-  }).catch(function(e){q('adminRows').innerHTML='<tr><td colspan="6" class="empty">'+e.message+'</td></tr>';});
-}
-function toggleAdmin(id){
-  request('/admin/admins/'+id+'/toggle',{method:'PUT'}).then(loadAdmins).catch(function(e){alert(e.message);});
-}
-function addAdmin(){
-  var email=q('naEmail').value, pw=q('naPw').value, name=q('naName').value, role=q('naRole').value;
-  if(!email||!pw){showErr('naMsg','Email and password required');return;}
-  request('/admin/admins',{method:'POST',body:JSON.stringify({email:email,password:pw,full_name:name,role:role})})
-    .then(function(){closeMo('mAddAdmin');loadAdmins();alert('Admin created: '+email);})
-    .catch(function(e){showErr('naMsg',e.message);});
-}
-
-// ── AUDIT ─────────────────────────────────────────────────
-function loadAudit(){
-  request('/admin/audit').then(function(d){
-    q('auditRows').innerHTML=(d||[]).map(function(a){
-      return '<tr><td style="font-size:12px">'+(a.admin_users&&a.admin_users.email||'—')+'</td><td><code style="font-family:monospace;font-size:11px;background:#f0f0f0;padding:2px 6px;border-radius:4px">'+a.action+'</code></td><td style="font-size:12px;color:#666">'+(a.entity_type||'—')+'</td><td style="font-size:11px;color:#888">'+dTime(a.created_at)+'</td></tr>';
-    }).join('')||'<tr><td colspan="4" class="empty">No audit logs</td></tr>';
-  }).catch(function(){});
-}
-
-// ── TEST EMAIL ────────────────────────────────────────────
-function testEmail(){
+function doTestEmail(){
   var to=q('testEmailTo').value.trim();
-  if(!to){q('testEmailRes').innerHTML='<div class="al al-err">Enter an email address</div>';return;}
+  if(!to){q('testEmailRes').innerHTML='<div class="al al-err">Enter email</div>';return;}
   q('testEmailRes').innerHTML='<div class="al al-info">Sending...</div>';
-  request('/admin/test-email',{method:'POST',body:JSON.stringify({to:to})})
+  req('/admin/test-email',{method:'POST',body:JSON.stringify({to:to})})
     .then(function(d){q('testEmailRes').innerHTML='<div class="al al-ok">✅ '+d.message+'</div>';})
     .catch(function(e){q('testEmailRes').innerHTML='<div class="al al-err">❌ '+e.message+'</div>';});
 }
 
-// ── WIRE ALL EVENTS ───────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function() {
+// REVENUE
+function loadRev(){
+  Promise.all([req('/admin/revenue'),req('/admin/stats')]).then(function(res){
+    var rev=res[0],s=res[1];
+    q('revCards').innerHTML=[{l:'Total processed',v:money(rev.total_processed)},{l:'MRR',v:money(s.mrr),c:'var(--green)'},{l:'ARR',v:money(s.arr)},{l:'Revenue 30d',v:money(s.revenue_30d)}].map(function(x){return '<div class="kc"><div class="kl">'+x.l+'</div><div class="kv"'+(x.c?' style="color:'+x.c+'"':'')+'>'+x.v+'</div></div>';}).join('');
+    var months=Object.entries(rev.monthly_revenue||{}).sort().slice(-12);
+    var maxV=Math.max.apply(null,[1].concat(months.map(function(m){return m[1];})));
+    q('revBars').innerHTML=months.map(function(m){var h=Math.max(4,m[1]/maxV*160);return '<div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:40px;gap:4px"><div style="font-size:10px;color:var(--ink3)">'+money(m[1]).split('.')[0]+'</div><div style="width:100%;background:var(--ink);border-radius:3px 3px 0 0;height:'+h+'px"></div><div style="font-size:10px;color:var(--ink3);white-space:nowrap">'+m[0].slice(5)+'</div></div>';}).join('');
+  }).catch(function(){});
+}
 
-  // Login page
-  q('btnLogin').addEventListener('click', doLogin);
-  q('iEmail').addEventListener('keydown', function(e){if(e.key==='Enter')doLogin();});
-  q('iPw').addEventListener('keydown', function(e){if(e.key==='Enter')doLogin();});
-  q('btnShowForgot').addEventListener('click', function(){ q('fLogin').classList.add('hidden'); q('fForgot').classList.remove('hidden'); });
-  q('btnBackLogin').addEventListener('click', function(){ q('fForgot').classList.add('hidden'); q('fLogin').classList.remove('hidden'); });
-  q('btnSendReset').addEventListener('click', doForgot);
-  q('btnDoReset').addEventListener('click', doResetPw);
+// CHURN
+function loadChurn(){
+  req('/admin/churn').then(function(d){
+    var at=d.at_risk||[],ns=d.new_signups_7d||[];
+    q('churnCards').innerHTML=[{l:'At-risk users',v:at.length,c:at.length>0?'var(--red)':'var(--green)'},{l:'New signups (7d)',v:ns.length,c:'var(--green)'},{l:'Est. churn rate',v:(d.churn_rate||0)+'%'}].map(function(x){return '<div class="kc"><div class="kl">'+x.l+'</div><div class="kv"'+(x.c?' style="color:'+x.c+'"':'')+'>'+x.v+'</div></div>';}).join('');
+    function uRow(u){return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)"><div style="flex:1;min-width:0"><div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(u.company_name||u.full_name||'—')+'</div><div style="font-size:11px;color:var(--ink3)">'+u.email+'</div></div>'+pBdg(u.plan)+'</div>';}
+    q('atRiskList').innerHTML=at.length?at.map(uRow).join(''):'<div class="empty" style="padding:20px">No at-risk users 🎉</div>';
+    q('newSigList').innerHTML=ns.length?ns.map(uRow).join(''):'<div class="empty" style="padding:20px">No new signups</div>';
+  }).catch(function(){});
+}
+
+// USERS
+function loadUsers(){
+  var s=q('uSearch').value,p=q('uPlan').value;
+  req('/admin/users?search='+encodeURIComponent(s)+'&plan='+p+'&page='+uPage+'&limit=25')
+    .then(function(d){
+      q('userCount').textContent=(d.total||0)+' users';
+      q('userRows').innerHTML=(d.data||[]).map(function(u){return '<tr><td><div style="font-weight:500">'+(u.company_name||u.full_name||'—')+'</div><div style="font-size:11px;color:var(--ink3)">'+(u.full_name||'')+'</div></td><td>'+pBdg(u.plan)+'</td><td style="color:var(--blue);font-size:12px">'+(u.email||'—')+'</td><td style="font-size:11px;color:var(--ink3)">'+dDate(u.created_at)+'</td><td><div style="display:flex;gap:4px;flex-wrap:wrap"><button class="ab ab-sm" onclick="changePlan(\''+u.id+'\',\''+u.plan+'\')">Plan</button><button class="ab ab-sm ab-s" onclick="giveTrialPro(\''+u.id+'\')">Trial+</button><button class="ab ab-sm ab-d" onclick="doSuspend(\''+u.id+'\')">Suspend</button></div></td></tr>';}).join('')||'<tr><td colspan="5" class="empty">No users</td></tr>';
+      var pages=Math.ceil((d.total||0)/25);
+      if(pages>1){var h='';for(var i=1;i<=Math.min(pages,10);i++){h+='<button class="ab ab-sm'+(i===uPage?' ab-p':'')+'" onclick="uPage='+i+';loadUsers()">'+i+'</button>';}q('userPager').innerHTML=h;}
+      else{q('userPager').innerHTML='';}
+    }).catch(function(e){q('userRows').innerHTML='<tr><td colspan="5" class="empty">Error: '+e.message+'</td></tr>';});
+}
+function changePlan(id,cur){var p=prompt('New plan (free/starter/pro/enterprise):',cur);if(!p||!['free','starter','pro','enterprise'].includes(p))return;req('/admin/users/'+id+'/plan',{method:'PUT',body:JSON.stringify({plan:p})}).then(function(){alert('Plan updated to '+p);loadUsers();}).catch(function(e){alert(e.message);});}
+function giveTrialPro(id){if(!confirm('Give Pro plan for 14 days?'))return;req('/admin/users/'+id+'/extend-trial',{method:'POST',body:JSON.stringify({days:14,plan:'pro'})}).then(function(d){alert(d.message);loadUsers();}).catch(function(e){alert(e.message);});}
+function doSuspend(id){if(!confirm('Suspend this account?'))return;req('/admin/users/'+id+'/suspend',{method:'PUT',body:JSON.stringify({suspended:true})}).then(function(){alert('Suspended');loadUsers();}).catch(function(e){alert(e.message);});}
+
+// CLIENTS
+function loadClients(){
+  req('/admin/clients').then(function(d){
+    q('clientCount').textContent=(d.total||0)+' clients';
+    q('clientRows').innerHTML=(d.data||[]).map(function(c){return '<tr><td style="font-weight:500">'+(c.name||'—')+'</td><td style="color:var(--blue);font-size:12px">'+(c.email||'—')+'</td><td style="font-size:12px;color:var(--ink2)">'+(c.profiles&&(c.profiles.company_name||c.profiles.full_name)||'—')+'</td><td>'+(c.currency||'GBP')+'</td></tr>';}).join('')||'<tr><td colspan="4" class="empty">No clients</td></tr>';
+  }).catch(function(){});
+}
+
+// INVOICES
+function loadInv(){
+  var f=q('invFilter').value;
+  req('/admin/invoices?status='+f+'&page='+iPage+'&limit=25').then(function(d){
+    q('invCount').textContent=(d.total||0)+' invoices';
+    q('invRows').innerHTML=(d.data||[]).map(function(inv){return '<tr><td style="font-family:monospace;font-weight:600;font-size:12px">'+inv.invoice_number+'</td><td style="font-size:12px">'+(inv.profiles&&(inv.profiles.company_name||inv.profiles.full_name)||'—')+'</td><td style="font-weight:500">'+money(inv.total)+'</td><td>'+sBdg(inv.status)+'</td><td style="font-size:11px;color:var(--ink3)">'+dDate(inv.created_at)+'</td><td>'+(inv.status!=='paid'?'<button class="ab ab-sm ab-s" onclick="markPaid(\''+inv.id+'\')">✓ Paid</button>':'')+'</td></tr>';}).join('')||'<tr><td colspan="6" class="empty">No invoices</td></tr>';
+  }).catch(function(){});
+}
+function markPaid(id){req('/admin/invoices/'+id,{method:'PUT',body:JSON.stringify({status:'paid'})}).then(loadInv).catch(function(e){alert(e.message);});}
+
+// PAYMENTS
+function loadPay(){
+  req('/admin/payments?limit=50').then(function(d){
+    q('payRows').innerHTML=(d.data||[]).map(function(p){return '<tr><td style="font-size:12px">'+(p.profiles&&(p.profiles.company_name||p.profiles.full_name)||'—')+'</td><td style="font-family:monospace;font-size:11px">'+(p.invoices&&p.invoices.invoice_number||'—')+'</td><td style="font-weight:500;color:var(--green)">'+money(p.amount)+'</td><td>'+bdg('draft',p.method||'manual')+'</td><td style="font-size:11px;color:var(--ink3)">'+dDate(p.paid_at)+'</td></tr>';}).join('')||'<tr><td colspan="5" class="empty">No payments</td></tr>';
+  }).catch(function(){});
+}
+
+// FEATURES
+var FEATS=[{k:'feature_ai_assistant',n:'AI Invoice Assistant'},{k:'feature_whatsapp_sms',n:'WhatsApp & SMS'},{k:'feature_receipt_scanner',n:'Receipt Scanner'},{k:'feature_cashflow_forecast',n:'Cash Flow Forecast'},{k:'feature_invoice_designer',n:'Invoice Designer'},{k:'feature_client_happiness',n:'Client Happiness Score'},{k:'feature_financing',n:'Invoice Financing'},{k:'feature_time_tracking',n:'Time Tracking'},{k:'feature_recurring',n:'Recurring Invoices'},{k:'feature_year_review',n:'Year in Review'}];
+function loadFeatures(){
+  req('/admin/feature-flags').then(function(d){
+    var flags={};d.forEach(function(f){try{flags[f.key]=JSON.parse(f.value);}catch(e){flags[f.key]=true;}});
+    q('featureList').innerHTML=FEATS.map(function(f){var on=flags[f.k]!==false;return '<div class="sr"><div style="font-size:13px;font-weight:500">'+f.n+'</div><button class="tog '+(on?'on':'off')+'" data-key="'+f.k+'"></button></div>';}).join('');
+    q('featureList').querySelectorAll('.tog').forEach(function(btn){btn.addEventListener('click',function(){var on=this.classList.contains('on');this.classList.toggle('on',!on);this.classList.toggle('off',on);var k=this.dataset.key,self=this;req('/admin/feature-flags/'+k,{method:'PUT',body:JSON.stringify({value:!on})}).catch(function(e){self.classList.toggle('on',on);self.classList.toggle('off',!on);alert('Failed: '+e.message);});});});
+  }).catch(function(){});
+}
+
+// PLANS
+function loadPlans(){
+  req('/admin/plans').then(function(d){
+    var cs={free:'#b8b2a3',starter:'#1d4ed8',pro:'#7c3aed',enterprise:'#b45309'};
+    q('planCards').innerHTML=d.map(function(p){return '<div class="kc" style="border-top:3px solid '+(cs[p.slug]||'#888')+'"><div class="kl">'+p.name+'</div><div class="kv">£'+p.price_monthly+'<span style="font-size:12px;color:var(--ink3)">/mo</span></div><div class="ks" style="margin-bottom:12px">£'+p.price_yearly+'/yr · '+(p.max_invoices===-1?'∞':p.max_invoices)+' invoices/mo</div><label style="font-size:12px;font-weight:500;color:#666;display:block;margin-bottom:4px">Monthly price (£)</label><input class="fi" id="pi_'+p.id+'" value="'+p.price_monthly+'" type="number" step="0.01" style="font-size:12px;padding:7px 10px;margin-bottom:8px"/><button class="ab ab-p ab-sm" style="width:100%;justify-content:center" onclick="savePlan(\''+p.id+'\')">Save</button></div>';}).join('');
+  }).catch(function(){});
+}
+function savePlan(id){req('/admin/plans/'+id,{method:'PUT',body:JSON.stringify({price_monthly:+(q('pi_'+id).value)})}).then(function(){alert('Saved!');}).catch(function(e){alert(e.message);});}
+
+// ANNOUNCEMENT
+function loadAnnounce(){
+  req('/admin/settings').then(function(d){
+    var ann=d.find(function(s){return s.key==='platform_announcement';});
+    if(ann){var v=JSON.parse(ann.value);var active=new Date(v.expires_at)>new Date();q('annCurrent').innerHTML='<div style="padding:12px;border-radius:8px;background:var(--bbg);border:1px solid #bfdbfe;margin-bottom:8px"><strong>'+v.title+'</strong><p style="font-size:12.5px;margin-top:4px">'+v.message+'</p><div style="font-size:11px;color:var(--ink3);margin-top:6px">Expires: '+dTime(v.expires_at)+'</div></div>'+bdg(active?'ok':'err',active?'✅ Active':'⏰ Expired');if(active){q('annBadge').classList.remove('hidden');q('annBadgeMobile').classList.remove('hidden');}}
+    else{q('annCurrent').innerHTML='<div class="empty" style="padding:20px">No active announcement</div>';q('annBadge').classList.add('hidden');q('annBadgeMobile').classList.add('hidden');}
+  }).catch(function(){});
+}
+function doPublish(){var t=q('annTitle').value.trim(),m=q('annMsg').value.trim();if(!t||!m){errMsg('annFb','Title and message required');return;}req('/admin/announcement',{method:'POST',body:JSON.stringify({title:t,message:m,type:q('annType').value,expires_hours:+(q('annHours').value)})}).then(function(){okMsg('annFb','Published!');loadAnnounce();}).catch(function(e){errMsg('annFb',e.message);});}
+function doRemoveAnn(){if(!confirm('Remove announcement?'))return;req('/admin/announcement',{method:'DELETE'}).then(function(){okMsg('annFb','Removed');loadAnnounce();}).catch(function(e){errMsg('annFb',e.message);});}
+
+// TICKETS
+function loadTickets(){
+  var f=q('tickFilter').value;
+  req('/admin/tickets'+(f?'?status='+f:'')).then(function(d){
+    q('tickRows').innerHTML=(d||[]).map(function(t){var subj=(t.subject||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");var msg=(t.message||'').substring(0,200).replace(/\\/g,'\\\\').replace(/'/g,"\\'");return '<tr><td style="font-size:12px">'+(t.profiles&&t.profiles.full_name||'—')+'<div style="font-size:11px;color:var(--ink3)">'+(t.profiles&&t.profiles.email||'')+'</div></td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.subject+'</td><td>'+sBdg(t.status)+'</td><td style="font-size:11px;color:var(--ink3)">'+dDate(t.created_at)+'</td><td><button class="ab ab-sm" onclick="openTick(\''+t.id+'\',\''+subj+'\',\''+msg+'\')">Reply</button></td></tr>';}).join('')||'<tr><td colspan="5" class="empty">No tickets</td></tr>';
+  }).catch(function(e){q('tickRows').innerHTML='<tr><td colspan="5" class="empty">Error: '+e.message+'</td></tr>';});
+}
+function openTick(id,s,m){curTick=id;q('tickContent').innerHTML='<strong>'+s+'</strong><p style="margin-top:8px;color:var(--ink2);line-height:1.6">'+m+'</p>';q('tickReply').value='';openMo('mTicket');}
+function doReply(){var r=q('tickReply').value.trim();if(!r){alert('Enter a reply');return;}req('/admin/tickets/'+curTick,{method:'PUT',body:JSON.stringify({admin_reply:r,status:q('tickStat').value})}).then(function(){closeMo('mTicket');loadTickets();}).catch(function(e){alert(e.message);});}
+
+// SATISFACTION
+function loadSat(){
+  req('/admin/satisfaction').then(function(d){
+    q('satCards').innerHTML=[{l:'Average score',v:(d.average||0)+' / 5',c:d.average>=4?'var(--green)':d.average>=3?'var(--amber)':'var(--red)'},{l:'Total responses',v:d.total||0},{l:'5-star reviews',v:(d.distribution&&d.distribution.find(function(x){return x.score===5;})||{count:0}).count}].map(function(x){return '<div class="kc"><div class="kl">'+x.l+'</div><div class="kv"'+(x.c?' style="color:'+x.c+'"':'')+'>'+x.v+'</div></div>';}).join('');
+    q('satRows').innerHTML=(d.scores||[]).map(function(s){return '<tr><td style="font-size:12px">'+(s.profiles&&(s.profiles.company_name||s.profiles.full_name)||'—')+'</td><td style="color:#f59e0b">'+'★'.repeat(s.score)+'☆'.repeat(5-s.score)+'</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)">'+(s.comment||'—')+'</td><td style="font-size:11px;color:var(--ink3)">'+dDate(s.responded_at)+'</td></tr>';}).join('')||'<tr><td colspan="4" class="empty">No responses yet</td></tr>';
+  }).catch(function(){});
+}
+
+// BROADCAST
+function doBroadcast(){
+  var s=q('bSubj').value,m=q('bMsg').value,p=q('bPlan').value;
+  if(!s||!m){errMsg('broadRes','Subject and message required');return;}
+  if(!confirm('Send to '+(p||'ALL')+' users?'))return;
+  req('/admin/broadcast',{method:'POST',body:JSON.stringify({subject:s,message:m,plan_filter:p})})
+    .then(function(d){okMsg('broadRes','Queued for '+d.recipients+' users');q('bSubj').value='';q('bMsg').value='';})
+    .catch(function(e){errMsg('broadRes',e.message);});
+}
+
+// ADMINS
+function loadAdmins(){
+  req('/admin/admins').then(function(d){
+    q('adminRows').innerHTML=(d||[]).map(function(a){return '<tr><td style="font-weight:500">'+(a.full_name||'—')+'</td><td style="color:var(--blue);font-size:12px">'+a.email+'</td><td>'+bdg('b-'+(a.role||'support'),a.role||'support')+'</td><td style="font-size:11px;color:var(--ink3)">'+(a.last_login?dTime(a.last_login):'Never')+'</td><td>'+bdg(a.is_active?'ok':'err',a.is_active?'Active':'Disabled')+'</td><td><button class="ab ab-sm '+(a.is_active?'ab-d':'ab-s')+'" onclick="toggleAdmin(\''+a.id+'\')">'+(a.is_active?'Disable':'Enable')+'</button></td></tr>';}).join('')||'<tr><td colspan="6" class="empty">No admins</td></tr>';
+  }).catch(function(e){q('adminRows').innerHTML='<tr><td colspan="6" class="empty">'+e.message+'</td></tr>';});
+}
+function toggleAdmin(id){req('/admin/admins/'+id+'/toggle',{method:'PUT'}).then(loadAdmins).catch(function(e){alert(e.message);});}
+function doAddAdmin(){
+  var email=q('naEmail').value,pw=q('naPw').value,name=q('naName').value,role=q('naRole').value;
+  if(!email||!pw){errMsg('naMsg','Email and password required');return;}
+  req('/admin/admins',{method:'POST',body:JSON.stringify({email:email,password:pw,full_name:name,role:role})})
+    .then(function(){closeMo('mAddAdmin');loadAdmins();alert('Admin created: '+email);})
+    .catch(function(e){errMsg('naMsg',e.message);});
+}
+
+// AUDIT
+function loadAudit(){
+  req('/admin/audit').then(function(d){
+    q('auditRows').innerHTML=(d||[]).map(function(a){return '<tr><td style="font-size:12px">'+(a.admin_users&&a.admin_users.email||'—')+'</td><td><code style="font-family:monospace;font-size:11px;background:#f0f0f0;padding:2px 6px;border-radius:4px">'+a.action+'</code></td><td style="font-size:12px;color:var(--ink2)">'+(a.entity_type||'—')+'</td><td style="font-size:11px;color:var(--ink3)">'+dTime(a.created_at)+'</td></tr>';}).join('')||'<tr><td colspan="4" class="empty">No audit logs</td></tr>';
+  }).catch(function(){});
+}
+
+// ── WIRE ALL EVENTS ───────────────────────────────────────
+document.addEventListener('DOMContentLoaded',function(){
+
+  // Mobile sidebar
+  q('hamburger').addEventListener('click',openSidebar);
+  q('btnCloseSidebar').addEventListener('click',closeSidebar);
+  q('overlay').addEventListener('click',closeSidebar);
+
+  // Login
+  q('btnLogin').addEventListener('click',doLogin);
+  q('iEmail').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+  q('iPw').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+  q('btnShowForgot').addEventListener('click',function(){q('fLogin').classList.add('hidden');q('fForgot').classList.remove('hidden');});
+  q('btnBackLogin').addEventListener('click',function(){q('fForgot').classList.add('hidden');q('fLogin').classList.remove('hidden');});
+  q('btnSendReset').addEventListener('click',doForgot);
+  q('btnDoReset').addEventListener('click',doResetPw);
 
   // Sidebar nav
-  document.querySelectorAll('.nv[data-pg]').forEach(function(btn){
-    btn.addEventListener('click', function(){ goPage(this.dataset.pg); });
-  });
+  document.querySelectorAll('.nv[data-pg]').forEach(function(btn){btn.addEventListener('click',function(){goPage(this.dataset.pg);});});
 
-  // Top-level app buttons
-  q('btnLogout').addEventListener('click', doLogout);
-  q('btnChangePw').addEventListener('click', function(){ openMo('mChangePw'); });
+  // App controls
+  q('btnLogout').addEventListener('click',doLogout);
+  q('btnChangePw').addEventListener('click',function(){openMo('mChangePw');});
 
   // Change password modal
-  q('btnClosePwMo').addEventListener('click', function(){ closeMo('mChangePw'); });
-  q('btnCancelPw').addEventListener('click', function(){ closeMo('mChangePw'); });
-  q('btnSavePw').addEventListener('click', doChangePw);
+  q('btnClosePwMo').addEventListener('click',function(){closeMo('mChangePw');});
+  q('btnCancelPw').addEventListener('click',function(){closeMo('mChangePw');});
+  q('btnSavePw').addEventListener('click',doChangePw);
 
   // Add admin modal
-  q('btnAddAdmin').addEventListener('click', function(){ openMo('mAddAdmin'); });
-  q('btnCloseAddAdmin').addEventListener('click', function(){ closeMo('mAddAdmin'); });
-  q('btnCancelAddAdmin').addEventListener('click', function(){ closeMo('mAddAdmin'); });
-  q('btnSaveAdmin').addEventListener('click', addAdmin);
+  q('btnAddAdmin').addEventListener('click',function(){openMo('mAddAdmin');});
+  q('btnCloseAddAdmin').addEventListener('click',function(){closeMo('mAddAdmin');});
+  q('btnCancelAddAdmin').addEventListener('click',function(){closeMo('mAddAdmin');});
+  q('btnSaveAdmin').addEventListener('click',doAddAdmin);
 
   // Ticket modal
-  q('btnCloseTicket').addEventListener('click', function(){ closeMo('mTicket'); });
-  q('btnCancelTicket').addEventListener('click', function(){ closeMo('mTicket'); });
-  q('btnSendTicket').addEventListener('click', sendTicket);
+  q('btnCloseTicket').addEventListener('click',function(){closeMo('mTicket');});
+  q('btnCancelTicket').addEventListener('click',function(){closeMo('mTicket');});
+  q('btnSendTicket').addEventListener('click',doReply);
 
   // Health
-  q('btnTestEmail').addEventListener('click', testEmail);
+  q('btnTestEmail').addEventListener('click',doTestEmail);
 
   // Announcement
-  q('btnPublishAnn').addEventListener('click', publishAnn);
-  q('btnRemoveAnn').addEventListener('click', removeAnn);
+  q('btnPublish').addEventListener('click',doPublish);
+  q('btnRemoveAnn').addEventListener('click',doRemoveAnn);
 
   // Broadcast
-  q('btnBroadcast').addEventListener('click', sendBroadcast);
+  q('btnBroadcast').addEventListener('click',doBroadcast);
 
-  // Users search/filter
-  var uTimer;
-  q('uSearch').addEventListener('input', function(){ clearTimeout(uTimer); uTimer=setTimeout(loadUsers,400); });
-  q('uPlan').addEventListener('change', function(){ uPage=1; loadUsers(); });
-
-  // Invoices filter
-  q('invFilter').addEventListener('change', function(){ iPage=1; loadInv(); });
-
-  // Tickets filter
-  q('tickFilter').addEventListener('change', loadTickets);
+  // Users
+  var uT;q('uSearch').addEventListener('input',function(){clearTimeout(uT);uT=setTimeout(function(){uPage=1;loadUsers();},400);});
+  q('uPlan').addEventListener('change',function(){uPage=1;loadUsers();});
+  q('invFilter').addEventListener('change',function(){iPage=1;loadInv();});
+  q('tickFilter').addEventListener('change',loadTickets);
 
   // Close modals on background click
-  document.querySelectorAll('.mo-bg').forEach(function(bg){
-    bg.addEventListener('click', function(e){ if(e.target===this) closeMo(this.id); });
-  });
+  document.querySelectorAll('.mo-bg').forEach(function(bg){bg.addEventListener('click',function(e){if(e.target===this)closeMo(this.id);});});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('.mo-bg.show').forEach(function(m){closeMo(m.id);});});
 
-  // Close modals on Escape
-  document.addEventListener('keydown', function(e){ if(e.key==='Escape') document.querySelectorAll('.mo-bg.show').forEach(function(m){ closeMo(m.id); }); });
-
-  // Check for password reset token in URL hash
-  var hash = window.location.hash;
-  if (hash.includes('reset=')) {
-    var token = hash.split('reset=')[1];
-    if (token) {
-      fetch(API+'/admin/reset-password/'+token)
-        .then(function(r){return r.json();})
-        .then(function(d){
-          if(d.valid){ q('fLogin').classList.add('hidden'); q('fReset').classList.remove('hidden'); }
-          else { q('loginErr').textContent='Invalid or expired reset link. Request a new one.'; }
-        }).catch(function(){});
-    }
+  // Check for reset token in URL
+  var hash=window.location.hash;
+  if(hash.includes('reset=')){
+    var token=hash.split('reset=')[1];
+    if(token){fetch(API+'/admin/reset-password/'+token).then(function(r){return r.json();}).then(function(d){if(d.valid){q('fLogin').classList.add('hidden');q('fReset').classList.remove('hidden');}else{q('loginErr').textContent='Invalid or expired reset link';}}).catch(function(){});}
   }
 
-  // Auto-login if token saved
-  var saved = localStorage.getItem('ipat');
-  if (saved) {
-    tok = saved;
-    fetch(API+'/admin/stats', {headers:{'Authorization':'Bearer '+saved,'Content-Type':'application/json'}})
-      .then(function(r){ if(!r.ok) throw new Error('expired'); return r.json(); })
-      .then(function(){
-        q('loginPage').style.display='none';
-        q('app').style.display='block';
-        loadDash();
-      })
-      .catch(function(){ tok=null; localStorage.removeItem('ipat'); });
+  // Auto-login
+  var saved=localStorage.getItem('ipat');
+  if(saved){
+    tok=saved;
+    fetch(API+'/admin/stats',{headers:{'Authorization':'Bearer '+saved,'Content-Type':'application/json'}})
+      .then(function(r){if(!r.ok)throw new Error('expired');return r.json();})
+      .then(function(){q('authPage').style.display='none';q('app').style.display='block';loadDash();})
+      .catch(function(){tok=null;localStorage.removeItem('ipat');});
   }
 });
 </script>

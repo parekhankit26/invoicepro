@@ -345,7 +345,7 @@ tr:hover td{background:#fafaf8}
       <div class="pg" id="pg-revenue">
         <div class="ph"><div><div class="pt">Revenue & MRR</div></div></div>
         <div class="g4" id="revCards"></div>
-        <div class="bc"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Monthly revenue</div><div id="revBars" style="display:flex;align-items:flex-end;gap:6px;height:180px;overflow-x:auto;padding-bottom:4px"></div></div>
+        <div class="bc"><div style="font-size:13px;font-weight:600;margin-bottom:14px">Monthly revenue</div><div id="revBars" style="display:flex;align-items:flex-end;justify-content:center;gap:8px;height:180px;overflow-x:auto;padding-bottom:4px;background:var(--bg);border-radius:8px;padding:16px 16px 4px"></div></div>
       </div>
 
       <!-- CHURN -->
@@ -698,7 +698,7 @@ function loadRev(){
     q('revCards').innerHTML=[{l:'Total processed',v:money(rev.total_processed)},{l:'MRR',v:money(s.mrr),c:'var(--green)'},{l:'ARR',v:money(s.arr)},{l:'Revenue 30d',v:money(s.revenue_30d)}].map(function(x){return '<div class="kc"><div class="kl">'+x.l+'</div><div class="kv"'+(x.c?' style="color:'+x.c+'"':'')+'>'+x.v+'</div></div>';}).join('');
     var months=Object.entries(rev.monthly_revenue||{}).sort().slice(-12);
     var maxV=Math.max.apply(null,[1].concat(months.map(function(m){return m[1];})));
-    q('revBars').innerHTML=months.map(function(m){var h=Math.max(4,m[1]/maxV*160);return '<div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:40px;gap:4px"><div style="font-size:10px;color:var(--ink3)">'+money(m[1]).split('.')[0]+'</div><div style="width:100%;background:var(--ink);border-radius:3px 3px 0 0;height:'+h+'px"></div><div style="font-size:10px;color:var(--ink3);white-space:nowrap">'+m[0].slice(5)+'</div></div>';}).join('');
+    q('revBars').innerHTML=months.length?months.map(function(m){var h=Math.max(8,m[1]/maxV*150);return '<div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:44px;max-width:80px;gap:4px"><div style="font-size:10px;color:var(--ink3);text-align:center">'+(m[1]>0?'£'+Math.round(m[1]).toLocaleString():'')+'</div><div style="width:28px;background:var(--ink);border-radius:4px 4px 0 0;height:'+h+'px;transition:height .3s"></div><div style="font-size:10px;color:var(--ink3);white-space:nowrap">'+m[0].slice(5)+'</div></div>';}).join(''):'<div style="color:var(--ink3);font-size:13px;margin:auto">No revenue data yet</div>';
   }).catch(function(){});
 }
 

@@ -136,13 +136,24 @@ router.delete('/users/:id', adminAuth, async (req: any, res: Response) => {
 router.get('/invoices', adminAuth, async (req: any, res: Response) => {
   try {
     const { status, user_id, search, page = '1', limit = '25' } = req.query as any
-    let query = supabase.from('invoices').select('*, profiles(full_name, company_name, email), clients(name)', { count: 'exact' }).order('created_at', { ascending: false }).range((+page-1)*+limit, +page*+limit-1)
-    if (status) query = query.eq('status', status)
-    if (user_id) query = query.eq('user_id', user_id)
+    let query = supabase.from('invoices')
+      .select('*, clients(name)', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range((+page-1)*+limit, +page*+limit-1)
+    if (status) query = query.eq('status', status as string)
+    if (user_id) query = query.eq('user_id', user_id as string)
     if (search) query = query.ilike('invoice_number', `%${search}%`)
     const { data, error, count } = await query
     if (error) return res.status(400).json({ error: error.message })
-    return res.json({ data, total: count, page: +page })
+    // Enrich with profiles separately (invoices.user_id -> auth.users, not profiles directly)
+    const uids = [...new Set((data||[]).map((i:any) => i.user_id).filter(Boolean))]
+    let pm: any = {}
+    if (uids.length > 0) {
+      const { data: profs } = await supabase.from('profiles').select('id, full_name, company_name, email').in('id', uids)
+      ;(profs||[]).forEach((p:any) => { pm[p.id] = p })
+    }
+    const enriched = (data||[]).map((i:any) => ({ ...i, profiles: pm[i.user_id] || null }))
+    return res.json({ data: enriched, total: count, page: +page })
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
 
@@ -696,8 +707,10 @@ router.post('/test-email', adminAuth, async (req: any, res: Response) => {
   try {
     const { to } = (req as any).body
     if (!to) return res.status(400).json({ error: 'Recipient email required' })
-    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      return res.status(400).json({ error: 'SMTP not configured. Add SMTP_HOST, SMTP_USER, SMTP_PASS to Railway env vars.' })
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
+      return res.status(400).json({ 
+        error: 'SMTP not configured in Railway. Add: SMTP_HOST=smtp.gmail.com, SMTP_PORT=587, SMTP_USER=your@gmail.com, SMTP_PASS=your-app-password, EMAIL_FROM=your@gmail.com'
+      })
     }
     const nodemailer = await import('nodemailer')
     const transporter = nodemailer.default.createTransport({

@@ -967,10 +967,20 @@ function selectProvider(p) {
     c.style.border = isSelected ? '2px solid var(--ink)' : '2px solid var(--border)';
     c.style.background = isSelected ? 'var(--ink)' : '';
     c.style.color = isSelected ? 'white' : 'var(--ink)';
+    // Reset text color for child divs
+    if(!isSelected) c.querySelectorAll('div').forEach(function(d){d.style.color='';});
+    else c.querySelectorAll('div').forEach(function(d){d.style.color='white';});
   });
   if(q('smtpForm')) q('smtpForm').classList.toggle('hidden', p !== 'smtp');
   if(q('resendForm')) q('resendForm').classList.toggle('hidden', p !== 'resend');
   if(q('noneForm')) q('noneForm').classList.toggle('hidden', p !== 'none');
+  // If disabled selected, switch provider immediately
+  if(p === 'none') {
+    req('/admin/switch-email-provider',{method:'POST',body:JSON.stringify({provider:'none'})})
+      .then(function(){
+        if(q('emailStatusBanner')) q('emailStatusBanner').innerHTML='<div class="al al-warn"><strong>⚠ Email disabled</strong> — No emails will be sent to clients. Choose a provider below to re-enable.</div>';
+      }).catch(function(){});
+  }
 }
 
 function loadEmailSettings() {
@@ -1009,25 +1019,41 @@ function doSaveSmtp() {
   var user=q('smtpUser').value.trim(), pass=q('smtpPass').value.trim();
   var displayName=(q('smtpDisplayName')&&q('smtpDisplayName').value.trim())||'InvoicePro';
   var from = displayName+' <'+user+'>';
-  if(!host){errMsg('smtpSaveRes','SMTP host required');return;}
-  if(!user||!user.includes('@')){errMsg('smtpSaveRes','Valid email required');return;}
-  q('smtpSaveRes').innerHTML='<div class="al al-info">Saving...</div>';
+  if(!host){errMsg('smtpSaveRes','SMTP host is required');return;}
+  if(!user||!user.includes('@')){errMsg('smtpSaveRes','Enter a valid email address');return;}
+  q('smtpSaveRes').innerHTML='<div class="al al-info">⏳ Saving settings...</div>';
   var body={smtp_host:host,smtp_port:port,smtp_user:user,smtp_from:from,smtp_secure:secure};
   if(pass) body.smtp_pass=pass;
+  // Step 1: Save SMTP settings
   req('/admin/email-settings',{method:'POST',body:JSON.stringify(body)})
-    .then(function(d){okMsg('smtpSaveRes',d.message);setTimeout(loadEmailSettings,600);})
+    .then(function(){
+      // Step 2: Switch provider to SMTP (so it immediately starts using this email)
+      return req('/admin/switch-email-provider',{method:'POST',body:JSON.stringify({provider:'smtp'})});
+    })
+    .then(function(){
+      q('smtpSaveRes').innerHTML='<div class="al al-ok" style="font-size:13px"><strong>✅ Email activated!</strong><br>Sending as: <strong>'+from+'</strong><br><span style="font-size:11px;opacity:.8">All future invoices and quotes will use this email.</span></div>';
+      setTimeout(loadEmailSettings,1000);
+    })
     .catch(function(e){errMsg('smtpSaveRes',e.message);});
 }
 
 function doSaveResend() {
   var key=q('resendKey').value.trim(), from=q('resendFrom').value.trim(), name=(q('resendName').value.trim())||'InvoicePro';
-  if(!from||!from.includes('@')){errMsg('resendSaveRes','Valid from email required');return;}
+  if(!from||!from.includes('@')){errMsg('resendSaveRes','Enter a valid from email');return;}
   if(key&&!key.startsWith('re_')){errMsg('resendSaveRes','Resend keys start with re_');return;}
-  q('resendSaveRes').innerHTML='<div class="al al-info">Saving...</div>';
-  var body={resend_from:from,resend_name:name};
-  if(key) body.resend_api_key=key;
+  if(!key){errMsg('resendSaveRes','Resend API key is required');return;}
+  q('resendSaveRes').innerHTML='<div class="al al-info">⏳ Saving settings...</div>';
+  var body={resend_from:from,resend_name:name,resend_api_key:key};
+  // Step 1: Save Resend settings
   req('/admin/resend-settings',{method:'POST',body:JSON.stringify(body)})
-    .then(function(d){okMsg('resendSaveRes',d.message);setTimeout(loadEmailSettings,600);})
+    .then(function(){
+      // Step 2: Switch provider to Resend
+      return req('/admin/switch-email-provider',{method:'POST',body:JSON.stringify({provider:'resend'})});
+    })
+    .then(function(){
+      q('resendSaveRes').innerHTML='<div class="al al-ok" style="font-size:13px"><strong>✅ Resend activated!</strong><br>Sending from: <strong>'+name+' &lt;'+from+'&gt;</strong><br><span style="font-size:11px;opacity:.8">All future invoices and quotes will use Resend.</span></div>';
+      setTimeout(loadEmailSettings,1000);
+    })
     .catch(function(e){errMsg('resendSaveRes',e.message);});
 }
 

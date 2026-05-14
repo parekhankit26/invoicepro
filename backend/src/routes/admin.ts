@@ -873,3 +873,20 @@ router.get('/resend-settings', adminAuth, async (_req: any, res: Response) => {
     })
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
+
+// ── SWITCH EMAIL PROVIDER ─────────────────────────────────
+// Called automatically when admin saves SMTP or Resend settings
+router.post('/switch-email-provider', adminAuth, async (req: any, res: Response) => {
+  try {
+    const { provider } = (req as any).body
+    if (!['smtp', 'resend', 'none'].includes(provider)) {
+      return res.status(400).json({ error: 'Invalid provider. Use: smtp, resend, or none' })
+    }
+    await supabase.from('app_settings').upsert(
+      { key: 'email_provider', value: JSON.stringify(provider), label: 'Email Provider', category: 'email' },
+      { onConflict: 'key' }
+    )
+    await log(req.admin.id, 'email_provider_switched', 'system', 'email', { provider })
+    return res.json({ message: `✅ Email provider switched to ${provider}`, provider })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})

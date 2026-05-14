@@ -706,34 +706,84 @@ router.put('/settings', adminAuth, async (req: any, res: Response) => {
 router.post('/test-email', adminAuth, async (req: any, res: Response) => {
   try {
     const { to } = (req as any).body
-    if (!to) return res.status(400).json({ error: 'Recipient email required' })
-    if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
-      return res.status(400).json({ 
-        error: 'SMTP not configured in Railway. Add: SMTP_HOST=smtp.gmail.com, SMTP_PORT=587, SMTP_USER=your@gmail.com, SMTP_PASS=your-app-password, EMAIL_FROM=your@gmail.com'
-      })
+    if (!to || !to.includes('@')) return res.status(400).json({ error: 'Enter a valid email address' })
+    
+    // Get SMTP config from DB first, then env vars
+    const { data: smtpSettings } = await supabase.from('app_settings')
+      .select('key, value').in('key', ['smtp_host','smtp_port','smtp_user','smtp_pass','smtp_from','smtp_secure'])
+    
+    let host = process.env.SMTP_HOST || ''
+    let port = parseInt(process.env.SMTP_PORT || '587')
+    let user = process.env.SMTP_USER || ''
+    let pass = process.env.SMTP_PASS || ''
+    let from = process.env.EMAIL_FROM || process.env.SMTP_USER || ''
+    let secure = process.env.SMTP_SECURE === 'true'
+    
+    if (smtpSettings && smtpSettings.length > 0) {
+      const cfg: any = {}
+      smtpSettings.forEach((r: any) => { try { cfg[r.key] = JSON.parse(r.value) } catch { cfg[r.key] = r.value } })
+      if (cfg.smtp_host) { host = cfg.smtp_host; port = parseInt(cfg.smtp_port || '587'); user = cfg.smtp_user; pass = cfg.smtp_pass; from = cfg.smtp_from || cfg.smtp_user; secure = cfg.smtp_secure === true }
     }
+    
+    if (!host || !user || !pass) {
+      return res.status(400).json({ error: 'SMTP not configured. Go to System health → Email settings and configure your SMTP details.' })
+    }
+    
     const nodemailer = await import('nodemailer')
-    const transporter = nodemailer.default.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
-    })
+    const transporter = nodemailer.default.createTransport({ host, port, secure, auth: { user, pass } })
     await transporter.verify()
     await transporter.sendMail({
-      from: process.env.EMAIL_FROM || process.env.SMTP_USER,
+      from: `InvoicePro <${from}>`,
       to,
-      subject: '✅ InvoicePro email test — it works!',
-      html: `<div style="font-family:sans-serif;padding:32px;max-width:500px">
-        <h2 style="color:#1a1814">✅ Email is working!</h2>
-        <p>Your InvoicePro SMTP configuration is working correctly.</p>
-        <p style="color:#666;font-size:13px">Sent at: ${new Date().toLocaleString()}</p>
-        <p style="color:#666;font-size:13px">SMTP: ${process.env.SMTP_HOST}</p>
-      </div>`
+      subject: '✅ InvoicePro — Email test successful!',
+      html: `<div style="font-family:sans-serif;padding:32px;max-width:500px;background:#f8f7f4"><div style="background:#1a1814;padding:24px;border-radius:12px;color:white;text-align:center;margin-bottom:20px"><div style="font-size:36px;margin-bottom:8px">✅</div><h2 style="margin:0;font-size:20px">Email is working!</h2></div><p style="color:#555">Your InvoicePro SMTP configuration is working correctly. Emails will be delivered to your clients.</p><p style="color:#888;font-size:12px;margin-top:20px">Sent via: ${host} · ${new Date().toLocaleString()}</p></div>`
     })
-    await log(req.admin.id, 'test_email_sent', 'system', 'email', { to })
-    return res.json({ message: `✅ Test email sent successfully to ${to}` })
+    await log(req.admin.id, 'test_email_sent', 'system', 'email', { to, smtp_host: host })
+    return res.json({ message: `✅ Test email sent to ${to}! Check your inbox.` })
   } catch(e: any) {
-    return res.status(500).json({ error: `Email failed: ${e.message}` })
+    return res.status(500).json({ error: `Email failed: ${e.message}. Check your SMTP credentials.` })
   }
+})
+
+// ── SAVE EMAIL SETTINGS ───────────────────────────────────
+router.post('/email-settings', adminAuth, async (req: any, res: Response) => {
+  try {
+    const { smtp_host, smtp_port, smtp_user, smtp_pass, smtp_from, smtp_secure } = (req as any).body
+    if (!smtp_host || !smtp_user || !smtp_pass) {
+      return res.status(400).json({ error: 'SMTP host, user and password are required' })
+    }
+    const settings = [
+      { key: 'smtp_host', value: JSON.stringify(smtp_host), label: 'SMTP Host', category: 'email' },
+      { key: 'smtp_port', value: JSON.stringify(smtp_port || '587'), label: 'SMTP Port', category: 'email' },
+      { key: 'smtp_user', value: JSON.stringify(smtp_user), label: 'SMTP Username', category: 'email' },
+      { key: 'smtp_pass', value: JSON.stringify(smtp_pass), label: 'SMTP Password', category: 'email' },
+      { key: 'smtp_from', value: JSON.stringify(smtp_from || smtp_user), label: 'From Email', category: 'email' },
+      { key: 'smtp_secure', value: JSON.stringify(smtp_secure || false), label: 'Use SSL', category: 'email' },
+    ]
+    for (const s of settings) {
+      await supabase.from('app_settings').upsert(s, { onConflict: 'key' })
+    }
+    await log(req.admin.id, 'email_settings_saved', 'system', 'email', { smtp_host, smtp_user })
+    return res.json({ message: '✅ Email settings saved! Test the connection using the button above.' })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// ── GET EMAIL SETTINGS ────────────────────────────────────
+router.get('/email-settings', adminAuth, async (_req: any, res: Response) => {
+  try {
+    const { data } = await supabase.from('app_settings')
+      .select('key, value').in('key', ['smtp_host','smtp_port','smtp_user','smtp_from','smtp_secure'])
+    const cfg: any = {}
+    ;(data||[]).forEach((r: any) => { try { cfg[r.key] = JSON.parse(r.value) } catch { cfg[r.key] = r.value } })
+    // Check env vars as fallback
+    return res.json({
+      smtp_host: cfg.smtp_host || process.env.SMTP_HOST || '',
+      smtp_port: cfg.smtp_port || process.env.SMTP_PORT || '587',
+      smtp_user: cfg.smtp_user || process.env.SMTP_USER || '',
+      smtp_from: cfg.smtp_from || process.env.EMAIL_FROM || '',
+      smtp_secure: cfg.smtp_secure || false,
+      smtp_pass: cfg.smtp_user ? '••••••••' : '', // Never return actual password
+      source: cfg.smtp_host ? 'database' : (process.env.SMTP_HOST ? 'env_vars' : 'not_configured')
+    })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })

@@ -289,6 +289,7 @@ tr:hover td{background:#fafaf8}
       <button class="nv" data-pg="broadcast">📢 Broadcast</button>
 
       <div class="nav-sec">System</div>
+    <button class="nv" data-pg="email">📧 Email settings</button>
       <button class="nv" data-pg="admins">🔐 Admin accounts</button>
       <button class="nv" data-pg="audit">📝 Audit log</button>
 
@@ -498,6 +499,79 @@ tr:hover td{background:#fafaf8}
         </div></div>
       </div>
 
+      <!-- EMAIL SETTINGS -->
+      <div class="pg" id="pg-email">
+        <div class="ph"><div><div class="pt">Email settings</div><div class="ps">Configure SMTP to send invoices, quotes and notifications</div></div></div>
+        
+        <div id="emailStatusBanner" style="margin-bottom:14px"></div>
+
+        <div class="g2">
+          <div class="bc">
+            <div style="font-size:13px;font-weight:600;margin-bottom:16px">📧 SMTP Configuration</div>
+            
+            <div class="fg"><label>Email provider</label>
+              <select class="fi" id="emailProvider" style="margin-bottom:8px">
+                <option value="">Choose provider (or enter manually below)</option>
+                <option value="gmail">Gmail (smtp.gmail.com)</option>
+                <option value="outlook">Outlook / Hotmail (smtp.office365.com)</option>
+                <option value="yahoo">Yahoo (smtp.mail.yahoo.com)</option>
+                <option value="sendgrid">SendGrid (smtp.sendgrid.net)</option>
+                <option value="mailgun">Mailgun (smtp.mailgun.org)</option>
+                <option value="custom">Custom SMTP</option>
+              </select>
+            </div>
+
+            <div class="fg"><label>SMTP Host *</label><input class="fi" id="smtpHost" placeholder="smtp.gmail.com"/></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="fg"><label>Port</label><input class="fi" id="smtpPort" placeholder="587" value="587" type="number"/></div>
+              <div class="fg"><label>Security</label>
+                <select class="fi" id="smtpSecure">
+                  <option value="false">TLS (port 587)</option>
+                  <option value="true">SSL (port 465)</option>
+                </select>
+              </div>
+            </div>
+            <div class="fg"><label>SMTP Username / Email *</label><input class="fi" id="smtpUser" placeholder="your@gmail.com" type="email"/></div>
+            <div class="fg"><label>SMTP Password / App Password *</label>
+              <input class="fi" id="smtpPass" placeholder="Enter password or app password" type="password"/>
+              <div style="font-size:11px;color:var(--ink3);margin-top:4px">For Gmail: use an App Password, not your account password</div>
+            </div>
+            <div class="fg"><label>From email (shown to clients)</label><input class="fi" id="smtpFrom" placeholder="invoices@yourcompany.com or your@gmail.com"/></div>
+
+            <div style="display:flex;gap:8px;margin-top:4px">
+              <button class="ab ab-p" style="flex:1;justify-content:center" id="btnSaveEmail">💾 Save settings</button>
+            </div>
+            <div id="emailSaveRes" style="margin-top:10px"></div>
+          </div>
+
+          <div>
+            <div class="bc" style="margin-bottom:14px">
+              <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Test email sending</div>
+              <div class="fg"><label>Send test to</label><input class="fi" type="email" id="testEmailTo" placeholder="your@email.com"/></div>
+              <button class="ab ab-p" style="width:100%;justify-content:center" id="btnTestEmail2">Send test email</button>
+              <div id="testEmailRes2" style="margin-top:10px"></div>
+            </div>
+
+            <div class="bc">
+              <div style="font-size:13px;font-weight:600;margin-bottom:12px">📖 Gmail setup guide</div>
+              <div style="font-size:12.5px;color:var(--ink2);line-height:1.8">
+                <div style="margin-bottom:8px"><strong>1.</strong> Go to <a href="https://myaccount.google.com/security" target="_blank" style="color:var(--blue)">myaccount.google.com/security</a></div>
+                <div style="margin-bottom:8px"><strong>2.</strong> Enable <strong>2-Step Verification</strong></div>
+                <div style="margin-bottom:8px"><strong>3.</strong> Search <strong>"App passwords"</strong> → Create one for "Mail"</div>
+                <div style="margin-bottom:8px"><strong>4.</strong> Copy the 16-character password (no spaces)</div>
+                <div style="margin-bottom:8px"><strong>5.</strong> Paste it as the SMTP Password above</div>
+                <div style="padding:10px;background:var(--bg);border-radius:7px;font-family:monospace;font-size:11.5px">
+                  Host: smtp.gmail.com<br/>
+                  Port: 587<br/>
+                  User: your@gmail.com<br/>
+                  Pass: 16-char app password
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div><!-- /main -->
   </div><!-- /layout -->
 </div><!-- /app -->
@@ -586,7 +660,7 @@ function goPage(page){
   document.querySelectorAll('.nv[data-pg="'+page+'"]').forEach(function(n){n.classList.add('on');});
   // Close sidebar on mobile after navigation
   if(window.innerWidth<=768)closeSidebar();
-  var fns={dashboard:loadDash,health:loadHealth,revenue:loadRev,churn:loadChurn,
+  var fns={dashboard:loadDash,health:loadHealth,revenue:loadRev,churn:loadChurn,email:loadEmailSettings,
     users:loadUsers,clients:loadClients,invoices:loadInv,payments:loadPay,
     features:loadFeatures,plans:loadPlans,announce:loadAnnounce,tickets:loadTickets,
     satisfaction:loadSat,broadcast:function(){},admins:loadAdmins,audit:loadAudit};
@@ -834,6 +908,89 @@ function loadAudit(){
   }).catch(function(){});
 }
 
+
+// ── EMAIL SETTINGS ────────────────────────────────────────
+var PROVIDERS = {
+  gmail:    {host:'smtp.gmail.com',    port:'587', secure:false},
+  outlook:  {host:'smtp.office365.com',port:'587', secure:false},
+  yahoo:    {host:'smtp.mail.yahoo.com',port:'587',secure:false},
+  sendgrid: {host:'smtp.sendgrid.net', port:'587', secure:false},
+  mailgun:  {host:'smtp.mailgun.org',  port:'587', secure:false},
+};
+
+function loadEmailSettings() {
+  req('/admin/email-settings').then(function(d) {
+    if (d.smtp_host) {
+      q('smtpHost').value = d.smtp_host;
+      q('smtpPort').value = d.smtp_port || '587';
+      q('smtpUser').value = d.smtp_user || '';
+      q('smtpFrom').value = d.smtp_from || '';
+      q('smtpSecure').value = d.smtp_secure ? 'true' : 'false';
+      q('smtpPass').placeholder = d.smtp_pass || 'Enter password';
+    }
+    var src = d.source;
+    var banner = src === 'database' 
+      ? '<div class="al al-ok">✅ Email configured via Admin settings ('+d.smtp_user+')</div>'
+      : src === 'env_vars'
+      ? '<div class="al al-info">ℹ Email configured via Railway env vars ('+d.smtp_user+'). Save here to override.</div>'
+      : '<div class="al al-warn">⚠ Email not configured. Fill the form below to enable email sending.</div>';
+    q('emailStatusBanner').innerHTML = banner;
+  }).catch(function() {
+    q('emailStatusBanner').innerHTML = '<div class="al al-warn">⚠ Email not configured yet. Set up SMTP below to enable emails.</div>';
+  });
+}
+
+function doSaveEmailSettings() {
+  var host = q('smtpHost').value.trim();
+  var user = q('smtpUser').value.trim();
+  var pass = q('smtpPass').value.trim();
+  var port = q('smtpPort').value || '587';
+  var from = q('smtpFrom').value.trim() || user;
+  var secure = q('smtpSecure').value === 'true';
+  
+  if (!host || !user || !pass) {
+    errMsg('emailSaveRes', 'SMTP host, username and password are required');
+    return;
+  }
+  if (!user.includes('@')) {
+    errMsg('emailSaveRes', 'Enter a valid email address as username');
+    return;
+  }
+  
+  q('emailSaveRes').innerHTML = '<div class="al al-info">Saving...</div>';
+  req('/admin/email-settings', {method:'POST', body:JSON.stringify({smtp_host:host, smtp_port:port, smtp_user:user, smtp_pass:pass, smtp_from:from, smtp_secure:secure})})
+    .then(function(d) {
+      okMsg('emailSaveRes', d.message);
+      loadEmailSettings();
+    }).catch(function(e) { errMsg('emailSaveRes', e.message); });
+}
+
+function doTestEmail2() {
+  var to = q('testEmailTo').value.trim();
+  if (!to || !to.includes('@')) { 
+    q('testEmailRes2').innerHTML = '<div class="al al-err">Enter a valid email address</div>'; 
+    return; 
+  }
+  q('testEmailRes2').innerHTML = '<div class="al al-info">Sending test email to '+to+'...</div>';
+  req('/admin/test-email', {method:'POST', body:JSON.stringify({to:to})})
+    .then(function(d) { q('testEmailRes2').innerHTML = '<div class="al al-ok">'+d.message+'</div>'; })
+    .catch(function(e) { q('testEmailRes2').innerHTML = '<div class="al al-err">❌ '+e.message+'</div>'; });
+}
+
+// Also fix the old test email on health page
+function doTestEmail() {
+  var to = q('testEmailTo') ? q('testEmailTo').value.trim() : '';
+  if (!to || !to.includes('@')) {
+    var res = q('testEmailRes');
+    if (res) res.innerHTML = '<div class="al al-err">Enter a valid email address (e.g. your@gmail.com)</div>';
+    return;
+  }
+  if (q('testEmailRes')) q('testEmailRes').innerHTML = '<div class="al al-info">Sending...</div>';
+  req('/admin/test-email', {method:'POST', body:JSON.stringify({to:to})})
+    .then(function(d) { if (q('testEmailRes')) q('testEmailRes').innerHTML = '<div class="al al-ok">'+d.message+'</div>'; })
+    .catch(function(e) { if (q('testEmailRes')) q('testEmailRes').innerHTML = '<div class="al al-err">❌ '+e.message+'</div>'; });
+}
+
 // ── WIRE ALL EVENTS ───────────────────────────────────────
 document.addEventListener('DOMContentLoaded',function(){
 
@@ -893,6 +1050,26 @@ document.addEventListener('DOMContentLoaded',function(){
   // Close modals on background click
   document.querySelectorAll('.mo-bg').forEach(function(bg){bg.addEventListener('click',function(e){if(e.target===this)closeMo(this.id);});});
   document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('.mo-bg.show').forEach(function(m){closeMo(m.id);});});
+
+  // Email settings events
+  var btnSaveEmail = q('btnSaveEmail');
+  if (btnSaveEmail) btnSaveEmail.addEventListener('click', doSaveEmailSettings);
+  var btnTestEmail2 = q('btnTestEmail2');
+  if (btnTestEmail2) btnTestEmail2.addEventListener('click', doTestEmail2);
+  
+  // Provider preset selector
+  var emailProvider = q('emailProvider');
+  if (emailProvider) {
+    emailProvider.addEventListener('change', function() {
+      var p = PROVIDERS[this.value];
+      if (p) {
+        q('smtpHost').value = p.host;
+        q('smtpPort').value = p.port;
+        q('smtpSecure').value = p.secure ? 'true' : 'false';
+        q('smtpUser').focus();
+      }
+    });
+  }
 
   // Check for reset token in URL
   var hash=window.location.hash;

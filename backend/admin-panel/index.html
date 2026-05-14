@@ -444,352 +444,417 @@ tr:hover td{background:#fafaf8}
         </div>
       </div>
 
-      <!-- TICKETS -->
-      <div class="pg" id="pg-tickets">
-        <div class="ph">
-          <div><div class="pt">Support tickets</div></div>
-          <select class="fi" id="tickFilter" style="width:160px"><option value="">All</option><option value="open">Open</option><option value="resolved">Resolved</option></select>
-        </div>
-        <div class="bc" style="padding:0"><div class="tbl-wrap">
-          <table><thead><tr><th>User</th><th>Subject</th><th>Status</th><th>Date</th><th></th></tr></thead>
-          <tbody id="tickRows"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
-        </div></div>
-      </div>
-
-      <!-- SATISFACTION -->
-      <div class="pg" id="pg-satisfaction">
-        <div class="ph"><div><div class="pt">Client satisfaction</div></div></div>
-        <div class="g3" id="satCards"></div>
-        <div class="bc" style="padding:0"><div class="tbl-wrap">
-          <table><thead><tr><th>Business</th><th>Score</th><th>Comment</th><th>Date</th></tr></thead>
-          <tbody id="satRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
-        </div></div>
-      </div>
-
-      <!-- BROADCAST -->
-      <div class="pg" id="pg-broadcast">
-        <div class="ph"><div><div class="pt">Broadcast email</div><div class="ps">Send to all or filtered users</div></div></div>
-        <div class="g2">
-          <div class="bc">
-            <div class="fg"><label>Subject</label><input class="fi" id="bSubj" placeholder="Subject line"/></div>
-            <div class="fg"><label>Plan filter</label><select class="fi" id="bPlan"><option value="">All users</option><option value="free">Free</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select></div>
-            <div class="fg"><label>Message</label><textarea class="fi" id="bMsg" rows="5" placeholder="Hi there..."></textarea></div>
-            <button class="ab ab-p" style="width:100%;justify-content:center" id="btnBroadcast">📢 Send broadcast</button>
-            <div id="broadRes" style="margin-top:10px"></div>
-          </div>
-          <div class="bc"><div class="al al-info">Target specific segments with plan filter.</div><div class="al al-warn" style="margin-top:8px">SMTP must be configured in Railway for delivery.</div></div>
-        </div>
-      </div>
-
-      <!-- ADMINS -->
-      <div class="pg" id="pg-admins">
-        <div class="ph"><div><div class="pt">Admin accounts</div></div><button class="ab ab-p" id="btnAddAdmin">+ Add admin</button></div>
-        <div class="bc" style="padding:0"><div class="tbl-wrap">
-          <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Last login</th><th>Status</th><th></th></tr></thead>
-          <tbody id="adminRows"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
-        </div></div>
-      </div>
-
-      <!-- AUDIT -->
-      <div class="pg" id="pg-audit">
-        <div class="ph"><div><div class="pt">Audit log</div></div></div>
-        <div class="bc" style="padding:0"><div class="tbl-wrap">
-          <table><thead><tr><th>Admin</th><th>Action</th><th>Entity</th><th>Time</th></tr></thead>
-          <tbody id="auditRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
-        </div></div>
-      </div>
-
       <!-- EMAIL SETTINGS -->
       <div class="pg" id="pg-email">
-        <div class="ph"><div><div class="pt">Email settings</div><div class="ps">Configure email delivery for invoices, quotes and notifications</div></div></div>
-        
-        <div id="emailStatusBanner" style="margin-bottom:14px"></div>
-
-        <!-- Provider tabs -->
-        <div style="display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:20px">
-          <button class="ab" id="tabResend" style="border:none;border-bottom:2px solid var(--ink);border-radius:0;margin-bottom:-2px;color:var(--ink);font-weight:600">🚀 Resend (Recommended)</button>
-          <button class="ab" id="tabSmtp" style="border:none;border-radius:0;color:var(--ink3)">⚙️ SMTP / Gmail</button>
-        </div>
-
-        <!-- RESEND PANEL -->
-        <div id="panelResend">
-          <div class="g2">
-            <div class="bc">
-              <div style="font-size:13px;font-weight:600;margin-bottom:4px">🚀 Resend — Free, reliable, works instantly</div>
-              <div style="font-size:12px;color:var(--ink3);margin-bottom:16px">3,000 emails/month free · No SMTP needed · Works from Railway</div>
-              
-              <div class="fg"><label>Resend API Key *</label>
-                <input class="fi" id="resendKey" type="password" placeholder="re_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
-                <div style="font-size:11px;color:var(--ink3);margin-top:4px">Get your free API key at resend.com</div>
-              </div>
-              <div class="fg"><label>From email (must be verified in Resend)</label>
-                <input class="fi" id="resendFrom" placeholder="invoices@yourdomain.com or onboarding@resend.dev (for testing)"/>
-                <div style="font-size:11px;color:var(--ink3);margin-top:4px">Use <strong>onboarding@resend.dev</strong> for testing (can only send to your own account email). Add your domain to send to anyone.</div>
-              </div>
-              <div class="fg"><label>From name</label>
-                <input class="fi" id="resendName" placeholder="InvoicePro" value="InvoicePro"/>
-              </div>
-
-              <button class="ab ab-p" style="width:100%;justify-content:center" id="btnSaveResend">💾 Save Resend settings</button>
-              <div id="resendSaveRes" style="margin-top:10px"></div>
-            </div>
-
-            <div>
-              <div class="bc" style="margin-bottom:14px">
-                <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Send test email</div>
-                <div class="fg"><label>Send test to</label><input class="fi" type="email" id="testEmailTo" placeholder="your@email.com"/></div>
-                <button class="ab ab-p" style="width:100%;justify-content:center" id="btnTestEmail2">Send test email</button>
-                <div id="testEmailRes2" style="margin-top:10px"></div>
-              </div>
-
-              <div class="bc">
-                <div style="font-size:13px;font-weight:600;margin-bottom:12px">📖 Quick setup (2 minutes)</div>
-                <div style="font-size:12.5px;color:var(--ink2);line-height:2">
-                  <div><strong>1.</strong> Go to <a href="https://resend.com" target="_blank" style="color:var(--blue)">resend.com</a> → Sign up free</div>
-                  <div><strong>2.</strong> Click <strong>API Keys</strong> → <strong>Create API Key</strong></div>
-                  <div><strong>3.</strong> Copy the key (starts with <code style="background:var(--bg);padding:1px 5px;border-radius:3px">re_</code>)</div>
-                  <div><strong>4.</strong> Paste above → use <strong>onboarding@resend.dev</strong> as From email</div>
-                  <div><strong>5.</strong> Save → Send test → Done ✅</div>
-                </div>
-                <div style="margin-top:10px;padding:12px;background:var(--abg);border-radius:8px;font-size:12px;color:var(--amber);border-left:3px solid var(--amber)">
-                  ⚠ <strong>Free tier limit:</strong> With onboarding@resend.dev you can only test-send to <strong>your own Resend account email</strong>. To send to any client, add your domain at <a href="https://resend.com/domains" target="_blank" style="color:var(--amber)">resend.com/domains</a> (free, 5 mins).
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- SMTP PANEL -->
-        <div id="panelSmtp" class="hidden">
-          <div class="al al-ok" style="margin-bottom:14px">
-            ✅ <strong>Hostinger SMTP works great from Railway.</strong> Enter your <strong>invoice@asproite.com</strong> password below. Note: Gmail blocks cloud servers, use Resend tab instead for Gmail.
-          </div>
-          <div class="g2">
-            <div class="bc">
-              <div class="fg"><label>Email provider preset</label>
-                <select class="fi" id="emailProvider">
-                  <option value="">Choose provider</option>
-                  <option value="hostinger" selected>Hostinger (your current host)</option>
-                  <option value="sendgrid">SendGrid (free 100/day)</option>
-                  <option value="mailgun">Mailgun</option>
-                  <option value="outlook">Outlook / Office 365</option>
-                  <option value="gmail">Gmail (blocked from Railway)</option>
-                  <option value="custom">Custom SMTP</option>
-                </select>
-              </div>
-              <div class="fg"><label>SMTP Host *</label><input class="fi" id="smtpHost" placeholder="smtp.sendgrid.net"/></div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-                <div class="fg"><label>Port</label><input class="fi" id="smtpPort" placeholder="587" value="587" type="number"/></div>
-                <div class="fg"><label>Security</label>
-                  <select class="fi" id="smtpSecure">
-                    <option value="false">TLS (port 587)</option>
-                    <option value="true">SSL (port 465)</option>
-                  </select>
-                </div>
-              </div>
-              <div class="fg"><label>SMTP Username *</label><input class="fi" id="smtpUser" placeholder="apikey or your@email.com"/></div>
-              <div class="fg"><label>SMTP Password *</label>
-                <input class="fi" id="smtpPass" type="password" placeholder="Password or API key"/>
-              </div>
-              <div class="fg"><label>From email</label><input class="fi" id="smtpFrom" placeholder="invoices@yourdomain.com"/></div>
-              <button class="ab ab-p" style="width:100%;justify-content:center" id="btnSaveEmail">💾 Save SMTP settings</button>
-              <div id="emailSaveRes" style="margin-top:10px"></div>
-            </div>
-            <div class="bc">
-              <div style="font-size:13px;font-weight:600;margin-bottom:10px">SendGrid (free 100 emails/day)</div>
-              <div style="font-size:12.5px;color:var(--ink2);line-height:2">
-                <div><strong>1.</strong> Go to <a href="https://sendgrid.com" target="_blank" style="color:var(--blue)">sendgrid.com</a> → Sign up</div>
-                <div><strong>2.</strong> Settings → API Keys → Create key</div>
-                <div><strong>3.</strong> SMTP settings:</div>
-                <div style="padding:10px;background:var(--bg);border-radius:7px;font-family:monospace;font-size:11.5px;line-height:1.8">
-                  Host: smtp.sendgrid.net<br/>Port: 587<br/>User: apikey<br/>Pass: your_api_key
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TICKETS -->
-      <div class="pg" id="pg-tickets">
         <div class="ph">
-          <div><div class="pt">Support tickets</div></div>
-          <select class="fi" id="tickFilter" style="width:160px"><option value="">All</option><option value="open">Open</option><option value="resolved">Resolved</option></select>
+          <div><div class="pt">📧 Email settings</div><div class="ps">All email sent from InvoicePro — invoices, quotes, reminders — uses these settings</div></div>
         </div>
-        <div class="bc" style="padding:0"><div class="tbl-wrap">
-          <table><thead><tr><th>User</th><th>Subject</th><th>Status</th><th>Date</th><th></th></tr></thead>
-          <tbody id="tickRows"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
-        </div></div>
-      </div>
 
-      <!-- SATISFACTION -->
-      <div class="pg" id="pg-satisfaction">
-        <div class="ph"><div><div class="pt">Client satisfaction</div></div></div>
-        <div class="g3" id="satCards"></div>
-        <div class="bc" style="padding:0"><div class="tbl-wrap">
-          <table><thead><tr><th>Business</th><th>Score</th><th>Comment</th><th>Date</th></tr></thead>
-          <tbody id="satRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
-        </div></div>
-      </div>
+        <!-- Current status -->
+        <div id="emailStatusBanner" style="margin-bottom:16px"></div>
 
-      <!-- BROADCAST -->
-      <div class="pg" id="pg-broadcast">
-        <div class="ph"><div><div class="pt">Broadcast email</div><div class="ps">Send to all or filtered users</div></div></div>
-        <div class="g2">
-          <div class="bc">
-            <div class="fg"><label>Subject</label><input class="fi" id="bSubj" placeholder="Subject line"/></div>
-            <div class="fg"><label>Plan filter</label><select class="fi" id="bPlan"><option value="">All users</option><option value="free">Free</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select></div>
-            <div class="fg"><label>Message</label><textarea class="fi" id="bMsg" rows="5" placeholder="Hi there..."></textarea></div>
-            <button class="ab ab-p" style="width:100%;justify-content:center" id="btnBroadcast">📢 Send broadcast</button>
-            <div id="broadRes" style="margin-top:10px"></div>
+        <!-- Provider selector -->
+        <div class="bc" style="margin-bottom:14px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:14px">Choose email provider</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px" id="providerCards">
+            <div class="provider-card" data-provider="smtp" onclick="selectProvider('smtp')" style="border:2px solid var(--ink);border-radius:10px;padding:16px;cursor:pointer;text-align:center;background:var(--ink);color:white">
+              <div style="font-size:24px;margin-bottom:6px">⚙️</div>
+              <div style="font-weight:600;font-size:13px">SMTP</div>
+              <div style="font-size:11px;margin-top:3px;opacity:.8">Hostinger, SendGrid, any mail server</div>
+            </div>
+            <div class="provider-card" data-provider="resend" onclick="selectProvider('resend')" style="border:2px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;text-align:center">
+              <div style="font-size:24px;margin-bottom:6px">🚀</div>
+              <div style="font-weight:600;font-size:13px">Resend</div>
+              <div style="font-size:11px;color:var(--ink3);margin-top:3px">Free 3000/mo · API-based</div>
+            </div>
+            <div class="provider-card" data-provider="none" onclick="selectProvider('none')" style="border:2px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;text-align:center">
+              <div style="font-size:24px;margin-bottom:6px">🚫</div>
+              <div style="font-weight:600;font-size:13px">Disabled</div>
+              <div style="font-size:11px;color:var(--ink3);margin-top:3px">Turn off all emails</div>
+            </div>
           </div>
-          <div class="bc"><div class="al al-info">Target specific segments with plan filter.</div><div class="al al-warn" style="margin-top:8px">SMTP must be configured in Railway for delivery.</div></div>
         </div>
-      </div>
 
-      <!-- ADMINS -->
-      <div class="pg" id="pg-admins">
-        <div class="ph"><div><div class="pt">Admin accounts</div></div><button class="ab ab-p" id="btnAddAdmin">+ Add admin</button></div>
-        <div class="bc" style="padding:0"><div class="tbl-wrap">
-          <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Last login</th><th>Status</th><th></th></tr></thead>
-          <tbody id="adminRows"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
-        </div></div>
-      </div>
-
-      <!-- AUDIT -->
-      <div class="pg" id="pg-audit">
-        <div class="ph"><div><div class="pt">Audit log</div></div></div>
-        <div class="bc" style="padding:0"><div class="tbl-wrap">
-          <table><thead><tr><th>Admin</th><th>Action</th><th>Entity</th><th>Time</th></tr></thead>
-          <tbody id="auditRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
-        </div></div>
-      </div>
-
-      <!-- EMAIL SETTINGS -->
-      <div class="pg" id="pg-email">
-        <div class="ph"><div><div class="pt">Email settings</div><div class="ps">Configure SMTP to send invoices, quotes and notifications</div></div></div>
-        
-        <div id="emailStatusBanner" style="margin-bottom:14px"></div>
-
-        <div class="g2">
+        <!-- SMTP FORM -->
+        <div id="smtpForm" class="g2">
           <div class="bc">
-            <div style="font-size:13px;font-weight:600;margin-bottom:16px">📧 SMTP Configuration</div>
-            
-            <div class="fg"><label>Email provider</label>
-              <select class="fi" id="emailProvider" style="margin-bottom:8px">
-                <option value="">Choose provider (or enter manually below)</option>
-                <option value="gmail">Gmail (smtp.gmail.com)</option>
-                <option value="outlook">Outlook / Hotmail (smtp.office365.com)</option>
-                <option value="yahoo">Yahoo (smtp.mail.yahoo.com)</option>
+            <div style="font-size:13px;font-weight:600;margin-bottom:16px">⚙️ SMTP configuration</div>
+
+            <div class="fg"><label>Quick setup — choose your provider</label>
+              <select class="fi" id="smtpPreset">
+                <option value="">— Select to auto-fill host/port —</option>
+                <option value="hostinger">Hostinger (smtp.hostinger.com)</option>
                 <option value="sendgrid">SendGrid (smtp.sendgrid.net)</option>
                 <option value="mailgun">Mailgun (smtp.mailgun.org)</option>
-                <option value="custom">Custom SMTP</option>
+                <option value="outlook">Outlook / Office 365</option>
+                <option value="custom">Custom / Other</option>
               </select>
             </div>
 
-            <div class="fg"><label>SMTP Host *</label><input class="fi" id="smtpHost" placeholder="smtp.gmail.com"/></div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-              <div class="fg"><label>Port</label><input class="fi" id="smtpPort" placeholder="587" value="587" type="number"/></div>
-              <div class="fg"><label>Security</label>
-                <select class="fi" id="smtpSecure">
-                  <option value="false">TLS (port 587)</option>
-                  <option value="true">SSL (port 465)</option>
-                </select>
-              </div>
+            <div style="display:grid;grid-template-columns:1fr 120px;gap:10px">
+              <div class="fg"><label>SMTP Host *</label><input class="fi" id="smtpHost" placeholder="smtp.hostinger.com"/></div>
+              <div class="fg"><label>Port *</label><input class="fi" id="smtpPort" type="number" placeholder="465"/></div>
             </div>
-            <div class="fg"><label>SMTP Username / Email *</label><input class="fi" id="smtpUser" placeholder="your@gmail.com" type="email"/></div>
-            <div class="fg"><label>SMTP Password / App Password *</label>
-              <input class="fi" id="smtpPass" placeholder="Enter password or app password" type="password"/>
-              <div style="font-size:11px;color:var(--ink3);margin-top:4px">For Gmail: use an App Password, not your account password</div>
+            <div class="fg"><label>Encryption</label>
+              <select class="fi" id="smtpSecure">
+                <option value="true">SSL / TLS (port 465) — recommended</option>
+                <option value="false">STARTTLS (port 587)</option>
+              </select>
             </div>
-            <div class="fg"><label>From email (shown to clients)</label><input class="fi" id="smtpFrom" placeholder="invoices@yourcompany.com or your@gmail.com"/></div>
+            <div class="fg"><label>Email address (SMTP username) *</label>
+              <input class="fi" id="smtpUser" type="email" placeholder="invoice@yourdomain.com"/>
+            </div>
+            <div class="fg"><label>Password *</label>
+              <input class="fi" id="smtpPass" type="password" placeholder="Your email password"/>
+              <div style="font-size:11px;color:var(--ink3);margin-top:4px" id="smtpPassHint">Enter your email account password</div>
+            </div>
+            <div class="fg"><label>Display name (shown to clients)</label>
+              <input class="fi" id="smtpDisplayName" placeholder="InvoicePro" value="InvoicePro"/>
+            </div>
+            <div class="fg"><label>Reply-to email (optional)</label>
+              <input class="fi" id="smtpReplyTo" type="email" placeholder="Same as above, or a different address"/>
+            </div>
 
-            <div style="display:flex;gap:8px;margin-top:4px">
-              <button class="ab ab-p" style="flex:1;justify-content:center" id="btnSaveEmail">💾 Save settings</button>
-            </div>
-            <div id="emailSaveRes" style="margin-top:10px"></div>
+            <button class="ab ab-p" style="width:100%;justify-content:center;padding:13px" id="btnSaveSmtp">💾 Save &amp; activate</button>
+            <div id="smtpSaveRes" style="margin-top:10px"></div>
           </div>
 
           <div>
             <div class="bc" style="margin-bottom:14px">
-              <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Test email sending</div>
-              <div class="fg"><label>Send test to</label><input class="fi" type="email" id="testEmailTo" placeholder="your@email.com"/></div>
+              <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Test email</div>
+              <div class="fg"><label>Send test to</label>
+                <input class="fi" type="email" id="testEmailTo" placeholder="your@email.com"/>
+              </div>
               <button class="ab ab-p" style="width:100%;justify-content:center" id="btnTestEmail2">Send test email</button>
               <div id="testEmailRes2" style="margin-top:10px"></div>
             </div>
-
             <div class="bc">
-              <div style="font-size:13px;font-weight:600;margin-bottom:12px">📖 Gmail setup guide</div>
-              <div style="font-size:12.5px;color:var(--ink2);line-height:1.8">
-                <div style="margin-bottom:8px"><strong>1.</strong> Go to <a href="https://myaccount.google.com/security" target="_blank" style="color:var(--blue)">myaccount.google.com/security</a></div>
-                <div style="margin-bottom:8px"><strong>2.</strong> Enable <strong>2-Step Verification</strong></div>
-                <div style="margin-bottom:8px"><strong>3.</strong> Search <strong>"App passwords"</strong> → Create one for "Mail"</div>
-                <div style="margin-bottom:8px"><strong>4.</strong> Copy the 16-character password (no spaces)</div>
-                <div style="margin-bottom:8px"><strong>5.</strong> Paste it as the SMTP Password above</div>
-                <div style="padding:10px;background:var(--bg);border-radius:7px;font-family:monospace;font-size:11.5px">
-                  Host: smtp.gmail.com<br/>
-                  Port: 587<br/>
-                  User: your@gmail.com<br/>
-                  Pass: 16-char app password
+              <div style="font-size:13px;font-weight:600;margin-bottom:12px">📋 Provider guides</div>
+              <div id="smtpGuide">
+                <div style="font-size:12.5px;color:var(--ink2);line-height:1.9">
+                  Select a provider above to see its specific guide
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- RESEND FORM -->
+        <div id="resendForm" class="g2 hidden">
+          <div class="bc">
+            <div style="font-size:13px;font-weight:600;margin-bottom:4px">🚀 Resend API</div>
+            <div style="font-size:12px;color:var(--ink3);margin-bottom:16px">Free 3,000 emails/month · Works from any server · No SMTP blocking</div>
+            <div class="fg"><label>API Key *</label>
+              <input class="fi" id="resendKey" type="password" placeholder="re_xxxxxxxxxxxxxxxxxxxxxx"/>
+              <div style="font-size:11px;color:var(--ink3);margin-top:4px">Get free at <a href="https://resend.com" target="_blank" style="color:var(--blue)">resend.com</a> → API Keys</div>
+            </div>
+            <div class="fg"><label>From email *</label>
+              <input class="fi" id="resendFrom" type="email" placeholder="invoices@yourdomain.com"/>
+              <div style="font-size:11px;color:var(--ink3);margin-top:4px">Use <strong>onboarding@resend.dev</strong> for testing (sends only to your account email)</div>
+            </div>
+            <div class="fg"><label>Display name</label>
+              <input class="fi" id="resendName" placeholder="InvoicePro" value="InvoicePro"/>
+            </div>
+            <button class="ab ab-p" style="width:100%;justify-content:center;padding:13px" id="btnSaveResend">💾 Save &amp; activate</button>
+            <div id="resendSaveRes" style="margin-top:10px"></div>
+          </div>
+          <div>
+            <div class="bc" style="margin-bottom:14px">
+              <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Test email</div>
+              <div class="fg"><label>Send test to</label><input class="fi" type="email" id="resendTestTo" placeholder="your@email.com"/></div>
+              <button class="ab ab-p" style="width:100%;justify-content:center" id="btnTestResend">Send test</button>
+              <div id="resendTestRes" style="margin-top:10px"></div>
+            </div>
+            <div class="bc">
+              <div style="font-size:13px;font-weight:600;margin-bottom:10px">Quick setup</div>
+              <div style="font-size:12.5px;color:var(--ink2);line-height:2">
+                <div><strong>1.</strong> <a href="https://resend.com" target="_blank" style="color:var(--blue)">resend.com</a> → Sign up free</div>
+                <div><strong>2.</strong> API Keys → Create API Key</div>
+                <div><strong>3.</strong> Paste key above</div>
+                <div><strong>4.</strong> From: <strong>onboarding@resend.dev</strong> (testing) or your domain</div>
+                <div><strong>5.</strong> Save → test ✅</div>
+              </div>
+              <div style="margin-top:10px;padding:10px;background:var(--abg);border-radius:7px;font-size:12px;color:var(--amber)">
+                ⚠ With onboarding@resend.dev, test emails only go to your own account email. Add your domain at resend.com/domains to send to anyone.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DISABLED MESSAGE -->
+        <div id="noneForm" class="hidden">
+          <div class="bc">
+            <div style="text-align:center;padding:30px">
+              <div style="font-size:48px;margin-bottom:12px">🚫</div>
+              <div style="font-size:16px;font-weight:600;margin-bottom:8px">Email sending is disabled</div>
+              <div style="font-size:13px;color:var(--ink3)">Invoices and quotes will not be sent by email. Choose a provider above to enable.</div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-    </div><!-- /main -->
-  </div><!-- /layout -->
-</div><!-- /app -->
+      <!-- TICKETS -->
+      <div class="pg" id="pg-tickets">
+        <div class="ph">
+          <div><div class="pt">Support tickets</div></div>
+          <select class="fi" id="tickFilter" style="width:160px"><option value="">All</option><option value="open">Open</option><option value="resolved">Resolved</option></select>
+        </div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>User</th><th>Subject</th><th>Status</th><th>Date</th><th></th></tr></thead>
+          <tbody id="tickRows"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
+      </div>
 
-<!-- MODALS -->
-<div class="mo-bg" id="mChangePw">
-  <div class="mo-box" style="max-width:420px">
-    <div class="mo-hdr"><h3>🔑 Change password</h3><button class="ab ab-sm" id="btnClosePwMo">✕</button></div>
-    <div class="mo-body">
-      <div class="fg"><label>Current password</label><input class="fi" type="password" id="cpCur" placeholder="Current password"/></div>
-      <div class="fg"><label>New password (8+ chars)</label><input class="fi" type="password" id="cpNew" placeholder="New password"/></div>
-      <div class="fg"><label>Confirm new password</label><input class="fi" type="password" id="cpCon" placeholder="Repeat"/></div>
-      <div id="cpMsg"></div>
-    </div>
-    <div class="mo-ftr">
-      <button class="ab" id="btnCancelPw">Cancel</button>
-      <button class="ab ab-p" id="btnSavePw">Update password</button>
-    </div>
-  </div>
-</div>
+      <!-- SATISFACTION -->
+      <div class="pg" id="pg-satisfaction">
+        <div class="ph"><div><div class="pt">Client satisfaction</div></div></div>
+        <div class="g3" id="satCards"></div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>Business</th><th>Score</th><th>Comment</th><th>Date</th></tr></thead>
+          <tbody id="satRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
+      </div>
 
-<div class="mo-bg" id="mAddAdmin">
-  <div class="mo-box" style="max-width:440px">
-    <div class="mo-hdr"><h3>Add admin account</h3><button class="ab ab-sm" id="btnCloseAddAdmin">✕</button></div>
-    <div class="mo-body">
-      <div class="fg"><label>Full name</label><input class="fi" id="naName" placeholder="Support Agent"/></div>
-      <div class="fg"><label>Email</label><input class="fi" type="email" id="naEmail" placeholder="support@example.com"/></div>
-      <div class="fg"><label>Password (8+ chars)</label><input class="fi" type="password" id="naPw" placeholder="••••••••"/></div>
-      <div class="fg"><label>Role</label><select class="fi" id="naRole"><option value="support">Support (read-only)</option><option value="admin">Admin (full access)</option><option value="super_admin">Super Admin</option></select></div>
-      <div id="naMsg"></div>
-    </div>
-    <div class="mo-ftr">
-      <button class="ab" id="btnCancelAddAdmin">Cancel</button>
-      <button class="ab ab-p" id="btnSaveAdmin">Create admin</button>
-    </div>
-  </div>
-</div>
+      <!-- BROADCAST -->
+      <div class="pg" id="pg-broadcast">
+        <div class="ph"><div><div class="pt">Broadcast email</div><div class="ps">Send to all or filtered users</div></div></div>
+        <div class="g2">
+          <div class="bc">
+            <div class="fg"><label>Subject</label><input class="fi" id="bSubj" placeholder="Subject line"/></div>
+            <div class="fg"><label>Plan filter</label><select class="fi" id="bPlan"><option value="">All users</option><option value="free">Free</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select></div>
+            <div class="fg"><label>Message</label><textarea class="fi" id="bMsg" rows="5" placeholder="Hi there..."></textarea></div>
+            <button class="ab ab-p" style="width:100%;justify-content:center" id="btnBroadcast">📢 Send broadcast</button>
+            <div id="broadRes" style="margin-top:10px"></div>
+          </div>
+          <div class="bc"><div class="al al-info">Target specific segments with plan filter.</div><div class="al al-warn" style="margin-top:8px">SMTP must be configured in Railway for delivery.</div></div>
+        </div>
+      </div>
 
-<div class="mo-bg" id="mTicket">
-  <div class="mo-box" style="max-width:500px">
-    <div class="mo-hdr"><h3>Reply to ticket</h3><button class="ab ab-sm" id="btnCloseTicket">✕</button></div>
-    <div class="mo-body">
-      <div id="tickContent" style="background:var(--bg);padding:12px;border-radius:8px;margin-bottom:14px;font-size:13px;line-height:1.6"></div>
-      <div class="fg"><label>Your reply</label><textarea class="fi" id="tickReply" rows="4" placeholder="Type your response..."></textarea></div>
-      <div class="fg"><label>Update status</label><select class="fi" id="tickStat"><option value="resolved">Mark resolved</option><option value="open">Keep open</option></select></div>
-    </div>
-    <div class="mo-ftr">
-      <button class="ab" id="btnCancelTicket">Cancel</button>
-      <button class="ab ab-p" id="btnSendTicket">Send reply</button>
-    </div>
-  </div>
-</div>
+      <!-- ADMINS -->
+      <div class="pg" id="pg-admins">
+        <div class="ph"><div><div class="pt">Admin accounts</div></div><button class="ab ab-p" id="btnAddAdmin">+ Add admin</button></div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Last login</th><th>Status</th><th></th></tr></thead>
+          <tbody id="adminRows"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
+      </div>
+
+      <!-- AUDIT -->
+      <div class="pg" id="pg-audit">
+        <div class="ph"><div><div class="pt">Audit log</div></div></div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>Admin</th><th>Action</th><th>Entity</th><th>Time</th></tr></thead>
+          <tbody id="auditRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
+      </div>
+
+      </div>
+
+      <!-- EMAIL SETTINGS -->
+      <div class="pg" id="pg-email">
+        <div class="ph">
+          <div><div class="pt">📧 Email settings</div><div class="ps">All email sent from InvoicePro — invoices, quotes, reminders — uses these settings</div></div>
+        </div>
+
+        <!-- Current status -->
+        <div id="emailStatusBanner" style="margin-bottom:16px"></div>
+
+        <!-- Provider selector -->
+        <div class="bc" style="margin-bottom:14px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:14px">Choose email provider</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px" id="providerCards">
+            <div class="provider-card" data-provider="smtp" onclick="selectProvider('smtp')" style="border:2px solid var(--ink);border-radius:10px;padding:16px;cursor:pointer;text-align:center;background:var(--ink);color:white">
+              <div style="font-size:24px;margin-bottom:6px">⚙️</div>
+              <div style="font-weight:600;font-size:13px">SMTP</div>
+              <div style="font-size:11px;margin-top:3px;opacity:.8">Hostinger, SendGrid, any mail server</div>
+            </div>
+            <div class="provider-card" data-provider="resend" onclick="selectProvider('resend')" style="border:2px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;text-align:center">
+              <div style="font-size:24px;margin-bottom:6px">🚀</div>
+              <div style="font-weight:600;font-size:13px">Resend</div>
+              <div style="font-size:11px;color:var(--ink3);margin-top:3px">Free 3000/mo · API-based</div>
+            </div>
+            <div class="provider-card" data-provider="none" onclick="selectProvider('none')" style="border:2px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;text-align:center">
+              <div style="font-size:24px;margin-bottom:6px">🚫</div>
+              <div style="font-weight:600;font-size:13px">Disabled</div>
+              <div style="font-size:11px;color:var(--ink3);margin-top:3px">Turn off all emails</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SMTP FORM -->
+        <div id="smtpForm" class="g2">
+          <div class="bc">
+            <div style="font-size:13px;font-weight:600;margin-bottom:16px">⚙️ SMTP configuration</div>
+
+            <div class="fg"><label>Quick setup — choose your provider</label>
+              <select class="fi" id="smtpPreset">
+                <option value="">— Select to auto-fill host/port —</option>
+                <option value="hostinger">Hostinger (smtp.hostinger.com)</option>
+                <option value="sendgrid">SendGrid (smtp.sendgrid.net)</option>
+                <option value="mailgun">Mailgun (smtp.mailgun.org)</option>
+                <option value="outlook">Outlook / Office 365</option>
+                <option value="custom">Custom / Other</option>
+              </select>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 120px;gap:10px">
+              <div class="fg"><label>SMTP Host *</label><input class="fi" id="smtpHost" placeholder="smtp.hostinger.com"/></div>
+              <div class="fg"><label>Port *</label><input class="fi" id="smtpPort" type="number" placeholder="465"/></div>
+            </div>
+            <div class="fg"><label>Encryption</label>
+              <select class="fi" id="smtpSecure">
+                <option value="true">SSL / TLS (port 465) — recommended</option>
+                <option value="false">STARTTLS (port 587)</option>
+              </select>
+            </div>
+            <div class="fg"><label>Email address (SMTP username) *</label>
+              <input class="fi" id="smtpUser" type="email" placeholder="invoice@yourdomain.com"/>
+            </div>
+            <div class="fg"><label>Password *</label>
+              <input class="fi" id="smtpPass" type="password" placeholder="Your email password"/>
+              <div style="font-size:11px;color:var(--ink3);margin-top:4px" id="smtpPassHint">Enter your email account password</div>
+            </div>
+            <div class="fg"><label>Display name (shown to clients)</label>
+              <input class="fi" id="smtpDisplayName" placeholder="InvoicePro" value="InvoicePro"/>
+            </div>
+            <div class="fg"><label>Reply-to email (optional)</label>
+              <input class="fi" id="smtpReplyTo" type="email" placeholder="Same as above, or a different address"/>
+            </div>
+
+            <button class="ab ab-p" style="width:100%;justify-content:center;padding:13px" id="btnSaveSmtp">💾 Save &amp; activate</button>
+            <div id="smtpSaveRes" style="margin-top:10px"></div>
+          </div>
+
+          <div>
+            <div class="bc" style="margin-bottom:14px">
+              <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Test email</div>
+              <div class="fg"><label>Send test to</label>
+                <input class="fi" type="email" id="testEmailTo" placeholder="your@email.com"/>
+              </div>
+              <button class="ab ab-p" style="width:100%;justify-content:center" id="btnTestEmail2">Send test email</button>
+              <div id="testEmailRes2" style="margin-top:10px"></div>
+            </div>
+            <div class="bc">
+              <div style="font-size:13px;font-weight:600;margin-bottom:12px">📋 Provider guides</div>
+              <div id="smtpGuide">
+                <div style="font-size:12.5px;color:var(--ink2);line-height:1.9">
+                  Select a provider above to see its specific guide
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESEND FORM -->
+        <div id="resendForm" class="g2 hidden">
+          <div class="bc">
+            <div style="font-size:13px;font-weight:600;margin-bottom:4px">🚀 Resend API</div>
+            <div style="font-size:12px;color:var(--ink3);margin-bottom:16px">Free 3,000 emails/month · Works from any server · No SMTP blocking</div>
+            <div class="fg"><label>API Key *</label>
+              <input class="fi" id="resendKey" type="password" placeholder="re_xxxxxxxxxxxxxxxxxxxxxx"/>
+              <div style="font-size:11px;color:var(--ink3);margin-top:4px">Get free at <a href="https://resend.com" target="_blank" style="color:var(--blue)">resend.com</a> → API Keys</div>
+            </div>
+            <div class="fg"><label>From email *</label>
+              <input class="fi" id="resendFrom" type="email" placeholder="invoices@yourdomain.com"/>
+              <div style="font-size:11px;color:var(--ink3);margin-top:4px">Use <strong>onboarding@resend.dev</strong> for testing (sends only to your account email)</div>
+            </div>
+            <div class="fg"><label>Display name</label>
+              <input class="fi" id="resendName" placeholder="InvoicePro" value="InvoicePro"/>
+            </div>
+            <button class="ab ab-p" style="width:100%;justify-content:center;padding:13px" id="btnSaveResend">💾 Save &amp; activate</button>
+            <div id="resendSaveRes" style="margin-top:10px"></div>
+          </div>
+          <div>
+            <div class="bc" style="margin-bottom:14px">
+              <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Test email</div>
+              <div class="fg"><label>Send test to</label><input class="fi" type="email" id="resendTestTo" placeholder="your@email.com"/></div>
+              <button class="ab ab-p" style="width:100%;justify-content:center" id="btnTestResend">Send test</button>
+              <div id="resendTestRes" style="margin-top:10px"></div>
+            </div>
+            <div class="bc">
+              <div style="font-size:13px;font-weight:600;margin-bottom:10px">Quick setup</div>
+              <div style="font-size:12.5px;color:var(--ink2);line-height:2">
+                <div><strong>1.</strong> <a href="https://resend.com" target="_blank" style="color:var(--blue)">resend.com</a> → Sign up free</div>
+                <div><strong>2.</strong> API Keys → Create API Key</div>
+                <div><strong>3.</strong> Paste key above</div>
+                <div><strong>4.</strong> From: <strong>onboarding@resend.dev</strong> (testing) or your domain</div>
+                <div><strong>5.</strong> Save → test ✅</div>
+              </div>
+              <div style="margin-top:10px;padding:10px;background:var(--abg);border-radius:7px;font-size:12px;color:var(--amber)">
+                ⚠ With onboarding@resend.dev, test emails only go to your own account email. Add your domain at resend.com/domains to send to anyone.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DISABLED MESSAGE -->
+        <div id="noneForm" class="hidden">
+          <div class="bc">
+            <div style="text-align:center;padding:30px">
+              <div style="font-size:48px;margin-bottom:12px">🚫</div>
+              <div style="font-size:16px;font-weight:600;margin-bottom:8px">Email sending is disabled</div>
+              <div style="font-size:13px;color:var(--ink3)">Invoices and quotes will not be sent by email. Choose a provider above to enable.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TICKETS -->
+      <div class="pg" id="pg-tickets">
+        <div class="ph">
+          <div><div class="pt">Support tickets</div></div>
+          <select class="fi" id="tickFilter" style="width:160px"><option value="">All</option><option value="open">Open</option><option value="resolved">Resolved</option></select>
+        </div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>User</th><th>Subject</th><th>Status</th><th>Date</th><th></th></tr></thead>
+          <tbody id="tickRows"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
+      </div>
+
+      <!-- SATISFACTION -->
+      <div class="pg" id="pg-satisfaction">
+        <div class="ph"><div><div class="pt">Client satisfaction</div></div></div>
+        <div class="g3" id="satCards"></div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>Business</th><th>Score</th><th>Comment</th><th>Date</th></tr></thead>
+          <tbody id="satRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
+      </div>
+
+      <!-- BROADCAST -->
+      <div class="pg" id="pg-broadcast">
+        <div class="ph"><div><div class="pt">Broadcast email</div><div class="ps">Send to all or filtered users</div></div></div>
+        <div class="g2">
+          <div class="bc">
+            <div class="fg"><label>Subject</label><input class="fi" id="bSubj" placeholder="Subject line"/></div>
+            <div class="fg"><label>Plan filter</label><select class="fi" id="bPlan"><option value="">All users</option><option value="free">Free</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select></div>
+            <div class="fg"><label>Message</label><textarea class="fi" id="bMsg" rows="5" placeholder="Hi there..."></textarea></div>
+            <button class="ab ab-p" style="width:100%;justify-content:center" id="btnBroadcast">📢 Send broadcast</button>
+            <div id="broadRes" style="margin-top:10px"></div>
+          </div>
+          <div class="bc"><div class="al al-info">Target specific segments with plan filter.</div><div class="al al-warn" style="margin-top:8px">SMTP must be configured in Railway for delivery.</div></div>
+        </div>
+      </div>
+
+      <!-- ADMINS -->
+      <div class="pg" id="pg-admins">
+        <div class="ph"><div><div class="pt">Admin accounts</div></div><button class="ab ab-p" id="btnAddAdmin">+ Add admin</button></div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Last login</th><th>Status</th><th></th></tr></thead>
+          <tbody id="adminRows"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
+      </div>
+
+      <!-- AUDIT -->
+      <div class="pg" id="pg-audit">
+        <div class="ph"><div><div class="pt">Audit log</div></div></div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>Admin</th><th>Action</th><th>Entity</th><th>Time</th></tr></thead>
+          <tbody id="auditRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
+      </div>
 
 <script>
 var API='/api', tok=null, curTick=null, uPage=1, iPage=1;
@@ -1076,98 +1141,112 @@ function loadAudit(){
 
 
 
-// ── RESEND / EMAIL TABS ───────────────────────────────────
-function switchEmailTab(tab) {
-  if (tab === 'resend') {
-    q('panelResend').classList.remove('hidden');
-    q('panelSmtp').classList.add('hidden');
-    q('tabResend').style.borderBottom = '2px solid var(--ink)';
-    q('tabResend').style.color = 'var(--ink)';
-    q('tabResend').style.fontWeight = '600';
-    q('tabSmtp').style.borderBottom = 'none';
-    q('tabSmtp').style.color = 'var(--ink3)';
-    q('tabSmtp').style.fontWeight = '400';
-  } else {
-    q('panelSmtp').classList.remove('hidden');
-    q('panelResend').classList.add('hidden');
-    q('tabSmtp').style.borderBottom = '2px solid var(--ink)';
-    q('tabSmtp').style.color = 'var(--ink)';
-    q('tabSmtp').style.fontWeight = '600';
-    q('tabResend').style.borderBottom = 'none';
-    q('tabResend').style.color = 'var(--ink3)';
-    q('tabResend').style.fontWeight = '400';
-  }
+// ── EMAIL SETTINGS ────────────────────────────────────────
+var SMTP_PRESETS = {
+  hostinger:{host:'smtp.hostinger.com',port:'465',secure:'true',hint:'Use your Hostinger mailbox password'},
+  sendgrid: {host:'smtp.sendgrid.net', port:'587',secure:'false',hint:'Username: apikey  Password: your SendGrid API key'},
+  mailgun:  {host:'smtp.mailgun.org',  port:'587',secure:'false',hint:'Use your Mailgun SMTP credentials'},
+  outlook:  {host:'smtp.office365.com',port:'587',secure:'false',hint:'Use your Microsoft account password'},
+  custom:   {host:'',                  port:'587',secure:'false',hint:'Enter your mail server details'},
+};
+var SMTP_GUIDES = {
+  hostinger:'<strong>Hostinger:</strong> hPanel → Emails → Mailboxes → create invoice@yourdomain.com → use that password below<br><br><code style="background:var(--bg);padding:6px 10px;border-radius:6px;display:block;font-size:11px;line-height:1.8">Host: smtp.hostinger.com<br>Port: 465 (SSL)<br>User: invoice@yourdomain.com<br>Pass: your mailbox password</code>',
+  sendgrid: '<strong>SendGrid (free 100/day):</strong> sendgrid.com → API Keys → Create<br><br><code style="background:var(--bg);padding:6px 10px;border-radius:6px;display:block;font-size:11px;line-height:1.8">Host: smtp.sendgrid.net<br>Port: 587<br>User: apikey<br>Pass: your_api_key</code>',
+  mailgun:  '<strong>Mailgun:</strong> mailgun.com → Sending → Domains → SMTP credentials',
+  outlook:  '<strong>Outlook:</strong> Use your Microsoft 365 email and password',
+  custom:   '<strong>Custom SMTP:</strong> Contact your email provider for SMTP details',
+};
+var currentEmailProvider = 'smtp';
+
+function selectProvider(p) {
+  currentEmailProvider = p;
+  document.querySelectorAll('.provider-card').forEach(function(c){
+    var isSelected = c.dataset.provider === p;
+    c.style.border = isSelected ? '2px solid var(--ink)' : '2px solid var(--border)';
+    c.style.background = isSelected ? 'var(--ink)' : '';
+    c.style.color = isSelected ? 'white' : 'var(--ink)';
+  });
+  if(q('smtpForm')) q('smtpForm').classList.toggle('hidden', p !== 'smtp');
+  if(q('resendForm')) q('resendForm').classList.toggle('hidden', p !== 'resend');
+  if(q('noneForm')) q('noneForm').classList.toggle('hidden', p !== 'none');
 }
 
 function loadEmailSettings() {
-  // Load Resend settings
-  req('/admin/resend-settings').then(function(d) {
-    if (q('resendFrom')) q('resendFrom').value = d.resend_from || '';
-    if (q('resendName')) q('resendName').value = d.resend_name || 'InvoicePro';
-    if (q('resendKey')) q('resendKey').placeholder = d.configured ? 're_•••••••••• (saved — enter new to change)' : 're_xxxxxxxxxxxxxxxxxxxxxxxx';
-    // Auto-fill test email
-    if (q('testEmailTo') && !q('testEmailTo').value && d.resend_from && d.resend_from.includes('@')) {
-      // Don't auto-fill with onboarding@resend.dev
-      if (!d.resend_from.includes('resend.dev')) q('testEmailTo').value = d.resend_from;
-    }
-    if (d.email_provider === 'resend' || d.configured) {
-      switchEmailTab('resend');
-      if (q('emailStatusBanner')) q('emailStatusBanner').innerHTML = '<div class="al al-ok"><strong>✅ Email configured via Resend</strong> — Sending from ' + (d.resend_from || '—') + '</div>';
-    }
-  }).catch(function(){});
+  Promise.all([req('/admin/email-settings'), req('/admin/resend-settings')]).then(function(res){
+    var smtp=res[0], resend=res[1];
+    // Fill SMTP
+    if(q('smtpHost')) q('smtpHost').value = smtp.smtp_host||'';
+    if(q('smtpPort')) q('smtpPort').value = smtp.smtp_port||'465';
+    if(q('smtpSecure')) q('smtpSecure').value = (smtp.smtp_secure===true||smtp.smtp_secure==='true'||smtp.smtp_port==='465')?'true':'false';
+    if(q('smtpUser')) q('smtpUser').value = smtp.smtp_user||'';
+    if(q('smtpPass')) q('smtpPass').placeholder = smtp.source!=='not_configured' ? '•••••••• (saved — enter new to change)' : 'Enter your email password';
+    if(q('smtpDisplayName')){ var m=(smtp.smtp_from||'').match(/^(.+?)\s*</); q('smtpDisplayName').value = m?m[1].trim():'InvoicePro'; }
+    if(q('testEmailTo')&&!q('testEmailTo').value&&smtp.smtp_user) q('testEmailTo').value=smtp.smtp_user;
+    // Fill Resend
+    if(q('resendFrom')) q('resendFrom').value = resend.resend_from||'';
+    if(q('resendName')) q('resendName').value = resend.resend_name||'InvoicePro';
+    if(q('resendKey')) q('resendKey').placeholder = resend.configured ? 're_•••••••• (saved)' : 're_xxxxxxxxxxxxxxxxx';
+    if(q('resendTestTo')&&resend.resend_from&&!resend.resend_from.includes('resend.dev')) q('resendTestTo').value=resend.resend_from;
+    // Determine provider & show status
+    var provider = 'smtp';
+    if(resend.configured && smtp.source==='not_configured') provider = 'resend';
+    selectProvider(provider);
+    var banner = '';
+    if(provider==='resend'&&resend.configured) banner='<div class="al al-ok"><strong>✅ Email active via Resend</strong> — From: '+resend.resend_from+'</div>';
+    else if(smtp.source!=='not_configured') banner='<div class="al al-ok"><strong>✅ Email active via '+smtp.smtp_host+'</strong> — Sending as: '+smtp.smtp_user+'</div>';
+    else banner='<div class="al al-warn"><strong>⚠ Email not configured</strong> — Choose a provider below</div>';
+    if(q('emailStatusBanner')) q('emailStatusBanner').innerHTML = banner;
+  }).catch(function(){
+    if(q('emailStatusBanner')) q('emailStatusBanner').innerHTML='<div class="al al-warn">⚠ Could not load email settings</div>';
+  });
+}
 
-  // Load SMTP settings
-  req('/admin/email-settings').then(function(d) {
-    if (q('smtpHost')) q('smtpHost').value = d.smtp_host || 'smtp.hostinger.com';
-    if (q('smtpPort')) q('smtpPort').value = d.smtp_port || '465';
-    if (q('smtpUser')) q('smtpUser').value = d.smtp_user || 'invoice@asproite.com';
-    if (q('smtpFrom')) q('smtpFrom').value = d.smtp_from || 'InvoicePro <invoice@asproite.com>';
-    if (q('smtpSecure')) q('smtpSecure').value = (d.smtp_secure === true || d.smtp_secure === 'true' || d.smtp_port === '465') ? 'true' : 'false';
-    if (q('smtpPass')) {
-      q('smtpPass').placeholder = (d.source !== 'not_configured') ? '•••••••• (saved — enter new to change)' : 'Enter your invoice@asproite.com password';
-    }
-    // Show SMTP status if not using Resend
-    if (q('emailStatusBanner') && q('emailStatusBanner').innerHTML.indexOf('Resend') === -1) {
-      if (d.source === 'database' && d.smtp_host) {
-        q('emailStatusBanner').innerHTML = '<div class="al al-ok"><strong>✅ Email configured</strong> — Sending from <strong>' + d.smtp_user + '</strong> via ' + d.smtp_host + '</div>';
-        // Switch to SMTP tab
-        switchEmailTab('smtp');
-      } else if (d.source === 'env_vars') {
-        q('emailStatusBanner').innerHTML = '<div class="al al-info">ℹ Using Railway env vars for SMTP (' + d.smtp_user + ')</div>';
-        switchEmailTab('smtp');
-      }
-    }
-  }).catch(function(){});
+function doSaveSmtp() {
+  var host=q('smtpHost').value.trim(), port=q('smtpPort').value||'465';
+  var secure=q('smtpSecure').value==='true';
+  var user=q('smtpUser').value.trim(), pass=q('smtpPass').value.trim();
+  var displayName=(q('smtpDisplayName')&&q('smtpDisplayName').value.trim())||'InvoicePro';
+  var from = displayName+' <'+user+'>';
+  if(!host){errMsg('smtpSaveRes','SMTP host required');return;}
+  if(!user||!user.includes('@')){errMsg('smtpSaveRes','Valid email required');return;}
+  q('smtpSaveRes').innerHTML='<div class="al al-info">Saving...</div>';
+  var body={smtp_host:host,smtp_port:port,smtp_user:user,smtp_from:from,smtp_secure:secure};
+  if(pass) body.smtp_pass=pass;
+  req('/admin/email-settings',{method:'POST',body:JSON.stringify(body)})
+    .then(function(d){okMsg('smtpSaveRes',d.message);setTimeout(loadEmailSettings,600);})
+    .catch(function(e){errMsg('smtpSaveRes',e.message);});
 }
 
 function doSaveResend() {
-  var key = q('resendKey').value.trim();
-  var from = q('resendFrom').value.trim();
-  var name = q('resendName').value.trim() || 'InvoicePro';
-  if (!from) { errMsg('resendSaveRes', 'From email is required'); return; }
-  if (!from.includes('@')) { errMsg('resendSaveRes', 'Enter a valid email address'); return; }
-  if (key && !key.startsWith('re_')) { errMsg('resendSaveRes', 'Invalid API key. Resend keys start with re_'); return; }
-  q('resendSaveRes').innerHTML = '<div class="al al-info">Saving...</div>';
-  var body = { resend_from: from, resend_name: name };
-  if (key) body.resend_api_key = key;
-  req('/admin/resend-settings', {method:'POST', body:JSON.stringify(body)})
-    .then(function(d) { okMsg('resendSaveRes', d.message); loadEmailSettings(); })
-    .catch(function(e) { errMsg('resendSaveRes', e.message); });
+  var key=q('resendKey').value.trim(), from=q('resendFrom').value.trim(), name=(q('resendName').value.trim())||'InvoicePro';
+  if(!from||!from.includes('@')){errMsg('resendSaveRes','Valid from email required');return;}
+  if(key&&!key.startsWith('re_')){errMsg('resendSaveRes','Resend keys start with re_');return;}
+  q('resendSaveRes').innerHTML='<div class="al al-info">Saving...</div>';
+  var body={resend_from:from,resend_name:name};
+  if(key) body.resend_api_key=key;
+  req('/admin/resend-settings',{method:'POST',body:JSON.stringify(body)})
+    .then(function(d){okMsg('resendSaveRes',d.message);setTimeout(loadEmailSettings,600);})
+    .catch(function(e){errMsg('resendSaveRes',e.message);});
 }
 
-function doTestEmail2() {
-  var to = q('testEmailTo') ? q('testEmailTo').value.trim() : '';
-  if (!to || !to.includes('@')) {
-    if (q('testEmailRes2')) q('testEmailRes2').innerHTML = '<div class="al al-err">Enter a valid email address</div>';
-    return;
-  }
-  if (q('testEmailRes2')) q('testEmailRes2').innerHTML = '<div class="al al-info">Sending to ' + to + '...</div>';
-  req('/admin/test-email', {method:'POST', body:JSON.stringify({to:to})})
-    .then(function(d) { if (q('testEmailRes2')) q('testEmailRes2').innerHTML = '<div class="al al-ok">'+d.message+'</div>'; })
-    .catch(function(e) { if (q('testEmailRes2')) q('testEmailRes2').innerHTML = '<div class="al al-err">❌ '+e.message+'</div>'; });
+function doTestEmail2(){
+  var to=q('testEmailTo')?q('testEmailTo').value.trim():'';
+  if(!to||!to.includes('@')){if(q('testEmailRes2'))q('testEmailRes2').innerHTML='<div class="al al-err">Enter valid email</div>';return;}
+  if(q('testEmailRes2'))q('testEmailRes2').innerHTML='<div class="al al-info">Sending to '+to+'...</div>';
+  req('/admin/test-email',{method:'POST',body:JSON.stringify({to:to})})
+    .then(function(d){if(q('testEmailRes2'))q('testEmailRes2').innerHTML='<div class="al al-ok">'+d.message+'</div>';})
+    .catch(function(e){if(q('testEmailRes2'))q('testEmailRes2').innerHTML='<div class="al al-err">❌ '+e.message+'</div>';});
 }
+function doTestResend(){
+  var to=q('resendTestTo')?q('resendTestTo').value.trim():'';
+  if(!to||!to.includes('@')){if(q('resendTestRes'))q('resendTestRes').innerHTML='<div class="al al-err">Enter valid email</div>';return;}
+  if(q('resendTestRes'))q('resendTestRes').innerHTML='<div class="al al-info">Sending...</div>';
+  req('/admin/test-email',{method:'POST',body:JSON.stringify({to:to})})
+    .then(function(d){if(q('resendTestRes'))q('resendTestRes').innerHTML='<div class="al al-ok">'+d.message+'</div>';})
+    .catch(function(e){if(q('resendTestRes'))q('resendTestRes').innerHTML='<div class="al al-err">❌ '+e.message+'</div>';});
+}
+function doTestEmail(){doTestEmail2();}
 
-// ── EMAIL SETTINGS ────────────────────────────────────────
 var PROVIDERS = {
   hostinger:{host:'smtp.hostinger.com', port:'465', secure:true},
   gmail:    {host:'smtp.gmail.com',     port:'587', secure:false},

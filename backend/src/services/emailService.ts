@@ -2,46 +2,75 @@ import nodemailer from 'nodemailer'
 import dotenv from 'dotenv'
 dotenv.config()
 
-// Get SMTP config from DB (admin settings) or fall back to env vars
-async function getSmtpConfig() {
+// ── Get email config from DB (admin settings) ─────────────
+// This is the ONLY source of truth for email config
+// Admin controls everything from the Super Admin panel
+export async function getEmailConfig() {
   try {
     const { supabase } = await import('../lib/supabase')
     const { data } = await supabase.from('app_settings')
       .select('key, value')
-      .in('key', ['smtp_host','smtp_port','smtp_user','smtp_pass','smtp_from','smtp_secure'])
-    if (data && data.length > 0) {
-      const cfg: any = {}
-      data.forEach((r: any) => { try { cfg[r.key] = JSON.parse(r.value) } catch { cfg[r.key] = r.value } })
-      if (cfg.smtp_host && cfg.smtp_user && cfg.smtp_pass) {
-        return {
-          host: cfg.smtp_host,
-          port: parseInt(cfg.smtp_port || '587'),
-          secure: cfg.smtp_secure === true || cfg.smtp_secure === 'true',
-          auth: { user: cfg.smtp_user, pass: cfg.smtp_pass },
-          from: cfg.smtp_from || cfg.smtp_user
-        }
+      .in('key', ['email_provider','resend_api_key','resend_from','resend_name',
+        'smtp_host','smtp_port','smtp_user','smtp_pass','smtp_from','smtp_secure'])
+    
+    if (!data || data.length === 0) throw new Error('no_config')
+    
+    const cfg: any = {}
+    data.forEach((r: any) => { 
+      try { cfg[r.key] = JSON.parse(r.value) } 
+      catch { cfg[r.key] = r.value } 
+    })
+    
+    const provider = cfg.email_provider || (cfg.resend_api_key ? 'resend' : cfg.smtp_host ? 'smtp' : 'none')
+    return { provider, cfg }
+  } catch(e) {
+    // Fall back to env vars only if DB fails
+    return {
+      provider: process.env.SMTP_HOST ? 'smtp' : 'none',
+      cfg: {
+        smtp_host: process.env.SMTP_HOST || '',
+        smtp_port: process.env.SMTP_PORT || '587',
+        smtp_user: process.env.SMTP_USER || '',
+        smtp_pass: process.env.SMTP_PASS || '',
+        smtp_from: process.env.EMAIL_FROM || process.env.SMTP_USER || '',
+        smtp_secure: process.env.SMTP_PORT === '465',
       }
     }
-  } catch(e) { /* fall through to env vars */ }
-  // Fall back to env vars
-  const envHost = process.env.SMTP_HOST || ''
-  const envUser = process.env.SMTP_USER || ''
-  const envPass = process.env.SMTP_PASS || ''
-  return {
-    host: envHost,
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465',
-    auth: { user: envUser, pass: envPass },
-    from: process.env.EMAIL_FROM || envUser
   }
 }
 
-async function createTransporter() {
-  const cfg = await getSmtpConfig()
-  if (!cfg.host || !cfg.auth.user || !cfg.auth.pass) {
-    throw new Error('Email not configured. Set up SMTP in Super Admin → System health → Email settings.')
+async function sendEmail(to: string, subject: string, html: string, attachments?: any[]) {
+  const { provider, cfg } = await getEmailConfig()
+  
+  if (provider === 'none') {
+    throw new Error('Email not configured. Set up email in Super Admin → Email settings.')
   }
-  return { transporter: nodemailer.createTransport({ host: cfg.host, port: cfg.port, secure: cfg.secure, auth: cfg.auth }), from: cfg.from }
+  
+  if (provider === 'resend') {
+    if (!cfg.resend_api_key) throw new Error('Resend API key not configured.')
+    const { Resend } = await import('resend')
+    const resend = new Resend(cfg.resend_api_key)
+    const fromStr = cfg.resend_name 
+      ? `${cfg.resend_name} <${cfg.resend_from}>` 
+      : cfg.resend_from
+    const result = await resend.emails.send({ from: fromStr, to: [to], subject, html, attachments })
+    if (result.error) throw new Error(result.error.message)
+    return result
+  }
+  
+  // SMTP
+  if (!cfg.smtp_host || !cfg.smtp_user || !cfg.smtp_pass) {
+    throw new Error('SMTP not fully configured. Go to Super Admin → Email settings.')
+  }
+  const transporter = nodemailer.createTransport({
+    host: cfg.smtp_host,
+    port: parseInt(cfg.smtp_port || '587'),
+    secure: cfg.smtp_secure === true || cfg.smtp_secure === 'true' || cfg.smtp_port === '465',
+    auth: { user: cfg.smtp_user, pass: cfg.smtp_pass },
+    tls: { rejectUnauthorized: false }
+  })
+  const fromStr = cfg.smtp_from || cfg.smtp_user
+  await transporter.sendMail({ from: fromStr, to, subject, html, attachments })
 }
 
 const base = (content: string, accentColor = '#0f172a') => `<!DOCTYPE html>
@@ -68,134 +97,94 @@ const base = (content: string, accentColor = '#0f172a') => `<!DOCTYPE html>
 </style></head><body><div class="wrap">${content}</div></body></html>`
 
 export const emailService = {
-  // ── INVOICE EMAIL ──────────────────────────────────────
   async sendInvoice({ to, clientName, invoice, pdfBuffer }: { to: string; clientName: string; invoice: any; pdfBuffer: Buffer }) {
     const dueDate = new Date(invoice.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
     const html = base(`
       <div class="hdr"><h1>Invoice ${invoice.invoice_number}</h1><p>From ${invoice.profiles?.company_name || invoice.profiles?.full_name || 'Your Vendor'}</p></div>
       <div class="body">
-        <p style="color:#374151;font-size:15px">Hi ${clientName},</p>
+        <p style="color:#374151;font-size:15px">Dear ${clientName},</p>
         <p style="color:#6b7280;font-size:14px;line-height:1.6">Please find attached your invoice. You can pay securely online using the button below.</p>
         <div class="box">
-          <div class="row"><span>Invoice</span><span><strong>${invoice.invoice_number}</strong></span></div>
-          <div class="row"><span>Due date</span><span>${dueDate}</span></div>
-          ${invoice.tax_amount > 0 ? `<div class="row"><span>Subtotal</span><span>${invoice.currency} ${invoice.subtotal?.toFixed(2)}</span></div><div class="row"><span>VAT (${invoice.tax_rate}%)</span><span>${invoice.currency} ${invoice.tax_amount?.toFixed(2)}</span></div>` : ''}
-          ${invoice.late_fee_amount > 0 ? `<div class="row"><span style="color:#dc2626">Late fee</span><span style="color:#dc2626">${invoice.currency} ${invoice.late_fee_amount?.toFixed(2)}</span></div>` : ''}
-          <div class="total"><span>Total due</span><span>${invoice.currency} ${invoice.total?.toFixed(2)}</span></div>
+          <div class="row"><span>Invoice number</span><strong>${invoice.invoice_number}</strong></div>
+          <div class="row"><span>Due date</span><strong>${dueDate}</strong></div>
+          <div class="row"><span>Currency</span><strong>${invoice.currency || 'GBP'}</strong></div>
+          <div class="total"><span>Total due</span><span>${invoice.currency || '£'}${invoice.total?.toFixed(2)}</span></div>
         </div>
-        ${invoice.stripe_payment_link ? `<div style="text-align:center"><a href="${invoice.stripe_payment_link}" class="btn btn-primary">Pay Now — ${invoice.currency} ${invoice.total?.toFixed(2)}</a></div>` : ''}
-        ${invoice.notes ? `<p style="color:#6b7280;font-size:13px"><strong>Notes:</strong> ${invoice.notes}</p>` : ''}
+        ${invoice.stripe_payment_link ? `<a href="${invoice.stripe_payment_link}" class="btn btn-primary" style="background:#0f172a;color:#fff">Pay Now — ${invoice.currency || '£'}${invoice.total?.toFixed(2)}</a>` : ''}
       </div>
-      <div class="footer"><p>Invoice attached as PDF. Reply to this email with any questions.</p></div>`)
-    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: emailFrom, to, subject: `Invoice ${invoice.invoice_number} — ${invoice.currency} ${invoice.total?.toFixed(2)} due ${dueDate}`, html, attachments: [{ filename: `${invoice.invoice_number}.pdf`, content: pdfBuffer, contentType: 'application/pdf' }] })
+      <div class="footer">This invoice was sent via InvoicePro. Please do not reply to this email.</div>`)
+    await sendEmail(to, `Invoice ${invoice.invoice_number} — ${invoice.currency || 'GBP'} ${invoice.total?.toFixed(2)} due ${dueDate}`, html, [
+      { filename: `${invoice.invoice_number}.pdf`, content: pdfBuffer, contentType: 'application/pdf' }
+    ])
   },
 
-  // ── QUOTE EMAIL ────────────────────────────────────────
   async sendQuote({ to, clientName, quote, portalUrl }: { to: string; clientName: string; quote: any; portalUrl: string }) {
-    const expiryDate = new Date(quote.expiry_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+    const expiryDate = quote.expiry_date ? new Date(quote.expiry_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'No expiry'
     const html = base(`
-      <div class="hdr" style="background:#1e40af"><h1>Quote ${quote.quote_number}</h1><p>From ${quote.profiles?.company_name || quote.profiles?.full_name}</p></div>
+      <div class="hdr" style="background:#0369a1"><h1>Quote ${quote.quote_number}</h1><p>Review and respond below</p></div>
       <div class="body">
-        <p style="color:#374151;font-size:15px">Hi ${clientName},</p>
-        <p style="color:#6b7280;font-size:14px;line-height:1.6">Please review the quote below. You can accept or decline it online using the button below.</p>
+        <p style="color:#374151;font-size:15px">Dear ${clientName},</p>
+        <p style="color:#6b7280;font-size:14px;line-height:1.6">Please review the quote below and let us know if you'd like to proceed.</p>
         <div class="box">
-          <div class="row"><span>Quote number</span><span><strong>${quote.quote_number}</strong></span></div>
-          <div class="row"><span>Valid until</span><span>${expiryDate}</span></div>
-          ${quote.tax_amount > 0 ? `<div class="row"><span>Subtotal</span><span>${quote.currency} ${quote.subtotal?.toFixed(2)}</span></div><div class="row"><span>VAT (${quote.tax_rate}%)</span><span>${quote.currency} ${quote.tax_amount?.toFixed(2)}</span></div>` : ''}
-          <div class="total"><span>Total</span><span>${quote.currency} ${quote.total?.toFixed(2)}</span></div>
+          <div class="row"><span>Quote number</span><strong>${quote.quote_number}</strong></div>
+          <div class="row"><span>Valid until</span><strong>${expiryDate}</strong></div>
+          <div class="total"><span>Total</span><span>${quote.currency || '£'}${quote.total?.toFixed(2)}</span></div>
         </div>
-        <div style="text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-          <a href="${portalUrl}?action=accept" class="btn btn-success">Accept Quote</a>
-          <a href="${portalUrl}?action=decline" class="btn btn-danger">Decline</a>
-        </div>
-        <p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:8px">Or <a href="${portalUrl}">view full quote online</a></p>
-        ${quote.notes ? `<p style="color:#6b7280;font-size:13px;margin-top:16px"><strong>Notes:</strong> ${quote.notes}</p>` : ''}
+        <a href="${portalUrl}?action=accept" class="btn btn-success" style="margin-right:12px">✓ Accept Quote</a>
+        <a href="${portalUrl}?action=decline" class="btn btn-danger">✗ Decline</a>
+        <p style="color:#9ca3af;font-size:13px;margin-top:16px">Or view online: <a href="${portalUrl}" style="color:#0369a1">${portalUrl}</a></p>
       </div>
-      <div class="footer"><p>This quote expires on ${expiryDate}. Reply to this email with any questions.</p></div>`, '#1e40af')
-    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: emailFrom, to, subject: `Quote ${quote.quote_number} — ${quote.currency} ${quote.total?.toFixed(2)} — Action required`, html })
+      <div class="footer">This quote was sent via InvoicePro.</div>`)
+    await sendEmail(to, `Quote ${quote.quote_number} — ${quote.currency || 'GBP'} ${quote.total?.toFixed(2)} — Please review`, html)
   },
 
-  // ── PAYMENT CONFIRMATION ───────────────────────────────
-  async sendPaymentConfirmation({ invoice, client }: { invoice: any; client: any }) {
+  async sendPaymentReminder({ to, clientName, invoice }: { to: string; clientName: string; invoice: any }) {
+    const dueDate = new Date(invoice.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+    const isOverdue = new Date(invoice.due_date) < new Date()
     const html = base(`
-      <div class="hdr" style="background:#15803d"><h1>Payment received</h1><p>Thank you!</p></div>
+      <div class="hdr" style="background:${isOverdue ? '#dc2626' : '#d97706'}">
+        <h1>${isOverdue ? '⚠ Overdue Invoice' : '⏰ Payment Reminder'}</h1>
+        <p>Invoice ${invoice.invoice_number}</p>
+      </div>
       <div class="body">
-        <p style="color:#374151;font-size:15px">Hi ${client.name},</p>
-        <p style="color:#6b7280;font-size:14px;line-height:1.6">We've received your payment for invoice <strong>${invoice.invoice_number}</strong>.</p>
+        <p style="color:#374151;font-size:15px">Dear ${clientName},</p>
+        <p style="color:#6b7280;font-size:14px;line-height:1.6">
+          ${isOverdue ? 'This invoice is now overdue. Please arrange payment as soon as possible.' : 'This is a friendly reminder that payment is due soon.'}
+        </p>
         <div class="box">
-          <div class="row"><span>Invoice</span><span>${invoice.invoice_number}</span></div>
-          <div class="row"><span>Amount paid</span><span><strong>${invoice.currency} ${invoice.total?.toFixed(2)}</strong></span></div>
-          <div class="row"><span>Date</span><span>${new Date().toLocaleDateString('en-GB')}</span></div>
-          <div class="row"><span>Status</span><span><span class="badge badge-accepted">Paid</span></span></div>
+          <div class="row"><span>Invoice</span><strong>${invoice.invoice_number}</strong></div>
+          <div class="row"><span>Due date</span><strong>${dueDate}</strong></div>
+          <div class="total"><span>Amount due</span><span>${invoice.currency || '£'}${invoice.total?.toFixed(2)}</span></div>
         </div>
-        <p style="color:#6b7280;font-size:13px">Please keep this email as your payment confirmation.</p>
+        ${invoice.stripe_payment_link ? `<a href="${invoice.stripe_payment_link}" class="btn btn-primary" style="background:#dc2626">Pay Now</a>` : ''}
       </div>
-      <div class="footer"><p>Thank you for your business!</p></div>`, '#15803d')
-    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: emailFrom, to: client.email, subject: `Payment confirmed — Invoice ${invoice.invoice_number}`, html })
+      <div class="footer">InvoicePro payment reminder.</div>`)
+    await sendEmail(to, `${isOverdue ? '[OVERDUE] ' : ''}Payment reminder — Invoice ${invoice.invoice_number}`, html)
   },
 
-  // ── OVERDUE REMINDER ───────────────────────────────────
-  async sendOverdueReminder({ invoice, client, daysOverdue }: { invoice: any; client: any; daysOverdue: number }) {
-    const html = base(`
-      <div class="hdr" style="background:#7f1d1d"><h1>Payment overdue</h1><p>Invoice ${invoice.invoice_number} is ${daysOverdue} days overdue</p></div>
-      <div class="body">
-        <p style="color:#374151;font-size:15px">Hi ${client.name},</p>
-        <p style="color:#6b7280;font-size:14px;line-height:1.6">Invoice <strong>${invoice.invoice_number}</strong> was due on <strong>${new Date(invoice.due_date).toLocaleDateString('en-GB')}</strong> and is now <strong>${daysOverdue} days overdue</strong>.</p>
-        <div class="box">
-          <div class="row"><span>Invoice</span><span>${invoice.invoice_number}</span></div>
-          <div class="row"><span>Due date</span><span>${new Date(invoice.due_date).toLocaleDateString('en-GB')}</span></div>
-          <div class="total"><span>Amount due</span><span>${invoice.currency} ${invoice.total?.toFixed(2)}</span></div>
-        </div>
-        ${invoice.stripe_payment_link ? `<div style="text-align:center"><a href="${invoice.stripe_payment_link}" class="btn btn-primary" style="background:#dc2626">Pay Now</a></div>` : ''}
-      </div>
-      <div class="footer"><p>If you have already sent payment, please disregard this notice.</p></div>`, '#7f1d1d')
-    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: emailFrom, to: client.email, subject: `Overdue: Invoice ${invoice.invoice_number} — ${daysOverdue} days past due`, html })
+  async sendGeneral({ to, subject, html }: { to: string; subject: string; html: string }) {
+    await sendEmail(to, subject, html)
   },
-
-  // ── UPCOMING REMINDER ──────────────────────────────────
-  async sendUpcomingReminder({ invoice, client, daysUntilDue }: { invoice: any; client: any; daysUntilDue: number }) {
-    const html = base(`
-      <div class="hdr" style="background:#78350f"><h1>Payment due soon</h1><p>Due in ${daysUntilDue} days</p></div>
-      <div class="body">
-        <p style="color:#374151;font-size:15px">Hi ${client.name},</p>
-        <p style="color:#6b7280;font-size:14px;line-height:1.6">Friendly reminder: invoice <strong>${invoice.invoice_number}</strong> is due in <strong>${daysUntilDue} days</strong> on <strong>${new Date(invoice.due_date).toLocaleDateString('en-GB')}</strong>.</p>
-        <div class="box"><div class="total"><span>Amount due</span><span>${invoice.currency} ${invoice.total?.toFixed(2)}</span></div></div>
-        ${invoice.stripe_payment_link ? `<div style="text-align:center"><a href="${invoice.stripe_payment_link}" class="btn btn-primary">Pay Now</a></div>` : ''}
-      </div>
-      <div class="footer"><p>Thank you for your prompt attention.</p></div>`, '#78350f')
-    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: emailFrom, to: client.email, subject: `Reminder: Invoice ${invoice.invoice_number} due in ${daysUntilDue} days`, html })
+  async sendSatisfactionSurvey({ to, clientName, invoiceNumber, surveyUrl }: any) {
+    await sendEmail(to, `How did we do? — Invoice ${invoiceNumber}`,
+      base(`<div class="hdr" style="background:#0369a1"><h1>Quick feedback</h1></div><div class="body"><p>Dear ${clientName},</p><p style="color:#6b7280">Rate your experience — takes 30 seconds.</p><a href="${surveyUrl}" class="btn btn-primary" style="background:#0369a1">Rate now</a></div><div class="footer">InvoicePro.</div>`))
   },
-
-  // ── TEAM INVITE ────────────────────────────────────────
-  async sendTeamInvite({ to, inviteeName, inviteUrl, role }: { to: string; inviteeName: string; inviteUrl: string; role: string }) {
-    const html = base(`
-      <div class="hdr" style="background:#4338ca"><h1>You're invited to join the team</h1><p>As ${role}</p></div>
-      <div class="body">
-        <p style="color:#374151;font-size:15px">Hi ${inviteeName},</p>
-        <p style="color:#6b7280;font-size:14px;line-height:1.6">You've been invited to join as a <strong>${role}</strong> on InvoicePro. Click the button below to accept your invitation.</p>
-        <div style="text-align:center"><a href="${inviteUrl}" class="btn btn-primary" style="background:#4338ca">Accept Invitation</a></div>
-        <p style="color:#9ca3af;font-size:12px;text-align:center;margin-top:8px">This invite expires in 7 days.</p>
-      </div>
-      <div class="footer"><p>If you didn't expect this invite, you can safely ignore this email.</p></div>`, '#4338ca')
-    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: emailFrom, to, subject: `You've been invited to InvoicePro as ${role}`, html })
+  async sendTeamInvite({ to, inviterName, companyName, acceptUrl }: any) {
+    await sendEmail(to, `Invitation to join ${companyName} on InvoicePro`,
+      base(`<div class="hdr"><h1>Team invitation</h1></div><div class="body"><p>Dear team member,</p><p style="color:#6b7280">${inviterName} has invited you to join <strong>${companyName}</strong> on InvoicePro.</p><a href="${acceptUrl}" class="btn btn-primary" style="background:#0f172a">Accept invitation</a></div><div class="footer">InvoicePro.</div>`))
   },
-
-  async sendSatisfactionSurvey({ to, clientName, companyName, surveyUrl, invoice }: { to: string; clientName: string; companyName: string; surveyUrl: string; invoice: any }) {
-    const html = base(`
-      <div class="hdr" style="background:#0f766e"><h1>How did we do?</h1><p>Quick feedback</p></div>
-      <div class="body">
-        <p style="color:#374151;font-size:15px">Hi ${clientName},</p>
-        <p style="color:#6b7280;font-size:14px;line-height:1.6">Thank you for paying invoice <strong>${invoice.invoice_number}</strong>. We'd love to hear how your experience was with <strong>${companyName}</strong>.</p>
-        <div style="text-align:center;margin:24px 0">
-          <p style="color:#374151;font-weight:600;margin-bottom:16px">How would you rate your experience? (click one)</p>
-          <a href="${surveyUrl}?score=5" class="btn btn-primary" style="background:#16a34a">Excellent ★★★★★</a><br><br>
-          <a href="${surveyUrl}?score=4" class="btn btn-secondary" style="display:inline-block;padding:10px 20px;border:1px solid #e2e8f0;border-radius:8px;text-decoration:none;font-size:13px;color:#374151;margin:4px">Good ★★★★</a>
-          <a href="${surveyUrl}?score=3" class="btn btn-secondary" style="display:inline-block;padding:10px 20px;border:1px solid #e2e8f0;border-radius:8px;text-decoration:none;font-size:13px;color:#374151;margin:4px">Average ★★★</a>
-          <a href="${surveyUrl}?score=2" class="btn btn-secondary" style="display:inline-block;padding:10px 20px;border:1px solid #e2e8f0;border-radius:8px;text-decoration:none;font-size:13px;color:#374151;margin:4px">Poor ★★</a>
-          <a href="${surveyUrl}?score=1" class="btn btn-danger" style="display:inline-block;padding:10px 20px;border:1px solid #fecaca;border-radius:8px;text-decoration:none;font-size:13px;color:#dc2626;margin:4px">Terrible ★</a>
-        </div>
-      </div>
-      <div class="footer"><p>Your feedback helps us improve. Thank you!</p></div>`, '#0f766e')
-    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: emailFrom, to, subject: `How did we do? — Quick feedback for ${companyName}`, html })
+  async sendPaymentConfirmation({ to, clientName, invoice }: any) {
+    await sendEmail(to, `Payment received — Invoice ${invoice.invoice_number}`,
+      base(`<div class="hdr" style="background:#16a34a"><h1>Payment received</h1></div><div class="body"><p>Dear ${clientName},</p><p style="color:#6b7280">Thank you! Payment for invoice ${invoice.invoice_number} has been received.</p><div class="box"><div class="total"><span>Amount</span><span>${invoice.currency||'£'}${invoice.total?.toFixed(2)}</span></div></div></div><div class="footer">InvoicePro.</div>`))
+  },
+  async sendOverdueReminder({ to, clientName, invoice }: any) {
+    const days = Math.floor((Date.now() - new Date(invoice.due_date).getTime()) / 86400000)
+    await sendEmail(to, `[OVERDUE ${days}d] Invoice ${invoice.invoice_number}`,
+      base(`<div class="hdr" style="background:#dc2626"><h1>Invoice overdue</h1></div><div class="body"><p>Dear ${clientName},</p><p style="color:#6b7280">Invoice ${invoice.invoice_number} is ${days} days overdue. Please arrange payment.</p>${invoice.stripe_payment_link?`<a href="${invoice.stripe_payment_link}" class="btn btn-danger">Pay now</a>`:''}</div><div class="footer">InvoicePro.</div>`))
+  },
+  async sendUpcomingReminder({ to, clientName, invoice }: any) {
+    await sendEmail(to, `Payment due soon — Invoice ${invoice.invoice_number}`,
+      base(`<div class="hdr" style="background:#d97706"><h1>Payment due soon</h1></div><div class="body"><p>Dear ${clientName},</p><p style="color:#6b7280">Invoice ${invoice.invoice_number} is due soon.</p>${invoice.stripe_payment_link?`<a href="${invoice.stripe_payment_link}" class="btn btn-primary" style="background:#d97706">Pay now</a>`:''}</div><div class="footer">InvoicePro.</div>`))
   }
+
 }

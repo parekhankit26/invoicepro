@@ -752,14 +752,17 @@ router.post('/email-settings', adminAuth, async (req: any, res: Response) => {
     if (!smtp_host || !smtp_user || !smtp_pass) {
       return res.status(400).json({ error: 'SMTP host, user and password are required' })
     }
-    const settings = [
+    const settings: any[] = [
       { key: 'smtp_host', value: JSON.stringify(smtp_host), label: 'SMTP Host', category: 'email' },
       { key: 'smtp_port', value: JSON.stringify(smtp_port || '587'), label: 'SMTP Port', category: 'email' },
       { key: 'smtp_user', value: JSON.stringify(smtp_user), label: 'SMTP Username', category: 'email' },
-      { key: 'smtp_pass', value: JSON.stringify(smtp_pass), label: 'SMTP Password', category: 'email' },
       { key: 'smtp_from', value: JSON.stringify(smtp_from || smtp_user), label: 'From Email', category: 'email' },
       { key: 'smtp_secure', value: JSON.stringify(smtp_secure || false), label: 'Use SSL', category: 'email' },
     ]
+    // Only save password if provided (don't overwrite existing)
+    if (smtp_pass && smtp_pass.trim()) {
+      settings.push({ key: 'smtp_pass', value: JSON.stringify(smtp_pass), label: 'SMTP Password', category: 'email' })
+    }
     for (const s of settings) {
       await supabase.from('app_settings').upsert(s, { onConflict: 'key' })
     }

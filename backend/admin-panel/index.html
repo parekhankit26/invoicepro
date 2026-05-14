@@ -335,7 +335,7 @@ tr:hover td{background:#fafaf8}
         <div class="bc">
           <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Test email</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <input class="fi" type="email" id="testEmailTo" placeholder="Send test to this email..." style="flex:1;min-width:200px"/>
+            <input class="fi" type="email" id="healthTestEmailTo" placeholder="Enter your email address..." style="flex:1;min-width:200px"/>
             <button class="ab ab-p" id="btnTestEmail">Send test</button>
           </div>
           <div id="testEmailRes" style="margin-top:8px"></div>
@@ -682,7 +682,7 @@ function doLogin(){
   if(!email||!pw){q('loginErr').textContent='Enter email and password';return;}
   btn.disabled=true;btn.textContent='Signing in...';
   req('/admin/login',{method:'POST',body:JSON.stringify({email:email,password:pw})})
-    .then(function(d){tok=d.token;localStorage.setItem('ipat',tok);showApp(d.admin);})
+    .then(function(d){tok=d.token;localStorage.setItem('ipat',tok);showApp(d.admin);setTimeout(loadEmailSettings,500);})
     .catch(function(e){q('loginErr').textContent=e.message||'Invalid credentials';btn.disabled=false;btn.textContent='Sign in →';});
 }
 
@@ -920,23 +920,34 @@ var PROVIDERS = {
 
 function loadEmailSettings() {
   req('/admin/email-settings').then(function(d) {
-    if (d.smtp_host) {
-      q('smtpHost').value = d.smtp_host;
-      q('smtpPort').value = d.smtp_port || '587';
-      q('smtpUser').value = d.smtp_user || '';
-      q('smtpFrom').value = d.smtp_from || '';
-      q('smtpSecure').value = d.smtp_secure ? 'true' : 'false';
-      q('smtpPass').placeholder = d.smtp_pass || 'Enter password';
+    // Always pre-fill whatever we have
+    if (q('smtpHost')) q('smtpHost').value = d.smtp_host || '';
+    if (q('smtpPort')) q('smtpPort').value = d.smtp_port || '587';
+    if (q('smtpUser')) q('smtpUser').value = d.smtp_user || '';
+    if (q('smtpFrom')) q('smtpFrom').value = d.smtp_from || '';
+    if (q('smtpSecure')) q('smtpSecure').value = (d.smtp_secure === true || d.smtp_secure === 'true') ? 'true' : 'false';
+    if (q('smtpPass')) {
+      if (d.source === 'database' || d.source === 'env_vars') {
+        q('smtpPass').placeholder = '••••••••  (saved — enter new to change)';
+      } else {
+        q('smtpPass').placeholder = 'Enter your SMTP password / App password';
+      }
     }
-    var src = d.source;
-    var banner = src === 'database' 
-      ? '<div class="al al-ok">✅ Email configured via Admin settings ('+d.smtp_user+')</div>'
-      : src === 'env_vars'
-      ? '<div class="al al-info">ℹ Email configured via Railway env vars ('+d.smtp_user+'). Save here to override.</div>'
-      : '<div class="al al-warn">⚠ Email not configured. Fill the form below to enable email sending.</div>';
-    q('emailStatusBanner').innerHTML = banner;
-  }).catch(function() {
-    q('emailStatusBanner').innerHTML = '<div class="al al-warn">⚠ Email not configured yet. Set up SMTP below to enable emails.</div>';
+    // Auto-fill test email with current user if empty
+    if (q('testEmailTo') && !q('testEmailTo').value && d.smtp_user) {
+      q('testEmailTo').value = d.smtp_user;
+    }
+    var banner;
+    if (d.source === 'database') {
+      banner = '<div class="al al-ok" style="display:flex;align-items:center;gap:10px"><span style="font-size:18px">✅</span><div><strong>Email configured</strong> — Sending as <strong>'+d.smtp_user+'</strong> via '+d.smtp_host+'.<br><span style="font-size:11px;opacity:.8">Settings saved in database. Sending test email to verify.</span></div></div>';
+    } else if (d.source === 'env_vars') {
+      banner = '<div class="al al-info"><strong>ℹ Email using Railway env vars</strong> ('+d.smtp_user+'). You can save here to override with database settings.</div>';
+    } else {
+      banner = '<div class="al al-warn"><strong>⚠ Email not configured</strong> — Select a provider below and fill in your credentials to enable invoice emails.</div>';
+    }
+    if (q('emailStatusBanner')) q('emailStatusBanner').innerHTML = banner;
+  }).catch(function(e) {
+    if (q('emailStatusBanner')) q('emailStatusBanner').innerHTML = '<div class="al al-warn">⚠ Could not load email settings: '+e.message+'</div>';
   });
 }
 
@@ -948,17 +959,24 @@ function doSaveEmailSettings() {
   var from = q('smtpFrom').value.trim() || user;
   var secure = q('smtpSecure').value === 'true';
   
-  if (!host || !user || !pass) {
-    errMsg('emailSaveRes', 'SMTP host, username and password are required');
+  if (!host || !user) {
+    errMsg('emailSaveRes', 'SMTP host and username are required');
     return;
   }
   if (!user.includes('@')) {
     errMsg('emailSaveRes', 'Enter a valid email address as username');
     return;
   }
+  // If password empty, try to use existing saved password
+  if (!pass) {
+    // Load existing and use that
+    q('emailSaveRes').innerHTML = '<div class="al al-info">Keeping existing password...</div>';
+  }
   
   q('emailSaveRes').innerHTML = '<div class="al al-info">Saving...</div>';
-  req('/admin/email-settings', {method:'POST', body:JSON.stringify({smtp_host:host, smtp_port:port, smtp_user:user, smtp_pass:pass, smtp_from:from, smtp_secure:secure})})
+  var saveData = {smtp_host:host, smtp_port:port, smtp_user:user, smtp_from:from, smtp_secure:secure};
+  if (pass) saveData.smtp_pass = pass; // Only update password if provided
+  req('/admin/email-settings', {method:'POST', body:JSON.stringify(saveData)})
     .then(function(d) {
       okMsg('emailSaveRes', d.message);
       loadEmailSettings();
@@ -979,13 +997,14 @@ function doTestEmail2() {
 
 // Also fix the old test email on health page
 function doTestEmail() {
-  var to = q('testEmailTo') ? q('testEmailTo').value.trim() : '';
+  var el = q('healthTestEmailTo');
+  var to = el ? el.value.trim() : '';
   if (!to || !to.includes('@')) {
     var res = q('testEmailRes');
     if (res) res.innerHTML = '<div class="al al-err">Enter a valid email address (e.g. your@gmail.com)</div>';
     return;
   }
-  if (q('testEmailRes')) q('testEmailRes').innerHTML = '<div class="al al-info">Sending...</div>';
+  if (q('testEmailRes')) q('testEmailRes').innerHTML = '<div class="al al-info">Sending to ' + to + '...</div>';
   req('/admin/test-email', {method:'POST', body:JSON.stringify({to:to})})
     .then(function(d) { if (q('testEmailRes')) q('testEmailRes').innerHTML = '<div class="al al-ok">'+d.message+'</div>'; })
     .catch(function(e) { if (q('testEmailRes')) q('testEmailRes').innerHTML = '<div class="al al-err">❌ '+e.message+'</div>'; });
@@ -1084,7 +1103,13 @@ document.addEventListener('DOMContentLoaded',function(){
     tok=saved;
     fetch(API+'/admin/stats',{headers:{'Authorization':'Bearer '+saved,'Content-Type':'application/json'}})
       .then(function(r){if(!r.ok)throw new Error('expired');return r.json();})
-      .then(function(){q('authPage').style.display='none';q('app').style.display='block';loadDash();})
+      .then(function(){
+        q('authPage').style.display='none';
+        q('app').style.display='block';
+        loadDash();
+        // Pre-load email settings in background so form is ready
+        setTimeout(loadEmailSettings, 500);
+      })
       .catch(function(){tok=null;localStorage.removeItem('ipat');});
   }
 });

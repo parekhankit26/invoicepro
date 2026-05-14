@@ -1113,100 +1113,109 @@ function doTestEmail() {
 }
 
 // ── WIRE ALL EVENTS ───────────────────────────────────────
-document.addEventListener('DOMContentLoaded',function(){
+document.addEventListener('DOMContentLoaded', function() {
+  function on(id, event, fn) { var e=q(id); if(e) e.addEventListener(event, fn); }
 
-  // Mobile sidebar
-  var _el_hamburger=q('hamburger');if(_el_hamburger)_el_hamburger.addEventListener('click',openSidebar);
-  var _el_btnCloseSidebar=q('btnCloseSidebar');if(_el_btnCloseSidebar)_el_btnCloseSidebar.addEventListener('click',closeSidebar);
-  var _el_overlay=q('overlay');if(_el_overlay)_el_overlay.addEventListener('click',closeSidebar);
+  // ── MOBILE SIDEBAR ────────────────────────────────────────
+  on('hamburger','click',openSidebar);
+  on('btnCloseSidebar','click',closeSidebar);
+  on('overlay','click',closeSidebar);
 
-  // Login
-  var _el_btnLogin=q('btnLogin');if(_el_btnLogin)_el_btnLogin.addEventListener('click',doLogin);
-  var _el_iEmail=q('iEmail');if(_el_iEmail)_el_iEmail.addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
-  var _el_iPw=q('iPw');if(_el_iPw)_el_iPw.addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
-  var _el_btnShowForgot=q('btnShowForgot');if(_el_btnShowForgot)_el_btnShowForgot.addEventListener('click',function(){q('fLogin').classList.add('hidden');q('fForgot').classList.remove('hidden');});
-  var _el_btnBackLogin=q('btnBackLogin');if(_el_btnBackLogin)_el_btnBackLogin.addEventListener('click',function(){q('fForgot').classList.add('hidden');q('fLogin').classList.remove('hidden');});
-  var _el_btnSendReset=q('btnSendReset');if(_el_btnSendReset)_el_btnSendReset.addEventListener('click',doForgot);
-  var _el_btnDoReset=q('btnDoReset');if(_el_btnDoReset)_el_btnDoReset.addEventListener('click',doResetPw);
+  // ── LOGIN / AUTH ──────────────────────────────────────────
+  on('btnLogin','click',doLogin);
+  on('iEmail','keydown',function(e){if(e.key==='Enter')doLogin();});
+  on('iPw','keydown',function(e){if(e.key==='Enter')doLogin();});
+  on('btnShowForgot','click',function(){q('fLogin').classList.add('hidden');q('fForgot').classList.remove('hidden');});
+  on('btnBackLogin','click',function(){q('fForgot').classList.add('hidden');q('fLogin').classList.remove('hidden');});
+  on('btnSendReset','click',doForgot);
+  on('btnDoReset','click',doResetPw);
 
-  // Sidebar nav
-  document.querySelectorAll('.nv[data-pg]').forEach(function(btn){btn.addEventListener('click',function(){goPage(this.dataset.pg);});});
+  // ── NAVIGATION ────────────────────────────────────────────
+  document.querySelectorAll('.nv[data-pg]').forEach(function(btn){
+    btn.addEventListener('click',function(){goPage(this.dataset.pg);});
+  });
 
-  // App controls
-  var _el_btnLogout=q('btnLogout');if(_el_btnLogout)_el_btnLogout.addEventListener('click',doLogout);
-  var _el_btnChangePw=q('btnChangePw');if(_el_btnChangePw)_el_btnChangePw.addEventListener('click',function(){openMo('mChangePw');});
+  // ── APP CONTROLS ──────────────────────────────────────────
+  on('btnLogout','click',doLogout);
+  on('btnChangePw','click',function(){openMo('mChangePw');});
 
-  // Change password modal
-  var _el_btnClosePwMo=q('btnClosePwMo');if(_el_btnClosePwMo)_el_btnClosePwMo.addEventListener('click',function(){closeMo('mChangePw');});
-  var _el_btnCancelPw=q('btnCancelPw');if(_el_btnCancelPw)_el_btnCancelPw.addEventListener('click',function(){closeMo('mChangePw');});
-  var _el_btnSavePw=q('btnSavePw');if(_el_btnSavePw)_el_btnSavePw.addEventListener('click',doChangePw);
+  // ── CHANGE PASSWORD MODAL ─────────────────────────────────
+  on('btnClosePwMo','click',function(){closeMo('mChangePw');});
+  on('btnCancelPw','click',function(){closeMo('mChangePw');});
+  on('btnSavePw','click',doChangePw);
 
-  // Add admin modal
-  var _el_btnAddAdmin=q('btnAddAdmin');if(_el_btnAddAdmin)_el_btnAddAdmin.addEventListener('click',function(){openMo('mAddAdmin');});
-  var _el_btnCloseAddAdmin=q('btnCloseAddAdmin');if(_el_btnCloseAddAdmin)_el_btnCloseAddAdmin.addEventListener('click',function(){closeMo('mAddAdmin');});
-  var _el_btnCancelAddAdmin=q('btnCancelAddAdmin');if(_el_btnCancelAddAdmin)_el_btnCancelAddAdmin.addEventListener('click',function(){closeMo('mAddAdmin');});
-  var _el_btnSaveAdmin=q('btnSaveAdmin');if(_el_btnSaveAdmin)_el_btnSaveAdmin.addEventListener('click',doAddAdmin);
+  // ── ADD ADMIN MODAL ───────────────────────────────────────
+  on('btnAddAdmin','click',function(){openMo('mAddAdmin');});
+  on('btnCloseAddAdmin','click',function(){closeMo('mAddAdmin');});
+  on('btnCancelAddAdmin','click',function(){closeMo('mAddAdmin');});
+  on('btnSaveAdmin','click',doAddAdmin);
 
-  // Ticket modal
-  var _el_btnCloseTicket=q('btnCloseTicket');if(_el_btnCloseTicket)_el_btnCloseTicket.addEventListener('click',function(){closeMo('mTicket');});
-  var _el_btnCancelTicket=q('btnCancelTicket');if(_el_btnCancelTicket)_el_btnCancelTicket.addEventListener('click',function(){closeMo('mTicket');});
-  var _el_btnSendTicket=q('btnSendTicket');if(_el_btnSendTicket)_el_btnSendTicket.addEventListener('click',doReply);
+  // ── TICKET MODAL ──────────────────────────────────────────
+  on('btnCloseTicket','click',function(){closeMo('mTicket');});
+  on('btnCancelTicket','click',function(){closeMo('mTicket');});
+  on('btnSendTicket','click',doReply);
 
-  // Health
-  var _el_btnTestEmail=q('btnTestEmail');if(_el_btnTestEmail)_el_btnTestEmail.addEventListener('click',doTestEmail);
+  // ── HEALTH PAGE ───────────────────────────────────────────
+  on('btnTestEmail','click',doTestEmail);
 
-  // Announcement
-  var _el_btnPublish=q('btnPublish');if(_el_btnPublish)_el_btnPublish.addEventListener('click',doPublish);
-  var _el_btnRemoveAnn=q('btnRemoveAnn');if(_el_btnRemoveAnn)_el_btnRemoveAnn.addEventListener('click',doRemoveAnn);
+  // ── ANNOUNCEMENT ──────────────────────────────────────────
+  on('btnPublish','click',doPublish);
+  on('btnRemoveAnn','click',doRemoveAnn);
 
-  // Broadcast
-  var _el_btnBroadcast=q('btnBroadcast');if(_el_btnBroadcast)_el_btnBroadcast.addEventListener('click',doBroadcast);
+  // ── BROADCAST ─────────────────────────────────────────────
+  on('btnBroadcast','click',doBroadcast);
 
-  // Users
-  var uT;var _el_uSearch=q('uSearch');if(_el_uSearch)_el_uSearch.addEventListener('input',function(){clearTimeout(uT);uT=setTimeout(function(){uPage=1;loadUsers();},400);});
-  var _el_uPlan=q('uPlan');if(_el_uPlan)_el_uPlan.addEventListener('change',function(){uPage=1;loadUsers();});
-  var _el_invFilter=q('invFilter');if(_el_invFilter)_el_invFilter.addEventListener('change',function(){iPage=1;loadInv();});
-  var _el_tickFilter=q('tickFilter');if(_el_tickFilter)_el_tickFilter.addEventListener('change',loadTickets);
+  // ── USERS / FILTERS ───────────────────────────────────────
+  var uT;
+  on('uSearch','input',function(){clearTimeout(uT);uT=setTimeout(function(){uPage=1;loadUsers();},400);});
+  on('uPlan','change',function(){uPage=1;loadUsers();});
+  on('invFilter','change',function(){iPage=1;loadInv();});
+  on('tickFilter','change',loadTickets);
 
-  // Close modals on background click
-  document.querySelectorAll('.mo-bg').forEach(function(bg){bg.addEventListener('click',function(e){if(e.target===this)closeMo(this.id);});});
-  document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('.mo-bg.show').forEach(function(m){closeMo(m.id);});});
+  // ── EMAIL SETTINGS ────────────────────────────────────────
+  // Provider card clicks - handled by onclick="selectProvider()" in HTML
 
-  // Email tab buttons
-  var tabResend = q('tabResend');
-  if (tabResend) tabResend.addEventListener('click', function(){ switchEmailTab('resend'); });
-  var tabSmtp = q('tabSmtp');
-  if (tabSmtp) tabSmtp.addEventListener('click', function(){ switchEmailTab('smtp'); });
-  // Save buttons
-  var btnSaveResend = q('btnSaveResend');
-  if (btnSaveResend) btnSaveResend.addEventListener('click', doSaveResend);
-  var btnSaveEmail = q('btnSaveEmail');
-  if (btnSaveEmail) btnSaveEmail.addEventListener('click', doSaveEmailSettings);
-  var btnTestEmail2 = q('btnTestEmail2');
-  if (btnTestEmail2) btnTestEmail2.addEventListener('click', doTestEmail2);
-  
-  // Provider preset selector
-  var emailProvider = q('emailProvider');
-  if (emailProvider) {
-    emailProvider.addEventListener('change', function() {
-      var p = PROVIDERS[this.value];
-      if (p) {
-        q('smtpHost').value = p.host;
-        q('smtpPort').value = p.port;
-        q('smtpSecure').value = p.secure ? 'true' : 'false';
-        q('smtpUser').focus();
-      }
-    });
-  }
+  // SMTP form
+  on('btnSaveSmtp','click',doSaveSmtp);
+  on('btnTestEmail2','click',doTestEmail2);
+  on('smtpPreset','change',function(){
+    var p=SMTP_PRESETS[this.value]; if(!p) return;
+    if(q('smtpHost')) q('smtpHost').value=p.host;
+    if(q('smtpPort')) q('smtpPort').value=p.port;
+    if(q('smtpSecure')) q('smtpSecure').value=p.secure;
+    if(q('smtpPassHint')) q('smtpPassHint').textContent=p.hint;
+    var g=q('smtpGuide');
+    if(g&&SMTP_GUIDES[this.value]) g.innerHTML='<div style="font-size:12.5px;color:var(--ink2);line-height:1.9">'+SMTP_GUIDES[this.value]+'</div>';
+    if(q('smtpUser')) q('smtpUser').focus();
+  });
 
-  // Check for reset token in URL
+  // Resend form
+  on('btnSaveResend','click',doSaveResend);
+  on('btnTestResend','click',doTestResend);
+
+  // ── MODALS: CLOSE ON BACKGROUND / ESCAPE ─────────────────
+  document.querySelectorAll('.mo-bg').forEach(function(bg){
+    bg.addEventListener('click',function(e){if(e.target===this)closeMo(this.id);});
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape') document.querySelectorAll('.mo-bg.show').forEach(function(m){closeMo(m.id);});
+  });
+
+  // ── CHECK URL FOR PASSWORD RESET TOKEN ────────────────────
   var hash=window.location.hash;
   if(hash.includes('reset=')){
     var token=hash.split('reset=')[1];
-    if(token){fetch(API+'/admin/reset-password/'+token).then(function(r){return r.json();}).then(function(d){if(d.valid){q('fLogin').classList.add('hidden');q('fReset').classList.remove('hidden');}else{q('loginErr').textContent='Invalid or expired reset link';}}).catch(function(){});}
+    if(token){
+      fetch(API+'/admin/reset-password/'+token)
+        .then(function(r){return r.json();})
+        .then(function(d){
+          if(d.valid){q('fLogin').classList.add('hidden');q('fReset').classList.remove('hidden');}
+          else{q('loginErr').textContent='Invalid or expired reset link.';}
+        }).catch(function(){});
+    }
   }
 
-  // Auto-login
+  // ── AUTO-LOGIN IF TOKEN SAVED ─────────────────────────────
   var saved=localStorage.getItem('ipat');
   if(saved){
     tok=saved;
@@ -1216,8 +1225,7 @@ document.addEventListener('DOMContentLoaded',function(){
         q('authPage').style.display='none';
         q('app').style.display='block';
         loadDash();
-        // Pre-load email settings in background so form is ready
-        setTimeout(loadEmailSettings, 500);
+        setTimeout(loadEmailSettings,600);
       })
       .catch(function(){tok=null;localStorage.removeItem('ipat');});
   }

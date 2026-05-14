@@ -24,12 +24,15 @@ async function getSmtpConfig() {
     }
   } catch(e) { /* fall through to env vars */ }
   // Fall back to env vars
+  const envHost = process.env.SMTP_HOST || ''
+  const envUser = process.env.SMTP_USER || ''
+  const envPass = process.env.SMTP_PASS || ''
   return {
-    host: process.env.SMTP_HOST || '',
+    host: envHost,
     port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_SECURE === 'true',
-    auth: { user: process.env.SMTP_USER || '', pass: process.env.SMTP_PASS || '' },
-    from: process.env.EMAIL_FROM || process.env.SMTP_USER || ''
+    secure: process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465',
+    auth: { user: envUser, pass: envPass },
+    from: process.env.EMAIL_FROM || envUser
   }
 }
 
@@ -84,7 +87,7 @@ export const emailService = {
         ${invoice.notes ? `<p style="color:#6b7280;font-size:13px"><strong>Notes:</strong> ${invoice.notes}</p>` : ''}
       </div>
       <div class="footer"><p>Invoice attached as PDF. Reply to this email with any questions.</p></div>`)
-    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: process.env.EMAIL_FROM, to, subject: `Invoice ${invoice.invoice_number} — ${invoice.currency} ${invoice.total?.toFixed(2)} due ${dueDate}`, html, attachments: [{ filename: `${invoice.invoice_number}.pdf`, content: pdfBuffer, contentType: 'application/pdf' }] })
+    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: emailFrom, to, subject: `Invoice ${invoice.invoice_number} — ${invoice.currency} ${invoice.total?.toFixed(2)} due ${dueDate}`, html, attachments: [{ filename: `${invoice.invoice_number}.pdf`, content: pdfBuffer, contentType: 'application/pdf' }] })
   },
 
   // ── QUOTE EMAIL ────────────────────────────────────────
@@ -109,7 +112,7 @@ export const emailService = {
         ${quote.notes ? `<p style="color:#6b7280;font-size:13px;margin-top:16px"><strong>Notes:</strong> ${quote.notes}</p>` : ''}
       </div>
       <div class="footer"><p>This quote expires on ${expiryDate}. Reply to this email with any questions.</p></div>`, '#1e40af')
-    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: process.env.EMAIL_FROM, to, subject: `Quote ${quote.quote_number} — ${quote.currency} ${quote.total?.toFixed(2)} — Action required`, html })
+    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: emailFrom, to, subject: `Quote ${quote.quote_number} — ${quote.currency} ${quote.total?.toFixed(2)} — Action required`, html })
   },
 
   // ── PAYMENT CONFIRMATION ───────────────────────────────
@@ -128,7 +131,7 @@ export const emailService = {
         <p style="color:#6b7280;font-size:13px">Please keep this email as your payment confirmation.</p>
       </div>
       <div class="footer"><p>Thank you for your business!</p></div>`, '#15803d')
-    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: process.env.EMAIL_FROM, to: client.email, subject: `Payment confirmed — Invoice ${invoice.invoice_number}`, html })
+    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: emailFrom, to: client.email, subject: `Payment confirmed — Invoice ${invoice.invoice_number}`, html })
   },
 
   // ── OVERDUE REMINDER ───────────────────────────────────
@@ -146,7 +149,7 @@ export const emailService = {
         ${invoice.stripe_payment_link ? `<div style="text-align:center"><a href="${invoice.stripe_payment_link}" class="btn btn-primary" style="background:#dc2626">Pay Now</a></div>` : ''}
       </div>
       <div class="footer"><p>If you have already sent payment, please disregard this notice.</p></div>`, '#7f1d1d')
-    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: process.env.EMAIL_FROM, to: client.email, subject: `Overdue: Invoice ${invoice.invoice_number} — ${daysOverdue} days past due`, html })
+    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: emailFrom, to: client.email, subject: `Overdue: Invoice ${invoice.invoice_number} — ${daysOverdue} days past due`, html })
   },
 
   // ── UPCOMING REMINDER ──────────────────────────────────
@@ -160,7 +163,7 @@ export const emailService = {
         ${invoice.stripe_payment_link ? `<div style="text-align:center"><a href="${invoice.stripe_payment_link}" class="btn btn-primary">Pay Now</a></div>` : ''}
       </div>
       <div class="footer"><p>Thank you for your prompt attention.</p></div>`, '#78350f')
-    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: process.env.EMAIL_FROM, to: client.email, subject: `Reminder: Invoice ${invoice.invoice_number} due in ${daysUntilDue} days`, html })
+    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: emailFrom, to: client.email, subject: `Reminder: Invoice ${invoice.invoice_number} due in ${daysUntilDue} days`, html })
   },
 
   // ── TEAM INVITE ────────────────────────────────────────
@@ -174,7 +177,7 @@ export const emailService = {
         <p style="color:#9ca3af;font-size:12px;text-align:center;margin-top:8px">This invite expires in 7 days.</p>
       </div>
       <div class="footer"><p>If you didn't expect this invite, you can safely ignore this email.</p></div>`, '#4338ca')
-    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: process.env.EMAIL_FROM, to, subject: `You've been invited to InvoicePro as ${role}`, html })
+    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: emailFrom, to, subject: `You've been invited to InvoicePro as ${role}`, html })
   },
 
   async sendSatisfactionSurvey({ to, clientName, companyName, surveyUrl, invoice }: { to: string; clientName: string; companyName: string; surveyUrl: string; invoice: any }) {
@@ -193,6 +196,6 @@ export const emailService = {
         </div>
       </div>
       <div class="footer"><p>Your feedback helps us improve. Thank you!</p></div>`, '#0f766e')
-    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: process.env.EMAIL_FROM, to, subject: `How did we do? — Quick feedback for ${companyName}`, html })
+    const { transporter: t, from: emailFrom } = await createTransporter(); await t.sendMail({ from: emailFrom, to, subject: `How did we do? — Quick feedback for ${companyName}`, html })
   }
 }

@@ -561,18 +561,19 @@ tr:hover td{background:#fafaf8}
 
         <!-- SMTP PANEL -->
         <div id="panelSmtp" class="hidden">
-          <div class="al al-warn" style="margin-bottom:14px">
-            ⚠ <strong>Gmail blocks SMTP from cloud servers</strong> (Railway, AWS etc.) by default. Use Resend above for reliable delivery. SMTP works best with SendGrid, Mailgun or your own mail server.
+          <div class="al al-ok" style="margin-bottom:14px">
+            ✅ <strong>Hostinger SMTP works great from Railway.</strong> Enter your <strong>invoice@asproite.com</strong> password below. Note: Gmail blocks cloud servers, use Resend tab instead for Gmail.
           </div>
           <div class="g2">
             <div class="bc">
               <div class="fg"><label>Email provider preset</label>
                 <select class="fi" id="emailProvider">
                   <option value="">Choose provider</option>
-                  <option value="sendgrid">SendGrid (recommended for SMTP)</option>
+                  <option value="hostinger" selected>Hostinger (your current host)</option>
+                  <option value="sendgrid">SendGrid (free 100/day)</option>
                   <option value="mailgun">Mailgun</option>
                   <option value="outlook">Outlook / Office 365</option>
-                  <option value="gmail">Gmail (may timeout from Railway)</option>
+                  <option value="gmail">Gmail (blocked from Railway)</option>
                   <option value="custom">Custom SMTP</option>
                 </select>
               </div>
@@ -1117,14 +1118,24 @@ function loadEmailSettings() {
 
   // Load SMTP settings
   req('/admin/email-settings').then(function(d) {
-    if (q('smtpHost')) q('smtpHost').value = d.smtp_host || '';
-    if (q('smtpPort')) q('smtpPort').value = d.smtp_port || '587';
-    if (q('smtpUser')) q('smtpUser').value = d.smtp_user || '';
-    if (q('smtpFrom')) q('smtpFrom').value = d.smtp_from || '';
-    if (q('smtpSecure')) q('smtpSecure').value = (d.smtp_secure === true || d.smtp_secure === 'true') ? 'true' : 'false';
-    if (q('smtpPass')) q('smtpPass').placeholder = (d.source !== 'not_configured') ? '•••••••• (saved)' : 'Enter SMTP password';
-    if (d.source === 'env_vars' && q('emailStatusBanner') && q('emailStatusBanner').innerHTML.indexOf('Resend') === -1) {
-      q('emailStatusBanner').innerHTML = '<div class="al al-info">ℹ Using Railway env vars for SMTP (' + d.smtp_user + ')</div>';
+    if (q('smtpHost')) q('smtpHost').value = d.smtp_host || 'smtp.hostinger.com';
+    if (q('smtpPort')) q('smtpPort').value = d.smtp_port || '465';
+    if (q('smtpUser')) q('smtpUser').value = d.smtp_user || 'invoice@asproite.com';
+    if (q('smtpFrom')) q('smtpFrom').value = d.smtp_from || 'InvoicePro <invoice@asproite.com>';
+    if (q('smtpSecure')) q('smtpSecure').value = (d.smtp_secure === true || d.smtp_secure === 'true' || d.smtp_port === '465') ? 'true' : 'false';
+    if (q('smtpPass')) {
+      q('smtpPass').placeholder = (d.source !== 'not_configured') ? '•••••••• (saved — enter new to change)' : 'Enter your invoice@asproite.com password';
+    }
+    // Show SMTP status if not using Resend
+    if (q('emailStatusBanner') && q('emailStatusBanner').innerHTML.indexOf('Resend') === -1) {
+      if (d.source === 'database' && d.smtp_host) {
+        q('emailStatusBanner').innerHTML = '<div class="al al-ok"><strong>✅ Email configured</strong> — Sending from <strong>' + d.smtp_user + '</strong> via ' + d.smtp_host + '</div>';
+        // Switch to SMTP tab
+        switchEmailTab('smtp');
+      } else if (d.source === 'env_vars') {
+        q('emailStatusBanner').innerHTML = '<div class="al al-info">ℹ Using Railway env vars for SMTP (' + d.smtp_user + ')</div>';
+        switchEmailTab('smtp');
+      }
     }
   }).catch(function(){});
 }
@@ -1158,11 +1169,12 @@ function doTestEmail2() {
 
 // ── EMAIL SETTINGS ────────────────────────────────────────
 var PROVIDERS = {
-  gmail:    {host:'smtp.gmail.com',    port:'587', secure:false},
-  outlook:  {host:'smtp.office365.com',port:'587', secure:false},
-  yahoo:    {host:'smtp.mail.yahoo.com',port:'587',secure:false},
-  sendgrid: {host:'smtp.sendgrid.net', port:'587', secure:false},
-  mailgun:  {host:'smtp.mailgun.org',  port:'587', secure:false},
+  hostinger:{host:'smtp.hostinger.com', port:'465', secure:true},
+  gmail:    {host:'smtp.gmail.com',     port:'587', secure:false},
+  outlook:  {host:'smtp.office365.com', port:'587', secure:false},
+  sendgrid: {host:'smtp.sendgrid.net',  port:'587', secure:false},
+  mailgun:  {host:'smtp.mailgun.org',   port:'587', secure:false},
+  custom:   {host:'',                   port:'587', secure:false},
 };
 
 // loadEmailSettings defined above

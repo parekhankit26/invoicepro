@@ -530,3 +530,16 @@ INSERT INTO app_settings (key, value, label, category) VALUES
 ON CONFLICT (key) DO NOTHING;
 
 SELECT 'Full migration complete ✅' as status;
+
+-- ── PERMANENT EMAIL SETTINGS (Hostinger) ─────────────────────
+-- Pre-configure Hostinger SMTP - admin just needs to add password
+INSERT INTO app_settings (key, value, label, category) VALUES
+  ('smtp_host',   '"smtp.hostinger.com"',        'SMTP Host',     'email'),
+  ('smtp_port',   '"465"',                        'SMTP Port',     'email'),
+  ('smtp_secure', 'true',                         'Use SSL',       'email'),
+  ('smtp_user',   '"invoice@asproite.com"',       'SMTP Username', 'email'),
+  ('smtp_from',   '"InvoicePro <invoice@asproite.com>"', 'From Email', 'email'),
+  ('email_provider', '"smtp"',                    'Provider',      'email')
+ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+
+SELECT 'Hostinger email pre-configured ✅' as status;

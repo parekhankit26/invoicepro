@@ -652,209 +652,11 @@ tr:hover td{background:#fafaf8}
       </div>
 
       <!-- EMAIL SETTINGS -->
-      <div class="pg" id="pg-email">
-        <div class="ph">
-          <div><div class="pt">📧 Email settings</div><div class="ps">All email sent from InvoicePro — invoices, quotes, reminders — uses these settings</div></div>
-        </div>
 
-        <!-- Current status -->
-        <div id="emailStatusBanner" style="margin-bottom:16px"></div>
+    </div><!-- /main -->
+  </div><!-- /layout -->
+</div><!-- /app -->
 
-        <!-- Provider selector -->
-        <div class="bc" style="margin-bottom:14px">
-          <div style="font-size:13px;font-weight:600;margin-bottom:14px">Choose email provider</div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px" id="providerCards">
-            <div class="provider-card" data-provider="smtp" onclick="selectProvider('smtp')" style="border:2px solid var(--ink);border-radius:10px;padding:16px;cursor:pointer;text-align:center;background:var(--ink);color:white">
-              <div style="font-size:24px;margin-bottom:6px">⚙️</div>
-              <div style="font-weight:600;font-size:13px">SMTP</div>
-              <div style="font-size:11px;margin-top:3px;opacity:.8">Hostinger, SendGrid, any mail server</div>
-            </div>
-            <div class="provider-card" data-provider="resend" onclick="selectProvider('resend')" style="border:2px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;text-align:center">
-              <div style="font-size:24px;margin-bottom:6px">🚀</div>
-              <div style="font-weight:600;font-size:13px">Resend</div>
-              <div style="font-size:11px;color:var(--ink3);margin-top:3px">Free 3000/mo · API-based</div>
-            </div>
-            <div class="provider-card" data-provider="none" onclick="selectProvider('none')" style="border:2px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;text-align:center">
-              <div style="font-size:24px;margin-bottom:6px">🚫</div>
-              <div style="font-weight:600;font-size:13px">Disabled</div>
-              <div style="font-size:11px;color:var(--ink3);margin-top:3px">Turn off all emails</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- SMTP FORM -->
-        <div id="smtpForm" class="g2">
-          <div class="bc">
-            <div style="font-size:13px;font-weight:600;margin-bottom:16px">⚙️ SMTP configuration</div>
-
-            <div class="fg"><label>Quick setup — choose your provider</label>
-              <select class="fi" id="smtpPreset">
-                <option value="">— Select to auto-fill host/port —</option>
-                <option value="hostinger">Hostinger (smtp.hostinger.com)</option>
-                <option value="sendgrid">SendGrid (smtp.sendgrid.net)</option>
-                <option value="mailgun">Mailgun (smtp.mailgun.org)</option>
-                <option value="outlook">Outlook / Office 365</option>
-                <option value="custom">Custom / Other</option>
-              </select>
-            </div>
-
-            <div style="display:grid;grid-template-columns:1fr 120px;gap:10px">
-              <div class="fg"><label>SMTP Host *</label><input class="fi" id="smtpHost" placeholder="smtp.hostinger.com"/></div>
-              <div class="fg"><label>Port *</label><input class="fi" id="smtpPort" type="number" placeholder="465"/></div>
-            </div>
-            <div class="fg"><label>Encryption</label>
-              <select class="fi" id="smtpSecure">
-                <option value="true">SSL / TLS (port 465) — recommended</option>
-                <option value="false">STARTTLS (port 587)</option>
-              </select>
-            </div>
-            <div class="fg"><label>Email address (SMTP username) *</label>
-              <input class="fi" id="smtpUser" type="email" placeholder="invoice@yourdomain.com"/>
-            </div>
-            <div class="fg"><label>Password *</label>
-              <input class="fi" id="smtpPass" type="password" placeholder="Your email password"/>
-              <div style="font-size:11px;color:var(--ink3);margin-top:4px" id="smtpPassHint">Enter your email account password</div>
-            </div>
-            <div class="fg"><label>Display name (shown to clients)</label>
-              <input class="fi" id="smtpDisplayName" placeholder="InvoicePro" value="InvoicePro"/>
-            </div>
-            <div class="fg"><label>Reply-to email (optional)</label>
-              <input class="fi" id="smtpReplyTo" type="email" placeholder="Same as above, or a different address"/>
-            </div>
-
-            <button class="ab ab-p" style="width:100%;justify-content:center;padding:13px" id="btnSaveSmtp">💾 Save &amp; activate</button>
-            <div id="smtpSaveRes" style="margin-top:10px"></div>
-          </div>
-
-          <div>
-            <div class="bc" style="margin-bottom:14px">
-              <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Test email</div>
-              <div class="fg"><label>Send test to</label>
-                <input class="fi" type="email" id="testEmailTo" placeholder="your@email.com"/>
-              </div>
-              <button class="ab ab-p" style="width:100%;justify-content:center" id="btnTestEmail2">Send test email</button>
-              <div id="testEmailRes2" style="margin-top:10px"></div>
-            </div>
-            <div class="bc">
-              <div style="font-size:13px;font-weight:600;margin-bottom:12px">📋 Provider guides</div>
-              <div id="smtpGuide">
-                <div style="font-size:12.5px;color:var(--ink2);line-height:1.9">
-                  Select a provider above to see its specific guide
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- RESEND FORM -->
-        <div id="resendForm" class="g2 hidden">
-          <div class="bc">
-            <div style="font-size:13px;font-weight:600;margin-bottom:4px">🚀 Resend API</div>
-            <div style="font-size:12px;color:var(--ink3);margin-bottom:16px">Free 3,000 emails/month · Works from any server · No SMTP blocking</div>
-            <div class="fg"><label>API Key *</label>
-              <input class="fi" id="resendKey" type="password" placeholder="re_xxxxxxxxxxxxxxxxxxxxxx"/>
-              <div style="font-size:11px;color:var(--ink3);margin-top:4px">Get free at <a href="https://resend.com" target="_blank" style="color:var(--blue)">resend.com</a> → API Keys</div>
-            </div>
-            <div class="fg"><label>From email *</label>
-              <input class="fi" id="resendFrom" type="email" placeholder="invoices@yourdomain.com"/>
-              <div style="font-size:11px;color:var(--ink3);margin-top:4px">Use <strong>onboarding@resend.dev</strong> for testing (sends only to your account email)</div>
-            </div>
-            <div class="fg"><label>Display name</label>
-              <input class="fi" id="resendName" placeholder="InvoicePro" value="InvoicePro"/>
-            </div>
-            <button class="ab ab-p" style="width:100%;justify-content:center;padding:13px" id="btnSaveResend">💾 Save &amp; activate</button>
-            <div id="resendSaveRes" style="margin-top:10px"></div>
-          </div>
-          <div>
-            <div class="bc" style="margin-bottom:14px">
-              <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Test email</div>
-              <div class="fg"><label>Send test to</label><input class="fi" type="email" id="resendTestTo" placeholder="your@email.com"/></div>
-              <button class="ab ab-p" style="width:100%;justify-content:center" id="btnTestResend">Send test</button>
-              <div id="resendTestRes" style="margin-top:10px"></div>
-            </div>
-            <div class="bc">
-              <div style="font-size:13px;font-weight:600;margin-bottom:10px">Quick setup</div>
-              <div style="font-size:12.5px;color:var(--ink2);line-height:2">
-                <div><strong>1.</strong> <a href="https://resend.com" target="_blank" style="color:var(--blue)">resend.com</a> → Sign up free</div>
-                <div><strong>2.</strong> API Keys → Create API Key</div>
-                <div><strong>3.</strong> Paste key above</div>
-                <div><strong>4.</strong> From: <strong>onboarding@resend.dev</strong> (testing) or your domain</div>
-                <div><strong>5.</strong> Save → test ✅</div>
-              </div>
-              <div style="margin-top:10px;padding:10px;background:var(--abg);border-radius:7px;font-size:12px;color:var(--amber)">
-                ⚠ With onboarding@resend.dev, test emails only go to your own account email. Add your domain at resend.com/domains to send to anyone.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DISABLED MESSAGE -->
-        <div id="noneForm" class="hidden">
-          <div class="bc">
-            <div style="text-align:center;padding:30px">
-              <div style="font-size:48px;margin-bottom:12px">🚫</div>
-              <div style="font-size:16px;font-weight:600;margin-bottom:8px">Email sending is disabled</div>
-              <div style="font-size:13px;color:var(--ink3)">Invoices and quotes will not be sent by email. Choose a provider above to enable.</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- TICKETS -->
-      <div class="pg" id="pg-tickets">
-        <div class="ph">
-          <div><div class="pt">Support tickets</div></div>
-          <select class="fi" id="tickFilter" style="width:160px"><option value="">All</option><option value="open">Open</option><option value="resolved">Resolved</option></select>
-        </div>
-        <div class="bc" style="padding:0"><div class="tbl-wrap">
-          <table><thead><tr><th>User</th><th>Subject</th><th>Status</th><th>Date</th><th></th></tr></thead>
-          <tbody id="tickRows"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
-        </div></div>
-      </div>
-
-      <!-- SATISFACTION -->
-      <div class="pg" id="pg-satisfaction">
-        <div class="ph"><div><div class="pt">Client satisfaction</div></div></div>
-        <div class="g3" id="satCards"></div>
-        <div class="bc" style="padding:0"><div class="tbl-wrap">
-          <table><thead><tr><th>Business</th><th>Score</th><th>Comment</th><th>Date</th></tr></thead>
-          <tbody id="satRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
-        </div></div>
-      </div>
-
-      <!-- BROADCAST -->
-      <div class="pg" id="pg-broadcast">
-        <div class="ph"><div><div class="pt">Broadcast email</div><div class="ps">Send to all or filtered users</div></div></div>
-        <div class="g2">
-          <div class="bc">
-            <div class="fg"><label>Subject</label><input class="fi" id="bSubj" placeholder="Subject line"/></div>
-            <div class="fg"><label>Plan filter</label><select class="fi" id="bPlan"><option value="">All users</option><option value="free">Free</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select></div>
-            <div class="fg"><label>Message</label><textarea class="fi" id="bMsg" rows="5" placeholder="Hi there..."></textarea></div>
-            <button class="ab ab-p" style="width:100%;justify-content:center" id="btnBroadcast">📢 Send broadcast</button>
-            <div id="broadRes" style="margin-top:10px"></div>
-          </div>
-          <div class="bc"><div class="al al-info">Target specific segments with plan filter.</div><div class="al al-warn" style="margin-top:8px">SMTP must be configured in Railway for delivery.</div></div>
-        </div>
-      </div>
-
-      <!-- ADMINS -->
-      <div class="pg" id="pg-admins">
-        <div class="ph"><div><div class="pt">Admin accounts</div></div><button class="ab ab-p" id="btnAddAdmin">+ Add admin</button></div>
-        <div class="bc" style="padding:0"><div class="tbl-wrap">
-          <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Last login</th><th>Status</th><th></th></tr></thead>
-          <tbody id="adminRows"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
-        </div></div>
-      </div>
-
-      <!-- AUDIT -->
-      <div class="pg" id="pg-audit">
-        <div class="ph"><div><div class="pt">Audit log</div></div></div>
-        <div class="bc" style="padding:0"><div class="tbl-wrap">
-          <table><thead><tr><th>Admin</th><th>Action</th><th>Entity</th><th>Time</th></tr></thead>
-          <tbody id="auditRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
-        </div></div>
-      </div>
 
 <script>
 var API='/api', tok=null, curTick=null, uPage=1, iPage=1;
@@ -1321,57 +1123,57 @@ function doTestEmail() {
 document.addEventListener('DOMContentLoaded',function(){
 
   // Mobile sidebar
-  q('hamburger').addEventListener('click',openSidebar);
-  q('btnCloseSidebar').addEventListener('click',closeSidebar);
-  q('overlay').addEventListener('click',closeSidebar);
+  var _el_hamburger=q('hamburger');if(_el_hamburger)_el_hamburger.addEventListener('click',openSidebar);
+  var _el_btnCloseSidebar=q('btnCloseSidebar');if(_el_btnCloseSidebar)_el_btnCloseSidebar.addEventListener('click',closeSidebar);
+  var _el_overlay=q('overlay');if(_el_overlay)_el_overlay.addEventListener('click',closeSidebar);
 
   // Login
-  q('btnLogin').addEventListener('click',doLogin);
-  q('iEmail').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
-  q('iPw').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
-  q('btnShowForgot').addEventListener('click',function(){q('fLogin').classList.add('hidden');q('fForgot').classList.remove('hidden');});
-  q('btnBackLogin').addEventListener('click',function(){q('fForgot').classList.add('hidden');q('fLogin').classList.remove('hidden');});
-  q('btnSendReset').addEventListener('click',doForgot);
-  q('btnDoReset').addEventListener('click',doResetPw);
+  var _el_btnLogin=q('btnLogin');if(_el_btnLogin)_el_btnLogin.addEventListener('click',doLogin);
+  var _el_iEmail=q('iEmail');if(_el_iEmail)_el_iEmail.addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+  var _el_iPw=q('iPw');if(_el_iPw)_el_iPw.addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+  var _el_btnShowForgot=q('btnShowForgot');if(_el_btnShowForgot)_el_btnShowForgot.addEventListener('click',function(){q('fLogin').classList.add('hidden');q('fForgot').classList.remove('hidden');});
+  var _el_btnBackLogin=q('btnBackLogin');if(_el_btnBackLogin)_el_btnBackLogin.addEventListener('click',function(){q('fForgot').classList.add('hidden');q('fLogin').classList.remove('hidden');});
+  var _el_btnSendReset=q('btnSendReset');if(_el_btnSendReset)_el_btnSendReset.addEventListener('click',doForgot);
+  var _el_btnDoReset=q('btnDoReset');if(_el_btnDoReset)_el_btnDoReset.addEventListener('click',doResetPw);
 
   // Sidebar nav
   document.querySelectorAll('.nv[data-pg]').forEach(function(btn){btn.addEventListener('click',function(){goPage(this.dataset.pg);});});
 
   // App controls
-  q('btnLogout').addEventListener('click',doLogout);
-  q('btnChangePw').addEventListener('click',function(){openMo('mChangePw');});
+  var _el_btnLogout=q('btnLogout');if(_el_btnLogout)_el_btnLogout.addEventListener('click',doLogout);
+  var _el_btnChangePw=q('btnChangePw');if(_el_btnChangePw)_el_btnChangePw.addEventListener('click',function(){openMo('mChangePw');});
 
   // Change password modal
-  q('btnClosePwMo').addEventListener('click',function(){closeMo('mChangePw');});
-  q('btnCancelPw').addEventListener('click',function(){closeMo('mChangePw');});
-  q('btnSavePw').addEventListener('click',doChangePw);
+  var _el_btnClosePwMo=q('btnClosePwMo');if(_el_btnClosePwMo)_el_btnClosePwMo.addEventListener('click',function(){closeMo('mChangePw');});
+  var _el_btnCancelPw=q('btnCancelPw');if(_el_btnCancelPw)_el_btnCancelPw.addEventListener('click',function(){closeMo('mChangePw');});
+  var _el_btnSavePw=q('btnSavePw');if(_el_btnSavePw)_el_btnSavePw.addEventListener('click',doChangePw);
 
   // Add admin modal
-  q('btnAddAdmin').addEventListener('click',function(){openMo('mAddAdmin');});
-  q('btnCloseAddAdmin').addEventListener('click',function(){closeMo('mAddAdmin');});
-  q('btnCancelAddAdmin').addEventListener('click',function(){closeMo('mAddAdmin');});
-  q('btnSaveAdmin').addEventListener('click',doAddAdmin);
+  var _el_btnAddAdmin=q('btnAddAdmin');if(_el_btnAddAdmin)_el_btnAddAdmin.addEventListener('click',function(){openMo('mAddAdmin');});
+  var _el_btnCloseAddAdmin=q('btnCloseAddAdmin');if(_el_btnCloseAddAdmin)_el_btnCloseAddAdmin.addEventListener('click',function(){closeMo('mAddAdmin');});
+  var _el_btnCancelAddAdmin=q('btnCancelAddAdmin');if(_el_btnCancelAddAdmin)_el_btnCancelAddAdmin.addEventListener('click',function(){closeMo('mAddAdmin');});
+  var _el_btnSaveAdmin=q('btnSaveAdmin');if(_el_btnSaveAdmin)_el_btnSaveAdmin.addEventListener('click',doAddAdmin);
 
   // Ticket modal
-  q('btnCloseTicket').addEventListener('click',function(){closeMo('mTicket');});
-  q('btnCancelTicket').addEventListener('click',function(){closeMo('mTicket');});
-  q('btnSendTicket').addEventListener('click',doReply);
+  var _el_btnCloseTicket=q('btnCloseTicket');if(_el_btnCloseTicket)_el_btnCloseTicket.addEventListener('click',function(){closeMo('mTicket');});
+  var _el_btnCancelTicket=q('btnCancelTicket');if(_el_btnCancelTicket)_el_btnCancelTicket.addEventListener('click',function(){closeMo('mTicket');});
+  var _el_btnSendTicket=q('btnSendTicket');if(_el_btnSendTicket)_el_btnSendTicket.addEventListener('click',doReply);
 
   // Health
-  q('btnTestEmail').addEventListener('click',doTestEmail);
+  var _el_btnTestEmail=q('btnTestEmail');if(_el_btnTestEmail)_el_btnTestEmail.addEventListener('click',doTestEmail);
 
   // Announcement
-  q('btnPublish').addEventListener('click',doPublish);
-  q('btnRemoveAnn').addEventListener('click',doRemoveAnn);
+  var _el_btnPublish=q('btnPublish');if(_el_btnPublish)_el_btnPublish.addEventListener('click',doPublish);
+  var _el_btnRemoveAnn=q('btnRemoveAnn');if(_el_btnRemoveAnn)_el_btnRemoveAnn.addEventListener('click',doRemoveAnn);
 
   // Broadcast
-  q('btnBroadcast').addEventListener('click',doBroadcast);
+  var _el_btnBroadcast=q('btnBroadcast');if(_el_btnBroadcast)_el_btnBroadcast.addEventListener('click',doBroadcast);
 
   // Users
-  var uT;q('uSearch').addEventListener('input',function(){clearTimeout(uT);uT=setTimeout(function(){uPage=1;loadUsers();},400);});
-  q('uPlan').addEventListener('change',function(){uPage=1;loadUsers();});
-  q('invFilter').addEventListener('change',function(){iPage=1;loadInv();});
-  q('tickFilter').addEventListener('change',loadTickets);
+  var uT;var _el_uSearch=q('uSearch');if(_el_uSearch)_el_uSearch.addEventListener('input',function(){clearTimeout(uT);uT=setTimeout(function(){uPage=1;loadUsers();},400);});
+  var _el_uPlan=q('uPlan');if(_el_uPlan)_el_uPlan.addEventListener('change',function(){uPage=1;loadUsers();});
+  var _el_invFilter=q('invFilter');if(_el_invFilter)_el_invFilter.addEventListener('change',function(){iPage=1;loadInv();});
+  var _el_tickFilter=q('tickFilter');if(_el_tickFilter)_el_tickFilter.addEventListener('change',loadTickets);
 
   // Close modals on background click
   document.querySelectorAll('.mo-bg').forEach(function(bg){bg.addEventListener('click',function(e){if(e.target===this)closeMo(this.id);});});

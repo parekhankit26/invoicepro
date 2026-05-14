@@ -751,29 +751,51 @@ router.post('/test-email', adminAuth, async (req: any, res: Response) => {
     }
     
     const nodemailer = await import('nodemailer')
-    const transporter = nodemailer.default.createTransport({
-      host, port, secure, auth: { user, pass },
-      connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 15000,
-      tls: { rejectUnauthorized: false }
-    })
-    try {
-      await transporter.verify()
-    } catch(verifyErr: any) {
-      let hint = verifyErr.message
-      if (hint.includes('timeout') || hint.includes('ETIMEDOUT')) {
-        hint = 'Connection timeout. Gmail blocks SMTP from cloud servers. Use Resend (tab above) instead, or try SendGrid SMTP.'
-      } else if (hint.includes('auth') || hint.includes('535') || hint.includes('534')) {
-        hint = 'Authentication failed. Check your password. For Gmail, create an App Password at myaccount.google.com → Security → App passwords.'
+    
+    // Try configured port first, then fallback to alternative
+    const portConfigs = [
+      { port, secure },
+      // If port 465 fails, try 587 with STARTTLS
+      ...(parseInt(String(port)) === 465 ? [{ port: 587, secure: false }] : []),
+      ...(parseInt(String(port)) === 587 ? [{ port: 465, secure: true }] : []),
+    ]
+    
+    let lastError = ''
+    for (const portCfg of portConfigs) {
+      try {
+        const transporter = nodemailer.default.createTransport({
+          host, port: portCfg.port, secure: portCfg.secure,
+          auth: { user, pass },
+          connectionTimeout: 12000, greetingTimeout: 12000, socketTimeout: 15000,
+          tls: { rejectUnauthorized: false }
+        })
+        await transporter.verify()
+        await transporter.sendMail({
+          from: `${from}`, to,
+          subject: 'InvoicePro - Email test successful!',
+          html: '<div style="font-family:sans-serif;padding:32px;max-width:500px"><div style="background:#1a1814;padding:24px;border-radius:12px;color:white;text-align:center"><h2 style="margin:0">✅ Email is working!</h2></div><p style="color:#555;margin-top:20px">Your InvoicePro email is configured correctly. Invoices and quotes will be delivered to your clients.</p><p style="color:#888;font-size:12px;margin-top:16px">Sent via: ' + host + ':' + portCfg.port + '</p></div>'
+        })
+        // If working port differs from configured, update it
+        if (portCfg.port !== port) {
+          await supabase.from('app_settings').upsert({ key: 'smtp_port', value: JSON.stringify(String(portCfg.port)), label: 'SMTP Port', category: 'email' }, { onConflict: 'key' })
+          await supabase.from('app_settings').upsert({ key: 'smtp_secure', value: JSON.stringify(portCfg.secure), label: 'Use SSL', category: 'email' }, { onConflict: 'key' })
+        }
+        await log(req.admin.id, 'test_email_sent', 'system', 'email', { to, provider: 'smtp', port: portCfg.port })
+        return res.json({ message: `✅ Test email sent to ${to}! Check your inbox. (Port ${portCfg.port} ${portCfg.secure ? 'SSL' : 'TLS'})` })
+      } catch(e: any) {
+        lastError = e.message
+        continue
       }
-      return res.status(400).json({ error: hint })
     }
-    await transporter.sendMail({
-      from: `InvoicePro <${from}>`, to,
-      subject: 'InvoicePro - Email test successful!',
-      html: '<div style="font-family:sans-serif;padding:32px"><h2>Email working via SMTP!</h2></div>'
-    })
-    await log(req.admin.id, 'test_email_sent', 'system', 'email', { to, provider: 'smtp' })
-    return res.json({ message: `✅ Test email sent to ${to} via SMTP! Check your inbox.` })
+    
+    // All ports failed
+    let hint = lastError
+    if (hint.includes('timeout') || hint.includes('ETIMEDOUT') || hint.includes('ECONNREFUSED')) {
+      hint = 'SMTP connection blocked. Railway servers cannot reach ' + host + '. Try switching to Resend (free, works from any server) — click the Resend tab above and sign up free at resend.com'
+    } else if (hint.includes('auth') || hint.includes('535') || hint.includes('534') || hint.includes('Wrong') || hint.includes('Invalid')) {
+      hint = 'Wrong password. Double-check your ' + user + ' password in Hostinger hPanel → Emails → Mailboxes.'
+    }
+    return res.status(400).json({ error: hint })
   } catch(e: any) {
     return res.status(500).json({ error: `Email failed: ${e.message}` })
   }

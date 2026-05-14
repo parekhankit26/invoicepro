@@ -796,11 +796,14 @@ router.post('/email-settings', adminAuth, async (req: any, res: Response) => {
     if (smtp_pass && smtp_pass.trim()) {
       settings.push({ key: 'smtp_pass', value: JSON.stringify(smtp_pass), label: 'SMTP Password', category: 'email' })
     }
+    // Always set provider to smtp when saving SMTP settings
+    settings.push({ key: 'email_provider', value: JSON.stringify('smtp'), label: 'Email Provider', category: 'email' })
+    
     for (const s of settings) {
       await supabase.from('app_settings').upsert(s, { onConflict: 'key' })
     }
     await log(req.admin.id, 'email_settings_saved', 'system', 'email', { smtp_host, smtp_user })
-    return res.json({ message: '✅ Email settings saved! Test the connection using the button above.' })
+    return res.json({ message: '✅ SMTP settings saved! Emails will now send from ' + (smtp_from || smtp_user) })
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
 

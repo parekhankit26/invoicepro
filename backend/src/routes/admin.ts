@@ -730,13 +730,33 @@ router.post('/test-email', adminAuth, async (req: any, res: Response) => {
     }
     
     const nodemailer = await import('nodemailer')
-    const transporter = nodemailer.default.createTransport({ host, port, secure, auth: { user, pass } })
-    await transporter.verify()
+    const transporter = nodemailer.default.createTransport({
+      host, port, secure,
+      auth: { user, pass },
+      connectionTimeout: 10000,  // 10 second timeout
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
+      tls: { rejectUnauthorized: false } // Allow self-signed certs
+    })
+    // Verify connection first
+    try {
+      await transporter.verify()
+    } catch(verifyErr: any) {
+      let hint = verifyErr.message
+      if (hint.includes('timeout') || hint.includes('ETIMEDOUT')) {
+        hint = 'Connection timeout — Gmail may be blocking the connection. Make sure you are using an App Password (not your Gmail password). Go to myaccount.google.com → Security → App passwords.'
+      } else if (hint.includes('auth') || hint.includes('535') || hint.includes('534')) {
+        hint = 'Authentication failed — Wrong password. For Gmail, use an App Password not your account password.'
+      } else if (hint.includes('ECONNREFUSED')) {
+        hint = 'Connection refused — Check the SMTP host and port settings.'
+      }
+      return res.status(400).json({ error: hint })
+    }
     await transporter.sendMail({
       from: `InvoicePro <${from}>`,
       to,
-      subject: '✅ InvoicePro — Email test successful!',
-      html: `<div style="font-family:sans-serif;padding:32px;max-width:500px;background:#f8f7f4"><div style="background:#1a1814;padding:24px;border-radius:12px;color:white;text-align:center;margin-bottom:20px"><div style="font-size:36px;margin-bottom:8px">✅</div><h2 style="margin:0;font-size:20px">Email is working!</h2></div><p style="color:#555">Your InvoicePro SMTP configuration is working correctly. Emails will be delivered to your clients.</p><p style="color:#888;font-size:12px;margin-top:20px">Sent via: ${host} · ${new Date().toLocaleString()}</p></div>`
+      subject: 'InvoicePro - Email test successful!',
+      html: '<div style="font-family:sans-serif;padding:32px;max-width:500px"><div style="background:#1a1814;padding:24px;border-radius:12px;color:white;text-align:center;margin-bottom:20px"><h2 style="margin:0;font-size:20px">Email is working!</h2></div><p style="color:#555;margin-top:20px">Your InvoicePro SMTP is configured correctly. Emails will be delivered to clients.</p><p style="color:#888;font-size:12px;margin-top:16px">Sent: ' + new Date().toLocaleString() + '</p></div>'
     })
     await log(req.admin.id, 'test_email_sent', 'system', 'email', { to, smtp_host: host })
     return res.json({ message: `✅ Test email sent to ${to}! Check your inbox.` })

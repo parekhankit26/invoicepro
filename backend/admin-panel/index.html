@@ -501,6 +501,171 @@ tr:hover td{background:#fafaf8}
 
       <!-- EMAIL SETTINGS -->
       <div class="pg" id="pg-email">
+        <div class="ph"><div><div class="pt">Email settings</div><div class="ps">Configure email delivery for invoices, quotes and notifications</div></div></div>
+        
+        <div id="emailStatusBanner" style="margin-bottom:14px"></div>
+
+        <!-- Provider tabs -->
+        <div style="display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:20px">
+          <button class="ab" id="tabResend" style="border:none;border-bottom:2px solid var(--ink);border-radius:0;margin-bottom:-2px;color:var(--ink);font-weight:600">🚀 Resend (Recommended)</button>
+          <button class="ab" id="tabSmtp" style="border:none;border-radius:0;color:var(--ink3)">⚙️ SMTP / Gmail</button>
+        </div>
+
+        <!-- RESEND PANEL -->
+        <div id="panelResend">
+          <div class="g2">
+            <div class="bc">
+              <div style="font-size:13px;font-weight:600;margin-bottom:4px">🚀 Resend — Free, reliable, works instantly</div>
+              <div style="font-size:12px;color:var(--ink3);margin-bottom:16px">3,000 emails/month free · No SMTP needed · Works from Railway</div>
+              
+              <div class="fg"><label>Resend API Key *</label>
+                <input class="fi" id="resendKey" type="password" placeholder="re_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
+                <div style="font-size:11px;color:var(--ink3);margin-top:4px">Get your free API key at resend.com</div>
+              </div>
+              <div class="fg"><label>From email (must be verified in Resend)</label>
+                <input class="fi" id="resendFrom" placeholder="invoices@yourdomain.com or onboarding@resend.dev (for testing)"/>
+                <div style="font-size:11px;color:var(--ink3);margin-top:4px">Use <strong>onboarding@resend.dev</strong> for testing without domain verification</div>
+              </div>
+              <div class="fg"><label>From name</label>
+                <input class="fi" id="resendName" placeholder="InvoicePro" value="InvoicePro"/>
+              </div>
+
+              <button class="ab ab-p" style="width:100%;justify-content:center" id="btnSaveResend">💾 Save Resend settings</button>
+              <div id="resendSaveRes" style="margin-top:10px"></div>
+            </div>
+
+            <div>
+              <div class="bc" style="margin-bottom:14px">
+                <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Send test email</div>
+                <div class="fg"><label>Send test to</label><input class="fi" type="email" id="testEmailTo" placeholder="your@email.com"/></div>
+                <button class="ab ab-p" style="width:100%;justify-content:center" id="btnTestEmail2">Send test email</button>
+                <div id="testEmailRes2" style="margin-top:10px"></div>
+              </div>
+
+              <div class="bc">
+                <div style="font-size:13px;font-weight:600;margin-bottom:12px">📖 Quick setup (2 minutes)</div>
+                <div style="font-size:12.5px;color:var(--ink2);line-height:2">
+                  <div><strong>1.</strong> Go to <a href="https://resend.com" target="_blank" style="color:var(--blue)">resend.com</a> → Sign up free</div>
+                  <div><strong>2.</strong> Click <strong>API Keys</strong> → <strong>Create API Key</strong></div>
+                  <div><strong>3.</strong> Copy the key (starts with <code style="background:var(--bg);padding:1px 5px;border-radius:3px">re_</code>)</div>
+                  <div><strong>4.</strong> Paste above → use <strong>onboarding@resend.dev</strong> as From email</div>
+                  <div><strong>5.</strong> Save → Send test → Done ✅</div>
+                </div>
+                <div style="margin-top:12px;padding:10px;background:var(--gbg);border-radius:8px;font-size:12px;color:#15803d">
+                  💡 To send from your own domain, verify it in Resend → Domains. Takes 5 minutes.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SMTP PANEL -->
+        <div id="panelSmtp" class="hidden">
+          <div class="al al-warn" style="margin-bottom:14px">
+            ⚠ <strong>Gmail blocks SMTP from cloud servers</strong> (Railway, AWS etc.) by default. Use Resend above for reliable delivery. SMTP works best with SendGrid, Mailgun or your own mail server.
+          </div>
+          <div class="g2">
+            <div class="bc">
+              <div class="fg"><label>Email provider preset</label>
+                <select class="fi" id="emailProvider">
+                  <option value="">Choose provider</option>
+                  <option value="sendgrid">SendGrid (recommended for SMTP)</option>
+                  <option value="mailgun">Mailgun</option>
+                  <option value="outlook">Outlook / Office 365</option>
+                  <option value="gmail">Gmail (may timeout from Railway)</option>
+                  <option value="custom">Custom SMTP</option>
+                </select>
+              </div>
+              <div class="fg"><label>SMTP Host *</label><input class="fi" id="smtpHost" placeholder="smtp.sendgrid.net"/></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div class="fg"><label>Port</label><input class="fi" id="smtpPort" placeholder="587" value="587" type="number"/></div>
+                <div class="fg"><label>Security</label>
+                  <select class="fi" id="smtpSecure">
+                    <option value="false">TLS (port 587)</option>
+                    <option value="true">SSL (port 465)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="fg"><label>SMTP Username *</label><input class="fi" id="smtpUser" placeholder="apikey or your@email.com"/></div>
+              <div class="fg"><label>SMTP Password *</label>
+                <input class="fi" id="smtpPass" type="password" placeholder="Password or API key"/>
+              </div>
+              <div class="fg"><label>From email</label><input class="fi" id="smtpFrom" placeholder="invoices@yourdomain.com"/></div>
+              <button class="ab ab-p" style="width:100%;justify-content:center" id="btnSaveEmail">💾 Save SMTP settings</button>
+              <div id="emailSaveRes" style="margin-top:10px"></div>
+            </div>
+            <div class="bc">
+              <div style="font-size:13px;font-weight:600;margin-bottom:10px">SendGrid (free 100 emails/day)</div>
+              <div style="font-size:12.5px;color:var(--ink2);line-height:2">
+                <div><strong>1.</strong> Go to <a href="https://sendgrid.com" target="_blank" style="color:var(--blue)">sendgrid.com</a> → Sign up</div>
+                <div><strong>2.</strong> Settings → API Keys → Create key</div>
+                <div><strong>3.</strong> SMTP settings:</div>
+                <div style="padding:10px;background:var(--bg);border-radius:7px;font-family:monospace;font-size:11.5px;line-height:1.8">
+                  Host: smtp.sendgrid.net<br/>Port: 587<br/>User: apikey<br/>Pass: your_api_key
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TICKETS -->
+      <div class="pg" id="pg-tickets">
+        <div class="ph">
+          <div><div class="pt">Support tickets</div></div>
+          <select class="fi" id="tickFilter" style="width:160px"><option value="">All</option><option value="open">Open</option><option value="resolved">Resolved</option></select>
+        </div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>User</th><th>Subject</th><th>Status</th><th>Date</th><th></th></tr></thead>
+          <tbody id="tickRows"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
+      </div>
+
+      <!-- SATISFACTION -->
+      <div class="pg" id="pg-satisfaction">
+        <div class="ph"><div><div class="pt">Client satisfaction</div></div></div>
+        <div class="g3" id="satCards"></div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>Business</th><th>Score</th><th>Comment</th><th>Date</th></tr></thead>
+          <tbody id="satRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
+      </div>
+
+      <!-- BROADCAST -->
+      <div class="pg" id="pg-broadcast">
+        <div class="ph"><div><div class="pt">Broadcast email</div><div class="ps">Send to all or filtered users</div></div></div>
+        <div class="g2">
+          <div class="bc">
+            <div class="fg"><label>Subject</label><input class="fi" id="bSubj" placeholder="Subject line"/></div>
+            <div class="fg"><label>Plan filter</label><select class="fi" id="bPlan"><option value="">All users</option><option value="free">Free</option><option value="starter">Starter</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select></div>
+            <div class="fg"><label>Message</label><textarea class="fi" id="bMsg" rows="5" placeholder="Hi there..."></textarea></div>
+            <button class="ab ab-p" style="width:100%;justify-content:center" id="btnBroadcast">📢 Send broadcast</button>
+            <div id="broadRes" style="margin-top:10px"></div>
+          </div>
+          <div class="bc"><div class="al al-info">Target specific segments with plan filter.</div><div class="al al-warn" style="margin-top:8px">SMTP must be configured in Railway for delivery.</div></div>
+        </div>
+      </div>
+
+      <!-- ADMINS -->
+      <div class="pg" id="pg-admins">
+        <div class="ph"><div><div class="pt">Admin accounts</div></div><button class="ab ab-p" id="btnAddAdmin">+ Add admin</button></div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Last login</th><th>Status</th><th></th></tr></thead>
+          <tbody id="adminRows"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
+      </div>
+
+      <!-- AUDIT -->
+      <div class="pg" id="pg-audit">
+        <div class="ph"><div><div class="pt">Audit log</div></div></div>
+        <div class="bc" style="padding:0"><div class="tbl-wrap">
+          <table><thead><tr><th>Admin</th><th>Action</th><th>Entity</th><th>Time</th></tr></thead>
+          <tbody id="auditRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
+        </div></div>
+      </div>
+
+      <!-- EMAIL SETTINGS -->
+      <div class="pg" id="pg-email">
         <div class="ph"><div><div class="pt">Email settings</div><div class="ps">Configure SMTP to send invoices, quotes and notifications</div></div></div>
         
         <div id="emailStatusBanner" style="margin-bottom:14px"></div>
@@ -909,6 +1074,88 @@ function loadAudit(){
 }
 
 
+
+// ── RESEND / EMAIL TABS ───────────────────────────────────
+function switchEmailTab(tab) {
+  if (tab === 'resend') {
+    q('panelResend').classList.remove('hidden');
+    q('panelSmtp').classList.add('hidden');
+    q('tabResend').style.borderBottom = '2px solid var(--ink)';
+    q('tabResend').style.color = 'var(--ink)';
+    q('tabResend').style.fontWeight = '600';
+    q('tabSmtp').style.borderBottom = 'none';
+    q('tabSmtp').style.color = 'var(--ink3)';
+    q('tabSmtp').style.fontWeight = '400';
+  } else {
+    q('panelSmtp').classList.remove('hidden');
+    q('panelResend').classList.add('hidden');
+    q('tabSmtp').style.borderBottom = '2px solid var(--ink)';
+    q('tabSmtp').style.color = 'var(--ink)';
+    q('tabSmtp').style.fontWeight = '600';
+    q('tabResend').style.borderBottom = 'none';
+    q('tabResend').style.color = 'var(--ink3)';
+    q('tabResend').style.fontWeight = '400';
+  }
+}
+
+function loadEmailSettings() {
+  // Load Resend settings
+  req('/admin/resend-settings').then(function(d) {
+    if (q('resendFrom')) q('resendFrom').value = d.resend_from || '';
+    if (q('resendName')) q('resendName').value = d.resend_name || 'InvoicePro';
+    if (q('resendKey')) q('resendKey').placeholder = d.configured ? 're_•••••••••• (saved — enter new to change)' : 're_xxxxxxxxxxxxxxxxxxxxxxxx';
+    // Auto-fill test email
+    if (q('testEmailTo') && !q('testEmailTo').value && d.resend_from && d.resend_from.includes('@')) {
+      // Don't auto-fill with onboarding@resend.dev
+      if (!d.resend_from.includes('resend.dev')) q('testEmailTo').value = d.resend_from;
+    }
+    if (d.email_provider === 'resend' || d.configured) {
+      switchEmailTab('resend');
+      if (q('emailStatusBanner')) q('emailStatusBanner').innerHTML = '<div class="al al-ok"><strong>✅ Email configured via Resend</strong> — Sending from ' + (d.resend_from || '—') + '</div>';
+    }
+  }).catch(function(){});
+
+  // Load SMTP settings
+  req('/admin/email-settings').then(function(d) {
+    if (q('smtpHost')) q('smtpHost').value = d.smtp_host || '';
+    if (q('smtpPort')) q('smtpPort').value = d.smtp_port || '587';
+    if (q('smtpUser')) q('smtpUser').value = d.smtp_user || '';
+    if (q('smtpFrom')) q('smtpFrom').value = d.smtp_from || '';
+    if (q('smtpSecure')) q('smtpSecure').value = (d.smtp_secure === true || d.smtp_secure === 'true') ? 'true' : 'false';
+    if (q('smtpPass')) q('smtpPass').placeholder = (d.source !== 'not_configured') ? '•••••••• (saved)' : 'Enter SMTP password';
+    if (d.source === 'env_vars' && q('emailStatusBanner') && q('emailStatusBanner').innerHTML.indexOf('Resend') === -1) {
+      q('emailStatusBanner').innerHTML = '<div class="al al-info">ℹ Using Railway env vars for SMTP (' + d.smtp_user + ')</div>';
+    }
+  }).catch(function(){});
+}
+
+function doSaveResend() {
+  var key = q('resendKey').value.trim();
+  var from = q('resendFrom').value.trim();
+  var name = q('resendName').value.trim() || 'InvoicePro';
+  if (!from) { errMsg('resendSaveRes', 'From email is required'); return; }
+  if (!from.includes('@')) { errMsg('resendSaveRes', 'Enter a valid email address'); return; }
+  if (key && !key.startsWith('re_')) { errMsg('resendSaveRes', 'Invalid API key. Resend keys start with re_'); return; }
+  q('resendSaveRes').innerHTML = '<div class="al al-info">Saving...</div>';
+  var body = { resend_from: from, resend_name: name };
+  if (key) body.resend_api_key = key;
+  req('/admin/resend-settings', {method:'POST', body:JSON.stringify(body)})
+    .then(function(d) { okMsg('resendSaveRes', d.message); loadEmailSettings(); })
+    .catch(function(e) { errMsg('resendSaveRes', e.message); });
+}
+
+function doTestEmail2() {
+  var to = q('testEmailTo') ? q('testEmailTo').value.trim() : '';
+  if (!to || !to.includes('@')) {
+    if (q('testEmailRes2')) q('testEmailRes2').innerHTML = '<div class="al al-err">Enter a valid email address</div>';
+    return;
+  }
+  if (q('testEmailRes2')) q('testEmailRes2').innerHTML = '<div class="al al-info">Sending to ' + to + '...</div>';
+  req('/admin/test-email', {method:'POST', body:JSON.stringify({to:to})})
+    .then(function(d) { if (q('testEmailRes2')) q('testEmailRes2').innerHTML = '<div class="al al-ok">'+d.message+'</div>'; })
+    .catch(function(e) { if (q('testEmailRes2')) q('testEmailRes2').innerHTML = '<div class="al al-err">❌ '+e.message+'</div>'; });
+}
+
 // ── EMAIL SETTINGS ────────────────────────────────────────
 var PROVIDERS = {
   gmail:    {host:'smtp.gmail.com',    port:'587', secure:false},
@@ -918,38 +1165,7 @@ var PROVIDERS = {
   mailgun:  {host:'smtp.mailgun.org',  port:'587', secure:false},
 };
 
-function loadEmailSettings() {
-  req('/admin/email-settings').then(function(d) {
-    // Always pre-fill whatever we have
-    if (q('smtpHost')) q('smtpHost').value = d.smtp_host || '';
-    if (q('smtpPort')) q('smtpPort').value = d.smtp_port || '587';
-    if (q('smtpUser')) q('smtpUser').value = d.smtp_user || '';
-    if (q('smtpFrom')) q('smtpFrom').value = d.smtp_from || '';
-    if (q('smtpSecure')) q('smtpSecure').value = (d.smtp_secure === true || d.smtp_secure === 'true') ? 'true' : 'false';
-    if (q('smtpPass')) {
-      if (d.source === 'database' || d.source === 'env_vars') {
-        q('smtpPass').placeholder = '••••••••  (saved — enter new to change)';
-      } else {
-        q('smtpPass').placeholder = 'Enter your SMTP password / App password';
-      }
-    }
-    // Auto-fill test email with current user if empty
-    if (q('testEmailTo') && !q('testEmailTo').value && d.smtp_user) {
-      q('testEmailTo').value = d.smtp_user;
-    }
-    var banner;
-    if (d.source === 'database') {
-      banner = '<div class="al al-ok" style="display:flex;align-items:center;gap:10px"><span style="font-size:18px">✅</span><div><strong>Email configured</strong> — Sending as <strong>'+d.smtp_user+'</strong> via '+d.smtp_host+'.<br><span style="font-size:11px;opacity:.8">Settings saved in database. Sending test email to verify.</span></div></div>';
-    } else if (d.source === 'env_vars') {
-      banner = '<div class="al al-info"><strong>ℹ Email using Railway env vars</strong> ('+d.smtp_user+'). You can save here to override with database settings.</div>';
-    } else {
-      banner = '<div class="al al-warn"><strong>⚠ Email not configured</strong> — Select a provider below and fill in your credentials to enable invoice emails.</div>';
-    }
-    if (q('emailStatusBanner')) q('emailStatusBanner').innerHTML = banner;
-  }).catch(function(e) {
-    if (q('emailStatusBanner')) q('emailStatusBanner').innerHTML = '<div class="al al-warn">⚠ Could not load email settings: '+e.message+'</div>';
-  });
-}
+// loadEmailSettings defined above
 
 function doSaveEmailSettings() {
   var host = q('smtpHost').value.trim();
@@ -1070,7 +1286,14 @@ document.addEventListener('DOMContentLoaded',function(){
   document.querySelectorAll('.mo-bg').forEach(function(bg){bg.addEventListener('click',function(e){if(e.target===this)closeMo(this.id);});});
   document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('.mo-bg.show').forEach(function(m){closeMo(m.id);});});
 
-  // Email settings events
+  // Email tab buttons
+  var tabResend = q('tabResend');
+  if (tabResend) tabResend.addEventListener('click', function(){ switchEmailTab('resend'); });
+  var tabSmtp = q('tabSmtp');
+  if (tabSmtp) tabSmtp.addEventListener('click', function(){ switchEmailTab('smtp'); });
+  // Save buttons
+  var btnSaveResend = q('btnSaveResend');
+  if (btnSaveResend) btnSaveResend.addEventListener('click', doSaveResend);
   var btnSaveEmail = q('btnSaveEmail');
   if (btnSaveEmail) btnSaveEmail.addEventListener('click', doSaveEmailSettings);
   var btnTestEmail2 = q('btnTestEmail2');

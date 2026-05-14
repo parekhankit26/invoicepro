@@ -707,65 +707,78 @@ router.post('/test-email', adminAuth, async (req: any, res: Response) => {
   try {
     const { to } = (req as any).body
     if (!to || !to.includes('@')) return res.status(400).json({ error: 'Enter a valid email address' })
+
+    // Check email provider setting
+    const { data: settings } = await supabase.from('app_settings')
+      .select('key, value').in('key', ['email_provider','resend_api_key','resend_from','resend_name',
+        'smtp_host','smtp_port','smtp_user','smtp_pass','smtp_from','smtp_secure'])
     
-    // Get SMTP config from DB first, then env vars
-    const { data: smtpSettings } = await supabase.from('app_settings')
-      .select('key, value').in('key', ['smtp_host','smtp_port','smtp_user','smtp_pass','smtp_from','smtp_secure'])
+    const cfg: any = {}
+    ;(settings||[]).forEach((r: any) => { try { cfg[r.key] = JSON.parse(r.value) } catch { cfg[r.key] = r.value } })
     
-    let host = process.env.SMTP_HOST || ''
-    let port = parseInt(process.env.SMTP_PORT || '587')
-    let user = process.env.SMTP_USER || ''
-    let pass = process.env.SMTP_PASS || ''
-    let from = process.env.EMAIL_FROM || process.env.SMTP_USER || ''
-    let secure = process.env.SMTP_SECURE === 'true'
+    const provider = cfg.email_provider || (cfg.resend_api_key ? 'resend' : 'smtp')
     
-    if (smtpSettings && smtpSettings.length > 0) {
-      const cfg: any = {}
-      smtpSettings.forEach((r: any) => { try { cfg[r.key] = JSON.parse(r.value) } catch { cfg[r.key] = r.value } })
-      if (cfg.smtp_host) { host = cfg.smtp_host; port = parseInt(cfg.smtp_port || '587'); user = cfg.smtp_user; pass = cfg.smtp_pass; from = cfg.smtp_from || cfg.smtp_user; secure = cfg.smtp_secure === true }
+    if (provider === 'resend' && cfg.resend_api_key) {
+      // Use Resend API
+      try {
+        const { Resend } = await import('resend')
+        const resendClient = new Resend(cfg.resend_api_key)
+        const fromStr = cfg.resend_name ? `${cfg.resend_name} <${cfg.resend_from}>` : cfg.resend_from
+        const result = await resendClient.emails.send({
+          from: fromStr,
+          to: [to],
+          subject: 'InvoicePro - Email test successful!',
+          html: '<div style="font-family:sans-serif;padding:32px;max-width:500px"><div style="background:#1a1814;padding:24px;border-radius:12px;color:white;text-align:center"><h2 style="margin:0">Email is working!</h2></div><p style="color:#555;margin-top:20px">Your InvoicePro email is configured correctly via Resend.</p></div>'
+        })
+        if (result.error) throw new Error(result.error.message)
+        await log(req.admin.id, 'test_email_sent', 'system', 'email', { to, provider: 'resend' })
+        return res.json({ message: `✅ Test email sent to ${to} via Resend! Check your inbox.` })
+      } catch(e: any) {
+        return res.status(400).json({ error: `Resend failed: ${e.message}` })
+      }
     }
     
+    // SMTP fallback
+    let host = cfg.smtp_host || process.env.SMTP_HOST || ''
+    let port = parseInt(cfg.smtp_port || process.env.SMTP_PORT || '587')
+    let user = cfg.smtp_user || process.env.SMTP_USER || ''
+    let pass = cfg.smtp_pass || process.env.SMTP_PASS || ''
+    let from = cfg.smtp_from || process.env.EMAIL_FROM || user
+    let secure = cfg.smtp_secure === true || cfg.smtp_secure === 'true'
+    
     if (!host || !user || !pass) {
-      return res.status(400).json({ error: 'SMTP not configured. Go to System health → Email settings and configure your SMTP details.' })
+      return res.status(400).json({ error: 'Email not configured. Set up Resend (recommended) or SMTP in Email settings.' })
     }
     
     const nodemailer = await import('nodemailer')
     const transporter = nodemailer.default.createTransport({
-      host, port, secure,
-      auth: { user, pass },
-      connectionTimeout: 10000,  // 10 second timeout
-      greetingTimeout: 10000,
-      socketTimeout: 15000,
-      tls: { rejectUnauthorized: false } // Allow self-signed certs
+      host, port, secure, auth: { user, pass },
+      connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 15000,
+      tls: { rejectUnauthorized: false }
     })
-    // Verify connection first
     try {
       await transporter.verify()
     } catch(verifyErr: any) {
       let hint = verifyErr.message
       if (hint.includes('timeout') || hint.includes('ETIMEDOUT')) {
-        hint = 'Connection timeout — Gmail may be blocking the connection. Make sure you are using an App Password (not your Gmail password). Go to myaccount.google.com → Security → App passwords.'
+        hint = 'Connection timeout. Gmail blocks SMTP from cloud servers. Use Resend (tab above) instead, or try SendGrid SMTP.'
       } else if (hint.includes('auth') || hint.includes('535') || hint.includes('534')) {
-        hint = 'Authentication failed — Wrong password. For Gmail, use an App Password not your account password.'
-      } else if (hint.includes('ECONNREFUSED')) {
-        hint = 'Connection refused — Check the SMTP host and port settings.'
+        hint = 'Authentication failed. Check your password. For Gmail, create an App Password at myaccount.google.com → Security → App passwords.'
       }
       return res.status(400).json({ error: hint })
     }
     await transporter.sendMail({
-      from: `InvoicePro <${from}>`,
-      to,
+      from: `InvoicePro <${from}>`, to,
       subject: 'InvoicePro - Email test successful!',
-      html: '<div style="font-family:sans-serif;padding:32px;max-width:500px"><div style="background:#1a1814;padding:24px;border-radius:12px;color:white;text-align:center;margin-bottom:20px"><h2 style="margin:0;font-size:20px">Email is working!</h2></div><p style="color:#555;margin-top:20px">Your InvoicePro SMTP is configured correctly. Emails will be delivered to clients.</p><p style="color:#888;font-size:12px;margin-top:16px">Sent: ' + new Date().toLocaleString() + '</p></div>'
+      html: '<div style="font-family:sans-serif;padding:32px"><h2>Email working via SMTP!</h2></div>'
     })
-    await log(req.admin.id, 'test_email_sent', 'system', 'email', { to, smtp_host: host })
-    return res.json({ message: `✅ Test email sent to ${to}! Check your inbox.` })
+    await log(req.admin.id, 'test_email_sent', 'system', 'email', { to, provider: 'smtp' })
+    return res.json({ message: `✅ Test email sent to ${to} via SMTP! Check your inbox.` })
   } catch(e: any) {
-    return res.status(500).json({ error: `Email failed: ${e.message}. Check your SMTP credentials.` })
+    return res.status(500).json({ error: `Email failed: ${e.message}` })
   }
 })
 
-// ── SAVE EMAIL SETTINGS ───────────────────────────────────
 router.post('/email-settings', adminAuth, async (req: any, res: Response) => {
   try {
     const { smtp_host, smtp_port, smtp_user, smtp_pass, smtp_from, smtp_secure } = (req as any).body
@@ -807,6 +820,53 @@ router.get('/email-settings', adminAuth, async (_req: any, res: Response) => {
       smtp_secure: cfg.smtp_secure || false,
       smtp_pass: cfg.smtp_user ? '••••••••' : '', // Never return actual password
       source: cfg.smtp_host ? 'database' : (process.env.SMTP_HOST ? 'env_vars' : 'not_configured')
+    })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// ── RESEND EMAIL SETTINGS ─────────────────────────────────
+router.post('/resend-settings', adminAuth, async (req: any, res: Response) => {
+  try {
+    const { resend_api_key, resend_from, resend_name } = (req as any).body
+    if (!resend_api_key || !resend_from) {
+      return res.status(400).json({ error: 'API key and From email are required' })
+    }
+    // Test the API key first
+    try {
+      const { Resend } = await import('resend')
+      const resendClient = new Resend(resend_api_key)
+      // Just validate by checking the key format
+      if (!resend_api_key.startsWith('re_')) {
+        return res.status(400).json({ error: 'Invalid Resend API key format. Should start with re_' })
+      }
+    } catch(e) {}
+    
+    const settings = [
+      { key: 'resend_api_key', value: JSON.stringify(resend_api_key), label: 'Resend API Key', category: 'email' },
+      { key: 'resend_from', value: JSON.stringify(resend_from), label: 'Resend From Email', category: 'email' },
+      { key: 'resend_name', value: JSON.stringify(resend_name || 'InvoicePro'), label: 'Resend From Name', category: 'email' },
+      { key: 'email_provider', value: JSON.stringify('resend'), label: 'Email Provider', category: 'email' },
+    ]
+    for (const s of settings) {
+      await supabase.from('app_settings').upsert(s, { onConflict: 'key' })
+    }
+    await log(req.admin.id, 'resend_settings_saved', 'system', 'email', { resend_from })
+    return res.json({ message: '✅ Resend settings saved! Send a test email to verify.' })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+router.get('/resend-settings', adminAuth, async (_req: any, res: Response) => {
+  try {
+    const { data } = await supabase.from('app_settings')
+      .select('key, value').in('key', ['resend_api_key','resend_from','resend_name','email_provider'])
+    const cfg: any = {}
+    ;(data||[]).forEach((r: any) => { try { cfg[r.key] = JSON.parse(r.value) } catch { cfg[r.key] = r.value } })
+    return res.json({
+      resend_api_key: cfg.resend_api_key ? '••••••••' : '',
+      resend_from: cfg.resend_from || '',
+      resend_name: cfg.resend_name || 'InvoicePro',
+      email_provider: cfg.email_provider || 'smtp',
+      configured: !!cfg.resend_api_key
     })
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })

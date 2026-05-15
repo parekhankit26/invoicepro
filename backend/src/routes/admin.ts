@@ -196,11 +196,37 @@ router.get('/audit', adminAuth, async (_req: any, res: Response) => {
 router.post('/broadcast', adminAuth, async (req: any, res: Response) => {
   try {
     const { subject, message, plan_filter } = (req as any).body
+    if (!subject || !message) return res.status(400).json({ error: 'Subject and message required' })
+
     let query: any = supabase.from('profiles').select('email, full_name')
     if (plan_filter) query = query.eq('plan', plan_filter)
     const { data: users } = await query
-    await log(req.admin.id, 'broadcast_sent', 'broadcast', 'all', { subject, recipient_count: users?.length })
-    return res.json({ message: `Broadcast queued for ${users?.length || 0} users`, recipients: users?.length || 0 })
+    if (!users || users.length === 0) return res.status(400).json({ error: 'No users found for this filter' })
+
+    // Send via emailService (uses Resend or SMTP — whatever is configured in admin panel)
+    const { emailService } = await import('../services/emailService')
+    const msgHtml = message.split('\n').join('<br>'); const html = '<div style="font-family:sans-serif;max-width:600px;margin:0 auto"><div style="background:#1a1814;padding:24px 32px"><div style="color:#a3e635;font-weight:800;font-size:20px">InvoicePro</div></div><div style="background:#fff;padding:32px"><p style="color:#555;line-height:1.7">' + msgHtml + '</p></div></div>'
+
+    let sent = 0, failed = 0
+    for (const user of users) {
+      if (!user.email) continue
+      try {
+        await emailService.sendGeneral({ to: user.email, subject, html })
+        sent++
+      } catch(e) {
+        failed++
+        console.error('Broadcast failed for', user.email, e)
+      }
+      // Small delay to avoid rate limits
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+
+    await log(req.admin.id, 'broadcast_sent', 'broadcast', 'all', { subject, sent, failed })
+    return res.json({ 
+      message: `✅ Broadcast sent to ${sent} users${failed > 0 ? ` (${failed} failed)` : ''}`,
+      recipients: sent,
+      failed
+    })
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
 

@@ -1093,21 +1093,31 @@ function doSaveResend() {
 
 function doTestEmail2(){
   var to=q('testEmailTo')?q('testEmailTo').value.trim():'';
-  if(!to||!to.includes('@')){if(q('testEmailRes2'))q('testEmailRes2').innerHTML='<div class="al al-err">Enter valid email</div>';return;}
-  if(q('testEmailRes2'))q('testEmailRes2').innerHTML='<div class="al al-info">Sending to '+to+'...</div>';
-  req('/admin/test-email',{method:'POST',body:JSON.stringify({to:to})})
+  if(!to||!to.includes('@')){if(q('testEmailRes2'))q('testEmailRes2').innerHTML='<div class="al al-err">Enter a valid email address</div>';return;}
+  if(q('testEmailRes2'))q('testEmailRes2').innerHTML='<div class="al al-info">⏳ Sending via SMTP...</div>';
+  // Force SMTP provider for this test
+  req('/admin/test-email',{method:'POST',body:JSON.stringify({to:to, force_provider:'smtp'})})
     .then(function(d){if(q('testEmailRes2'))q('testEmailRes2').innerHTML='<div class="al al-ok">'+d.message+'</div>';})
     .catch(function(e){if(q('testEmailRes2'))q('testEmailRes2').innerHTML='<div class="al al-err">❌ '+e.message+'</div>';});
 }
 function doTestResend(){
   var to=q('resendTestTo')?q('resendTestTo').value.trim():'';
-  if(!to||!to.includes('@')){if(q('resendTestRes'))q('resendTestRes').innerHTML='<div class="al al-err">Enter valid email</div>';return;}
-  if(q('resendTestRes'))q('resendTestRes').innerHTML='<div class="al al-info">Sending...</div>';
-  req('/admin/test-email',{method:'POST',body:JSON.stringify({to:to})})
+  if(!to||!to.includes('@')){if(q('resendTestRes'))q('resendTestRes').innerHTML='<div class="al al-err">Enter a valid email address</div>';return;}
+  if(q('resendTestRes'))q('resendTestRes').innerHTML='<div class="al al-info">⏳ Sending via Resend...</div>';
+  // Force Resend provider regardless of what DB says
+  req('/admin/test-email',{method:'POST',body:JSON.stringify({to:to, force_provider:'resend'})})
     .then(function(d){if(q('resendTestRes'))q('resendTestRes').innerHTML='<div class="al al-ok">'+d.message+'</div>';})
     .catch(function(e){if(q('resendTestRes'))q('resendTestRes').innerHTML='<div class="al al-err">❌ '+e.message+'</div>';});
 }
-function doTestEmail(){doTestEmail2();}
+function doTestEmail(){
+  var el=q('healthTestEmailTo');
+  var to=el?el.value.trim():'';
+  if(!to||!to.includes('@')){var r=q('testEmailRes');if(r)r.innerHTML='<div class="al al-err">Enter a valid email address</div>';return;}
+  var r=q('testEmailRes');if(r)r.innerHTML='<div class="al al-info">⏳ Sending...</div>';
+  req('/admin/test-email',{method:'POST',body:JSON.stringify({to:to})})
+    .then(function(d){if(q('testEmailRes'))q('testEmailRes').innerHTML='<div class="al al-ok">'+d.message+'</div>';})
+    .catch(function(e){if(q('testEmailRes'))q('testEmailRes').innerHTML='<div class="al al-err">❌ '+e.message+'</div>';});
+}
 
 
 

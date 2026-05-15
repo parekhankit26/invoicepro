@@ -716,7 +716,9 @@ router.post('/test-email', adminAuth, async (req: any, res: Response) => {
     const cfg: any = {}
     ;(settings||[]).forEach((r: any) => { try { cfg[r.key] = JSON.parse(r.value) } catch { cfg[r.key] = r.value } })
     
-    const provider = cfg.email_provider || (cfg.resend_api_key ? 'resend' : 'smtp')
+    // force_provider in body overrides DB setting (used when testing before saving)
+    const { force_provider } = (req as any).body
+    const provider = force_provider || cfg.email_provider || (cfg.resend_api_key ? 'resend' : 'smtp')
     
     if (provider === 'resend' && cfg.resend_api_key) {
       // Use Resend API

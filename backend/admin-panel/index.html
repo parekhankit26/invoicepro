@@ -457,20 +457,21 @@ tr:hover td{background:#fafaf8}
         <div class="bc" style="margin-bottom:14px">
           <div style="font-size:13px;font-weight:600;margin-bottom:14px">Choose email provider</div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px" id="providerCards">
-            <div class="provider-card" data-provider="smtp" onclick="selectProvider('smtp')" style="border:2px solid var(--ink);border-radius:10px;padding:16px;cursor:pointer;text-align:center;background:var(--ink);color:white">
+            <div class="provider-card" data-provider="resend" onclick="selectProvider('resend')" style="border:2px solid var(--ink);border-radius:10px;padding:16px;cursor:pointer;text-align:center;background:var(--ink);color:white;position:relative">
+              <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#16a34a;color:white;font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px;white-space:nowrap">RECOMMENDED</div>
+              <div style="font-size:24px;margin-bottom:6px">🚀</div>
+              <div style="font-weight:700;font-size:13px">Resend</div>
+              <div style="font-size:11px;margin-top:3px;opacity:.8">Free · Works from Railway</div>
+            </div>
+            <div class="provider-card" data-provider="smtp" onclick="selectProvider('smtp')" style="border:2px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;text-align:center">
               <div style="font-size:24px;margin-bottom:6px">⚙️</div>
               <div style="font-weight:600;font-size:13px">SMTP</div>
-              <div style="font-size:11px;margin-top:3px;opacity:.8">Hostinger, SendGrid, any mail server</div>
-            </div>
-            <div class="provider-card" data-provider="resend" onclick="selectProvider('resend')" style="border:2px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;text-align:center">
-              <div style="font-size:24px;margin-bottom:6px">🚀</div>
-              <div style="font-weight:600;font-size:13px">Resend</div>
-              <div style="font-size:11px;color:var(--ink3);margin-top:3px">Free 3000/mo · API-based</div>
+              <div style="font-size:11px;color:var(--red);margin-top:3px;font-weight:500">⚠ Blocked by Railway</div>
             </div>
             <div class="provider-card" data-provider="none" onclick="selectProvider('none')" style="border:2px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;text-align:center">
               <div style="font-size:24px;margin-bottom:6px">🚫</div>
               <div style="font-weight:600;font-size:13px">Disabled</div>
-              <div style="font-size:11px;color:var(--ink3);margin-top:3px">Turn off all emails</div>
+              <div style="font-size:11px;color:var(--ink3);margin-top:3px">No emails sent</div>
             </div>
           </div>
         </div>
@@ -540,42 +541,75 @@ tr:hover td{background:#fafaf8}
         </div>
 
         <!-- RESEND FORM -->
-        <div id="resendForm" class="g2 hidden">
-          <div class="bc">
-            <div style="font-size:13px;font-weight:600;margin-bottom:4px">🚀 Resend API</div>
-            <div style="font-size:12px;color:var(--ink3);margin-bottom:16px">Free 3,000 emails/month · Works from any server · No SMTP blocking</div>
-            <div class="fg"><label>API Key *</label>
-              <input class="fi" id="resendKey" type="password" placeholder="re_xxxxxxxxxxxxxxxxxxxxxx"/>
-              <div style="font-size:11px;color:var(--ink3);margin-top:4px">Get free at <a href="https://resend.com" target="_blank" style="color:var(--blue)">resend.com</a> → API Keys</div>
-            </div>
-            <div class="fg"><label>From email *</label>
-              <input class="fi" id="resendFrom" type="email" placeholder="invoices@yourdomain.com"/>
-              <div style="font-size:11px;color:var(--ink3);margin-top:4px">Use <strong>onboarding@resend.dev</strong> for testing (sends only to your account email)</div>
-            </div>
-            <div class="fg"><label>Display name</label>
-              <input class="fi" id="resendName" placeholder="InvoicePro" value="InvoicePro"/>
-            </div>
-            <button class="ab ab-p" style="width:100%;justify-content:center;padding:13px" id="btnSaveResend">💾 Save &amp; activate</button>
-            <div id="resendSaveRes" style="margin-top:10px"></div>
+        <div id="resendForm" class="hidden">
+          <div class="al al-ok" style="margin-bottom:16px;font-size:13px">
+            🚀 <strong>Resend works perfectly from Railway.</strong> Free 3,000 emails/month. Setup takes 5 minutes.
           </div>
-          <div>
-            <div class="bc" style="margin-bottom:14px">
-              <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Test email</div>
-              <div class="fg"><label>Send test to</label><input class="fi" type="email" id="resendTestTo" placeholder="your@email.com"/></div>
-              <button class="ab ab-p" style="width:100%;justify-content:center" id="btnTestResend">Send test</button>
-              <div id="resendTestRes" style="margin-top:10px"></div>
-            </div>
+          <div class="g2">
             <div class="bc">
-              <div style="font-size:13px;font-weight:600;margin-bottom:10px">Quick setup</div>
-              <div style="font-size:12.5px;color:var(--ink2);line-height:2">
-                <div><strong>1.</strong> <a href="https://resend.com" target="_blank" style="color:var(--blue)">resend.com</a> → Sign up free</div>
-                <div><strong>2.</strong> API Keys → Create API Key</div>
-                <div><strong>3.</strong> Paste key above</div>
-                <div><strong>4.</strong> From: <strong>onboarding@resend.dev</strong> (testing) or your domain</div>
-                <div><strong>5.</strong> Save → test ✅</div>
+              <div style="font-size:13px;font-weight:700;margin-bottom:16px">Step 1 — Get your API key</div>
+              <div style="font-size:12.5px;color:var(--ink2);line-height:2;margin-bottom:16px">
+                <div>1. Go to <a href="https://resend.com" target="_blank" style="color:var(--blue);font-weight:600">resend.com</a> → Sign up free (use Google)</div>
+                <div>2. Click <strong>API Keys</strong> in left sidebar</div>
+                <div>3. Click <strong>Create API Key</strong> → name it InvoicePro → copy it</div>
               </div>
-              <div style="margin-top:10px;padding:10px;background:var(--abg);border-radius:7px;font-size:12px;color:var(--amber)">
-                ⚠ With onboarding@resend.dev, test emails only go to your own account email. Add your domain at resend.com/domains to send to anyone.
+              <div class="fg"><label>Resend API Key *</label>
+                <input class="fi" id="resendKey" type="password" placeholder="re_xxxxxxxxxxxxxxxxxxxx"/>
+                <div style="font-size:11px;color:var(--ink3);margin-top:4px">Starts with <code style="background:var(--bg);padding:1px 5px;border-radius:3px">re_</code></div>
+              </div>
+
+              <div style="border-top:1px solid var(--border);margin:16px 0;padding-top:16px">
+                <div style="font-size:13px;font-weight:700;margin-bottom:12px">Step 2 — Add your domain (send from invoicepro@asproite.com)</div>
+                <div style="font-size:12.5px;color:var(--ink2);line-height:2;margin-bottom:12px">
+                  <div>1. Go to <a href="https://resend.com/domains" target="_blank" style="color:var(--blue);font-weight:600">resend.com/domains</a></div>
+                  <div>2. Click <strong>Add Domain</strong> → type <strong>asproite.com</strong></div>
+                  <div>3. Copy the 3 DNS records shown</div>
+                  <div>4. Go to <a href="https://hpanel.hostinger.com" target="_blank" style="color:var(--blue)">Hostinger hPanel</a> → Domains → DNS Zone</div>
+                  <div>5. Add the 3 records → click <strong>Verify</strong> in Resend</div>
+                </div>
+                <div style="padding:12px;background:var(--bg);border-radius:8px;font-size:12px;color:var(--ink2)">
+                  💡 DNS verification takes 1–5 minutes usually. Once verified, you can send to any email.
+                </div>
+              </div>
+
+              <div style="border-top:1px solid var(--border);margin:16px 0;padding-top:16px">
+                <div style="font-size:13px;font-weight:700;margin-bottom:12px">Step 3 — Configure sending address</div>
+                <div class="fg"><label>From email * (after domain verified)</label>
+                  <input class="fi" id="resendFrom" type="email" placeholder="invoicepro@asproite.com" value="invoicepro@asproite.com"/>
+                  <div style="font-size:11px;color:var(--ink3);margin-top:4px">Or use <strong>onboarding@resend.dev</strong> to test before domain is verified (only sends to your own account email)</div>
+                </div>
+                <div class="fg"><label>Display name (shown to clients)</label>
+                  <input class="fi" id="resendName" placeholder="InvoicePro" value="InvoicePro"/>
+                </div>
+              </div>
+
+              <button class="ab ab-p" style="width:100%;justify-content:center;padding:14px;font-size:14px" id="btnSaveResend">💾 Save &amp; activate Resend</button>
+              <div id="resendSaveRes" style="margin-top:10px"></div>
+            </div>
+
+            <div>
+              <div class="bc" style="margin-bottom:14px">
+                <div style="font-size:13px;font-weight:600;margin-bottom:12px">🧪 Send test email</div>
+                <div class="fg"><label>Send test to this email</label>
+                  <input class="fi" type="email" id="resendTestTo" placeholder="parekhankit3@gmail.com"/>
+                </div>
+                <button class="ab ab-p" style="width:100%;justify-content:center" id="btnTestResend">Send test email</button>
+                <div id="resendTestRes" style="margin-top:10px"></div>
+                <div style="margin-top:10px;font-size:11.5px;color:var(--ink3);line-height:1.6">
+                  ⚠ If using <strong>onboarding@resend.dev</strong> as From email, test only sends to your own Resend account email. Add your domain first to send to anyone.
+                </div>
+              </div>
+
+              <div class="bc">
+                <div style="font-size:13px;font-weight:600;margin-bottom:10px">✅ After setup, all emails send from:</div>
+                <div style="padding:14px;background:var(--gbg);border-radius:8px;font-size:13px;color:#15803d;border:1px solid #bbf7d0">
+                  <strong>InvoicePro &lt;invoicepro@asproite.com&gt;</strong><br>
+                  <span style="font-size:11px;margin-top:4px;display:block">Your clients will see this on every invoice and quote email</span>
+                </div>
+                <div style="margin-top:12px;font-size:12px;color:var(--ink3)">
+                  Free tier: 3,000 emails/month<br>
+                  Paid: £15/month for 50,000 emails
+                </div>
               </div>
             </div>
           </div>
@@ -958,7 +992,7 @@ var SMTP_GUIDES = {
   outlook:  '<strong>Outlook:</strong> Use your Microsoft 365 email and password',
   custom:   '<strong>Custom SMTP:</strong> Contact your email provider for SMTP details',
 };
-var currentEmailProvider = 'smtp';
+var currentEmailProvider = 'resend';
 
 function selectProvider(p) {
   currentEmailProvider = p;

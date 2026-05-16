@@ -61,7 +61,10 @@ export default function InvoiceDetail() {
   })
   const whatsappMutation = useMutation({
     mutationFn: () => api.post(`/notify/whatsapp/${id}`, {}),
-    onSuccess: (data: any) => toast.success(data.message || 'WhatsApp sent!'),
+    onSuccess: (data: any) => {
+      window.open(data.wa_url, '_blank')
+      toast.success(`WhatsApp opened for ${data.client_name} — tap Send to deliver`)
+    },
     onError: (e: any) => toast.error(e.message.includes('phone') ? 'Add a phone number to this client first' : e.message)
   })
   const smsMutation = useMutation({

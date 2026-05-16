@@ -59,7 +59,17 @@ async function sendSMS(to: string, message: string): Promise<boolean> {
   }
 }
 
-// Send WhatsApp reminder for an invoice
+// Normalise phone → digits only, no leading +
+function toWaPhone(raw: string) {
+  return raw.replace(/[^\d]/g, '')
+}
+
+// Build a wa.me deep-link that opens WhatsApp with a pre-filled message
+function waLink(phone: string, message: string) {
+  return `https://wa.me/${toWaPhone(phone)}?text=${encodeURIComponent(message)}`
+}
+
+// WhatsApp invoice notification (wa.me deep link — no Twilio required)
 router.post('/whatsapp/:invoiceId', async (req: AuthRequest, res: Response) => {
   try {
     const { data: invoice } = await supabase.from('invoices')
@@ -76,22 +86,46 @@ router.post('/whatsapp/:invoiceId', async (req: AuthRequest, res: Response) => {
     const isOverdue = new Date(invoice.due_date) < new Date()
 
     const message = isOverdue
-      ? `Hi ${invoice.clients.name},\n\nThis is a friendly reminder from ${companyName} that invoice ${invoice.invoice_number} for ${currency}${invoice.total.toFixed(2)} is now overdue (was due ${dueDate}).\n\nPlease pay at your earliest convenience:\n${invoice.stripe_payment_link || 'Contact us to arrange payment'}\n\nThank you!`
+      ? `Hi ${invoice.clients.name},\n\nFriendly reminder from ${companyName} — invoice ${invoice.invoice_number} for ${currency}${invoice.total.toFixed(2)} is now overdue (was due ${dueDate}).\n\nPlease pay at your earliest convenience:\n${invoice.stripe_payment_link || 'Contact us to arrange payment'}\n\nThank you!`
       : `Hi ${invoice.clients.name},\n\nInvoice ${invoice.invoice_number} for ${currency}${invoice.total.toFixed(2)} from ${companyName} is due on ${dueDate}.\n\nPay securely online:\n${invoice.stripe_payment_link || 'Contact us for payment details'}\n\nThank you!`
 
-    const success = await sendWhatsApp(invoice.clients.phone, message)
-    if (!success) return res.status(500).json({ error: 'Failed to send WhatsApp message' })
+    const wa_url = waLink(invoice.clients.phone, message)
 
-    // Log reminder
     await supabase.from('reminder_logs').insert({
       invoice_id: invoice.id, type: 'whatsapp',
       email_to: invoice.clients.phone, success: true
-    })
+    }).catch(() => {})
 
-    return res.json({ message: `WhatsApp sent to ${invoice.clients.name} (${invoice.clients.phone})` })
+    return res.json({ wa_url, client_name: invoice.clients.name })
   } catch (err) {
     console.error(err)
-    return res.status(500).json({ error: 'Failed to send WhatsApp' })
+    return res.status(500).json({ error: 'Failed to generate WhatsApp link' })
+  }
+})
+
+// WhatsApp quote notification (wa.me deep link)
+router.post('/whatsapp-quote/:quoteId', async (req: AuthRequest, res: Response) => {
+  try {
+    const { data: quote } = await supabase.from('quotes')
+      .select(`*, clients(*), profiles(company_name, full_name)`)
+      .eq('id', (req as any).params.quoteId).eq('user_id', (req as any).user!.id).single()
+
+    if (!quote) return res.status(404).json({ error: 'Quote not found' })
+    if (!quote.clients?.phone) return res.status(400).json({ error: 'Client has no phone number. Add a phone number to this client first.' })
+
+    const companyName = quote.profiles?.company_name || quote.profiles?.full_name || 'Your vendor'
+    const sym: Record<string, string> = { GBP: '£', USD: '$', EUR: '€' }
+    const currency = sym[quote.currency] || quote.currency
+    const expiry = quote.expiry_date
+      ? new Date(quote.expiry_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+      : 'no expiry'
+
+    const message = `Hi ${quote.clients.name},\n\nYou have a quote from ${companyName}!\n\nQuote ${quote.quote_number} for ${currency}${quote.total.toFixed(2)} — valid until ${expiry}.\n\nReview and accept it here:\n${process.env.FRONTEND_URL || 'https://invoicepro-ten.vercel.app'}/portal/${quote.id}\n\nThank you!`
+
+    const wa_url = waLink(quote.clients.phone, message)
+    return res.json({ wa_url, client_name: quote.clients.name })
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to generate WhatsApp link' })
   }
 })
 

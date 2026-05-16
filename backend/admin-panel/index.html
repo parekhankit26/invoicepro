@@ -332,6 +332,8 @@ tr:hover td{background:#fafaf8}
 
       <div class="nav-sec">System</div>
     <button class="nv" data-pg="email">📧 Email settings</button>
+      <button class="nv" data-pg="whatsapp">💬 WhatsApp</button>
+      <button class="nv" data-pg="sms">📱 SMS / Twilio</button>
       <button class="nv" data-pg="admins">🔐 Admin accounts</button>
       <button class="nv" data-pg="audit">📝 Audit log</button>
 
@@ -730,6 +732,113 @@ tr:hover td{background:#fafaf8}
         </div>
       </div>
 
+      <!-- WHATSAPP -->
+      <div class="pg" id="pg-whatsapp">
+        <div class="ph">
+          <div><div class="pt">💬 WhatsApp notifications</div><div class="ps">wa.me deep links — works instantly, no API key or account needed</div></div>
+          <span class="bdg b-ok" style="font-size:12px;padding:6px 14px">✅ Active</span>
+        </div>
+        <div class="bc" style="border-left:4px solid #25D366">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <div style="width:40px;height:40px;background:#25D366;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">💬</div>
+            <div>
+              <div style="font-weight:600;font-size:14px">WhatsApp (wa.me) — Live &amp; working</div>
+              <div style="font-size:12px;color:var(--ink2);margin-top:2px">Your users can send invoices and quotes via WhatsApp with one click. No setup required.</div>
+            </div>
+          </div>
+          <div class="al al-ok">✅ No API keys, no account, no approval, no cost — ever. Works on any phone worldwide.</div>
+        </div>
+        <div class="g2" style="margin-bottom:14px">
+          <div class="bc">
+            <div style="font-weight:600;font-size:13px;margin-bottom:10px">📄 Invoice WhatsApp</div>
+            <div style="font-size:13px;color:var(--ink2);line-height:1.7">
+              User opens any invoice → More actions → <strong>Send WhatsApp</strong><br>
+              WhatsApp opens pre-filled with:<br>
+              <div style="background:var(--bg);border-radius:8px;padding:10px 12px;margin-top:8px;font-size:12px;font-family:monospace;line-height:1.6;color:var(--ink)">
+                Hi [Client],<br><br>
+                Invoice INV-001 for £500 from [Company]<br>
+                is due on 30 May 2025.<br><br>
+                Pay securely: [payment link]<br><br>
+                Thank you!
+              </div>
+            </div>
+          </div>
+          <div class="bc">
+            <div style="font-weight:600;font-size:13px;margin-bottom:10px">📋 Quote WhatsApp</div>
+            <div style="font-size:13px;color:var(--ink2);line-height:1.7">
+              User opens Quotes → click the <strong>💬 button</strong> on any quote<br>
+              WhatsApp opens pre-filled with:<br>
+              <div style="background:var(--bg);border-radius:8px;padding:10px 12px;margin-top:8px;font-size:12px;font-family:monospace;line-height:1.6;color:var(--ink)">
+                Hi [Client],<br><br>
+                Quote QUO-001 for £1,200 — valid until<br>
+                30 June. Review &amp; accept here:<br>
+                [portal link]<br><br>
+                Thank you!
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bc">
+          <div style="font-weight:600;font-size:13px;margin-bottom:10px">⚠️ Requirement — client phone number</div>
+          <div style="font-size:13px;color:var(--ink2);line-height:1.7">
+            WhatsApp requires the client to have a phone number saved. Your users add phone numbers when creating or editing a client.<br>
+            If the client has no phone number, the app shows: <em>"Add a phone number to this client first."</em><br><br>
+            <strong>Format:</strong> International format recommended — e.g. <code>+44 7700 900000</code> or <code>+1 415 555 0100</code>
+          </div>
+        </div>
+        <div class="bc">
+          <div style="font-weight:600;font-size:13px;margin-bottom:8px">🔮 Future upgrade — WhatsApp Business API</div>
+          <div style="font-size:13px;color:var(--ink2);line-height:1.7">
+            When you're ready for <strong>fully automated</strong> WhatsApp (sends without the user clicking), you can upgrade to the WhatsApp Cloud API (Meta).
+            This requires a Meta Business account and template approval (~2 days). We'll build this when the platform needs it.
+          </div>
+        </div>
+      </div>
+
+      <!-- SMS / TWILIO -->
+      <div class="pg" id="pg-sms">
+        <div class="ph">
+          <div><div class="pt">📱 SMS / Twilio</div><div class="ps">Automated SMS notifications via Twilio — configure when ready</div></div>
+          <span class="bdg b-warn" style="font-size:12px;padding:6px 14px">⏳ Coming soon</span>
+        </div>
+        <div class="bc" style="border-left:4px solid var(--amber)">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <div style="width:40px;height:40px;background:var(--abg);border:2px solid var(--amber);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📱</div>
+            <div>
+              <div style="font-weight:600;font-size:14px">Twilio SMS — Ready to activate</div>
+              <div style="font-size:12px;color:var(--ink2);margin-top:2px">The backend is fully built. Add your Twilio credentials to go live.</div>
+            </div>
+          </div>
+          <div class="al al-warn">⏳ SMS is built but not yet activated. Set the 3 env vars below on Railway to enable it.</div>
+        </div>
+        <div class="bc">
+          <div style="font-weight:600;font-size:13px;margin-bottom:12px">🔑 How to activate SMS (5 minutes)</div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--ink2)">
+            <div style="display:flex;gap:10px"><span style="background:var(--ink);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">1</span><span>Go to <strong>twilio.com</strong> → Sign up free (includes £10 trial credit)</span></div>
+            <div style="display:flex;gap:10px"><span style="background:var(--ink);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">2</span><span>Copy your <strong>Account SID</strong> and <strong>Auth Token</strong> from the Twilio Console dashboard</span></div>
+            <div style="display:flex;gap:10px"><span style="background:var(--ink);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">3</span><span>Buy a phone number (Phone Numbers → Buy a number → tick SMS) — ~$1/month</span></div>
+            <div style="display:flex;gap:10px"><span style="background:var(--ink);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">4</span><span>Add these 3 env vars to Railway on your <strong>invoicepro</strong> service:</span></div>
+          </div>
+          <div style="background:var(--bg);border-radius:8px;padding:14px 16px;margin-top:14px;font-family:monospace;font-size:12px;line-height:2">
+            <div><strong>TWILIO_ACCOUNT_SID</strong>=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</div>
+            <div><strong>TWILIO_AUTH_TOKEN</strong>=your_auth_token_here</div>
+            <div><strong>TWILIO_SMS_FROM</strong>=+14155550100</div>
+          </div>
+          <div class="al al-info" style="margin-top:12px">Once set, SMS will automatically activate — no code changes needed. The backend routes are already live at <code>/notify/sms/:invoiceId</code></div>
+        </div>
+        <div class="bc">
+          <div style="font-weight:600;font-size:13px;margin-bottom:8px">📋 What SMS sends</div>
+          <div style="font-size:13px;color:var(--ink2);line-height:1.7">
+            When a user clicks "Send SMS" on an invoice:<br><br>
+            <div style="background:var(--bg);border-radius:8px;padding:10px 12px;font-size:12px;font-family:monospace;line-height:1.6;color:var(--ink)">
+              Invoice INV-001 for £500 is due.<br>
+              Pay here: [payment link]
+            </div><br>
+            SMS button appears in the invoice "More actions" dropdown — same place as the WhatsApp button.
+          </div>
+        </div>
+      </div>
+
       <!-- ADMINS -->
       <div class="pg" id="pg-admins">
         <div class="ph"><div><div class="pt">Admin accounts</div></div><button class="ab ab-p" id="btnAddAdmin">+ Add admin</button></div>
@@ -888,7 +997,7 @@ function showApp(admin){
   q('sRole').textContent=admin.role;
   q('sAvatar').textContent=(admin.full_name||admin.email)[0].toUpperCase();
   // Restore last visited page from URL hash on refresh
-  var validPages=['dashboard','health','revenue','churn','users','clients','invoices','payments','features','plans','announce','tickets','satisfaction','broadcast','admins','audit','email'];
+  var validPages=['dashboard','health','revenue','churn','users','clients','invoices','payments','features','plans','announce','tickets','satisfaction','broadcast','admins','audit','email','whatsapp','sms'];
   var hash=window.location.hash.replace('#','');
   var startPage=(hash&&validPages.indexOf(hash)!==-1)?hash:'dashboard';
   goPage(startPage);

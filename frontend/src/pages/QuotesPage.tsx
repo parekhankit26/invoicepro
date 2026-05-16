@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Send, FileText, CheckCircle, RefreshCw, Trash2, Search, X, Info } from 'lucide-react'
+import { Plus, Send, FileText, CheckCircle, RefreshCw, Trash2, Search, X, Info, MessageSquare } from 'lucide-react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { api } from '../lib/api'
 import { formatCurrency, formatDate, CURRENCIES } from '../lib/utils'
@@ -47,6 +47,14 @@ export default function QuotesPage() {
     mutationFn: (id: string) => api.delete(`/quotes/${id}`),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['quotes'] }); toast.success('Quote deleted') },
     onError: (e: any) => toast.error(e.message),
+  })
+  const whatsappMutation = useMutation({
+    mutationFn: (id: string) => api.post(`/notify/whatsapp-quote/${id}`, {}),
+    onSuccess: (data: any) => {
+      window.open(data.wa_url, '_blank')
+      toast.success(`WhatsApp opened for ${data.client_name} — tap Send to deliver`)
+    },
+    onError: (e: any) => toast.error(e.message.includes('phone') ? 'Add a phone number to this client first' : e.message),
   })
 
   const quotes = (data?.data || []).filter((q: any) =>
@@ -95,6 +103,11 @@ export default function QuotesPage() {
                       <div style={{ display:'flex', gap:4 }}>
                         <button className="btn btn-sm btn-secondary" onClick={() => { setEditQuote(q); { setShowModal(true); modalState.open() } }}>Edit</button>
                         {q.status === 'draft' && <button className="btn btn-sm btn-secondary" title="Send to client" onClick={() => sendMutation.mutate(q.id)}><Send size={12}/></button>}
+                        {['draft','sent'].includes(q.status) && (
+                          <button className="btn btn-sm btn-secondary" title="Send via WhatsApp" style={{ color:'#25D366' }} onClick={() => whatsappMutation.mutate(q.id)}>
+                            <MessageSquare size={12}/>
+                          </button>
+                        )}
                         {q.status === 'accepted' && (
                           <button className="btn btn-sm btn-secondary" style={{ color:'var(--green)' }} onClick={() => convertMutation.mutate(q.id)}>
                             <RefreshCw size={12}/> Convert

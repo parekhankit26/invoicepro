@@ -113,6 +113,33 @@ tr:hover td{background:#fafaf8}
 .b-admin{background:#ede9fe;color:var(--purple)}
 .b-support{background:var(--bbg);color:var(--blue)}
 
+/* ── PLAN DROPDOWN ── */
+.plan-wrap{position:relative;display:inline-block}
+.plan-pill{display:inline-flex;align-items:center;gap:5px;cursor:pointer;border-radius:20px;font-size:11px;font-weight:600;padding:3px 9px 3px 10px;border:1.5px solid transparent;transition:filter .12s,box-shadow .12s;user-select:none}
+.plan-pill:hover{filter:brightness(.88);box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.plan-pill .chv{font-size:8px;opacity:.5;transition:transform .15s;display:inline-block}
+.plan-pill.open .chv{transform:rotate(180deg)}
+.b-free.plan-pill{background:#f0f0f0;color:#888;border-color:#ddd}
+.b-starter.plan-pill{background:var(--bbg);color:var(--blue);border-color:#bfdbfe}
+.b-pro.plan-pill{background:#ede9fe;color:var(--purple);border-color:#ddd6fe}
+.b-enterprise.plan-pill{background:var(--abg);color:var(--amber);border-color:#fde68a}
+.plan-dd{position:absolute;top:calc(100% + 8px);left:-6px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.14);padding:6px;z-index:700;min-width:180px;display:none}
+.plan-dd.vis{display:block;animation:ddPop .13s ease}
+@keyframes ddPop{from{opacity:0;transform:translateY(-6px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.plan-opt{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .1s}
+.plan-opt:hover{background:var(--bg)}
+.plan-opt.cur-plan{background:#f4f3f0}
+.plan-opt .po-name{font-size:12px;font-weight:600;color:var(--ink);flex:1}
+.plan-opt .po-chk{font-size:11px;color:var(--green);font-weight:800}
+
+/* ── TOAST ── */
+#adminToast{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.t-item{padding:11px 16px 11px 14px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.18);display:flex;align-items:center;gap:8px;pointer-events:none;transition:opacity .3s,transform .3s}
+.t-ok{background:#1a1814;color:#fff}
+.t-err{background:var(--red);color:#fff}
+.t-info{background:var(--blue);color:#fff}
+@keyframes toastIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+
 /* BUTTONS */
 .ab{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--white);color:var(--ink);font-family:inherit;transition:all .12s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 .ab:hover{background:var(--bg)}
@@ -871,15 +898,98 @@ function loadUsers(){
   req('/admin/users?search='+encodeURIComponent(s)+'&plan='+p+'&page='+uPage+'&limit=25')
     .then(function(d){
       q('userCount').textContent=(d.total||0)+' users';
-      q('userRows').innerHTML=(d.data||[]).map(function(u){return '<tr><td><div style="font-weight:500">'+(u.company_name||u.full_name||'—')+'</div><div style="font-size:11px;color:var(--ink3)">'+(u.full_name||'')+'</div></td><td>'+pBdg(u.plan)+'</td><td style="color:var(--blue);font-size:12px">'+(u.email||'—')+'</td><td style="font-size:11px;color:var(--ink3)">'+dDate(u.created_at)+'</td><td><div style="display:flex;gap:4px;flex-wrap:wrap"><button class="ab ab-sm" onclick="changePlan(\''+u.id+'\',\''+u.plan+'\')">Plan</button><button class="ab ab-sm ab-s" onclick="giveTrialPro(\''+u.id+'\')">Trial+</button><button class="ab ab-sm ab-d" onclick="doSuspend(\''+u.id+'\')">Suspend</button></div></td></tr>';}).join('')||'<tr><td colspan="5" class="empty">No users</td></tr>';
+      q('userRows').innerHTML=(d.data||[]).map(function(u){return '<tr>'
+        +'<td><div style="font-weight:600;font-size:13px">'+(u.company_name||u.full_name||'—')+'</div><div style="font-size:11px;color:var(--ink3);margin-top:1px">'+(u.company_name?u.full_name||'':'')+'</div></td>'
+        +'<td>'+mkPlanSel(u.id,u.plan)+'</td>'
+        +'<td style="color:var(--blue);font-size:12px">'+(u.email||'—')+'</td>'
+        +'<td style="font-size:11px;color:var(--ink3)">'+dDate(u.created_at)+'</td>'
+        +'<td><div style="display:flex;gap:4px"><button class="ab ab-sm ab-s" onclick="giveTrialPro(\''+u.id+'\')" title="Give 14-day Pro trial">⚡ Trial</button><button class="ab ab-sm ab-d" onclick="doSuspend(\''+u.id+'\')" title="Suspend account">⊘ Suspend</button></div></td>'
+        +'</tr>';}).join('')||'<tr><td colspan="5" class="empty">No users</td></tr>';
       var pages=Math.ceil((d.total||0)/25);
       if(pages>1){var h='';for(var i=1;i<=Math.min(pages,10);i++){h+='<button class="ab ab-sm'+(i===uPage?' ab-p':'')+'" onclick="uPage='+i+';loadUsers()">'+i+'</button>';}q('userPager').innerHTML=h;}
       else{q('userPager').innerHTML='';}
     }).catch(function(e){q('userRows').innerHTML='<tr><td colspan="5" class="empty">Error: '+e.message+'</td></tr>';});
 }
-function changePlan(id,cur){var p=prompt('New plan (free/starter/pro/enterprise):',cur);if(!p||!['free','starter','pro','enterprise'].includes(p))return;req('/admin/users/'+id+'/plan',{method:'PUT',body:JSON.stringify({plan:p})}).then(function(){alert('Plan updated to '+p);loadUsers();}).catch(function(e){alert(e.message);});}
-function giveTrialPro(id){if(!confirm('Give Pro plan for 14 days?'))return;req('/admin/users/'+id+'/extend-trial',{method:'POST',body:JSON.stringify({days:14,plan:'pro'})}).then(function(d){alert(d.message);loadUsers();}).catch(function(e){alert(e.message);});}
-function doSuspend(id){if(!confirm('Suspend this account?'))return;req('/admin/users/'+id+'/suspend',{method:'PUT',body:JSON.stringify({suspended:true})}).then(function(){alert('Suspended');loadUsers();}).catch(function(e){alert(e.message);});}
+// ── TOAST ─────────────────────────────────────────────────
+function showToast(msg,type){
+  var c=document.getElementById('adminToast');if(!c)return;
+  var t=document.createElement('div');
+  t.className='t-item t-'+(type||'ok');
+  t.style.animation='toastIn .2s ease';
+  t.innerHTML=(type==='ok'?'<span style="font-size:15px">✓</span>':type==='err'?'<span style="font-size:15px">✕</span>':'<span style="font-size:15px">ℹ</span>')+' <span>'+msg+'</span>';
+  c.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(24px)';setTimeout(function(){t.remove();},320);},3000);
+}
+
+// ── PLAN DROPDOWN ─────────────────────────────────────────
+var _pddOpen=null;
+var PLANS=[
+  {k:'free',    label:'Free',       icon:'○'},
+  {k:'starter', label:'Starter',    icon:'◈'},
+  {k:'pro',     label:'Pro',        icon:'★'},
+  {k:'enterprise',label:'Enterprise',icon:'◆'}
+];
+
+function mkPlanSel(id,plan){
+  var p=plan||'free';
+  var opts=PLANS.map(function(pl){
+    var cur=pl.k===p;
+    return '<div class="plan-opt'+(cur?' cur-plan':'')+'" onclick="selectPlan(\''+id+'\',\''+pl.k+'\')" title="Switch to '+pl.label+'">'
+      +'<span class="bdg b-'+pl.k+'" style="flex-shrink:0">'+pl.icon+' '+pl.k+'</span>'
+      +'<span class="po-name">'+pl.label+'</span>'
+      +(cur?'<span class="po-chk">✓</span>':'')
+      +'</div>';
+  }).join('');
+  return '<div class="plan-wrap">'
+    +'<div class="plan-pill b-'+p+'" id="ppl-'+id+'" onclick="openPlanDD(event,\''+id+'\')" title="Click to change plan">'
+    +p+' <span class="chv">▾</span></div>'
+    +'<div class="plan-dd" id="pdd-'+id+'">'
+    +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);padding:2px 10px 8px;border-bottom:1px solid var(--border);margin-bottom:4px">Change plan</div>'
+    +opts
+    +'</div></div>';
+}
+
+function openPlanDD(e,id){
+  e.stopPropagation();
+  if(_pddOpen&&_pddOpen!==id){
+    var prev=document.getElementById('pdd-'+_pddOpen);
+    var prevPill=document.getElementById('ppl-'+_pddOpen);
+    if(prev)prev.classList.remove('vis');
+    if(prevPill)prevPill.classList.remove('open');
+  }
+  var dd=document.getElementById('pdd-'+id);
+  var pill=document.getElementById('ppl-'+id);
+  if(!dd)return;
+  var opening=!dd.classList.contains('vis');
+  dd.classList.toggle('vis',opening);
+  if(pill)pill.classList.toggle('open',opening);
+  _pddOpen=opening?id:null;
+}
+
+function selectPlan(id,plan){
+  req('/admin/users/'+id+'/plan',{method:'PUT',body:JSON.stringify({plan:plan})})
+    .then(function(){
+      var dd=document.getElementById('pdd-'+id);
+      var pill=document.getElementById('ppl-'+id);
+      if(dd)dd.classList.remove('vis');
+      if(pill)pill.classList.remove('open');
+      _pddOpen=null;
+      showToast('Plan updated to '+plan,'ok');
+      loadUsers();
+    }).catch(function(e){showToast(e.message,'err');});
+}
+
+function giveTrialPro(id){
+  req('/admin/users/'+id+'/extend-trial',{method:'POST',body:JSON.stringify({days:14,plan:'pro'})})
+    .then(function(d){showToast(d.message||'Trial Pro activated for 14 days','ok');loadUsers();})
+    .catch(function(e){showToast(e.message,'err');});
+}
+
+function doSuspend(id){
+  req('/admin/users/'+id+'/suspend',{method:'PUT',body:JSON.stringify({suspended:true})})
+    .then(function(){showToast('Account suspended','info');loadUsers();})
+    .catch(function(e){showToast(e.message,'err');});
+}
 
 // CLIENTS
 function loadClients(){
@@ -1323,7 +1433,19 @@ document.addEventListener('DOMContentLoaded', function() {
       .catch(function(){tok=null;localStorage.removeItem('ipat');});
   }
 });
+
+// Close plan dropdown on outside click
+document.addEventListener('click',function(){
+  if(_pddOpen){
+    var dd=document.getElementById('pdd-'+_pddOpen);
+    var pill=document.getElementById('ppl-'+_pddOpen);
+    if(dd)dd.classList.remove('vis');
+    if(pill)pill.classList.remove('open');
+    _pddOpen=null;
+  }
+});
 </script>
+<div id="adminToast"></div>
 </body>
 </html>
 // auto-switch resend Fri May 15 00:27:56 UTC 2026

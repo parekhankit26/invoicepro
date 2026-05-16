@@ -60,12 +60,22 @@ export default function AuthPage() {
         navigate('/dashboard')
 
       } else if (mode === 'forgot') {
-        const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-          redirectTo: `${window.location.origin}/auth`
+        // Use our backend endpoint — sends via Resend/SMTP from admin panel config
+        // (bypasses Supabase's rate-limited free-tier email)
+        const res = await fetch(`${API_BASE}/auth/forgot-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: data.email })
         })
-        if (error) throw error
+        const result = await res.json()
         setResetEmail(data.email)
-        toast.success('Reset link sent! Check your email.')
+        if (result.dev_reset_url) {
+          // Dev mode: open the link directly (email not configured)
+          toast.success('Dev mode: opening reset link...')
+          window.open(result.dev_reset_url, '_blank')
+        } else {
+          toast.success(result.message || 'Reset link sent! Check your inbox.')
+        }
         reset()
 
       } else if (mode === 'reset') {

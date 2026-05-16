@@ -479,7 +479,12 @@ tr:hover td{background:#fafaf8}
         <!-- SMTP FORM -->
         <div id="smtpForm" class="g2">
           <div class="bc">
-            <div style="font-size:13px;font-weight:600;margin-bottom:16px">⚙️ SMTP configuration</div>
+            <div class="al al-err" style="margin-bottom:16px">
+              <strong>⛔ SMTP is blocked on Railway</strong><br>
+              Railway blocks all outbound SMTP connections (ports 25, 465, 587). <strong>Hostinger, Gmail, Outlook — none will work.</strong><br>
+              <span style="font-size:12px;margin-top:6px;display:block">👉 <strong>Switch to Resend</strong> — click the Resend card above. It's free (3,000 emails/month), works from Railway, and takes 5 minutes to set up.</span>
+            </div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:16px">⚙️ SMTP configuration <span style="font-size:11px;font-weight:400;color:var(--red)">(blocked on Railway — use Resend instead)</span></div>
 
             <div class="fg"><label>Quick setup — choose your provider</label>
               <select class="fi" id="smtpPreset">
@@ -1045,12 +1050,14 @@ function loadEmailSettings() {
     if(q('resendTestTo')&&resend.resend_from&&!resend.resend_from.includes('resend.dev')) q('resendTestTo').value=resend.resend_from;
     // Determine provider & show status
     var provider = 'smtp';
-    if(resend.configured && smtp.source==='not_configured') provider = 'resend';
+    // Prefer Resend if configured — auto-switch even if SMTP is also saved
+    if(resend.configured) provider = 'resend';
+    else if(smtp.source!=='not_configured') provider = 'smtp';
     selectProvider(provider);
     var banner = '';
     if(provider==='resend'&&resend.configured) banner='<div class="al al-ok"><strong>✅ Email active via Resend</strong> — From: '+resend.resend_from+'</div>';
-    else if(smtp.source!=='not_configured') banner='<div class="al al-ok"><strong>✅ Email active via '+smtp.smtp_host+'</strong> — Sending as: '+smtp.smtp_user+'</div>';
-    else banner='<div class="al al-warn"><strong>⚠ Email not configured</strong> — Choose a provider below</div>';
+    else if(smtp.source!=='not_configured') banner='<div class="al al-err"><strong>❌ SMTP is blocked on Railway</strong> — Your Hostinger/SMTP config is saved but Railway blocks all outbound SMTP. <strong>Switch to Resend (free, works instantly)</strong> — click the Resend card above.</div>';
+    else banner='<div class="al al-warn"><strong>⚠ Email not configured</strong> — Choose Resend below (recommended for Railway)</div>';
     if(q('emailStatusBanner')) q('emailStatusBanner').innerHTML = banner;
   }).catch(function(){
     if(q('emailStatusBanner')) q('emailStatusBanner').innerHTML='<div class="al al-warn">⚠ Could not load email settings</div>';

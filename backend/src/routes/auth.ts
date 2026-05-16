@@ -75,6 +75,71 @@ router.put('/profile', authenticate, async (req: AuthRequest, res: Response) => 
   return res.json(data)
 })
 
+// ── CUSTOM FORGOT PASSWORD ───────────────────────────────
+// Generates a Supabase recovery link and sends it via our emailService
+// This bypasses Supabase's rate-limited free-tier email
+router.post('/forgot-password', async (req: Request, res: Response) => {
+  try {
+    const { email } = (req as any).body
+    if (!email) return res.status(400).json({ error: 'Email is required' })
+
+    const frontendUrl = process.env.FRONTEND_URL || 'https://invoicepro-ten.vercel.app'
+
+    // Generate a Supabase recovery link (admin API — no email sent by Supabase)
+    const { data, error } = await supabase.auth.admin.generateLink({
+      type: 'recovery',
+      email,
+      options: { redirectTo: `${frontendUrl}/auth` }
+    })
+
+    // Always return success — never reveal whether account exists
+    if (error || !data?.properties?.action_link) {
+      return res.json({ message: 'If an account with that email exists, a reset link has been sent.' })
+    }
+
+    const resetUrl = data.properties.action_link
+
+    // Send via our emailService (Resend / SMTP from admin panel config)
+    const { emailService } = await import('../services/emailService')
+    try {
+      await emailService.sendGeneral({
+        to: email,
+        subject: 'Reset your InvoicePro password',
+        html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;margin:0;padding:20px">
+          <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08)">
+            <div style="background:#1a1814;padding:28px 32px">
+              <h1 style="color:white;margin:0;font-size:21px;font-weight:700;letter-spacing:-0.5px">Reset your password</h1>
+              <p style="color:rgba(255,255,255,0.6);margin:5px 0 0;font-size:13px">InvoicePro account recovery</p>
+            </div>
+            <div style="padding:32px">
+              <p style="color:#374151;font-size:15px;margin:0 0 12px">We received a request to reset the password for your InvoicePro account.</p>
+              <p style="color:#6b7280;font-size:14px;line-height:1.6;margin:0 0 24px">Click the button below to set a new password. This link expires in <strong>1 hour</strong>.</p>
+              <a href="${resetUrl}" style="display:inline-block;background:#1a1814;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;letter-spacing:-0.2px">Reset password →</a>
+              <p style="color:#9ca3af;font-size:12px;margin:24px 0 8px">If you didn't request this, you can safely ignore this email — your password won't change.</p>
+              <p style="color:#d1d5db;font-size:11px;word-break:break-all">Link not working? Copy and paste into your browser:<br>${resetUrl}</p>
+            </div>
+            <div style="background:#f8f7f4;padding:16px 32px;border-top:1px solid #e8e5de">
+              <p style="color:#9ca3af;font-size:11px;margin:0">Sent by InvoicePro</p>
+            </div>
+          </div>
+        </body></html>`
+      })
+      return res.json({ message: 'Password reset email sent! Check your inbox (and spam folder).' })
+    } catch (emailErr: any) {
+      console.error('Password reset email failed:', emailErr.message)
+      // In non-production, return the link so admin can test
+      if (process.env.NODE_ENV !== 'production') {
+        return res.json({ message: 'Email delivery failed (email not configured?). Dev reset link below:', dev_reset_url: resetUrl })
+      }
+      // Production: still say success but log the failure
+      return res.json({ message: 'If an account with that email exists, a reset link has been sent.' })
+    }
+  } catch (e: any) {
+    console.error('Forgot password error:', e.message)
+    return res.json({ message: 'If an account with that email exists, a reset link has been sent.' })
+  }
+})
+
 // One-time admin setup endpoint — creates first super admin
 // Protected by ADMIN_SETUP_KEY env var
 router.post('/setup-admin', async (req: Request, res: Response) => {

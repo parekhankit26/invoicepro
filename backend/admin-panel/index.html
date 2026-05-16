@@ -736,6 +736,87 @@ tr:hover td{background:#fafaf8}
 
     </div><!-- /main -->
   </div><!-- /layout -->
+
+  <!-- MODAL: Change password -->
+  <div class="mo-bg" id="mChangePw">
+    <div class="mo-box" style="max-width:420px">
+      <div class="mo-hdr">
+        <h3>🔑 Change password</h3>
+        <button class="ab" id="btnClosePwMo" style="padding:4px 8px;font-size:18px;border:none;background:none;cursor:pointer;color:#999">×</button>
+      </div>
+      <div class="mo-body">
+        <div class="fg">
+          <label>Current password</label>
+          <input class="fi" type="password" id="cpCur" placeholder="Your current password" autocomplete="current-password"/>
+        </div>
+        <div class="fg">
+          <label>New password</label>
+          <input class="fi" type="password" id="cpNew" placeholder="At least 8 characters" autocomplete="new-password"/>
+        </div>
+        <div class="fg" style="margin-bottom:0">
+          <label>Confirm new password</label>
+          <input class="fi" type="password" id="cpCon" placeholder="Repeat new password" autocomplete="new-password"/>
+        </div>
+        <div id="cpMsg" style="margin-top:12px"></div>
+      </div>
+      <div class="mo-ftr">
+        <button class="ab" id="btnCancelPw">Cancel</button>
+        <button class="ab ab-p" id="btnSavePw">Update password</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Add admin -->
+  <div class="mo-bg" id="mAddAdmin">
+    <div class="mo-box" style="max-width:460px">
+      <div class="mo-hdr">
+        <h3>Add admin account</h3>
+        <button class="ab" id="btnCloseAddAdmin" style="padding:4px 8px;font-size:18px;border:none;background:none;cursor:pointer;color:#999">×</button>
+      </div>
+      <div class="mo-body">
+        <div class="fg"><label>Full name</label><input class="fi" id="newAdminName" placeholder="Jane Smith"/></div>
+        <div class="fg"><label>Email</label><input class="fi" id="newAdminEmail" type="email" placeholder="admin@yourdomain.com"/></div>
+        <div class="fg"><label>Password (8+ chars)</label><input class="fi" id="newAdminPw" type="password" placeholder="Strong password"/></div>
+        <div class="fg" style="margin-bottom:0"><label>Role</label>
+          <select class="fi" id="newAdminRole">
+            <option value="admin">Admin</option>
+            <option value="super_admin">Super Admin</option>
+            <option value="support">Support</option>
+          </select>
+        </div>
+        <div id="addAdminMsg" style="margin-top:12px"></div>
+      </div>
+      <div class="mo-ftr">
+        <button class="ab" id="btnCancelAddAdmin">Cancel</button>
+        <button class="ab ab-p" id="btnSaveAdmin">Create admin</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Support ticket -->
+  <div class="mo-bg" id="mTicket">
+    <div class="mo-box" style="max-width:560px">
+      <div class="mo-hdr">
+        <h3>Ticket reply</h3>
+        <button class="ab" id="btnCloseTicket" style="padding:4px 8px;font-size:18px;border:none;background:none;cursor:pointer;color:#999">×</button>
+      </div>
+      <div class="mo-body">
+        <div id="tickContent" style="margin-bottom:16px;padding:14px;background:var(--bg);border-radius:8px;font-size:13px;line-height:1.6"></div>
+        <div class="fg"><label>Status</label>
+          <select class="fi" id="tickStat">
+            <option value="open">Open</option>
+            <option value="resolved">Resolved</option>
+          </select>
+        </div>
+        <div class="fg" style="margin-bottom:0"><label>Reply</label><textarea class="fi" id="tickReply" rows="4" placeholder="Your reply to the user..."></textarea></div>
+      </div>
+      <div class="mo-ftr">
+        <button class="ab" id="btnCancelTicket">Cancel</button>
+        <button class="ab ab-p" id="btnSendTicket">Send reply</button>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /app -->
 
 
@@ -1408,6 +1489,7 @@ document.addEventListener('DOMContentLoaded', function() {
   on('btnClosePwMo','click',function(){closeMo('mChangePw');});
   on('btnCancelPw','click',function(){closeMo('mChangePw');});
   on('btnSavePw','click',doChangePw);
+  ['cpCur','cpNew','cpCon'].forEach(function(id){on(id,'keydown',function(e){if(e.key==='Enter')doChangePw();});});
 
   // ── ADD ADMIN MODAL ───────────────────────────────────────
   on('btnAddAdmin','click',function(){openMo('mAddAdmin');});

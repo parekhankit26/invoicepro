@@ -232,6 +232,29 @@ router.post('/broadcast', adminAuth, async (req: any, res: Response) => {
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
 
+// ── CHANGE PASSWORD (authenticated admin) ────────────────
+router.put('/change-password', adminAuth, async (req: any, res: Response) => {
+  try {
+    const { current_password, new_password } = req.body
+    if (!current_password || !new_password) return res.status(400).json({ error: 'Both current and new password are required' })
+    if (new_password.length < 8) return res.status(400).json({ error: 'New password must be at least 8 characters' })
+
+    const { data: admin } = await supabase.from('admin_users')
+      .select('id, password_hash, email').eq('id', req.admin.id).single()
+    if (!admin) return res.status(404).json({ error: 'Admin not found' })
+
+    const valid = await bcrypt.compare(current_password, admin.password_hash)
+    if (!valid) return res.status(401).json({ error: 'Current password is incorrect' })
+
+    const newHash = await bcrypt.hash(new_password, 12)
+    const { error } = await supabase.from('admin_users').update({ password_hash: newHash }).eq('id', admin.id)
+    if (error) return res.status(400).json({ error: error.message })
+
+    await log(admin.id, 'password_changed', 'admin_user', admin.id, { email: admin.email })
+    return res.json({ message: 'Password changed successfully' })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
 export default router
 
 // ── HEALTH CHECK ─────────────────────────────────────────

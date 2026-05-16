@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express'
 import { supabase } from '../lib/supabase'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
+import { emailService } from '../services/emailService'
 
 const router = Router()
 const ADMIN_JWT_SECRET = process.env.ADMIN_JWT_SECRET || process.env.JWT_SECRET || 'invoicepro-admin-secret-2024'
@@ -417,35 +418,34 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
     }).eq('id', admin.id)
     
     const resetUrl = `${process.env.BACKEND_URL || 'https://invoicepro-production-2ed7.up.railway.app'}/admin#reset=${token}`
-    
-    // Send email if SMTP configured
-    if (process.env.SMTP_HOST && process.env.SMTP_USER) {
-      try {
-        const { emailService } = await import('../services/emailService')
-        await (emailService as any).sendMail({
-          to: admin.email,
-          subject: 'InvoicePro Admin — Password Reset',
-          html: `
-            <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px">
-              <h2 style="color:#1a1814">Password Reset Request</h2>
-              <p>Hi ${admin.full_name || 'Admin'},</p>
-              <p>Click below to reset your InvoicePro admin password. Link expires in 1 hour.</p>
-              <a href="${resetUrl}" style="display:inline-block;margin:20px 0;padding:12px 24px;background:#1a1814;color:white;border-radius:8px;text-decoration:none;font-weight:600">Reset Password →</a>
-              <p style="color:#888;font-size:12px">If you didn't request this, ignore this email. Your password won't change.</p>
-              <hr style="border:none;border-top:1px solid #eee;margin:20px 0"/>
-              <p style="color:#888;font-size:11px">InvoicePro Admin Panel</p>
-            </div>`
-        })
-      } catch(emailErr) { console.error('Reset email failed:', emailErr) }
+
+    // Try to send email via emailService (Resend or SMTP — reads from DB/env vars)
+    let emailSent = false
+    try {
+      await emailService.sendGeneral({
+        to: admin.email,
+        subject: 'InvoicePro Admin — Password Reset',
+        html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px">
+          <h2 style="color:#1a1814">Password Reset Request</h2>
+          <p>Hi ${admin.full_name || 'Admin'},</p>
+          <p>Click below to reset your InvoicePro admin password. This link expires in <strong>1 hour</strong>.</p>
+          <a href="${resetUrl}" style="display:inline-block;margin:20px 0;padding:12px 24px;background:#1a1814;color:white;border-radius:8px;text-decoration:none;font-weight:600">Reset Password →</a>
+          <p style="color:#888;font-size:12px">If you didn't request this, ignore this email. Your password won't change.</p>
+          <p style="color:#888;font-size:11px">InvoicePro Admin Panel</p>
+        </div>`
+      })
+      emailSent = true
+    } catch(emailErr: any) {
+      console.error('Admin reset email failed:', emailErr.message)
     }
-    
+
     // Log the attempt
     try { await supabase.from('admin_audit_log').insert({ admin_id: admin.id, action: 'password_reset_requested', entity_type: 'admin_user', entity_id: admin.id, new_value: { email: admin.email } }) } catch(_) {}
-    
+
     return res.json({
-      message: 'If that email exists, a reset link has been sent.',
-      // In development/no-SMTP: return the reset URL directly
-      ...(!process.env.SMTP_HOST ? { dev_reset_url: resetUrl } : {})
+      message: emailSent ? 'Reset link sent to your email!' : 'If that email exists, a reset link has been sent.',
+      // Always return the direct link so admin can reset even without email configured
+      dev_reset_url: resetUrl
     })
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })

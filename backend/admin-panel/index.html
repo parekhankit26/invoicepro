@@ -766,8 +766,14 @@ function doForgot(){
   msg.innerHTML='<div class="al al-info">Sending...</div>';
   req('/admin/forgot-password',{method:'POST',body:JSON.stringify({email:email})})
     .then(function(d){
-      if(d.dev_reset_url){msg.innerHTML='<div class="al al-ok">✅ Reset link generated!</div><div class="al al-info" style="margin-top:6px">Click to reset: <a href="'+d.dev_reset_url+'" target="_blank" style="color:var(--blue);font-weight:600;word-break:break-all">'+d.dev_reset_url+'</a></div>';}
-      else{msg.innerHTML='<div class="al al-ok">✅ '+d.message+'</div>';}
+      if(d.dev_reset_url){
+        var emailNote = d.message && d.message.indexOf('sent to your email')!==-1
+          ? '<div class="al al-ok" style="margin-bottom:8px">✅ Reset link sent to your email!</div>'
+          : '<div class="al al-info" style="margin-bottom:8px">Email delivery not configured — use the button below to reset directly.</div>';
+        msg.innerHTML=emailNote+'<a href="'+d.dev_reset_url+'" style="display:block;text-align:center;padding:12px 20px;background:#1a1814;color:white;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px">Reset my password →</a>';
+      } else {
+        msg.innerHTML='<div class="al al-ok">✅ '+d.message+'</div>';
+      }
     }).catch(function(e){msg.innerHTML='<div class="al al-err">'+e.message+'</div>';});
 }
 

@@ -565,10 +565,13 @@ router.delete('/clients/:id', adminAuth, async (req: any, res: Response) => {
 // ── PAYMENTS (platform-wide) ─────────────────────────────
 router.get('/payments', adminAuth, async (req: any, res: Response) => {
   try {
-    const limit = parseInt(req.query.limit as string) || 50
-    const { data, error, count } = await supabase.from('payments')
-      .select('*, invoices(invoice_number)', { count: 'exact' })
+    const limit = parseInt(req.query.limit as string) || 100
+    const method = req.query.method as string || ''
+    let query = supabase.from('payments')
+      .select('*, invoices(invoice_number, currency, clients(name))', { count: 'exact' })
       .order('paid_at', { ascending: false }).limit(limit)
+    if (method) query = query.eq('method', method)
+    const { data, error, count } = await query
     if (error) return res.status(400).json({ error: error.message })
     // Enrich with profiles
     const userIds = [...new Set((data||[]).map((p:any) => p.user_id))]
@@ -576,7 +579,10 @@ router.get('/payments', adminAuth, async (req: any, res: Response) => {
     const profileMap: any = {}
     ;(profiles||[]).forEach((p:any) => { profileMap[p.id] = p })
     const enriched = (data||[]).map((p:any) => ({ ...p, profiles: profileMap[p.user_id] || null }))
-    return res.json({ data: enriched, total: count })
+    // Summary stats
+    const totalVolume = enriched.reduce((s:number, p:any) => s + (Number(p.amount)||0), 0)
+    const byMethod = enriched.reduce((acc:any, p:any) => { const m = p.method||'manual'; acc[m] = (acc[m]||0) + 1; return acc }, {})
+    return res.json({ data: enriched, total: count, total_volume: totalVolume, by_method: byMethod })
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
 

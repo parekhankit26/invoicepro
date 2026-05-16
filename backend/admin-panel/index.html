@@ -448,10 +448,28 @@ tr:hover td{background:#fafaf8}
 
       <!-- PAYMENTS -->
       <div class="pg" id="pg-payments">
-        <div class="ph"><div><div class="pt">All payments</div></div></div>
+        <div class="ph">
+          <div><div class="pt">All payments</div><div class="ps" id="paySubtitle">Invoice payments collected across all accounts</div></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select class="fi" id="payMethodFilter" style="width:140px;padding:7px 10px;font-size:12px">
+              <option value="">All methods</option>
+              <option value="manual">Manual</option>
+              <option value="stripe">Stripe</option>
+            </select>
+          </div>
+        </div>
+        <!-- Stats strip -->
+        <div class="g4" style="margin-bottom:16px" id="payStats">
+          <div class="kc"><div class="kl">Total volume</div><div class="kv" id="pStatVol">—</div></div>
+          <div class="kc"><div class="kl">Payments</div><div class="kv" id="pStatCount">—</div></div>
+          <div class="kc"><div class="kl">Stripe</div><div class="kv" id="pStatStripe" style="color:var(--purple)">—</div></div>
+          <div class="kc"><div class="kl">Manual</div><div class="kv" id="pStatManual">—</div></div>
+        </div>
         <div class="bc" style="padding:0"><div class="tbl-wrap">
-          <table><thead><tr><th>Owner</th><th>Invoice</th><th>Amount</th><th>Method</th><th>Date</th></tr></thead>
-          <tbody id="payRows"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody></table>
+          <table>
+            <thead><tr><th>Account</th><th>Client (payer)</th><th>Invoice</th><th>Amount</th><th>Method</th><th>Date</th></tr></thead>
+            <tbody id="payRows"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody>
+          </table>
         </div></div>
       </div>
 
@@ -1133,9 +1151,44 @@ function markPaid(id){req('/admin/invoices/'+id,{method:'PUT',body:JSON.stringif
 
 // PAYMENTS
 function loadPay(){
-  req('/admin/payments?limit=50').then(function(d){
-    q('payRows').innerHTML=(d.data||[]).map(function(p){return '<tr><td style="font-size:12px">'+(p.profiles&&(p.profiles.company_name||p.profiles.full_name)||'—')+'</td><td style="font-family:monospace;font-size:11px">'+(p.invoices&&p.invoices.invoice_number||'—')+'</td><td style="font-weight:500;color:var(--green)">'+money(p.amount)+'</td><td>'+bdg('draft',p.method||'manual')+'</td><td style="font-size:11px;color:var(--ink3)">'+dDate(p.paid_at)+'</td></tr>';}).join('')||'<tr><td colspan="5" class="empty">No payments</td></tr>';
-  }).catch(function(){});
+  var method=q('payMethodFilter')?q('payMethodFilter').value:'';
+  req('/admin/payments?limit=100'+(method?'&method='+method:''))
+    .then(function(d){
+      // Stats strip
+      var vol=d.total_volume||0;
+      var bm=d.by_method||{};
+      if(q('pStatVol'))q('pStatVol').textContent=money(vol);
+      if(q('pStatCount'))q('pStatCount').textContent=(d.total||0).toLocaleString();
+      if(q('pStatStripe'))q('pStatStripe').textContent=(bm.stripe||0).toLocaleString();
+      if(q('pStatManual'))q('pStatManual').textContent=(bm.manual||0).toLocaleString();
+
+      // Method badge styling
+      function mBdg(m){
+        if(m==='stripe') return '<span class="bdg" style="background:#f3f0ff;color:#6d28d9;border:1px solid #ddd6fe">⚡ Stripe</span>';
+        return '<span class="bdg" style="background:#f0f0f0;color:#666;border:1px solid #e0e0e0">Manual</span>';
+      }
+
+      q('payRows').innerHTML=(d.data||[]).map(function(p){
+        var acct=p.profiles?(p.profiles.company_name||p.profiles.full_name||'—'):'—';
+        var initial=(acct[0]||'?').toUpperCase();
+        var client=p.invoices&&p.invoices.clients?p.invoices.clients.name:'—';
+        var inv=p.invoices?p.invoices.invoice_number:'—';
+        var currency=p.invoices&&p.invoices.currency||'GBP';
+        var amt='<span style="font-weight:700;color:var(--green)">'+money(p.amount)+'</span><span style="font-size:10px;color:var(--ink3);margin-left:3px">'+currency+'</span>';
+        return '<tr>'
+          +'<td><div style="display:flex;align-items:center;gap:9px">'
+          +'<div style="width:28px;height:28px;border-radius:8px;background:var(--ink);color:#a3e635;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;flex-shrink:0">'+initial+'</div>'
+          +'<div><div style="font-weight:600;font-size:13px">'+acct+'</div></div></div></td>'
+          +'<td style="font-size:13px;color:var(--ink2)">'+client+'</td>'
+          +'<td><span style="font-family:monospace;font-size:12px;font-weight:600;background:var(--bg);padding:2px 7px;border-radius:5px;border:1px solid var(--border)">'+inv+'</span></td>'
+          +'<td>'+amt+'</td>'
+          +'<td>'+mBdg(p.method||'manual')+'</td>'
+          +'<td style="font-size:11px;color:var(--ink3);white-space:nowrap">'+dDate(p.paid_at)+'</td>'
+          +'</tr>';
+      }).join('')||'<tr><td colspan="6" class="empty" style="padding:40px">No payments found</td></tr>';
+    }).catch(function(e){
+      q('payRows').innerHTML='<tr><td colspan="6" class="empty">Error: '+e.message+'</td></tr>';
+    });
 }
 
 // FEATURES
@@ -1518,6 +1571,7 @@ document.addEventListener('DOMContentLoaded', function() {
   on('uPlan','change',function(){uPage=1;loadUsers();});
   on('invFilter','change',function(){iPage=1;loadInv();});
   on('tickFilter','change',loadTickets);
+  on('payMethodFilter','change',loadPay);
 
   // ── EMAIL SETTINGS ────────────────────────────────────────
   // Provider card clicks - handled by onclick="selectProvider()" in HTML

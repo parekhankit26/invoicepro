@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express'
 import { supabase } from '../lib/supabase'
 import { authenticate, AuthRequest } from '../middleware/auth'
+import { emailService } from '../services/emailService'
 
 const router = Router()
 
@@ -100,7 +101,6 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
     const resetUrl = data.properties.action_link
 
     // Send via our emailService (Resend / SMTP from admin panel config)
-    const { emailService } = await import('../services/emailService')
     try {
       await emailService.sendGeneral({
         to: email,
@@ -124,15 +124,16 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
           </div>
         </body></html>`
       })
-      return res.json({ message: 'Password reset email sent! Check your inbox (and spam folder).' })
+      return res.json({ email_sent: true, message: 'Password reset email sent! Check your inbox (and spam folder).' })
     } catch (emailErr: any) {
       console.error('Password reset email failed:', emailErr.message)
-      // In non-production, return the link so admin can test
-      if (process.env.NODE_ENV !== 'production') {
-        return res.json({ message: 'Email delivery failed (email not configured?). Dev reset link below:', dev_reset_url: resetUrl })
-      }
-      // Production: still say success but log the failure
-      return res.json({ message: 'If an account with that email exists, a reset link has been sent.' })
+      // Always surface the real error so the user can fix their email settings
+      return res.json({
+        email_sent: false,
+        email_error: emailErr.message,
+        dev_reset_url: resetUrl,
+        message: `Reset link generated but email delivery failed: ${emailErr.message}. Check Admin Panel → Email Settings.`
+      })
     }
   } catch (e: any) {
     console.error('Forgot password error:', e.message)

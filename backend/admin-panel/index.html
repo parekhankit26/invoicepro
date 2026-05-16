@@ -981,12 +981,13 @@ function loadHealth(){
   }).catch(function(e){q('healthCards').innerHTML='<div class="al al-err" style="grid-column:1/-1">Failed: '+e.message+'</div>';});
 }
 function doTestEmail(){
-  var to=q('testEmailTo').value.trim();
-  if(!to){q('testEmailRes').innerHTML='<div class="al al-err">Enter email</div>';return;}
-  q('testEmailRes').innerHTML='<div class="al al-info">Sending...</div>';
+  var el=q('healthTestEmailTo');
+  var to=el?el.value.trim():'';
+  if(!to||!to.includes('@')){var r=q('testEmailRes');if(r)r.innerHTML='<div class="al al-err">Enter a valid email address</div>';return;}
+  if(q('testEmailRes'))q('testEmailRes').innerHTML='<div class="al al-info">⏳ Sending...</div>';
   req('/admin/test-email',{method:'POST',body:JSON.stringify({to:to})})
-    .then(function(d){q('testEmailRes').innerHTML='<div class="al al-ok">✅ '+d.message+'</div>';})
-    .catch(function(e){q('testEmailRes').innerHTML='<div class="al al-err">❌ '+e.message+'</div>';});
+    .then(function(d){if(q('testEmailRes'))q('testEmailRes').innerHTML='<div class="al al-ok">'+d.message+'</div>';})
+    .catch(function(e){if(q('testEmailRes'))q('testEmailRes').innerHTML='<div class="al al-err">❌ '+e.message+'</div>';});
 }
 
 // REVENUE
@@ -1147,7 +1148,7 @@ function loadInv(){
     q('invRows').innerHTML=(d.data||[]).map(function(inv){return '<tr><td style="font-family:monospace;font-weight:600;font-size:12px">'+inv.invoice_number+'</td><td style="font-size:12px">'+(inv.profiles&&(inv.profiles.company_name||inv.profiles.full_name)||'—')+'</td><td style="font-weight:500">'+money(inv.total)+'</td><td>'+sBdg(inv.status)+'</td><td style="font-size:11px;color:var(--ink3)">'+dDate(inv.created_at)+'</td><td>'+(inv.status!=='paid'?'<button class="ab ab-sm ab-s" onclick="markPaid(\''+inv.id+'\')">✓ Paid</button>':'')+'</td></tr>';}).join('')||'<tr><td colspan="6" class="empty">No invoices</td></tr>';
   }).catch(function(){});
 }
-function markPaid(id){req('/admin/invoices/'+id,{method:'PUT',body:JSON.stringify({status:'paid'})}).then(loadInv).catch(function(e){alert(e.message);});}
+function markPaid(id){req('/admin/invoices/'+id,{method:'PUT',body:JSON.stringify({status:'paid'})}).then(function(){loadInv();showToast('Invoice marked as paid','ok');}).catch(function(e){showToast(e.message,'err');});}
 
 // PAYMENTS
 function loadPay(){
@@ -1197,7 +1198,7 @@ function loadFeatures(){
   req('/admin/feature-flags').then(function(d){
     var flags={};d.forEach(function(f){try{flags[f.key]=JSON.parse(f.value);}catch(e){flags[f.key]=true;}});
     q('featureList').innerHTML=FEATS.map(function(f){var on=flags[f.k]!==false;return '<div class="sr"><div style="font-size:13px;font-weight:500">'+f.n+'</div><button class="tog '+(on?'on':'off')+'" data-key="'+f.k+'"></button></div>';}).join('');
-    q('featureList').querySelectorAll('.tog').forEach(function(btn){btn.addEventListener('click',function(){var on=this.classList.contains('on');this.classList.toggle('on',!on);this.classList.toggle('off',on);var k=this.dataset.key,self=this;req('/admin/feature-flags/'+k,{method:'PUT',body:JSON.stringify({value:!on})}).catch(function(e){self.classList.toggle('on',on);self.classList.toggle('off',!on);alert('Failed: '+e.message);});});});
+    q('featureList').querySelectorAll('.tog').forEach(function(btn){btn.addEventListener('click',function(){var on=this.classList.contains('on');this.classList.toggle('on',!on);this.classList.toggle('off',on);var k=this.dataset.key,self=this;req('/admin/feature-flags/'+k,{method:'PUT',body:JSON.stringify({value:!on})}).catch(function(e){self.classList.toggle('on',on);self.classList.toggle('off',!on);showToast('Failed: '+e.message,'err');});});});
   }).catch(function(){});
 }
 
@@ -1250,7 +1251,7 @@ function loadTickets(){
   }).catch(function(e){q('tickRows').innerHTML='<tr><td colspan="5" class="empty">Error: '+e.message+'</td></tr>';});
 }
 function openTick(id,s,m){curTick=id;q('tickContent').innerHTML='<strong>'+s+'</strong><p style="margin-top:8px;color:var(--ink2);line-height:1.6">'+m+'</p>';q('tickReply').value='';openMo('mTicket');}
-function doReply(){var r=q('tickReply').value.trim();if(!r){alert('Enter a reply');return;}req('/admin/tickets/'+curTick,{method:'PUT',body:JSON.stringify({admin_reply:r,status:q('tickStat').value})}).then(function(){closeMo('mTicket');loadTickets();}).catch(function(e){alert(e.message);});}
+function doReply(){var r=q('tickReply').value.trim();if(!r){showToast('Enter a reply','err');return;}req('/admin/tickets/'+curTick,{method:'PUT',body:JSON.stringify({admin_reply:r,status:q('tickStat').value})}).then(function(){closeMo('mTicket');loadTickets();showToast('Reply sent','ok');}).catch(function(e){showToast(e.message,'err');});}
 
 // SATISFACTION
 function loadSat(){
@@ -1286,13 +1287,13 @@ function loadAdmins(){
     q('adminRows').innerHTML=(d||[]).map(function(a){return '<tr><td style="font-weight:500">'+(a.full_name||'—')+'</td><td style="color:var(--blue);font-size:12px">'+a.email+'</td><td>'+bdg('b-'+(a.role||'support'),a.role||'support')+'</td><td style="font-size:11px;color:var(--ink3)">'+(a.last_login?dTime(a.last_login):'Never')+'</td><td>'+bdg(a.is_active?'ok':'err',a.is_active?'Active':'Disabled')+'</td><td><button class="ab ab-sm '+(a.is_active?'ab-d':'ab-s')+'" onclick="toggleAdmin(\''+a.id+'\')">'+(a.is_active?'Disable':'Enable')+'</button></td></tr>';}).join('')||'<tr><td colspan="6" class="empty">No admins</td></tr>';
   }).catch(function(e){q('adminRows').innerHTML='<tr><td colspan="6" class="empty">'+e.message+'</td></tr>';});
 }
-function toggleAdmin(id){req('/admin/admins/'+id+'/toggle',{method:'PUT'}).then(loadAdmins).catch(function(e){alert(e.message);});}
+function toggleAdmin(id){req('/admin/admins/'+id+'/toggle',{method:'PUT'}).then(loadAdmins).catch(function(e){showToast(e.message,'err');});}
 function doAddAdmin(){
-  var email=q('naEmail').value,pw=q('naPw').value,name=q('naName').value,role=q('naRole').value;
-  if(!email||!pw){errMsg('naMsg','Email and password required');return;}
+  var email=q('newAdminEmail').value,pw=q('newAdminPw').value,name=q('newAdminName').value,role=q('newAdminRole').value;
+  if(!email||!pw){errMsg('addAdminMsg','Email and password required');return;}
   req('/admin/admins',{method:'POST',body:JSON.stringify({email:email,password:pw,full_name:name,role:role})})
-    .then(function(){closeMo('mAddAdmin');loadAdmins();alert('Admin created: '+email);})
-    .catch(function(e){errMsg('naMsg',e.message);});
+    .then(function(){closeMo('mAddAdmin');loadAdmins();showToast('Admin created: '+email,'ok');})
+    .catch(function(e){errMsg('addAdminMsg',e.message);});
 }
 
 // AUDIT
@@ -1421,10 +1422,9 @@ function doSaveResend() {
 }
 
 function doTestEmail2(){
-  var to=q('testEmailTo')?q('testEmailTo').value.trim():'';
+  var to=q('smtpTestTo')?q('smtpTestTo').value.trim():(q('testEmailTo')?q('testEmailTo').value.trim():'');
   if(!to||!to.includes('@')){if(q('testEmailRes2'))q('testEmailRes2').innerHTML='<div class="al al-err">Enter a valid email address</div>';return;}
   if(q('testEmailRes2'))q('testEmailRes2').innerHTML='<div class="al al-info">⏳ Sending via SMTP...</div>';
-  // Force SMTP provider for this test
   req('/admin/test-email',{method:'POST',body:JSON.stringify({to:to, force_provider:'smtp'})})
     .then(function(d){if(q('testEmailRes2'))q('testEmailRes2').innerHTML='<div class="al al-ok">'+d.message+'</div>';})
     .catch(function(e){if(q('testEmailRes2'))q('testEmailRes2').innerHTML='<div class="al al-err">❌ '+e.message+'</div>';});
@@ -1438,18 +1438,6 @@ function doTestResend(){
     .then(function(d){if(q('resendTestRes'))q('resendTestRes').innerHTML='<div class="al al-ok">'+d.message+'</div>';})
     .catch(function(e){if(q('resendTestRes'))q('resendTestRes').innerHTML='<div class="al al-err">❌ '+e.message+'</div>';});
 }
-function doTestEmail(){
-  var el=q('healthTestEmailTo');
-  var to=el?el.value.trim():'';
-  if(!to||!to.includes('@')){var r=q('testEmailRes');if(r)r.innerHTML='<div class="al al-err">Enter a valid email address</div>';return;}
-  var r=q('testEmailRes');if(r)r.innerHTML='<div class="al al-info">⏳ Sending...</div>';
-  req('/admin/test-email',{method:'POST',body:JSON.stringify({to:to})})
-    .then(function(d){if(q('testEmailRes'))q('testEmailRes').innerHTML='<div class="al al-ok">'+d.message+'</div>';})
-    .catch(function(e){if(q('testEmailRes'))q('testEmailRes').innerHTML='<div class="al al-err">❌ '+e.message+'</div>';});
-}
-
-
-
 // loadEmailSettings defined above
 
 function doSaveEmailSettings() {
@@ -1484,32 +1472,6 @@ function doSaveEmailSettings() {
     }).catch(function(e) { errMsg('emailSaveRes', e.message); });
 }
 
-function doTestEmail2() {
-  var to = q('testEmailTo').value.trim();
-  if (!to || !to.includes('@')) { 
-    q('testEmailRes2').innerHTML = '<div class="al al-err">Enter a valid email address</div>'; 
-    return; 
-  }
-  q('testEmailRes2').innerHTML = '<div class="al al-info">Sending test email to '+to+'...</div>';
-  req('/admin/test-email', {method:'POST', body:JSON.stringify({to:to})})
-    .then(function(d) { q('testEmailRes2').innerHTML = '<div class="al al-ok">'+d.message+'</div>'; })
-    .catch(function(e) { q('testEmailRes2').innerHTML = '<div class="al al-err">❌ '+e.message+'</div>'; });
-}
-
-// Also fix the old test email on health page
-function doTestEmail() {
-  var el = q('healthTestEmailTo');
-  var to = el ? el.value.trim() : '';
-  if (!to || !to.includes('@')) {
-    var res = q('testEmailRes');
-    if (res) res.innerHTML = '<div class="al al-err">Enter a valid email address (e.g. your@gmail.com)</div>';
-    return;
-  }
-  if (q('testEmailRes')) q('testEmailRes').innerHTML = '<div class="al al-info">Sending to ' + to + '...</div>';
-  req('/admin/test-email', {method:'POST', body:JSON.stringify({to:to})})
-    .then(function(d) { if (q('testEmailRes')) q('testEmailRes').innerHTML = '<div class="al al-ok">'+d.message+'</div>'; })
-    .catch(function(e) { if (q('testEmailRes')) q('testEmailRes').innerHTML = '<div class="al al-err">❌ '+e.message+'</div>'; });
-}
 
 // ── WIRE ALL EVENTS ───────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {

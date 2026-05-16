@@ -772,7 +772,8 @@ function goPage(page){
   document.querySelectorAll('.nv').forEach(function(n){n.classList.remove('on');});
   var pg=q('pg-'+page);if(pg)pg.classList.add('on');
   document.querySelectorAll('.nv[data-pg="'+page+'"]').forEach(function(n){n.classList.add('on');});
-  // Close sidebar on mobile after navigation
+  // Persist current page in URL hash so refresh stays here
+  history.replaceState(null,'','#'+page);
   if(window.innerWidth<=768)closeSidebar();
   var fns={dashboard:loadDash,health:loadHealth,revenue:loadRev,churn:loadChurn,email:loadEmailSettings,
     users:loadUsers,clients:loadClients,invoices:loadInv,payments:loadPay,
@@ -787,7 +788,11 @@ function showApp(admin){
   q('sName').textContent=admin.full_name||admin.email;
   q('sRole').textContent=admin.role;
   q('sAvatar').textContent=(admin.full_name||admin.email)[0].toUpperCase();
-  loadDash();
+  // Restore last visited page from URL hash on refresh
+  var validPages=['dashboard','health','revenue','churn','users','clients','invoices','payments','features','plans','announce','tickets','satisfaction','broadcast','admins','audit','email'];
+  var hash=window.location.hash.replace('#','');
+  var startPage=(hash&&validPages.indexOf(hash)!==-1)?hash:'dashboard';
+  goPage(startPage);
 }
 
 function doLogin(){
@@ -1069,7 +1074,28 @@ function loadPlans(){
     q('planCards').innerHTML=d.map(function(p){return '<div class="kc" style="border-top:3px solid '+(cs[p.slug]||'#888')+'"><div class="kl">'+p.name+'</div><div class="kv">£'+p.price_monthly+'<span style="font-size:12px;color:var(--ink3)">/mo</span></div><div class="ks" style="margin-bottom:12px">£'+p.price_yearly+'/yr · '+(p.max_invoices===-1?'∞':p.max_invoices)+' invoices/mo</div><label style="font-size:12px;font-weight:500;color:#666;display:block;margin-bottom:4px">Monthly price (£)</label><input class="fi" id="pi_'+p.id+'" value="'+p.price_monthly+'" type="number" step="0.01" style="font-size:12px;padding:7px 10px;margin-bottom:8px"/><button class="ab ab-p ab-sm" style="width:100%;justify-content:center" onclick="savePlan(\''+p.id+'\')">Save</button></div>';}).join('');
   }).catch(function(){});
 }
-function savePlan(id){req('/admin/plans/'+id,{method:'PUT',body:JSON.stringify({price_monthly:+(q('pi_'+id).value)})}).then(function(){alert('Saved!');}).catch(function(e){alert(e.message);});}
+function savePlan(id){
+  var inp=q('pi_'+id);
+  var val=+(inp.value);
+  var btn=document.querySelector('[onclick="savePlan(\''+id+'\')"]');
+  if(btn){btn.disabled=true;btn.textContent='Saving...';}
+  req('/admin/plans/'+id,{method:'PUT',body:JSON.stringify({price_monthly:val})})
+    .then(function(d){
+      // Instant UI update — no reload needed
+      var card=inp.closest('.kc');
+      if(card){
+        var kv=card.querySelector('.kv');
+        if(kv)kv.innerHTML='£'+val+'<span style="font-size:12px;color:var(--ink3)">/mo</span>';
+        var ks=card.querySelector('.ks');
+        if(ks){var yr=Math.round(val*12*100)/100;ks.textContent='£'+yr+'/yr · '+(ks.textContent.split('·')[1]||'').trim();}
+      }
+      if(btn){btn.disabled=false;btn.textContent='Saved ✓';setTimeout(function(){btn.textContent='Save';},2000);}
+      showToast('Plan price updated to £'+val+'/mo','ok');
+    }).catch(function(e){
+      if(btn){btn.disabled=false;btn.textContent='Save';}
+      showToast(e.message,'err');
+    });
+}
 
 // ANNOUNCEMENT
 function loadAnnounce(){

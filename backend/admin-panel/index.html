@@ -945,12 +945,22 @@ function loadSat(){
 
 // BROADCAST
 function doBroadcast(){
-  var s=q('bSubj').value,m=q('bMsg').value,p=q('bPlan').value;
-  if(!s||!m){errMsg('broadRes','Subject and message required');return;}
-  if(!confirm('Send to '+(p||'ALL')+' users?'))return;
+  var s=q('bSubj').value.trim(),m=q('bMsg').value.trim(),p=q('bPlan').value;
+  if(!s){errMsg('broadRes','Subject line is required');return;}
+  if(!m){errMsg('broadRes','Message body is required');return;}
+  var btn=q('btnBroadcast');
+  if(btn){btn.disabled=true;btn.textContent='📤 Sending...';}
+  q('broadRes').innerHTML='<div class="al al-info">⏳ Sending emails — this may take a moment...</div>';
   req('/admin/broadcast',{method:'POST',body:JSON.stringify({subject:s,message:m,plan_filter:p})})
-    .then(function(d){okMsg('broadRes','Queued for '+d.recipients+' users');q('bSubj').value='';q('bMsg').value='';})
-    .catch(function(e){errMsg('broadRes',e.message);});
+    .then(function(d){
+      q('broadRes').innerHTML='<div class="al al-ok" style="font-size:13px"><strong>'+d.message+'</strong></div>';
+      q('bSubj').value='';q('bMsg').value='';
+      if(btn){btn.disabled=false;btn.textContent='📢 Send broadcast';}
+    })
+    .catch(function(e){
+      errMsg('broadRes',e.message);
+      if(btn){btn.disabled=false;btn.textContent='📢 Send broadcast';}
+    });
 }
 
 // ADMINS

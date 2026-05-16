@@ -222,8 +222,9 @@ router.post('/broadcast', adminAuth, async (req: any, res: Response) => {
     }
 
     await log(req.admin.id, 'broadcast_sent', 'broadcast', 'all', { subject, sent, failed })
+    const failMsg = failed > 0 ? ' (' + failed + ' failed)' : ''
     return res.json({ 
-      message: `✅ Broadcast sent to ${sent} users${failed > 0 ? ` (${failed} failed)` : ''}`,
+      message: '✅ Broadcast sent to ' + sent + ' users' + failMsg,
       recipients: sent,
       failed
     })

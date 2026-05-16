@@ -14,6 +14,7 @@ export default function AuthPage() {
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
   const [resetEmail, setResetEmail] = useState('')
+  const [resetLink, setResetLink] = useState('')
   const { signIn } = useAuthStore()
   const navigate = useNavigate()
   const { register, handleSubmit, reset, watch } = useForm<any>()
@@ -24,7 +25,6 @@ export default function AuthPage() {
     if (hash.includes('type=recovery') || hash.includes('access_token')) {
       setMode('reset')
     }
-    // Also check for Supabase auth state change (password recovery)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') setMode('reset')
     })
@@ -40,7 +40,6 @@ export default function AuthPage() {
         navigate('/dashboard')
 
       } else if (mode === 'register') {
-        // Use backend route — auto-confirms email, no email verification needed
         const res = await fetch(`${API_BASE}/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -53,10 +52,8 @@ export default function AuthPage() {
         })
         const result = await res.json()
         if (!res.ok) throw new Error(result.error || 'Registration failed')
-
-        // Auto sign in after registration
         await signIn(data.email, data.password)
-        toast.success('Account created! Welcome to InvoicePro 🎉')
+        toast.success('Account created! Welcome to InvoicePro')
         navigate('/dashboard')
 
       } else if (mode === 'forgot') {
@@ -66,31 +63,32 @@ export default function AuthPage() {
           body: JSON.stringify({ email: data.email })
         })
         const result = await res.json()
+
         if (result.email_sent === false) {
-          // Email delivery failed — open reset link directly and show error
-          if (result.dev_reset_url) window.open(result.dev_reset_url, '_blank')
-          throw new Error(result.email_error || result.message || 'Email delivery failed. Configure email in Admin Panel.')
+          // Email delivery failed but we have the direct reset link — show it on the page
+          setResetEmail(data.email)
+          setResetLink(result.dev_reset_url || '')
+          reset()
+        } else {
+          setResetEmail(data.email)
+          setResetLink('')
+          toast.success(result.message || 'Reset link sent! Check your inbox.')
+          reset()
         }
-        setResetEmail(data.email)
-        toast.success(result.message || 'Reset link sent! Check your inbox.')
-        reset()
 
       } else if (mode === 'reset') {
-        // User clicked link from email — now set new password
         if (data.password !== data.confirm_password) {
           throw new Error('Passwords do not match')
         }
         const { error } = await supabase.auth.updateUser({ password: data.password })
         if (error) throw error
         toast.success('Password updated! Please sign in.')
-        // Clear the hash and go to login
         window.history.replaceState(null, '', window.location.pathname)
         setMode('login')
         reset()
       }
     } catch (err: any) {
       let msg = err.message || 'Something went wrong'
-      // Friendly error messages
       if (msg.includes('already exists') || msg.includes('already registered')) {
         msg = 'This email is already registered. Click "Sign in" below.'
         setMode('login')
@@ -109,7 +107,7 @@ export default function AuthPage() {
     }
   }
 
-  const goBack = () => { setMode('login'); reset(); setResetEmail('') }
+  const goBack = () => { setMode('login'); reset(); setResetEmail(''); setResetLink('') }
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', padding: 20 }}>
@@ -138,8 +136,8 @@ export default function AuthPage() {
             </button>
           )}
 
-          {/* FORGOT PASSWORD - sent confirmation */}
-          {mode === 'forgot' && resetEmail && (
+          {/* FORGOT PASSWORD — email sent successfully */}
+          {mode === 'forgot' && resetEmail && !resetLink && (
             <div style={{ textAlign: 'center', padding: '20px 0' }}>
               <div style={{ fontSize: 40, marginBottom: 12 }}>📧</div>
               <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 8 }}>Check your email</div>
@@ -150,6 +148,30 @@ export default function AuthPage() {
                 Click the link in the email then come back here to set your new password.
               </div>
               <button onClick={goBack} className="btn btn-secondary" style={{ marginTop: 16, width: '100%', justifyContent: 'center' }}>
+                Back to login
+              </button>
+            </div>
+          )}
+
+          {/* FORGOT PASSWORD — email delivery failed, show direct link */}
+          {mode === 'forgot' && resetEmail && resetLink && (
+            <div style={{ textAlign: 'center', padding: '20px 0' }}>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>🔑</div>
+              <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 8 }}>Reset link ready</div>
+              <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 16 }}>
+                Email delivery failed (email not configured yet).<br/>Click the button below to reset your password directly.
+              </div>
+              <a
+                href={resetLink}
+                className="btn btn-primary"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '12px', fontSize: 14, textDecoration: 'none', marginBottom: 12 }}
+              >
+                Reset my password →
+              </a>
+              <div style={{ fontSize: 11, color: 'var(--text-subtle)', background: 'var(--bg)', padding: '10px 14px', borderRadius: 8, wordBreak: 'break-all', textAlign: 'left' }}>
+                <strong>To fix email:</strong> Go to Admin Panel → Email Settings → configure Resend API key.
+              </div>
+              <button onClick={goBack} className="btn btn-secondary" style={{ marginTop: 12, width: '100%', justifyContent: 'center' }}>
                 Back to login
               </button>
             </div>
@@ -251,8 +273,8 @@ export default function AuthPage() {
         {/* Plan features teaser on register */}
         {mode === 'register' && (
           <div style={{ marginTop: 16, textAlign: 'center' }}>
-            {['✅ Free forever — no credit card', '✅ 5 invoices/month on free plan', '✅ Unlimited on paid plans from £9/mo'].map(f => (
-              <div key={f} style={{ fontSize: 12, color: 'var(--text-subtle)', marginBottom: 4 }}>{f}</div>
+            {['Free forever — no credit card', '5 invoices/month on free plan', 'Unlimited on paid plans from £9/mo'].map(f => (
+              <div key={f} style={{ fontSize: 12, color: 'var(--text-subtle)', marginBottom: 4 }}>✅ {f}</div>
             ))}
           </div>
         )}

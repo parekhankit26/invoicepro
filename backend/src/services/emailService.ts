@@ -21,10 +21,26 @@ export async function getEmailConfig() {
       catch { cfg[r.key] = r.value } 
     })
     
+    // DB config loaded — resolve provider, fall back to env vars before 'none'
+    if (!cfg.resend_api_key && process.env.RESEND_API_KEY) {
+      cfg.resend_api_key = process.env.RESEND_API_KEY
+      cfg.resend_from = cfg.resend_from || process.env.RESEND_FROM || 'noreply@invoicepro.app'
+      cfg.resend_name = cfg.resend_name || process.env.RESEND_NAME || 'InvoicePro'
+    }
     const provider = cfg.email_provider || (cfg.resend_api_key ? 'resend' : cfg.smtp_host ? 'smtp' : 'none')
     return { provider, cfg }
   } catch(e) {
-    // Fall back to env vars only if DB fails
+    // Fall back to env vars — check Resend first (works on Railway), then SMTP
+    if (process.env.RESEND_API_KEY) {
+      return {
+        provider: 'resend',
+        cfg: {
+          resend_api_key: process.env.RESEND_API_KEY,
+          resend_from: process.env.RESEND_FROM || 'noreply@invoicepro.app',
+          resend_name: process.env.RESEND_NAME || 'InvoicePro',
+        }
+      }
+    }
     return {
       provider: process.env.SMTP_HOST ? 'smtp' : 'none',
       cfg: {

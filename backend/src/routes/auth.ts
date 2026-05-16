@@ -75,8 +75,6 @@ router.put('/profile', authenticate, async (req: AuthRequest, res: Response) => 
   return res.json(data)
 })
 
-export default router
-
 // One-time admin setup endpoint — creates first super admin
 // Protected by ADMIN_SETUP_KEY env var
 router.post('/setup-admin', async (req: Request, res: Response) => {
@@ -206,3 +204,5 @@ router.post('/reset-user-password', async (req: Request, res: Response) => {
     }
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
+
+export default router

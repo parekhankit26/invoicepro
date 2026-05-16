@@ -27,7 +27,7 @@ export default function InvoiceModal({ invoice, onClose, onSave }: { invoice?: a
   // Signal AI button to hide
   useEffect(() => { modalState.open(); return () => modalState.close() }, [])
 
-  const { register, control, handleSubmit, watch, setValue } = useForm({
+  const { register, control, handleSubmit, watch, setValue, reset } = useForm({
     defaultValues: invoice
       ? {
           ...invoice,
@@ -38,9 +38,9 @@ export default function InvoiceModal({ invoice, onClose, onSave }: { invoice?: a
       : {
           issue_date: today,
           due_date: in30,
-          currency: 'GBP',
-          country_code: 'GB',
-          tax_rate: 20,
+          currency: defaultCurrency,
+          country_code: defaultCountry,
+          tax_rate: defaultTaxRate,
           discount_percent: 0,
           tax_type: 'CGST_SGST',
           notes: '',
@@ -48,6 +48,24 @@ export default function InvoiceModal({ invoice, onClose, onSave }: { invoice?: a
           items: [{ description: '', quantity: 1, unit_price: 0 }],
         },
   })
+
+  // Apply profile defaults once profile loads (new invoice only)
+  useEffect(() => {
+    if (!isEdit && profile) {
+      reset({
+        issue_date: today,
+        due_date: in30,
+        currency: profile.default_currency || 'GBP',
+        country_code: profile.country_code || 'GB',
+        tax_rate: profile.default_tax_rate ?? 20,
+        discount_percent: 0,
+        tax_type: 'CGST_SGST',
+        notes: '',
+        terms: 'Payment due within 30 days.',
+        items: [{ description: '', quantity: 1, unit_price: 0 }],
+      })
+    }
+  }, [profile?.id])
 
   const { fields, append, remove } = useFieldArray({ control, name: 'items' })
 

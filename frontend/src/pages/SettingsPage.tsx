@@ -159,6 +159,12 @@ export default function SettingsPage() {
             </button>
           </div>
         </form>
+
+        {/* Password Change */}
+        <div className="card card-p" style={{ marginTop: 16 }}>
+          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Change password</div>
+          <PasswordChangeForm />
+        </div>
       </div>
     </>
   )
@@ -168,7 +174,6 @@ export default function SettingsPage() {
 function PasswordChangeForm() {
   const [form, setForm] = useState({ current: '', next: '', confirm: '' })
   const [loading, setLoading] = useState(false)
-  const { supabase: sb } = { supabase: null as any }
 
   const handleChange = async (e: React.FormEvent) => {
     e.preventDefault()

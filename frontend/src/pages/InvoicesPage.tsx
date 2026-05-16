@@ -60,7 +60,7 @@ export default function InvoicesPage() {
                           {inv.status !== 'paid' && <button className="btn btn-sm btn-secondary" onClick={() => sendMutation.mutate(inv.id)}><Send size={12} /></button>}
                           {inv.status !== 'paid' && <button className="btn btn-sm btn-secondary" onClick={() => markPaidMutation.mutate(inv.id)}><CheckCircle size={12} /></button>}
                           <button className="btn btn-sm btn-secondary" onClick={() => api.downloadPDF(inv.id, inv.invoice_number).catch(e => toast.error(e.message))}><Download size={12} /></button>
-                          {inv.status === 'draft' && <button className="btn btn-sm btn-danger" onClick={() => { if (confirm('Delete?')) deleteMutation.mutate(inv.id) }}><Trash2 size={12} /></button>}
+                          {inv.status === 'draft' && <button className="btn btn-sm btn-danger" onClick={() => deleteMutation.mutate(inv.id)}><Trash2 size={12} /></button>}
                         </div>
                       </td>
                     </tr>

@@ -14,7 +14,7 @@ router.get('/', async (req: AuthRequest, res: Response) => {
   let query = supabase.from('invoices').select('*, clients(id,name,email), invoice_items(*)', { count: 'exact' }).eq('user_id', (req as any).user!.id).order('created_at', { ascending: false }).range((+page-1)*+limit, +page*+limit-1)
   if (status) query = query.eq('status', status)
   if (client_id) query = query.eq('client_id', client_id)
-  if (search) query = query.ilike('invoice_number', `%${search}%`)
+  if (search) query = query.or(`invoice_number.ilike.%${search}%,bill_to.ilike.%${search}%`)
   const { data, error, count } = await query
   if (error) return res.status(400).json({ error: error.message })
   return res.json({ data, total: count, page: +page, limit: +limit })
@@ -125,26 +125,17 @@ router.post('/:id/send', async (req: AuthRequest, res: Response) => {
     
     let paymentLink = invoice.stripe_payment_link
     try { paymentLink = await stripeService.createPaymentLink(invoice); await supabase.from('invoices').update({ stripe_payment_link: paymentLink }).eq('id', invoice.id) } catch(e) {}
-    
-    // Check if SMTP is configured
-    if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
-      // Mark as sent even without email config — update status
-      await supabase.from('invoices').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', invoice.id)
-      return res.json({ message: 'Invoice marked as sent (email delivery requires SMTP configuration)', payment_link: paymentLink, email_sent: false })
-    }
-    
+
     try {
       const pdfBuffer = await pdfService.generateInvoicePDF(invoice)
       await emailService.sendInvoice({ to: invoice.clients.email, clientName: invoice.clients.name, invoice: { ...invoice, stripe_payment_link: paymentLink }, pdfBuffer })
+      await supabase.from('invoices').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', invoice.id)
+      return res.json({ message: `Invoice sent to ${invoice.clients.email}`, payment_link: paymentLink, email_sent: true })
     } catch (emailErr: any) {
       console.error('Email send failed:', emailErr)
-      // Still mark as sent, just note email failed
       await supabase.from('invoices').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', invoice.id)
       return res.json({ message: `Invoice marked as sent but email delivery failed: ${emailErr.message}`, email_sent: false })
     }
-    
-    await supabase.from('invoices').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', invoice.id)
-    return res.json({ message: `Invoice sent to ${invoice.clients.email}`, payment_link: paymentLink, email_sent: true })
   } catch (err: any) {
     console.error('Send invoice error:', err)
     return res.status(500).json({ error: err.message || 'Failed to send invoice' })

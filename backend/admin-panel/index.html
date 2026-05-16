@@ -113,24 +113,39 @@ tr:hover td{background:#fafaf8}
 .b-admin{background:#ede9fe;color:var(--purple)}
 .b-support{background:var(--bbg);color:var(--blue)}
 
-/* ── PLAN DROPDOWN ── */
-.plan-wrap{position:relative;display:inline-block}
-.plan-pill{display:inline-flex;align-items:center;gap:5px;cursor:pointer;border-radius:20px;font-size:11px;font-weight:600;padding:3px 9px 3px 10px;border:1.5px solid transparent;transition:filter .12s,box-shadow .12s;user-select:none}
-.plan-pill:hover{filter:brightness(.88);box-shadow:0 2px 6px rgba(0,0,0,.1)}
-.plan-pill .chv{font-size:8px;opacity:.5;transition:transform .15s;display:inline-block}
-.plan-pill.open .chv{transform:rotate(180deg)}
-.b-free.plan-pill{background:#f0f0f0;color:#888;border-color:#ddd}
-.b-starter.plan-pill{background:var(--bbg);color:var(--blue);border-color:#bfdbfe}
-.b-pro.plan-pill{background:#ede9fe;color:var(--purple);border-color:#ddd6fe}
-.b-enterprise.plan-pill{background:var(--abg);color:var(--amber);border-color:#fde68a}
-.plan-dd{position:absolute;top:calc(100% + 8px);left:-6px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.14);padding:6px;z-index:700;min-width:180px;display:none}
-.plan-dd.vis{display:block;animation:ddPop .13s ease}
-@keyframes ddPop{from{opacity:0;transform:translateY(-6px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
-.plan-opt{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .1s}
-.plan-opt:hover{background:var(--bg)}
-.plan-opt.cur-plan{background:#f4f3f0}
-.plan-opt .po-name{font-size:12px;font-weight:600;color:var(--ink);flex:1}
-.plan-opt .po-chk{font-size:11px;color:var(--green);font-weight:800}
+/* ── PLAN PILL (inline badge) ── */
+.plan-pill{display:inline-flex;align-items:center;gap:5px;cursor:pointer;border-radius:20px;font-size:11px;font-weight:700;padding:4px 10px 4px 11px;border:1.5px solid transparent;transition:transform .12s,box-shadow .15s;user-select:none;letter-spacing:.01em}
+.plan-pill:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.12)}
+.plan-pill:active{transform:translateY(0)}
+.plan-pill svg{transition:transform .2s;flex-shrink:0;opacity:.6}
+.plan-pill.open svg{transform:rotate(180deg)}
+.pp-free{background:#f0f0f0;color:#666;border-color:#e0e0e0}
+.pp-starter{background:#dbeafe;color:#1d4ed8;border-color:#bfdbfe}
+.pp-pro{background:#ede9fe;color:#6d28d9;border-color:#c4b5fd}
+.pp-enterprise{background:#fef3c7;color:#92400e;border-color:#fcd34d}
+
+/* ── PLAN DROPDOWN (fixed — escapes table overflow) ── */
+.plan-dd{position:fixed;background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 8px 16px rgba(0,0,0,.06),0 24px 48px rgba(0,0,0,.12);padding:6px;z-index:9000;width:220px;display:none;overflow:hidden}
+.plan-dd.vis{display:block;animation:ddPop .15s cubic-bezier(.16,1,.3,1)}
+@keyframes ddPop{from{opacity:0;transform:translateY(-8px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.pd-header{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;padding:6px 12px 10px;border-bottom:1px solid #f3f4f6;margin-bottom:4px}
+.plan-opt{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:background .1s;margin-bottom:1px}
+.plan-opt:hover{background:#f9fafb}
+.plan-opt:active{background:#f3f4f6}
+.plan-opt.cur-plan{background:#f5f3ff}
+.po-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.po-dot-free{background:#9ca3af}
+.po-dot-starter{background:#3b82f6}
+.po-dot-pro{background:#7c3aed}
+.po-dot-enterprise{background:#d97706}
+.po-info{flex:1;min-width:0}
+.po-name{font-size:12.5px;font-weight:600;color:#111827;line-height:1.2}
+.po-desc{font-size:10.5px;color:#9ca3af;margin-top:1px}
+.po-chk{width:18px;height:18px;background:#7c3aed;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:#fff;font-weight:800}
+.po-chk-free{background:#6b7280}
+.po-chk-starter{background:#3b82f6}
+.po-chk-pro{background:#7c3aed}
+.po-chk-enterprise{background:#d97706}
 
 /* ── TOAST ── */
 #adminToast{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
@@ -924,56 +939,77 @@ function showToast(msg,type){
 // ── PLAN DROPDOWN ─────────────────────────────────────────
 var _pddOpen=null;
 var PLANS=[
-  {k:'free',    label:'Free',       icon:'○'},
-  {k:'starter', label:'Starter',    icon:'◈'},
-  {k:'pro',     label:'Pro',        icon:'★'},
-  {k:'enterprise',label:'Enterprise',icon:'◆'}
+  {k:'free',       label:'Free',        desc:'5 invoices/mo',    price:'£0/mo'},
+  {k:'starter',    label:'Starter',     desc:'50 invoices/mo',   price:'£9/mo'},
+  {k:'pro',        label:'Pro',         desc:'Unlimited',         price:'£19/mo'},
+  {k:'enterprise', label:'Enterprise',  desc:'Custom limits',     price:'£49/mo'}
 ];
 
 function mkPlanSel(id,plan){
   var p=plan||'free';
+  // Build dropdown HTML (appended to body on open, positioned via JS)
   var opts=PLANS.map(function(pl){
     var cur=pl.k===p;
-    return '<div class="plan-opt'+(cur?' cur-plan':'')+'" onclick="selectPlan(\''+id+'\',\''+pl.k+'\')" title="Switch to '+pl.label+'">'
-      +'<span class="bdg b-'+pl.k+'" style="flex-shrink:0">'+pl.icon+' '+pl.k+'</span>'
-      +'<span class="po-name">'+pl.label+'</span>'
-      +(cur?'<span class="po-chk">✓</span>':'')
+    return '<div class="plan-opt'+(cur?' cur-plan':'')+'" onclick="selectPlan(\''+id+'\',\''+pl.k+'\')">'
+      +'<div class="po-dot po-dot-'+pl.k+'"></div>'
+      +'<div class="po-info"><div class="po-name">'+pl.label+'</div><div class="po-desc">'+pl.desc+' &nbsp;·&nbsp; '+pl.price+'</div></div>'
+      +(cur?'<div class="po-chk po-chk-'+p+'">✓</div>':'')
       +'</div>';
   }).join('');
-  return '<div class="plan-wrap">'
-    +'<div class="plan-pill b-'+p+'" id="ppl-'+id+'" onclick="openPlanDD(event,\''+id+'\')" title="Click to change plan">'
-    +p+' <span class="chv">▾</span></div>'
-    +'<div class="plan-dd" id="pdd-'+id+'">'
-    +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);padding:2px 10px 8px;border-bottom:1px solid var(--border);margin-bottom:4px">Change plan</div>'
-    +opts
-    +'</div></div>';
+  var dd='<div class="plan-dd" id="pdd-'+id+'">'
+    +'<div class="pd-header">Change plan</div>'
+    +opts+'</div>';
+  // Pill renders inline; dropdown is appended to body on first open
+  return '<div class="plan-wrap" id="pwrap-'+id+'" data-uid="'+id+'" data-plan="'+p+'">'
+    +'<div class="plan-pill pp-'+p+'" id="ppl-'+id+'" onclick="openPlanDD(event,\''+id+'\')">'
+    +'<span>'+p+'</span>'
+    +'<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    +'</div>'
+    +dd+'</div>';
 }
 
 function openPlanDD(e,id){
   e.stopPropagation();
-  if(_pddOpen&&_pddOpen!==id){
-    var prev=document.getElementById('pdd-'+_pddOpen);
-    var prevPill=document.getElementById('ppl-'+_pddOpen);
-    if(prev)prev.classList.remove('vis');
-    if(prevPill)prevPill.classList.remove('open');
-  }
-  var dd=document.getElementById('pdd-'+id);
+  // Close current if different
+  if(_pddOpen&&_pddOpen!==id){ closePlanDD(); }
   var pill=document.getElementById('ppl-'+id);
-  if(!dd)return;
-  var opening=!dd.classList.contains('vis');
-  dd.classList.toggle('vis',opening);
-  if(pill)pill.classList.toggle('open',opening);
-  _pddOpen=opening?id:null;
+  var dd=document.getElementById('pdd-'+id);
+  if(!pill||!dd)return;
+  var isOpen=dd.classList.contains('vis');
+  if(isOpen){ closePlanDD(); return; }
+  // Move dropdown to body to escape table overflow
+  document.body.appendChild(dd);
+  var r=pill.getBoundingClientRect();
+  dd.style.top=(r.bottom+window.scrollY+6)+'px';
+  dd.style.left=r.left+'px';
+  // Clamp right edge to viewport
+  dd.style.display='block';
+  var ddW=dd.offsetWidth||220;
+  if(r.left+ddW>window.innerWidth-12){dd.style.left=Math.max(8,window.innerWidth-ddW-12)+'px';}
+  dd.style.display='';
+  dd.classList.add('vis');
+  pill.classList.add('open');
+  _pddOpen=id;
+}
+
+function closePlanDD(){
+  if(!_pddOpen)return;
+  var dd=document.getElementById('pdd-'+_pddOpen);
+  var pill=document.getElementById('ppl-'+_pddOpen);
+  if(dd){
+    dd.classList.remove('vis');
+    // Move back inside wrap
+    var wrap=document.getElementById('pwrap-'+_pddOpen);
+    if(wrap&&dd.parentNode===document.body)wrap.appendChild(dd);
+  }
+  if(pill)pill.classList.remove('open');
+  _pddOpen=null;
 }
 
 function selectPlan(id,plan){
+  closePlanDD();
   req('/admin/users/'+id+'/plan',{method:'PUT',body:JSON.stringify({plan:plan})})
     .then(function(){
-      var dd=document.getElementById('pdd-'+id);
-      var pill=document.getElementById('ppl-'+id);
-      if(dd)dd.classList.remove('vis');
-      if(pill)pill.classList.remove('open');
-      _pddOpen=null;
       showToast('Plan updated to '+plan,'ok');
       loadUsers();
     }).catch(function(e){showToast(e.message,'err');});
@@ -981,7 +1017,7 @@ function selectPlan(id,plan){
 
 function giveTrialPro(id){
   req('/admin/users/'+id+'/extend-trial',{method:'POST',body:JSON.stringify({days:14,plan:'pro'})})
-    .then(function(d){showToast(d.message||'Trial Pro activated for 14 days','ok');loadUsers();})
+    .then(function(d){showToast(d.message||'14-day Pro trial activated','ok');loadUsers();})
     .catch(function(e){showToast(e.message,'err');});
 }
 
@@ -1434,16 +1470,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-// Close plan dropdown on outside click
-document.addEventListener('click',function(){
-  if(_pddOpen){
-    var dd=document.getElementById('pdd-'+_pddOpen);
-    var pill=document.getElementById('ppl-'+_pddOpen);
-    if(dd)dd.classList.remove('vis');
-    if(pill)pill.classList.remove('open');
-    _pddOpen=null;
-  }
-});
+// Close plan dropdown on outside click or scroll
+document.addEventListener('click',function(){closePlanDD();});
+window.addEventListener('scroll',function(){closePlanDD();},true);
 </script>
 <div id="adminToast"></div>
 </body>

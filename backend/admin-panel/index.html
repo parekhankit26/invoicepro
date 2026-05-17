@@ -1574,7 +1574,10 @@ function savePlan(id){
     var val=parseFloat(priceInput.value);
     if(isNaN(val)||val<0){showToast('Invalid price','err');return;}
     payload.price_monthly=val;
-    payload.price_yearly=Math.round(val*12*100)/100;
+    // Only auto-set yearly if no yearly price or discount was explicitly set
+    if(!payload.price_yearly){
+      payload.price_yearly=Math.round(val*12*100)/100;
+    }
   }
   if(stripeInput){
     var sid=stripeInput.value.trim();

@@ -230,7 +230,7 @@ function UpgradeModal({ currentPlan, subInfo, onClose }: { currentPlan: string; 
                   </div>
                   {billing === 'yearly' && pYearly && (
                     <div style={{ fontSize: 11, color: '#15803d', fontWeight: 600, marginBottom: 10 }}>
-                      £{pYearly}/year · 2 months free
+                      £{pYearly}/year · save {pInfo?.yearly_saving ?? 0}%
                     </div>
                   )}
                   {billing === 'monthly' && (

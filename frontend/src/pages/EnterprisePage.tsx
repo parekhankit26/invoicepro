@@ -24,8 +24,22 @@ const planMeta: Record<string, { label: string; color: string; bg: string; borde
 
 export default function EnterprisePage() {
   const [tab, setTab] = useState('overview')
-  const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: () => api.get<any>('/auth/profile') })
+  const { data: profile, refetch: refetchProfile } = useQuery({ queryKey: ['profile'], queryFn: () => api.get<any>('/auth/profile') })
   const plan = profile?.plan || 'free'
+
+  // Show success toast when returning from Stripe Checkout
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('upgrade') === 'success') {
+      const upgradedPlan = params.get('plan') || 'new'
+      toast.success(`🎉 Welcome to ${upgradedPlan.charAt(0).toUpperCase() + upgradedPlan.slice(1)}! Your plan is now active.`)
+      refetchProfile()
+      window.history.replaceState({}, '', '/enterprise')
+    } else if (params.get('upgrade') === 'cancelled') {
+      toast('Upgrade cancelled — you can try again anytime', { icon: 'ℹ️' })
+      window.history.replaceState({}, '', '/enterprise')
+    }
+  }, [])
   const pm = planMeta[plan] || planMeta.free
   const isEnterprise = plan === 'enterprise'
   const isPro = plan === 'pro' || isEnterprise
@@ -97,16 +111,30 @@ const PLANS = [
   },
 ]
 
-function UpgradeModal({ currentPlan, onClose }: { currentPlan: string; onClose: () => void }) {
-  const [selected, setSelected] = useState('pro')
-  const [sent, setSent] = useState(false)
+function UpgradeModal({ currentPlan, subInfo, onClose }: { currentPlan: string; subInfo: any; onClose: () => void }) {
+  const [selected, setSelected] = useState(currentPlan === 'free' ? 'pro' : currentPlan === 'starter' ? 'pro' : 'enterprise')
+  const [loading, setLoading] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
 
-  const handleRequest = () => {
+  const stripeConfigured = subInfo?.available_plans?.[selected]?.configured
+
+  const handleStripeCheckout = async () => {
+    setLoading(true)
+    try {
+      const data = await api.post<any>('/billing/subscribe', { plan: selected })
+      window.location.href = data.url
+    } catch (e: any) {
+      toast.error(e.message)
+      setLoading(false)
+    }
+  }
+
+  const handleEmailRequest = () => {
     const plan = PLANS.find(p => p.id === selected)
     const subject = encodeURIComponent(`Upgrade request — ${plan?.label} plan`)
     const body = encodeURIComponent(`Hi,\n\nI'd like to upgrade my InvoicePro account to the ${plan?.label} plan (£${plan?.price}/month).\n\nPlease let me know how to proceed.\n\nThank you!`)
     window.open(`mailto:support@invoicepro.com?subject=${subject}&body=${body}`, '_blank')
-    setSent(true)
+    setEmailSent(true)
   }
 
   return (
@@ -115,33 +143,38 @@ function UpgradeModal({ currentPlan, onClose }: { currentPlan: string; onClose: 
         <div className="modal-header">
           <div>
             <h2 style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.02em' }}>Upgrade your plan</h2>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Choose a plan and we'll get you set up</p>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
+              {stripeConfigured ? 'Instant activation — pay securely with Stripe' : 'Choose a plan and we\'ll get you set up'}
+            </p>
           </div>
           <button className="btn btn-ghost btn-icon" onClick={onClose}><X size={18}/></button>
         </div>
 
         <div className="modal-body">
+          {/* Plan cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
             {PLANS.map(plan => {
               const isSelected = selected === plan.id
               const isCurrent = currentPlan === plan.id
+              const isDowngrade = ['free','starter','pro','enterprise'].indexOf(plan.id) < ['free','starter','pro','enterprise'].indexOf(currentPlan)
               return (
                 <div key={plan.id}
-                  onClick={() => !isCurrent && setSelected(plan.id)}
+                  onClick={() => !isCurrent && !isDowngrade && setSelected(plan.id)}
                   style={{
                     border: `2px solid ${isSelected ? plan.color : 'var(--border)'}`,
-                    borderRadius: 12, padding: '16px 14px', cursor: isCurrent ? 'default' : 'pointer',
+                    borderRadius: 12, padding: '16px 14px',
+                    cursor: isCurrent || isDowngrade ? 'default' : 'pointer',
                     background: isSelected ? plan.bg : 'var(--surface)',
                     transition: 'all .15s', position: 'relative',
-                    opacity: isCurrent ? 0.5 : 1,
+                    opacity: isCurrent || isDowngrade ? 0.45 : 1,
                   }}>
-                  {plan.popular && !isCurrent && (
+                  {plan.popular && !isCurrent && !isDowngrade && (
                     <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', background: plan.color, color: 'white', fontSize: 10, fontWeight: 700, padding: '2px 10px', borderRadius: 20, whiteSpace: 'nowrap', letterSpacing: '0.04em' }}>
                       MOST POPULAR
                     </div>
                   )}
                   {isCurrent && (
-                    <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', background: 'var(--text-subtle)', color: 'white', fontSize: 10, fontWeight: 700, padding: '2px 10px', borderRadius: 20, whiteSpace: 'nowrap' }}>
+                    <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', background: '#6b7280', color: 'white', fontSize: 10, fontWeight: 700, padding: '2px 10px', borderRadius: 20, whiteSpace: 'nowrap' }}>
                       CURRENT
                     </div>
                   )}
@@ -158,10 +191,8 @@ function UpgradeModal({ currentPlan, onClose }: { currentPlan: string; onClose: 
                     ))}
                   </div>
                   {isSelected && !isCurrent && (
-                    <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${plan.border}` }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: plan.color, fontWeight: 600 }}>
-                        <CheckCircle size={12}/> Selected
-                      </div>
+                    <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${plan.border}`, display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: plan.color, fontWeight: 600 }}>
+                      <CheckCircle size={12}/> Selected
                     </div>
                   )}
                 </div>
@@ -169,27 +200,39 @@ function UpgradeModal({ currentPlan, onClose }: { currentPlan: string; onClose: 
             })}
           </div>
 
-          {sent ? (
+          {/* Status / info bar */}
+          {emailSent ? (
             <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
               <CheckCircle size={18} color="#16a34a"/>
               <div>
                 <div style={{ fontWeight: 600, fontSize: 13, color: '#15803d' }}>Upgrade request sent!</div>
-                <div style={{ fontSize: 12, color: '#166534', marginTop: 2 }}>We'll confirm your upgrade and activate it within 24 hours.</div>
+                <div style={{ fontSize: 12, color: '#166534', marginTop: 2 }}>We'll confirm and activate your plan within 24 hours.</div>
               </div>
+            </div>
+          ) : stripeConfigured ? (
+            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '12px 14px', fontSize: 13, color: '#166534', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <CheckCircle size={14} color="#16a34a"/>
+              Secure payment via Stripe — your plan activates instantly after payment
             </div>
           ) : (
             <div style={{ background: 'var(--bg)', borderRadius: 10, padding: '12px 14px', fontSize: 13, color: 'var(--text-muted)' }}>
               <Zap size={13} style={{ marginRight: 6, verticalAlign: 'middle', color: '#b45309' }}/>
-              Clicking below will open your email app with a pre-filled upgrade request. We activate your plan manually within 24 hours.
+              Stripe not yet configured — clicking below sends an email upgrade request instead
             </div>
           )}
         </div>
 
         <div className="modal-footer">
           <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
-          <button className="btn btn-primary" onClick={handleRequest} disabled={sent || currentPlan === selected}>
-            {sent ? 'Request sent ✓' : `Request ${PLANS.find(p => p.id === selected)?.label} plan`}
-          </button>
+          {stripeConfigured ? (
+            <button className="btn btn-primary" onClick={handleStripeCheckout} disabled={loading || currentPlan === selected}>
+              {loading ? 'Redirecting to Stripe...' : `Subscribe to ${PLANS.find(p => p.id === selected)?.label} — £${PLANS.find(p => p.id === selected)?.price}/mo`}
+            </button>
+          ) : (
+            <button className="btn btn-primary" onClick={handleEmailRequest} disabled={emailSent || currentPlan === selected}>
+              {emailSent ? 'Request sent ✓' : `Request ${PLANS.find(p => p.id === selected)?.label} plan`}
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -199,8 +242,27 @@ function UpgradeModal({ currentPlan, onClose }: { currentPlan: string; onClose: 
 // ── OVERVIEW TAB ─────────────────────────────────────────
 function OverviewTab({ plan, profile, onGoTab }: { plan: string; profile: any; onGoTab: (t: string) => void }) {
   const [showUpgrade, setShowUpgrade] = useState(false)
+  const [portalLoading, setPortalLoading] = useState(false)
   const isEnterprise = plan === 'enterprise'
   const isPro = plan === 'pro' || isEnterprise
+
+  const { data: subInfo } = useQuery({
+    queryKey: ['subscription'],
+    queryFn: () => api.get<any>('/billing/subscription'),
+  })
+
+  const hasActiveSubscription = subInfo?.stripe_subscription_id && subInfo?.subscription_status === 'active'
+
+  const handleBillingPortal = async () => {
+    setPortalLoading(true)
+    try {
+      const data = await api.post<any>('/billing/portal', {})
+      window.location.href = data.url
+    } catch (e: any) {
+      toast.error(e.message)
+      setPortalLoading(false)
+    }
+  }
 
   const { data: members = [] } = useQuery({
     queryKey: ['team'],
@@ -255,11 +317,21 @@ function OverviewTab({ plan, profile, onGoTab }: { plan: string; profile: any; o
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {isPro && (
             <button className="btn btn-sm" onClick={() => onGoTab('team')}
               style={{ background: isEnterprise ? 'rgba(255,255,255,0.12)' : 'var(--bg)', color: isEnterprise ? 'white' : 'var(--text)', border: isEnterprise ? '1px solid rgba(255,255,255,0.2)' : '1px solid var(--border)' }}>
               <Users size={13} /> Manage team
+            </button>
+          )}
+          {hasActiveSubscription ? (
+            <button className="btn btn-sm" onClick={handleBillingPortal} disabled={portalLoading}
+              style={{ background: isEnterprise ? 'rgba(255,255,255,0.12)' : 'var(--bg)', color: isEnterprise ? 'white' : 'var(--text)', border: isEnterprise ? '1px solid rgba(255,255,255,0.2)' : '1px solid var(--border)' }}>
+              <Key size={13} /> {portalLoading ? 'Opening...' : 'Manage billing'}
+            </button>
+          ) : plan !== 'free' ? null : (
+            <button className="btn btn-sm btn-primary" onClick={() => { setShowUpgrade(true); modalState.open() }}>
+              <Zap size={13} /> Upgrade
             </button>
           )}
           {isEnterprise && (
@@ -397,7 +469,7 @@ function OverviewTab({ plan, profile, onGoTab }: { plan: string; profile: any; o
         )}
       </div>
 
-      {showUpgrade && <UpgradeModal currentPlan={plan} onClose={() => { setShowUpgrade(false); modalState.close() }} />}
+      {showUpgrade && <UpgradeModal currentPlan={plan} subInfo={subInfo} onClose={() => { setShowUpgrade(false); modalState.close() }} />}
     </div>
   )
 }

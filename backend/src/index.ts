@@ -21,6 +21,7 @@ import aiAssistantRoutes from './routes/aiAssistant'
 import notificationsRoutes from './routes/notifications'
 import featuresRoutes from './routes/features'
 import adminRoutes from './routes/admin'
+import billingRoutes from './routes/billing'
 import { reminderService } from './services/reminderService'
 import { recurringService } from './services/recurringService'
 
@@ -62,6 +63,7 @@ app.use('/api/ai', aiAssistantRoutes)
 app.use('/api/notify', notificationsRoutes)
 app.use('/api/features', featuresRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/billing', billingRoutes)
 
 // Serve admin panel HTML at /admin
 const adminPanelPath = path.join(__dirname, 'admin-panel')

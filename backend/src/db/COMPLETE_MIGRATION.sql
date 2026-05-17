@@ -543,3 +543,12 @@ INSERT INTO app_settings (key, value, label, category) VALUES
 ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 
 SELECT 'Hostinger email pre-configured ✅' as status;
+
+-- ── STRIPE SUBSCRIPTION COLUMNS ──────────────────────────────
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS subscription_status TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS subscription_period_end TIMESTAMPTZ;
+CREATE INDEX IF NOT EXISTS idx_profiles_stripe_customer ON profiles(stripe_customer_id);
+CREATE INDEX IF NOT EXISTS idx_profiles_stripe_sub ON profiles(stripe_subscription_id);
+
+SELECT 'Stripe subscription columns added ✅' as status;

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { Key, Users, Globe, FileText, Download, Plus, Trash2, Copy, X, Shield, CheckCircle, Clock, ArrowRight, Sparkles, Zap } from 'lucide-react'
-import { api } from '../lib/api'
+import { api, API_BASE } from '../lib/api'
+import { supabase } from '../lib/supabase'
 import { formatCurrency, formatDate } from '../lib/utils'
 import toast from 'react-hot-toast'
 import { modalState } from '../lib/modalState'
@@ -111,17 +112,49 @@ const PLANS = [
   },
 ]
 
-function UpgradeModal({ currentPlan, subInfo, onClose }: { currentPlan: string; subInfo: any; onClose: () => void }) {
+const COUNTRY_CURRENCY: Record<string, string> = {
+  IN:'INR',PK:'INR',BD:'INR',LK:'INR',NP:'INR',
+  US:'USD',CA:'USD',MX:'USD',AU:'USD',NZ:'USD',SG:'USD',HK:'USD',
+  AE:'USD',SA:'USD',QA:'USD',KW:'USD',BH:'USD',OM:'USD',
+  GB:'GBP',IE:'GBP',
+  DE:'EUR',FR:'EUR',IT:'EUR',ES:'EUR',NL:'EUR',BE:'EUR',
+  PT:'EUR',AT:'EUR',FI:'EUR',GR:'EUR',SE:'EUR',NO:'EUR',
+  DK:'EUR',PL:'EUR',CZ:'EUR',RO:'EUR',HU:'EUR',CH:'EUR',
+}
+
+async function detectCurrency(): Promise<string> {
+  try {
+    const res = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(3000) })
+    const data = await res.json()
+    return COUNTRY_CURRENCY[data.country_code] || 'GBP'
+  } catch {
+    return 'GBP'
+  }
+}
+
+function UpgradeModal({ currentPlan, subInfo: defaultSubInfo, onClose }: { currentPlan: string; subInfo: any; onClose: () => void }) {
   const [selected, setSelected] = useState(currentPlan === 'free' ? 'pro' : currentPlan === 'starter' ? 'pro' : 'enterprise')
   const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly')
   const [loading, setLoading] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
+  const [currency, setCurrency] = useState('GBP')
+  const [subInfo, setSubInfo] = useState(defaultSubInfo)
+
+  useEffect(() => {
+    detectCurrency().then(cur => {
+      if (cur === 'GBP') return // GBP is already loaded
+      setCurrency(cur)
+      api.get<any>(`/billing/subscription?currency=${cur}`)
+        .then(data => setSubInfo(data))
+        .catch(() => {}) // fall back to default subInfo
+    })
+  }, [])
 
   const planInfo = subInfo?.available_plans?.[selected]
+  const currencySymbol = subInfo?.currency_symbol || planInfo?.currency_symbol || '£'
   const stripeConfigured = billing === 'yearly'
     ? planInfo?.yearly_configured
     : planInfo?.monthly_configured
-  // fall back to old 'configured' field for backwards compat
   const stripeReady = stripeConfigured ?? planInfo?.configured
 
   const selectedPlan = PLANS.find(p => p.id === selected)
@@ -135,7 +168,7 @@ function UpgradeModal({ currentPlan, subInfo, onClose }: { currentPlan: string; 
   const handleStripeCheckout = async () => {
     setLoading(true)
     try {
-      const data = await api.post<any>('/billing/subscribe', { plan: selected, billing_period: billing })
+      const data = await api.post<any>('/billing/subscribe', { plan: selected, billing_period: billing, currency })
       window.location.href = data.url
     } catch (e: any) {
       toast.error(e.message)
@@ -203,6 +236,7 @@ function UpgradeModal({ currentPlan, subInfo, onClose }: { currentPlan: string; 
               const pYearly = pInfo?.price_yearly
               const pYearlyPerMonth = pYearly ? Math.round((pYearly / 12) * 100) / 100 : null
               const showPrice = billing === 'yearly' && pYearlyPerMonth ? pYearlyPerMonth : pMonthly
+              const sym = pInfo?.currency_symbol || currencySymbol
               return (
                 <div key={plan.id}
                   onClick={() => !isCurrent && !isDowngrade && setSelected(plan.id)}
@@ -226,11 +260,11 @@ function UpgradeModal({ currentPlan, subInfo, onClose }: { currentPlan: string; 
                   )}
                   <div style={{ fontWeight: 700, fontSize: 15, color: plan.color, marginBottom: 4 }}>{plan.label}</div>
                   <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 2 }}>
-                    £{showPrice}<span style={{ fontSize: 13, fontWeight: 400, color: 'var(--text-muted)' }}>/mo</span>
+                    {sym}{showPrice}<span style={{ fontSize: 13, fontWeight: 400, color: 'var(--text-muted)' }}>/mo</span>
                   </div>
                   {billing === 'yearly' && pYearly && (
                     <div style={{ fontSize: 11, color: '#15803d', fontWeight: 600, marginBottom: 10 }}>
-                      £{pYearly}/year · save {pInfo?.yearly_saving ?? 0}%
+                      {sym}{pYearly}/year · save {pInfo?.yearly_saving ?? 0}%
                     </div>
                   )}
                   {billing === 'monthly' && (
@@ -280,7 +314,7 @@ function UpgradeModal({ currentPlan, subInfo, onClose }: { currentPlan: string; 
           <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
           {stripeReady ? (
             <button className="btn btn-primary" onClick={handleStripeCheckout} disabled={loading || currentPlan === selected}>
-              {loading ? 'Redirecting to Stripe...' : `Subscribe — £${billing === 'yearly' && yearlyPrice ? yearlyPrice + '/yr' : displayPrice + '/mo'}`}
+              {loading ? 'Redirecting to Stripe...' : `Subscribe — ${currencySymbol}${billing === 'yearly' && yearlyPrice ? yearlyPrice + '/yr' : displayPrice + '/mo'}`}
             </button>
           ) : (
             <button className="btn btn-primary" onClick={handleEmailRequest} disabled={emailSent || currentPlan === selected}>
@@ -805,8 +839,11 @@ function TaxReportTab() {
   }
 
   const exportCSV = async (format: string) => {
-    const headers = await (api as any).getHeaders?.() || {}
-    const res = await fetch(`${(import.meta as any).env.VITE_API_URL || '/api'}/enterprise/export/${format}?from=${from}&to=${to}`, { headers })
+    const { data: sessionData } = await supabase.auth.getSession()
+    const token = sessionData?.session?.access_token || localStorage.getItem('team_token')
+    const res = await fetch(`${API_BASE}/enterprise/export/${format}?from=${from}&to=${to}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
     const blob = await res.blob()
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a'); a.href = url; a.download = `export-${format}-${from}.${format === 'csv' || format === 'xero' ? 'csv' : 'json'}`; a.click()

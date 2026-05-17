@@ -722,6 +722,55 @@ router.put('/plans/:id', adminAuth, async (req: any, res: Response) => {
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
 
+// ── REGIONAL PRICING ──────────────────────────────────────
+router.get('/regional-pricing/:planId', adminAuth, async (req: any, res: Response) => {
+  try {
+    const { data, error } = await supabase
+      .from('plan_regional_pricing')
+      .select('*')
+      .eq('plan_id', req.params.planId)
+      .order('currency_code')
+    if (error) return res.status(400).json({ error: error.message })
+    return res.json(data || [])
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+router.put('/regional-pricing/:planId', adminAuth, async (req: any, res: Response) => {
+  try {
+    const entries: Array<{
+      currency_code: string
+      price_monthly?: number
+      price_yearly?: number
+      stripe_price_id?: string
+      stripe_price_id_yearly?: string
+      country_codes?: string[]
+      is_active?: boolean
+    }> = req.body
+    if (!Array.isArray(entries)) return res.status(400).json({ error: 'Body must be an array of pricing entries' })
+
+    const results = []
+    for (const entry of entries) {
+      const { data, error } = await supabase
+        .from('plan_regional_pricing')
+        .upsert({
+          plan_id: req.params.planId,
+          currency_code: entry.currency_code,
+          price_monthly: entry.price_monthly ?? null,
+          price_yearly: entry.price_yearly ?? null,
+          stripe_price_id: entry.stripe_price_id || null,
+          stripe_price_id_yearly: entry.stripe_price_id_yearly || null,
+          country_codes: entry.country_codes || [],
+          is_active: entry.is_active !== false,
+        }, { onConflict: 'plan_id,currency_code' })
+        .select().single()
+      if (error) return res.status(400).json({ error: error.message })
+      results.push(data)
+    }
+    await log(req.admin.id, 'regional_pricing_updated', 'plan', req.params.planId, { currencies: entries.map(e => e.currency_code) })
+    return res.json(results)
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
 // ── APP SETTINGS ──────────────────────────────────────────
 router.get('/settings', adminAuth, async (_req: any, res: Response) => {
   try {

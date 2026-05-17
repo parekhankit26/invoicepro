@@ -558,3 +558,25 @@ CREATE INDEX IF NOT EXISTS idx_profiles_stripe_customer ON profiles(stripe_custo
 CREATE INDEX IF NOT EXISTS idx_profiles_stripe_sub ON profiles(stripe_subscription_id);
 
 SELECT 'Stripe subscription columns added ✅' as status;
+
+-- ── REGIONAL PRICING ──────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS plan_regional_pricing (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  plan_id UUID REFERENCES plans(id) ON DELETE CASCADE NOT NULL,
+  currency_code TEXT NOT NULL CHECK (currency_code IN ('GBP','USD','EUR','INR')),
+  price_monthly DECIMAL(10,2),
+  price_yearly DECIMAL(10,2),
+  stripe_price_id TEXT,
+  stripe_price_id_yearly TEXT,
+  country_codes TEXT[] DEFAULT '{}',
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(plan_id, currency_code)
+);
+
+CREATE INDEX IF NOT EXISTS idx_regional_plan_id ON plan_regional_pricing(plan_id);
+CREATE INDEX IF NOT EXISTS idx_regional_currency ON plan_regional_pricing(currency_code);
+
+ALTER TABLE plan_regional_pricing ENABLE ROW LEVEL SECURITY;
+
+SELECT 'Regional pricing table created ✅' as status;

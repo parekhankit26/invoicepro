@@ -164,6 +164,8 @@ tr:hover td{background:#fafaf8}
 .ab-s{background:var(--gbg)!important;color:var(--green)!important;border-color:#bbf7d0!important}
 .ab-d{background:var(--rbg)!important;color:var(--red)!important;border-color:#fecaca!important}
 .ab-sm{padding:5px 10px!important;font-size:12px!important}
+.rtab{padding:7px 14px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:500;color:var(--ink2);font-family:inherit;transition:all .12s;margin-bottom:-1px}
+.rtab.on{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
 
 /* FORM */
 .fi{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}
@@ -510,6 +512,34 @@ tr:hover td{background:#fafaf8}
             <li>Paste it into the field above and click Save</li>
           </ol>
           <div class="al al-ok" style="margin-top:10px">✅ Once saved, users can self-subscribe instantly via Stripe Checkout — no manual intervention needed.</div>
+        </div>
+      </div>
+
+      <!-- REGIONAL PRICING MODAL -->
+      <div id="regionalModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center;padding:20px">
+        <div style="background:var(--white);border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 0">
+            <div>
+              <div style="font-size:16px;font-weight:700" id="regionalModalTitle">🌍 Regional Pricing</div>
+              <div style="font-size:12px;color:var(--ink2);margin-top:2px">Set specific prices per currency — users see their local price automatically</div>
+            </div>
+            <button onclick="closeRegional()" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--ink2);padding:4px">×</button>
+          </div>
+          <!-- Currency tabs -->
+          <div style="display:flex;gap:4px;padding:16px 24px 0;border-bottom:1px solid var(--border)">
+            <button class="rtab on" onclick="switchRTab(this,'USD')" data-cur="USD">🇺🇸 USD</button>
+            <button class="rtab" onclick="switchRTab(this,'EUR')" data-cur="EUR">🇪🇺 EUR</button>
+            <button class="rtab" onclick="switchRTab(this,'INR')" data-cur="INR">🇮🇳 INR</button>
+            <button class="rtab" onclick="switchRTab(this,'GBP')" data-cur="GBP">🇬🇧 GBP</button>
+          </div>
+          <!-- Tab content -->
+          <div id="regionalTabContent" style="padding:20px 24px">
+            <div class="al al-info">Loading...</div>
+          </div>
+          <div style="padding:0 24px 20px">
+            <div id="regionalFb" style="min-height:16px;font-size:12px;margin-bottom:8px"></div>
+            <button onclick="saveRegionalCurrency()" style="width:100%;padding:12px;background:var(--ink);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit" id="regionalSaveBtn">💾 Save this currency</button>
+          </div>
         </div>
       </div>
 
@@ -1512,9 +1542,10 @@ function loadPlans(){
           +'<div style="font-size:11px;color:var(--ink3)">Create two separate prices in Stripe Dashboard (one monthly, one yearly recurring)</div>'
           +'</div>'
         )
-        // Save button
+        // Save button + regional pricing
         +(isFree?'<div class="al al-info" style="font-size:12px">Free plan — no payment required, no Stripe ID needed.</div>':
-          '<button class="ab ab-p" id="pSaveBtn_'+p.id+'" style="width:100%;justify-content:center" onclick="savePlan(\''+p.id+'\')">💾 Save changes</button>'
+          '<button class="ab ab-p" id="pSaveBtn_'+p.id+'" style="width:100%;justify-content:center;margin-bottom:8px" onclick="savePlan(\''+p.id+'\')">💾 Save changes</button>'
+          +'<button class="ab" style="width:100%;justify-content:center;font-size:12px" onclick="openRegional(\''+p.id+'\',\''+p.slug+'\',\''+p.name+'\')">🌍 Regional pricing (USD / EUR / INR)</button>'
         )
         +'</div>';
     }).join('');
@@ -1610,6 +1641,102 @@ function togglePlan(id){
   req('/admin/plans/'+id,{method:'PUT',body:JSON.stringify({is_active:cb.checked})})
     .then(function(){showToast(cb.checked?'Plan activated':'Plan deactivated','ok');})
     .catch(function(e){cb.checked=!cb.checked;showToast(e.message,'err');});
+}
+
+// ── REGIONAL PRICING ──────────────────────────────────────
+var _regionalPlanId='';
+var _regionalCurrency='USD';
+var _regionalData={};
+var _currencySymbols={GBP:'£',USD:'$',EUR:'€',INR:'₹'};
+var _currencyCountries={USD:'US, CA, AU, SG, AE, SA…',EUR:'DE, FR, IT, ES, NL…',INR:'IN, PK, BD, LK…',GBP:'GB, IE'};
+
+function openRegional(planId,slug,name){
+  _regionalPlanId=planId;
+  _regionalData={};
+  q('regionalModalTitle').textContent='🌍 Regional Pricing — '+name;
+  q('regionalModal').style.display='flex';
+  q('regionalFb').textContent='';
+  // Load existing data
+  req('/admin/regional-pricing/'+planId).then(function(rows){
+    rows.forEach(function(r){ _regionalData[r.currency_code]=r; });
+    switchRTab(document.querySelector('.rtab.on')||document.querySelector('.rtab'),'USD');
+  }).catch(function(e){ showToast(e.message,'err'); });
+}
+
+function closeRegional(){
+  q('regionalModal').style.display='none';
+}
+
+function switchRTab(el,currency){
+  document.querySelectorAll('.rtab').forEach(function(t){t.classList.remove('on');});
+  el.classList.add('on');
+  _regionalCurrency=currency||el.dataset.cur;
+  renderRegionalTab(_regionalCurrency);
+}
+
+function renderRegionalTab(cur){
+  var d=_regionalData[cur]||{};
+  var sym=_currencySymbols[cur]||cur;
+  var countries=_currencyCountries[cur]||'';
+  var isGBP=cur==='GBP';
+  q('regionalTabContent').innerHTML=
+    '<div style="font-size:11px;color:var(--ink2);margin-bottom:14px;background:var(--bg);border-radius:8px;padding:10px 12px">'
+    +(isGBP?'GBP is the <strong>default currency</strong> from the Plans section above. Set regional prices here only if you want Indian, US, or EU users to see different prices.'
+      :'Countries: <strong>'+countries+'</strong> — users from these regions will see '+sym+' prices.')
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">'
+    +'<div><label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);display:block;margin-bottom:4px">Monthly price ('+sym+')</label>'
+    +'<input class="fi" id="rMonthly" type="number" step="0.01" min="0" placeholder="e.g. '+(cur==='INR'?'799':cur==='USD'?'12':'11')+'" value="'+(d.price_monthly||'')+'" oninput="calcRYearly()" /></div>'
+    +'<div><label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);display:block;margin-bottom:4px">Yearly total ('+sym+')</label>'
+    +'<input class="fi" id="rYearly" type="number" step="0.01" min="0" placeholder="auto" value="'+(d.price_yearly||'')+'" style="background:var(--bg)" /></div>'
+    +'</div>'
+    +'<div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:12px">'
+    +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);margin-bottom:8px">Stripe price IDs ('+cur+')</div>'
+    +'<label style="font-size:11px;color:var(--ink2);display:block;margin-bottom:3px">Monthly price ID</label>'
+    +'<input class="fi" id="rStripeM" value="'+(d.stripe_price_id||'')+'" placeholder="price_..." style="font-family:monospace;font-size:12px;margin-bottom:8px"/>'
+    +'<label style="font-size:11px;color:var(--ink2);display:block;margin-bottom:3px">Yearly price ID</label>'
+    +'<input class="fi" id="rStripeY" value="'+(d.stripe_price_id_yearly||'')+'" placeholder="price_..." style="font-family:monospace;font-size:12px;margin-bottom:4px"/>'
+    +'<div style="font-size:11px;color:var(--ink3);margin-top:6px">⚠️ Create these prices in Stripe Dashboard in <strong>'+cur+'</strong> currency — Stripe requires separate price objects per currency.</div>'
+    +'</div>';
+}
+
+function calcRYearly(){
+  var m=parseFloat(q('rMonthly')&&q('rMonthly').value||0);
+  if(!m||isNaN(m))return;
+  var y=Math.round(m*12*0.85*100)/100; // default 15% discount suggestion
+  if(!(q('rYearly').value)) q('rYearly').value=y;
+}
+
+function saveRegionalCurrency(){
+  var cur=_regionalCurrency;
+  var monthly=q('rMonthly')&&q('rMonthly').value.trim();
+  var yearly=q('rYearly')&&q('rYearly').value.trim();
+  var stripeM=q('rStripeM')&&q('rStripeM').value.trim();
+  var stripeY=q('rStripeY')&&q('rStripeY').value.trim();
+  if(stripeM&&!stripeM.startsWith('price_')){showToast('Monthly price ID must start with price_','err');return;}
+  if(stripeY&&!stripeY.startsWith('price_')){showToast('Yearly price ID must start with price_','err');return;}
+  var payload=[{
+    currency_code:cur,
+    price_monthly:monthly?parseFloat(monthly):null,
+    price_yearly:yearly?parseFloat(yearly):null,
+    stripe_price_id:stripeM||null,
+    stripe_price_id_yearly:stripeY||null,
+    country_codes:[],
+    is_active:true
+  }];
+  var btn=q('regionalSaveBtn');
+  btn.disabled=true;btn.textContent='Saving...';
+  q('regionalFb').textContent='';
+  req('/admin/regional-pricing/'+_regionalPlanId,{method:'PUT',body:JSON.stringify(payload)})
+    .then(function(rows){
+      rows.forEach(function(r){_regionalData[r.currency_code]=r;});
+      btn.disabled=false;btn.textContent='✅ Saved!';
+      setTimeout(function(){btn.textContent='💾 Save this currency';},2500);
+      q('regionalFb').innerHTML='<span style="color:var(--green)">✅ '+cur+' pricing saved successfully</span>';
+    }).catch(function(e){
+      btn.disabled=false;btn.textContent='💾 Save this currency';
+      showToast(e.message,'err');
+    });
 }
 
 // ANNOUNCEMENT

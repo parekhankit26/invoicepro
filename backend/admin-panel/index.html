@@ -787,6 +787,15 @@ tr:hover td{background:#fafaf8}
           </div>
         </div>
         <div class="bc">
+          <div style="font-weight:600;font-size:13px;margin-bottom:12px">🧪 Test WhatsApp — send yourself a sample message</div>
+          <div style="font-size:13px;color:var(--ink2);margin-bottom:12px">Enter your own mobile number. WhatsApp will open with a sample invoice message pre-filled — tap Send to deliver it to yourself.</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input class="fi" id="waTestPhone" placeholder="+44 7700 900000 or +1 415 555 0100" style="flex:1;margin-bottom:0"/>
+            <button class="ab ab-p" id="btnTestWa" style="white-space:nowrap">💬 Open WhatsApp test</button>
+          </div>
+          <div id="waTestRes" style="margin-top:10px"></div>
+        </div>
+        <div class="bc">
           <div style="font-weight:600;font-size:13px;margin-bottom:8px">🔮 Future upgrade — WhatsApp Business API</div>
           <div style="font-size:13px;color:var(--ink2);line-height:1.7">
             When you're ready for <strong>fully automated</strong> WhatsApp (sends without the user clicking), you can upgrade to the WhatsApp Cloud API (Meta).
@@ -825,6 +834,15 @@ tr:hover td{background:#fafaf8}
             <div><strong>TWILIO_SMS_FROM</strong>=+14155550100</div>
           </div>
           <div class="al al-info" style="margin-top:12px">Once set, SMS will automatically activate — no code changes needed. The backend routes are already live at <code>/notify/sms/:invoiceId</code></div>
+        </div>
+        <div class="bc">
+          <div style="font-weight:600;font-size:13px;margin-bottom:12px">🧪 Test SMS — send yourself a real text message</div>
+          <div style="font-size:13px;color:var(--ink2);margin-bottom:12px">Requires Twilio env vars to be set on Railway. Enter your mobile number to receive a live test SMS.</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input class="fi" id="smsTestPhone" placeholder="+44 7700 900000 or +1 415 555 0100" style="flex:1;margin-bottom:0"/>
+            <button class="ab ab-p" id="btnTestSms" style="white-space:nowrap">📱 Send test SMS</button>
+          </div>
+          <div id="smsTestRes" style="margin-top:10px"></div>
         </div>
         <div class="bc">
           <div style="font-weight:600;font-size:13px;margin-bottom:8px">📋 What SMS sends</div>
@@ -1582,6 +1600,28 @@ function doSaveEmailSettings() {
 }
 
 
+// WHATSAPP TEST — generates a wa.me link with a sample invoice message
+function doTestWa(){
+  var phone=(q('waTestPhone').value||'').trim();
+  if(!phone){errMsg('waTestRes','Enter a phone number first');return;}
+  var clean=phone.replace(/[^\d]/g,'');
+  if(clean.length<7){errMsg('waTestRes','Enter a full international number e.g. +44 7700 900000');return;}
+  var msg='Hi there,\n\nThis is a test message from InvoicePro!\n\nInvoice INV-TEST for £100.00 from Your Company is due on 31 May 2025.\n\nPay securely online:\nhttps://invoicepro-ten.vercel.app\n\nThank you!';
+  var url='https://wa.me/'+clean+'?text='+encodeURIComponent(msg);
+  window.open(url,'_blank');
+  q('waTestRes').innerHTML='<div class="al al-ok">✅ WhatsApp opened with test message — tap Send on your phone to deliver it to yourself.</div>';
+}
+
+// SMS TEST — fires a real Twilio SMS (requires env vars on Railway)
+function doTestSms(){
+  var phone=(q('smsTestPhone').value||'').trim();
+  if(!phone){errMsg('smsTestRes','Enter a phone number first');return;}
+  q('smsTestRes').innerHTML='<div class="al al-info">⏳ Sending test SMS...</div>';
+  req('/admin/test-sms',{method:'POST',body:JSON.stringify({to:phone})})
+    .then(function(d){q('smsTestRes').innerHTML='<div class="al al-ok">'+d.message+'</div>';})
+    .catch(function(e){q('smsTestRes').innerHTML='<div class="al al-err">❌ '+e.message+'</div>';});
+}
+
 // ── WIRE ALL EVENTS ───────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
   function on(id, event, fn) { var e=q(id); if(e) e.addEventListener(event, fn); }
@@ -1664,6 +1704,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // Resend form
   on('btnSaveResend','click',doSaveResend);
   on('btnTestResend','click',doTestResend);
+
+  // ── WHATSAPP TEST ─────────────────────────────────────────
+  on('btnTestWa','click',doTestWa);
+
+  // ── SMS TEST ──────────────────────────────────────────────
+  on('btnTestSms','click',doTestSms);
 
   // ── MODALS: CLOSE ON BACKGROUND / ESCAPE ─────────────────
   document.querySelectorAll('.mo-bg').forEach(function(bg){

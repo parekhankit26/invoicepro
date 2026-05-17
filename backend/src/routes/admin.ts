@@ -859,6 +859,43 @@ router.post('/test-email', adminAuth, async (req: any, res: Response) => {
   }
 })
 
+// ── TEST SMS (Twilio) ─────────────────────────────────────
+router.post('/test-sms', adminAuth, async (req: any, res: Response) => {
+  try {
+    const { to } = (req as any).body
+    if (!to) return res.status(400).json({ error: 'Enter a phone number (e.g. +44 7700 900000)' })
+
+    const accountSid = process.env.TWILIO_ACCOUNT_SID
+    const authToken = process.env.TWILIO_AUTH_TOKEN
+    const from = process.env.TWILIO_SMS_FROM
+
+    if (!accountSid || !authToken || !from) {
+      return res.status(400).json({
+        error: 'Twilio not configured. Add TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN and TWILIO_SMS_FROM to your Railway environment variables.'
+      })
+    }
+
+    const phone = to.replace(/[^\d+]/g, '')
+    const body = `InvoicePro test SMS — SMS is working correctly! Sent at ${new Date().toLocaleTimeString('en-GB')}`
+
+    const result = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${Buffer.from(`${accountSid}:${authToken}`).toString('base64')}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({ From: from, To: phone, Body: body })
+    })
+    const data = await result.json() as any
+    if (!result.ok) return res.status(400).json({ error: `Twilio error: ${data.message || 'Unknown error'}` })
+
+    await log(req.admin.id, 'test_sms_sent', 'system', 'sms', { to: phone })
+    return res.json({ message: `✅ Test SMS sent to ${phone}! Check your phone.` })
+  } catch(e: any) {
+    return res.status(500).json({ error: e.message })
+  }
+})
+
 router.post('/email-settings', adminAuth, async (req: any, res: Response) => {
   try {
     const { smtp_host, smtp_port, smtp_user, smtp_pass, smtp_from, smtp_secure } = (req as any).body

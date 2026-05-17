@@ -91,10 +91,12 @@ router.post('/whatsapp/:invoiceId', async (req: AuthRequest, res: Response) => {
 
     const wa_url = waLink(invoice.clients.phone, message)
 
-    await supabase.from('reminder_logs').insert({
-      invoice_id: invoice.id, type: 'whatsapp',
-      email_to: invoice.clients.phone, success: true
-    }).catch(() => {})
+    try {
+      await supabase.from('reminder_logs').insert({
+        invoice_id: invoice.id, type: 'whatsapp',
+        email_to: invoice.clients.phone, success: true
+      })
+    } catch (_) {}
 
     return res.json({ wa_url, client_name: invoice.clients.name })
   } catch (err) {

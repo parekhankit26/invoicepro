@@ -518,28 +518,6 @@ router.post('/reset-password/:token', async (req: Request, res: Response) => {
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
 
-// ── CHANGE OWN PASSWORD (logged-in admin) ────────────────
-router.put('/change-password', adminAuth, async (req: any, res: Response) => {
-  try {
-    const { current_password, new_password } = (req as any).body
-    if (!current_password || !new_password || new_password.length < 8) {
-      return res.status(400).json({ error: 'Current password and new password (8+ chars) required' })
-    }
-    const { data: admin } = await supabase.from('admin_users').select('password_hash').eq('id', req.admin.id).single()
-    if (!admin) return res.status(404).json({ error: 'Admin not found' })
-    
-    const valid = await bcrypt.compare(current_password, admin.password_hash)
-    if (!valid) return res.status(400).json({ error: 'Current password is incorrect' })
-    
-    const hash = await bcrypt.hash(new_password, 12)
-    await supabase.from('admin_users').update({ password_hash: hash }).eq('id', req.admin.id)
-    
-    try { await supabase.from('admin_audit_log').insert({ admin_id: req.admin.id, action: 'password_changed', entity_type: 'admin_user', entity_id: req.admin.id, new_value: {} }) } catch(_) {}
-    
-    return res.json({ message: 'Password changed successfully' })
-  } catch(e: any) { return res.status(500).json({ error: e.message }) }
-})
-
 // ── CLIENTS (platform-wide) ──────────────────────────────
 router.get('/clients', adminAuth, async (req: any, res: Response) => {
   try {

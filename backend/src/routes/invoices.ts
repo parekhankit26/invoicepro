@@ -166,11 +166,16 @@ router.post('/:id/mark-unpaid', async (req: AuthRequest, res: Response) => {
 })
 
 router.post('/:id/payment-link', async (req: AuthRequest, res: Response) => {
-  const { data: invoice } = await supabase.from('invoices').select('*, clients(*)').eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id).single()
-  if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
-  const paymentLink = await stripeService.createPaymentLink(invoice)
-  await supabase.from('invoices').update({ stripe_payment_link: paymentLink }).eq('id', invoice.id)
-  return res.json({ payment_link: paymentLink })
+  try {
+    const { data: invoice } = await supabase.from('invoices').select('*, clients(*)').eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id).single()
+    if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
+    if (!process.env.STRIPE_SECRET_KEY) return res.status(400).json({ error: 'Stripe is not configured. Add STRIPE_SECRET_KEY to your environment.' })
+    const paymentLink = await stripeService.createPaymentLink(invoice)
+    await supabase.from('invoices').update({ stripe_payment_link: paymentLink }).eq('id', invoice.id)
+    return res.json({ payment_link: paymentLink })
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message || 'Failed to create payment link' })
+  }
 })
 
 export default router

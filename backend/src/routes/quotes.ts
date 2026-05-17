@@ -173,8 +173,21 @@ router.post('/:id/send', async (req: AuthRequest, res: Response) => {
     if (!quote) return res.status(404).json({ error: 'Quote not found' })
     if (!quote.clients?.email) return res.status(400).json({ error: 'Client has no email address' })
 
-    const portalUrl = `${process.env.FRONTEND_URL || 'https://invoicepro-ten.vercel.app'}/portal/${quote.client_token}`
-    
+    // Use client portal token (global portal) for the email link
+    const frontendUrl = process.env.FRONTEND_URL || 'https://invoicepro-ten.vercel.app'
+    let portalUrl = `${frontendUrl}/quotes`
+    const { data: portalData } = await supabase.from('client_portal_tokens')
+      .select('token').eq('client_id', quote.client_id).eq('user_id', (req as any).user!.id).single()
+    if (portalData?.token) {
+      portalUrl = `${frontendUrl}/portal/${portalData.token}`
+    } else {
+      const token = crypto.randomBytes(48).toString('base64url')
+      const { data: newPortal } = await supabase.from('client_portal_tokens')
+        .upsert({ user_id: (req as any).user!.id, client_id: quote.client_id, token, is_active: true }, { onConflict: 'user_id,client_id' })
+        .select('token').single()
+      if (newPortal?.token) portalUrl = `${frontendUrl}/portal/${newPortal.token}`
+    }
+
     if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
       await supabase.from('quotes').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', quote.id)
       return res.json({ message: 'Quote marked as sent (email requires SMTP config)', portal_url: portalUrl, email_sent: false })

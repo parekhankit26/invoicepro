@@ -1,6 +1,7 @@
 import { Router, Response } from 'express'
 import { authenticate, AuthRequest } from '../middleware/auth'
 import { supabase } from '../lib/supabase'
+import crypto from 'crypto'
 
 const router = Router()
 router.use(authenticate)
@@ -122,7 +123,22 @@ router.post('/whatsapp-quote/:quoteId', async (req: AuthRequest, res: Response) 
       ? new Date(quote.expiry_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
       : 'no expiry'
 
-    const message = `Hi ${quote.clients.name},\n\nYou have a quote from ${companyName}!\n\nQuote ${quote.quote_number} for ${currency}${quote.total.toFixed(2)} — valid until ${expiry}.\n\nReview and accept it here:\n${process.env.FRONTEND_URL || 'https://invoicepro-ten.vercel.app'}/portal/${quote.id}\n\nThank you!`
+    // Look up or auto-generate portal token for this client
+    const frontendUrl = process.env.FRONTEND_URL || 'https://invoicepro-ten.vercel.app'
+    let portalUrl = `${frontendUrl}/quotes`
+    const { data: portalData } = await supabase.from('client_portal_tokens')
+      .select('token').eq('client_id', quote.client_id).eq('user_id', (req as any).user!.id).single()
+    if (portalData?.token) {
+      portalUrl = `${frontendUrl}/portal/${portalData.token}`
+    } else {
+      const token = crypto.randomBytes(48).toString('base64url')
+      const { data: newPortal } = await supabase.from('client_portal_tokens')
+        .upsert({ user_id: (req as any).user!.id, client_id: quote.client_id, token, is_active: true }, { onConflict: 'user_id,client_id' })
+        .select('token').single()
+      if (newPortal?.token) portalUrl = `${frontendUrl}/portal/${newPortal.token}`
+    }
+
+    const message = `Hi ${quote.clients.name},\n\nYou have a quote from ${companyName}!\n\nQuote ${quote.quote_number} for ${currency}${quote.total.toFixed(2)} — valid until ${expiry}.\n\nReview and accept it here:\n${portalUrl}\n\nThank you!`
 
     const wa_url = waLink(quote.clients.phone, message)
     return res.json({ wa_url, client_name: quote.clients.name })

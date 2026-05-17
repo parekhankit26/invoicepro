@@ -1,11 +1,33 @@
 import Stripe from 'stripe'
-import dotenv from 'dotenv'
-dotenv.config()
+import { supabase } from '../lib/supabase'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', { apiVersion: '2023-10-16' })
+async function getStripeKey(): Promise<string> {
+  try {
+    const { data } = await supabase.from('app_settings').select('value').eq('key', 'stripe_secret_key').single()
+    if (data?.value) return JSON.parse(data.value)
+  } catch {}
+  return process.env.STRIPE_SECRET_KEY || ''
+}
+
+async function getWebhookSecret(): Promise<string> {
+  try {
+    const { data } = await supabase.from('app_settings').select('value').eq('key', 'stripe_webhook_secret').single()
+    if (data?.value) return JSON.parse(data.value)
+  } catch {}
+  return process.env.STRIPE_WEBHOOK_SECRET || ''
+}
+
+async function getStripe(): Promise<Stripe> {
+  const key = await getStripeKey()
+  if (!key || key === 'sk_test_placeholder') {
+    throw new Error('Stripe not configured. Add your secret key in Admin → Stripe settings.')
+  }
+  return new Stripe(key, { apiVersion: '2023-10-16' })
+}
 
 export const stripeService = {
   async createPaymentLink(invoice: any): Promise<string> {
+    const stripe = await getStripe()
     const product = await stripe.products.create({ name: `Invoice ${invoice.invoice_number}` })
     const price = await stripe.prices.create({ product: product.id, unit_amount: Math.round(invoice.total * 100), currency: (invoice.currency || 'GBP').toLowerCase() })
     const paymentLink = await stripe.paymentLinks.create({ line_items: [{ price: price.id, quantity: 1 }], metadata: { invoice_id: invoice.id } })
@@ -21,6 +43,7 @@ export const stripeService = {
     successUrl: string
     cancelUrl: string
   }): Promise<{ url: string }> {
+    const stripe = await getStripe()
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
@@ -37,11 +60,30 @@ export const stripeService = {
   },
 
   async createBillingPortal(customerId: string, returnUrl: string): Promise<string> {
+    const stripe = await getStripe()
     const session = await stripe.billingPortal.sessions.create({ customer: customerId, return_url: returnUrl })
     return session.url
   },
 
   async constructWebhookEvent(payload: Buffer, signature: string): Promise<Stripe.Event> {
-    return stripe.webhooks.constructEvent(payload, signature, process.env.STRIPE_WEBHOOK_SECRET!)
+    const key = await getStripeKey()
+    const secret = await getWebhookSecret()
+    if (!key || !secret) throw new Error('Stripe not configured')
+    const stripe = new Stripe(key, { apiVersion: '2023-10-16' })
+    return stripe.webhooks.constructEvent(payload, signature, secret)
+  },
+
+  async testConnection(): Promise<{ valid: boolean; account?: string; mode?: string; error?: string }> {
+    try {
+      const stripe = await getStripe()
+      const account = await stripe.accounts.retrieve()
+      return {
+        valid: true,
+        account: account.email || account.id,
+        mode: (await getStripeKey()).startsWith('sk_test_') ? 'test' : 'live',
+      }
+    } catch (err: any) {
+      return { valid: false, error: err.message }
+    }
   }
 }

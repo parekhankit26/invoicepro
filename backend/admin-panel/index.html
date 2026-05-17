@@ -331,6 +331,7 @@ tr:hover td{background:#fafaf8}
       <button class="nv" data-pg="broadcast">📢 Broadcast</button>
 
       <div class="nav-sec">System</div>
+      <button class="nv" data-pg="stripe">⚡ Stripe payments</button>
     <button class="nv" data-pg="email">📧 Email settings</button>
       <button class="nv" data-pg="whatsapp">💬 WhatsApp</button>
       <button class="nv" data-pg="sms">📱 SMS / Twilio</button>
@@ -528,6 +529,98 @@ tr:hover td{background:#fafaf8}
             <div id="annFb" style="margin-top:10px"></div>
           </div>
           <div class="bc"><div style="font-size:13px;font-weight:600;margin-bottom:10px">Current</div><div id="annCurrent"></div></div>
+        </div>
+      </div>
+
+      <!-- STRIPE SETTINGS -->
+      <div class="pg" id="pg-stripe">
+        <div class="ph">
+          <div><div class="pt">⚡ Stripe payments</div><div class="ps">Manage your Stripe keys, test the connection, and verify everything is working</div></div>
+        </div>
+
+        <!-- Status card -->
+        <div id="stripeStatusBanner" class="al al-info" style="margin-bottom:16px">⏳ Loading Stripe status...</div>
+
+        <!-- Keys form -->
+        <div class="bc" style="margin-bottom:14px">
+          <div style="font-size:14px;font-weight:700;margin-bottom:4px">🔑 API Keys</div>
+          <div style="font-size:12px;color:var(--ink3);margin-bottom:16px">Stored securely in the database — no Railway env vars needed</div>
+
+          <label class="lbl">Secret Key <span style="color:var(--ink3);font-weight:400">(starts with sk_test_ or sk_live_)</span></label>
+          <input class="inp" id="stripeSecretKey" type="password" placeholder="sk_test_..." autocomplete="new-password"/>
+          <div style="font-size:11px;color:var(--ink3);margin-top:4px;margin-bottom:14px">Leave blank to keep existing value</div>
+
+          <label class="lbl">Webhook Secret <span style="color:var(--ink3);font-weight:400">(starts with whsec_)</span></label>
+          <input class="inp" id="stripeWebhookSecret" type="password" placeholder="whsec_..." autocomplete="new-password"/>
+          <div style="font-size:11px;color:var(--ink3);margin-top:4px;margin-bottom:16px">Leave blank to keep existing value</div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="ab ab-p" id="btnSaveStripe" onclick="saveStripeSettings()">💾 Save keys</button>
+            <button class="ab" id="btnTestStripe" onclick="testStripeConnection()">🔌 Test connection</button>
+            <button class="ab" onclick="document.getElementById('stripeSecretKey').type==='password'?document.getElementById('stripeSecretKey').type='text':document.getElementById('stripeSecretKey').type='password'" style="font-size:12px">👁 Show/hide</button>
+          </div>
+          <div id="stripeSaveRes" style="margin-top:10px;font-size:13px"></div>
+        </div>
+
+        <!-- Webhook URL -->
+        <div class="bc" style="margin-bottom:14px">
+          <div style="font-size:14px;font-weight:700;margin-bottom:10px">🔗 Webhook endpoint</div>
+          <div style="font-size:12px;color:var(--ink2);margin-bottom:10px">Add this URL in Stripe Dashboard → Developers → Webhooks → Add endpoint:</div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:monospace;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <span id="stripeWebhookUrl" style="word-break:break-all">Loading...</span>
+            <button class="ab ab-sm" onclick="copyWebhookUrl()" style="flex-shrink:0">Copy</button>
+          </div>
+          <div style="font-size:12px;color:var(--ink3);margin-top:10px">
+            Required events: <code>checkout.session.completed</code>, <code>customer.subscription.updated</code>, <code>customer.subscription.deleted</code>
+          </div>
+        </div>
+
+        <!-- Test section -->
+        <div class="bc" style="margin-bottom:14px">
+          <div style="font-size:14px;font-weight:700;margin-bottom:4px">🧪 Test payment flow</div>
+          <div style="font-size:12px;color:var(--ink2);margin-bottom:14px">Verify your Stripe integration is working end-to-end</div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px">
+              <div style="font-weight:600;font-size:13px;margin-bottom:6px">1. Connection test</div>
+              <div style="font-size:12px;color:var(--ink2);margin-bottom:12px">Verifies your secret key is valid and can reach Stripe API</div>
+              <button class="ab" style="width:100%;justify-content:center" onclick="testStripeConnection()">🔌 Test API connection</button>
+              <div id="stripeConnectRes" style="margin-top:8px;font-size:12px"></div>
+            </div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px">
+              <div style="font-weight:600;font-size:13px;margin-bottom:6px">2. Subscription plans</div>
+              <div style="font-size:12px;color:var(--ink2);margin-bottom:12px">Check which plans have Stripe price IDs configured</div>
+              <button class="ab" style="width:100%;justify-content:center" onclick="nav('plans')">📋 View plans setup</button>
+              <div style="margin-top:8px;font-size:12px;color:var(--ink3)" id="stripePlansStatus">Loading...</div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;background:var(--bbg);border:1px solid #bfdbfe;border-radius:10px;padding:16px">
+            <div style="font-weight:600;font-size:13px;margin-bottom:6px;color:var(--blue)">ℹ️ Test card numbers (Stripe test mode only)</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+              <div style="font-size:12px"><code style="background:white;padding:2px 6px;border-radius:4px;font-family:monospace">4242 4242 4242 4242</code><br><span style="color:var(--ink3)">Successful payment</span></div>
+              <div style="font-size:12px"><code style="background:white;padding:2px 6px;border-radius:4px;font-family:monospace">4000 0000 0000 9995</code><br><span style="color:var(--ink3)">Insufficient funds</span></div>
+              <div style="font-size:12px"><code style="background:white;padding:2px 6px;border-radius:4px;font-family:monospace">4000 0025 0000 3155</code><br><span style="color:var(--ink3)">3D Secure required</span></div>
+              <div style="font-size:12px"><code style="background:white;padding:2px 6px;border-radius:4px;font-family:monospace">4000 0000 0000 0002</code><br><span style="color:var(--ink3)">Card declined</span></div>
+            </div>
+            <div style="font-size:11px;color:var(--ink3);margin-top:10px">Use any future expiry date, any 3-digit CVC, any postal code</div>
+          </div>
+        </div>
+
+        <!-- Setup guide -->
+        <div class="bc">
+          <div style="font-size:14px;font-weight:700;margin-bottom:10px">📖 Full setup guide</div>
+          <ol style="padding-left:18px;font-size:13px;color:var(--ink2);line-height:2.2">
+            <li>Go to <strong>stripe.com</strong> → sign in → Developers → API keys</li>
+            <li>Copy the <strong>Secret key</strong> (starts with <code>sk_test_</code> for test, <code>sk_live_</code> for production)</li>
+            <li>Paste it above and click <strong>Save keys</strong></li>
+            <li>Go to Developers → Webhooks → <strong>Add endpoint</strong> → paste the URL above</li>
+            <li>Select the 3 required events, save, then copy the <strong>Signing secret</strong> (whsec_...)</li>
+            <li>Paste the webhook secret above and save again</li>
+            <li>Go to <strong>Plans page</strong> → add Stripe price IDs for each plan</li>
+            <li>Click <strong>Test connection</strong> — you should see your account confirmed</li>
+          </ol>
+          <div class="al al-ok" style="margin-top:12px">✅ Once set up, users can self-subscribe via Stripe Checkout and manage their billing via the Stripe portal — all automatically.</div>
         </div>
       </div>
 
@@ -1027,6 +1120,7 @@ function goPage(page){
   history.replaceState(null,'','#'+page);
   if(window.innerWidth<=768)closeSidebar();
   var fns={dashboard:loadDash,health:loadHealth,revenue:loadRev,churn:loadChurn,email:loadEmailSettings,
+    stripe:loadStripeSettings,
     users:loadUsers,clients:loadClients,invoices:loadInv,payments:loadPay,
     features:loadFeatures,plans:loadPlans,announce:loadAnnounce,tickets:loadTickets,
     satisfaction:loadSat,broadcast:function(){},admins:loadAdmins,audit:loadAudit};
@@ -1563,6 +1657,89 @@ function selectProvider(p) {
         if(q('emailStatusBanner')) q('emailStatusBanner').innerHTML='<div class="al al-warn"><strong>⚠ Email disabled</strong> — No emails will be sent to clients. Choose a provider below to re-enable.</div>';
       }).catch(function(){});
   }
+}
+
+function loadStripeSettings() {
+  req('/admin/stripe-settings').then(function(d) {
+    // Status banner
+    var banner = q('stripeStatusBanner');
+    if (banner) {
+      if (d.configured) {
+        var modeTag = d.mode === 'test'
+          ? '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700">TEST MODE</span>'
+          : '<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700">LIVE MODE</span>';
+        var hookStatus = d.webhook_configured ? '✅ Webhook secret set' : '⚠️ Webhook secret not set — subscription events won\'t sync';
+        banner.className = 'al al-ok';
+        banner.innerHTML = '✅ <strong>Stripe is connected</strong> ' + modeTag + '<br><span style="font-size:12px;margin-top:4px;display:block">' + hookStatus + (d.source === 'database' ? ' · Keys stored in database' : ' · Keys from Railway env vars') + '</span>';
+      } else {
+        banner.className = 'al al-warn';
+        banner.innerHTML = '⚠️ <strong>Stripe not configured</strong> — Enter your secret key below to enable payments';
+      }
+    }
+    // Webhook URL
+    if (q('stripeWebhookUrl')) q('stripeWebhookUrl').textContent = d.webhook_url || '';
+    // Plans status
+    req('/admin/plans').then(function(plans) {
+      var ps = q('stripePlansStatus');
+      if (ps) {
+        var paid = (plans||[]).filter(function(p){return p.slug!=='free';});
+        var configured = paid.filter(function(p){return !!p.stripe_price_id;});
+        if (configured.length === paid.length && paid.length > 0) {
+          ps.innerHTML = '<span style="color:var(--green)">✅ All ' + paid.length + ' plans have price IDs</span>';
+        } else {
+          ps.innerHTML = '<span style="color:var(--amber)">' + configured.length + '/' + paid.length + ' plans configured</span>';
+        }
+      }
+    }).catch(function(){});
+  }).catch(function(e) {
+    var banner = q('stripeStatusBanner');
+    if (banner) { banner.className='al al-warn'; banner.innerHTML='⚠️ Could not load Stripe settings'; }
+  });
+}
+
+function saveStripeSettings() {
+  var sk = q('stripeSecretKey') ? q('stripeSecretKey').value.trim() : '';
+  var wh = q('stripeWebhookSecret') ? q('stripeWebhookSecret').value.trim() : '';
+  if (!sk && !wh) { showToast('Enter at least one key to save', 'err'); return; }
+  var btn = q('btnSaveStripe');
+  if (btn) { btn.disabled=true; btn.textContent='Saving...'; }
+  var payload = {};
+  if (sk) payload.stripe_secret_key = sk;
+  if (wh) payload.stripe_webhook_secret = wh;
+  req('/admin/stripe-settings', { method:'POST', body: JSON.stringify(payload) })
+    .then(function(d) {
+      okMsg('stripeSaveRes', d.message);
+      if (q('stripeSecretKey')) q('stripeSecretKey').value = '';
+      if (q('stripeWebhookSecret')) q('stripeWebhookSecret').value = '';
+      loadStripeSettings();
+    })
+    .catch(function(e) { errMsg('stripeSaveRes', e.message || 'Save failed'); })
+    .finally(function() { if (btn) { btn.disabled=false; btn.textContent='💾 Save keys'; } });
+}
+
+function testStripeConnection() {
+  var btn = q('btnTestStripe');
+  if (btn) { btn.disabled=true; btn.textContent='Testing...'; }
+  var res1 = q('stripeConnectRes');
+  if (res1) res1.innerHTML = '<span style="color:var(--ink3)">Connecting to Stripe...</span>';
+  req('/admin/test-stripe', { method:'POST' })
+    .then(function(d) {
+      var html = '<span style="color:var(--green)">'+d.message+'</span>';
+      if (res1) res1.innerHTML = html;
+      showToast(d.message, 'ok');
+      loadStripeSettings();
+    })
+    .catch(function(e) {
+      if (res1) res1.innerHTML = '<span style="color:var(--red)">' + (e.message||'Connection failed') + '</span>';
+      showToast(e.message || 'Connection failed', 'err');
+    })
+    .finally(function() { if (btn) { btn.disabled=false; btn.textContent='🔌 Test connection'; } });
+}
+
+function copyWebhookUrl() {
+  var el = q('stripeWebhookUrl');
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(function() { showToast('Webhook URL copied!', 'ok'); });
 }
 
 function loadEmailSettings() {

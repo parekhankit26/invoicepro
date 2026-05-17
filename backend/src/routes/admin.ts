@@ -255,8 +255,6 @@ router.put('/change-password', adminAuth, async (req: any, res: Response) => {
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
 
-export default router
-
 // ── HEALTH CHECK ─────────────────────────────────────────
 router.get('/health', adminAuth, async (_req: any, res: Response) => {
   try {
@@ -273,8 +271,12 @@ router.get('/health', adminAuth, async (_req: any, res: Response) => {
     const { count: invCount } = await supabase.from('invoices').select('*', { count: 'exact', head: true })
       .gte('created_at', new Date(Date.now() - 24 * 3600000).toISOString())
     checks.invoices_today = invCount || 0
-    checks.smtp_configured = !!(process.env.SMTP_HOST && process.env.SMTP_USER)
-    checks.stripe_configured = !!process.env.STRIPE_SECRET_KEY
+    // Check email: DB first, then env vars
+    const { data: emailCfg } = await supabase.from('app_settings').select('value').eq('key', 'smtp_host').single()
+    checks.smtp_configured = !!(emailCfg?.value || process.env.SMTP_HOST)
+    // Check Stripe: DB first, then env vars
+    const { data: stripeCfg } = await supabase.from('app_settings').select('value').eq('key', 'stripe_secret_key').single()
+    checks.stripe_configured = !!(stripeCfg?.value || process.env.STRIPE_SECRET_KEY)
     checks.ai_configured = !!process.env.ANTHROPIC_API_KEY
     checks.twilio_configured = !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN)
     return res.json({ status: 'ok', timestamp: new Date().toISOString(), checks })
@@ -987,3 +989,73 @@ router.post('/switch-email-provider', adminAuth, async (req: any, res: Response)
     return res.json({ message: `✅ Email provider switched to ${provider}`, provider })
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
+
+// ── STRIPE SETTINGS ───────────────────────────────────────
+router.get('/stripe-settings', adminAuth, async (_req: any, res: Response) => {
+  try {
+    const keys = ['stripe_secret_key', 'stripe_webhook_secret']
+    const { data } = await supabase.from('app_settings').select('key, value').in('key', keys)
+    const cfg: any = {}
+    ;(data || []).forEach((r: any) => { try { cfg[r.key] = JSON.parse(r.value) } catch { cfg[r.key] = r.value } })
+
+    const secretKey = cfg.stripe_secret_key || process.env.STRIPE_SECRET_KEY || ''
+    const webhookSecret = cfg.stripe_webhook_secret || process.env.STRIPE_WEBHOOK_SECRET || ''
+    const source = cfg.stripe_secret_key ? 'database' : (process.env.STRIPE_SECRET_KEY ? 'env_vars' : 'not_configured')
+
+    return res.json({
+      stripe_secret_key: secretKey ? '••••••••' : '',
+      stripe_webhook_secret: webhookSecret ? '••••••••' : '',
+      configured: !!secretKey,
+      webhook_configured: !!webhookSecret,
+      mode: secretKey.startsWith('sk_test_') ? 'test' : (secretKey ? 'live' : 'none'),
+      source,
+      webhook_url: `${process.env.BACKEND_URL || 'https://invoicepro-production-2ed7.up.railway.app'}/api/webhooks/stripe`,
+    })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+router.post('/stripe-settings', adminAuth, async (req: any, res: Response) => {
+  try {
+    const { stripe_secret_key, stripe_webhook_secret } = (req as any).body
+    if (!stripe_secret_key && !stripe_webhook_secret) {
+      return res.status(400).json({ error: 'At least one field is required' })
+    }
+    if (stripe_secret_key && !stripe_secret_key.startsWith('sk_')) {
+      return res.status(400).json({ error: 'Secret key must start with sk_test_ or sk_live_' })
+    }
+    if (stripe_webhook_secret && !stripe_webhook_secret.startsWith('whsec_')) {
+      return res.status(400).json({ error: 'Webhook secret must start with whsec_' })
+    }
+
+    const settings: any[] = []
+    if (stripe_secret_key?.trim()) {
+      settings.push({ key: 'stripe_secret_key', value: JSON.stringify(stripe_secret_key.trim()), label: 'Stripe Secret Key', category: 'stripe' })
+    }
+    if (stripe_webhook_secret?.trim()) {
+      settings.push({ key: 'stripe_webhook_secret', value: JSON.stringify(stripe_webhook_secret.trim()), label: 'Stripe Webhook Secret', category: 'stripe' })
+    }
+    for (const s of settings) {
+      await supabase.from('app_settings').upsert(s, { onConflict: 'key' })
+    }
+    await log(req.admin.id, 'stripe_settings_saved', 'system', 'stripe', { fields: settings.map(s => s.key) })
+    return res.json({ message: '✅ Stripe settings saved! Test the connection to verify.' })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+router.post('/test-stripe', adminAuth, async (_req: any, res: Response) => {
+  try {
+    const { stripeService } = await import('../services/stripeService')
+    const result = await stripeService.testConnection()
+    if (result.valid) {
+      return res.json({
+        message: `✅ Stripe connected! Account: ${result.account} (${result.mode} mode)`,
+        account: result.account,
+        mode: result.mode,
+      })
+    } else {
+      return res.status(400).json({ error: `❌ Connection failed: ${result.error}` })
+    }
+  } catch(e: any) { return res.status(400).json({ error: `❌ ${e.message}` }) }
+})
+
+export default router

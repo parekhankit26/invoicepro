@@ -76,11 +76,13 @@ export const stripeService = {
   async testConnection(): Promise<{ valid: boolean; account?: string; mode?: string; error?: string }> {
     try {
       const stripe = await getStripe()
-      const account = await stripe.accounts.retrieve()
+      const key = await getStripeKey()
+      // balance.retrieve() works for any valid key — no ID required
+      await stripe.balance.retrieve()
       return {
         valid: true,
-        account: account.email || account.id,
-        mode: (await getStripeKey()).startsWith('sk_test_') ? 'test' : 'live',
+        account: key.startsWith('sk_test_') ? 'Test mode account' : 'Live account',
+        mode: key.startsWith('sk_test_') ? 'test' : 'live',
       }
     } catch (err: any) {
       return { valid: false, error: err.message }

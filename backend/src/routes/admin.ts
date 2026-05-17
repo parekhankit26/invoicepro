@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import { emailService } from '../services/emailService'
+import { stripeService } from '../services/stripeService'
 
 const router = Router()
 const ADMIN_JWT_SECRET = process.env.ADMIN_JWT_SECRET || process.env.JWT_SECRET || 'invoicepro-admin-secret-2024'
@@ -1044,7 +1045,6 @@ router.post('/stripe-settings', adminAuth, async (req: any, res: Response) => {
 
 router.post('/test-stripe', adminAuth, async (_req: any, res: Response) => {
   try {
-    const { stripeService } = await import('../services/stripeService')
     const result = await stripeService.testConnection()
     if (result.valid) {
       return res.json({

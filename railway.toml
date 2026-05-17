@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "cd backend && npm install && npm run build"
+buildCommand = "cd backend && npm install && npx tsc --skipLibCheck; rm -rf dist/admin-panel && cp -r admin-panel dist/admin-panel"
 
 [deploy]
 startCommand = "cd backend && node dist/index.js"

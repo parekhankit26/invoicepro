@@ -525,12 +525,11 @@ tr:hover td{background:#fafaf8}
             </div>
             <button onclick="closeRegional()" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--ink2);padding:4px">×</button>
           </div>
-          <!-- Currency tabs -->
+          <!-- Currency tabs (GBP excluded — it's the default in Plans) -->
           <div style="display:flex;gap:4px;padding:16px 24px 0;border-bottom:1px solid var(--border)">
             <button class="rtab on" onclick="switchRTab(this,'USD')" data-cur="USD">🇺🇸 USD</button>
             <button class="rtab" onclick="switchRTab(this,'EUR')" data-cur="EUR">🇪🇺 EUR</button>
             <button class="rtab" onclick="switchRTab(this,'INR')" data-cur="INR">🇮🇳 INR</button>
-            <button class="rtab" onclick="switchRTab(this,'GBP')" data-cur="GBP">🇬🇧 GBP</button>
           </div>
           <!-- Tab content -->
           <div id="regionalTabContent" style="padding:20px 24px">
@@ -1667,7 +1666,27 @@ function closeRegional(){
   q('regionalModal').style.display='none';
 }
 
+function saveCurrentRTabToMemory(){
+  // Persist whatever is typed in the active tab back into _regionalData before switching
+  var cur=_regionalCurrency;
+  if(!cur)return;
+  var m=q('rMonthly')&&q('rMonthly').value.trim();
+  var y=q('rYearly')&&q('rYearly').value.trim();
+  var disc=q('rDiscount')&&q('rDiscount').value.trim();
+  var sm=q('rStripeM')&&q('rStripeM').value.trim();
+  var sy=q('rStripeY')&&q('rStripeY').value.trim();
+  _regionalData[cur]=Object.assign(_regionalData[cur]||{},{
+    currency_code:cur,
+    price_monthly:m?parseFloat(m):(_regionalData[cur]&&_regionalData[cur].price_monthly)||null,
+    price_yearly:y?parseFloat(y):(_regionalData[cur]&&_regionalData[cur].price_yearly)||null,
+    _discount:disc,
+    stripe_price_id:sm||((_regionalData[cur]&&_regionalData[cur].stripe_price_id)||null),
+    stripe_price_id_yearly:sy||((_regionalData[cur]&&_regionalData[cur].stripe_price_id_yearly)||null),
+  });
+}
+
 function switchRTab(el,currency){
+  saveCurrentRTabToMemory();
   document.querySelectorAll('.rtab').forEach(function(t){t.classList.remove('on');});
   el.classList.add('on');
   _regionalCurrency=currency||el.dataset.cur;
@@ -1679,9 +1698,9 @@ function renderRegionalTab(cur){
   var sym=_currencySymbols[cur]||cur;
   var countries=_currencyCountries[cur]||'';
   var isGBP=cur==='GBP';
-  // Derive existing discount % from saved data
-  var existingDisc='';
-  if(d.price_monthly&&d.price_yearly&&d.price_yearly<d.price_monthly*12){
+  // Restore discount % — prefer in-memory typed value, then derive from prices
+  var existingDisc=d._discount!==undefined?d._discount:'';
+  if(existingDisc===''&&d.price_monthly&&d.price_yearly&&d.price_yearly<d.price_monthly*12){
     existingDisc=Math.round((1-d.price_yearly/(d.price_monthly*12))*100);
   }
   q('regionalTabContent').innerHTML=

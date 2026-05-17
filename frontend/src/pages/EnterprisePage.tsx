@@ -1,57 +1,285 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
-import { Key, Users, Globe, FileText, Download, Plus, Trash2, Copy, X, Shield } from 'lucide-react'
+import { Key, Users, Globe, FileText, Download, Plus, Trash2, Copy, X, Shield, CheckCircle, Clock, ArrowRight, Sparkles } from 'lucide-react'
 import { api } from '../lib/api'
 import { formatCurrency, formatDate } from '../lib/utils'
 import toast from 'react-hot-toast'
 import { modalState } from '../lib/modalState'
 
 const TABS = [
+  { id: 'overview', label: 'Overview', icon: Shield },
   { id: 'team', label: 'Team members', icon: Users },
   { id: 'apikeys', label: 'API keys', icon: Key },
   { id: 'whitelabel', label: 'White label', icon: Globe },
   { id: 'tax', label: 'Tax reports', icon: FileText },
 ]
 
+const planMeta: Record<string, { label: string; color: string; bg: string; border: string }> = {
+  free:       { label: 'Free',       color: '#6b7280', bg: '#f9fafb', border: '#e5e7eb' },
+  starter:    { label: 'Starter',    color: '#1d4ed8', bg: '#eff6ff', border: '#bfdbfe' },
+  pro:        { label: 'Pro',        color: '#6d28d9', bg: '#ede9fe', border: '#c4b5fd' },
+  enterprise: { label: 'Enterprise', color: '#92400e', bg: '#fef3c7', border: '#fcd34d' },
+}
+
 export default function EnterprisePage() {
-  const [tab, setTab] = useState('team')
+  const [tab, setTab] = useState('overview')
   const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: () => api.get<any>('/auth/profile') })
   const plan = profile?.plan || 'free'
+  const pm = planMeta[plan] || planMeta.free
+  const isEnterprise = plan === 'enterprise'
+  const isPro = plan === 'pro' || isEnterprise
 
   return (
     <>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Enterprise features</h1>
-          <p className="page-subtitle">Team, API access, white label & tax reports</p>
+          <h1 className="page-title">{isEnterprise ? 'Workspace admin' : 'Team & features'}</h1>
+          <p className="page-subtitle">
+            {isEnterprise
+              ? 'Manage your team, API access, white label branding and tax reports'
+              : 'Invite team members, manage integrations and unlock advanced features'}
+          </p>
         </div>
-        <span className="badge" style={{
-          background: plan === 'enterprise' ? 'var(--accent-dim)' : 'var(--bg)',
-          color: plan === 'enterprise' ? 'var(--green)' : 'var(--text-muted)',
-          border: '1px solid', borderColor: plan === 'enterprise' ? 'var(--green)' : 'var(--border)',
-          padding: '5px 14px', borderRadius: 20, fontSize: 12, fontWeight: 600
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', gap: 6,
+          background: pm.bg, color: pm.color,
+          border: `1px solid ${pm.border}`,
+          padding: '5px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+          letterSpacing: '0.04em'
         }}>
-          {plan.toUpperCase()} plan
+          {isEnterprise && <Shield size={12} />}
+          {pm.label.toUpperCase()} PLAN
         </span>
       </div>
 
       <div className="page-body">
-        <div style={{ display: 'flex', gap: 4, marginBottom: 20, borderBottom: '1px solid var(--border)', paddingBottom: 0 }}>
+        <div style={{ display: 'flex', gap: 0, marginBottom: 20, borderBottom: '1px solid var(--border)' }}>
           {TABS.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 16px', border: 'none', background: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500, color: tab === t.id ? 'var(--text)' : 'var(--text-muted)', borderBottom: tab === t.id ? '2px solid var(--text)' : '2px solid transparent', marginBottom: -1, fontFamily: 'inherit' }}>
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '10px 16px', border: 'none', background: 'none',
+                cursor: 'pointer', fontSize: 13, fontWeight: tab === t.id ? 600 : 400,
+                color: tab === t.id ? 'var(--text)' : 'var(--text-muted)',
+                borderBottom: tab === t.id ? '2px solid var(--text)' : '2px solid transparent',
+                marginBottom: -1, fontFamily: 'inherit', transition: 'color .15s',
+              }}>
               <t.icon size={14} />{t.label}
             </button>
           ))}
         </div>
 
-        {tab === 'team' && <TeamTab plan={plan} />}
-        {tab === 'apikeys' && <ApiKeysTab plan={plan} />}
+        {tab === 'overview'   && <OverviewTab plan={plan} profile={profile} onGoTab={setTab} />}
+        {tab === 'team'       && <TeamTab plan={plan} />}
+        {tab === 'apikeys'    && <ApiKeysTab plan={plan} />}
         {tab === 'whitelabel' && <WhiteLabelTab plan={plan} />}
-        {tab === 'tax' && <TaxReportTab />}
+        {tab === 'tax'        && <TaxReportTab />}
       </div>
     </>
+  )
+}
+
+// ── OVERVIEW TAB ─────────────────────────────────────────
+function OverviewTab({ plan, profile, onGoTab }: { plan: string; profile: any; onGoTab: (t: string) => void }) {
+  const isEnterprise = plan === 'enterprise'
+  const isPro = plan === 'pro' || isEnterprise
+
+  const { data: members = [] } = useQuery({
+    queryKey: ['team'],
+    queryFn: () => api.get<any[]>('/team'),
+    enabled: isPro,
+  })
+  const { data: keys = [] } = useQuery({
+    queryKey: ['api-keys'],
+    queryFn: () => api.get<any[]>('/enterprise/api-keys'),
+    enabled: isEnterprise,
+  })
+  const { data: whiteLabel } = useQuery({
+    queryKey: ['white-label'],
+    queryFn: () => api.get<any>('/enterprise/white-label'),
+    enabled: isEnterprise,
+  })
+
+  const memberList = Array.isArray(members) ? members : []
+  const keyList = Array.isArray(keys) ? keys : []
+  const activeMembers = memberList.filter((m: any) => m.status === 'active').length
+  const pendingMembers = memberList.filter((m: any) => m.status === 'pending').length
+  const activeKeys = keyList.filter((k: any) => k.is_active).length
+  const whiteLabelConfigured = !!(whiteLabel?.brand_name || whiteLabel?.custom_domain)
+
+  return (
+    <div>
+      {/* Workspace identity card */}
+      <div style={{
+        background: isEnterprise ? 'linear-gradient(135deg, #1a1814 0%, #2d2a25 100%)' : 'var(--surface)',
+        border: isEnterprise ? 'none' : '1px solid var(--border)',
+        borderRadius: 14, padding: '24px 28px', marginBottom: 20,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        color: isEnterprise ? 'white' : 'var(--text)', flexWrap: 'wrap', gap: 16,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{
+            width: 52, height: 52, borderRadius: 12, flexShrink: 0,
+            background: isEnterprise ? '#a3e635' : 'var(--bg)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            {whiteLabel?.brand_logo_url
+              ? <img src={whiteLabel.brand_logo_url} alt="" style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 6 }} />
+              : <Shield size={24} color={isEnterprise ? '#1a1814' : 'var(--text-muted)'} />
+            }
+          </div>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 18, letterSpacing: '-0.02em' }}>
+              {whiteLabel?.brand_name || profile?.company_name || profile?.full_name || 'Your workspace'}
+            </div>
+            <div style={{ fontSize: 13, opacity: isEnterprise ? 0.6 : 1, color: isEnterprise ? 'white' : 'var(--text-muted)', marginTop: 2 }}>
+              {isEnterprise ? 'Enterprise workspace' : `${plan.charAt(0).toUpperCase() + plan.slice(1)} plan workspace`}
+            </div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {isPro && (
+            <button className="btn btn-sm" onClick={() => onGoTab('team')}
+              style={{ background: isEnterprise ? 'rgba(255,255,255,0.12)' : 'var(--bg)', color: isEnterprise ? 'white' : 'var(--text)', border: isEnterprise ? '1px solid rgba(255,255,255,0.2)' : '1px solid var(--border)' }}>
+              <Users size={13} /> Manage team
+            </button>
+          )}
+          {isEnterprise && (
+            <button className="btn btn-sm" onClick={() => onGoTab('whitelabel')}
+              style={{ background: 'rgba(255,255,255,0.12)', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}>
+              <Globe size={13} /> White label
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Stats grid */}
+      {isPro && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 20 }}>
+          {[
+            {
+              label: 'Active members',
+              value: activeMembers,
+              icon: CheckCircle, iconColor: '#16a34a',
+              action: () => onGoTab('team'),
+            },
+            {
+              label: 'Pending invites',
+              value: pendingMembers,
+              icon: Clock, iconColor: pendingMembers > 0 ? '#b45309' : '#9ca3af',
+              action: pendingMembers > 0 ? () => onGoTab('team') : undefined,
+            },
+            ...(isEnterprise ? [
+              {
+                label: 'API keys active',
+                value: activeKeys,
+                icon: Key, iconColor: '#1d4ed8',
+                action: () => onGoTab('apikeys'),
+              },
+              {
+                label: 'White label',
+                value: whiteLabelConfigured ? 'Configured' : 'Not set up',
+                icon: Globe, iconColor: whiteLabelConfigured ? '#16a34a' : '#9ca3af',
+                action: () => onGoTab('whitelabel'),
+              },
+            ] : []),
+          ].map(({ label, value, icon: Icon, iconColor, action }) => (
+            <div key={label}
+              onClick={action}
+              style={{
+                background: 'var(--surface)', border: '1px solid var(--border)',
+                borderRadius: 12, padding: '16px 18px',
+                cursor: action ? 'pointer' : 'default',
+                transition: 'box-shadow .15s, transform .1s',
+              }}
+              onMouseEnter={e => { if (action) { (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)' } }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = 'none'; (e.currentTarget as HTMLElement).style.transform = 'translateY(0)' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-subtle)' }}>{label}</div>
+                <Icon size={14} color={iconColor} />
+              </div>
+              <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.03em' }}>{value}</div>
+              {action && <div style={{ fontSize: 11, color: 'var(--text-subtle)', marginTop: 6, display: 'flex', alignItems: 'center', gap: 3 }}>View <ArrowRight size={10} /></div>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Team members quick view */}
+      {isPro && memberList.length > 0 && (
+        <div className="card" style={{ padding: 0, overflow: 'hidden', marginBottom: 20 }}>
+          <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ fontWeight: 600, fontSize: 13 }}>Team</div>
+            <button className="btn btn-sm btn-ghost" onClick={() => onGoTab('team')} style={{ fontSize: 12 }}>
+              Manage <ArrowRight size={11} />
+            </button>
+          </div>
+          <div className="table-wrapper">
+            <table className="data-table">
+              <thead><tr><th>Name</th><th>Role</th><th>Status</th><th>Joined</th></tr></thead>
+              <tbody>
+                {memberList.slice(0, 5).map((m: any) => (
+                  <tr key={m.id}>
+                    <td>
+                      <div style={{ fontWeight: 500 }}>{m.full_name || '—'}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-subtle)' }}>{m.email}</div>
+                    </td>
+                    <td><span className="badge badge-sent">{m.role}</span></td>
+                    <td><span className={`badge ${m.status === 'active' ? 'badge-paid' : 'badge-pending'}`}>{m.status}</span></td>
+                    <td style={{ fontSize: 12, color: 'var(--text-subtle)' }}>{m.joined_at ? formatDate(m.joined_at) : 'Pending'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {memberList.length > 5 && (
+            <div style={{ padding: '10px 18px', borderTop: '1px solid var(--border)', fontSize: 12, color: 'var(--text-muted)', textAlign: 'center' }}>
+              +{memberList.length - 5} more — <button className="btn btn-ghost btn-sm" onClick={() => onGoTab('team')} style={{ fontSize: 12 }}>view all</button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Feature availability grid */}
+      <div className="card card-p">
+        <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 14 }}>Features on your plan</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 8 }}>
+          {[
+            { label: 'Unlimited invoices & quotes', included: true },
+            { label: 'Client portal links', included: true },
+            { label: 'WhatsApp notifications', included: true },
+            { label: 'PDF generation', included: true },
+            { label: 'Team members', included: isPro },
+            { label: 'Advanced reports', included: isPro },
+            { label: 'API access', included: plan === 'enterprise' },
+            { label: 'White label branding', included: plan === 'enterprise' },
+            { label: 'Custom domain', included: plan === 'enterprise' },
+            { label: 'Tax report export', included: plan === 'enterprise' },
+          ].map(({ label, included }) => (
+            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: included ? 'var(--text)' : 'var(--text-subtle)' }}>
+              {included
+                ? <CheckCircle size={14} color="#16a34a" style={{ flexShrink: 0 }} />
+                : <div style={{ width: 14, height: 14, borderRadius: '50%', border: '1.5px solid var(--border)', flexShrink: 0 }} />
+              }
+              {label}
+            </div>
+          ))}
+        </div>
+        {plan !== 'enterprise' && (
+          <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+            <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+              <Sparkles size={13} style={{ marginRight: 4, verticalAlign: 'middle', color: '#b45309' }} />
+              Upgrade to Enterprise to unlock all features
+            </div>
+            <button className="btn btn-sm btn-primary" onClick={() => toast('Contact us to upgrade your plan')}>
+              Upgrade plan
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 

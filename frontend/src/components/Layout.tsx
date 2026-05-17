@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, FileText, Users, Receipt, BarChart3, Settings, LogOut, Clock, FileCheck, Crown, TrendingUp, Zap, Heart, Gift, Palette, Menu, X } from 'lucide-react'
+import { LayoutDashboard, FileText, Users, Receipt, BarChart3, Settings, LogOut, Clock, FileCheck, Shield, TrendingUp, Zap, Heart, Gift, Palette, Menu, X } from 'lucide-react'
 import { useAuthStore } from '../lib/authStore'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../lib/api'
@@ -36,7 +36,6 @@ const nav = [
   ]},
   { section: 'Tools', items: [
     { to: '/designer', icon: Palette, label: 'Invoice designer' },
-    { to: '/enterprise', icon: Crown, label: 'Enterprise' },
     { to: '/settings', icon: Settings, label: 'Settings' },
   ]},
 ]
@@ -111,6 +110,42 @@ export default function Layout() {
             ))}
           </div>
         ))}
+
+        {/* Workspace / Enterprise admin — plan-aware */}
+        <div style={{ marginTop: 4 }}>
+          <div className="nav-section-label">Workspace</div>
+          <NavLink
+            to="/enterprise"
+            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            style={({ isActive }) => ({
+              ...(profile?.plan === 'enterprise' && !isActive ? {
+                background: '#fffbeb',
+                color: '#b45309',
+              } : {}),
+            })}
+          >
+            <Shield size={15}/>
+            <span style={{ flex: 1 }}>
+              {profile?.plan === 'enterprise' ? 'Admin panel' : 'Team & features'}
+            </span>
+            {profile?.plan === 'enterprise' && (
+              <span style={{
+                fontSize: 9, fontWeight: 800, letterSpacing: '0.06em',
+                background: '#fef3c7', color: '#92400e',
+                padding: '2px 6px', borderRadius: 10,
+                border: '1px solid #fcd34d', flexShrink: 0,
+              }}>ADMIN</span>
+            )}
+            {profile?.plan === 'pro' && (
+              <span style={{
+                fontSize: 9, fontWeight: 800, letterSpacing: '0.06em',
+                background: '#ede9fe', color: '#6d28d9',
+                padding: '2px 6px', borderRadius: 10,
+                border: '1px solid #c4b5fd', flexShrink: 0,
+              }}>PRO</span>
+            )}
+          </NavLink>
+        </div>
       </nav>
 
       {/* User footer */}

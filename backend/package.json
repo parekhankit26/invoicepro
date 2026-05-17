@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "npx tsc --skipLibCheck && cp -r admin-panel dist/",
+    "build": "npx tsc --skipLibCheck && rm -rf dist/admin-panel && cp -r admin-panel dist/admin-panel",
     "start": "node dist/index.js"
   },
   "dependencies": {
@@ -39,5 +39,5 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "_cache_bust": 1778427831
+  "_cache_bust": 1778427999
 }

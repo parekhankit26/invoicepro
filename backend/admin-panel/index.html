@@ -590,7 +590,7 @@ tr:hover td{background:#fafaf8}
             <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px">
               <div style="font-weight:600;font-size:13px;margin-bottom:6px">2. Subscription plans</div>
               <div style="font-size:12px;color:var(--ink2);margin-bottom:12px">Check which plans have Stripe price IDs configured</div>
-              <button class="ab" style="width:100%;justify-content:center" onclick="nav('plans')">📋 View plans setup</button>
+              <button class="ab" style="width:100%;justify-content:center" onclick="goPage('plans')">📋 View plans setup</button>
               <div style="margin-top:8px;font-size:12px;color:var(--ink3)" id="stripePlansStatus">Loading...</div>
             </div>
           </div>
@@ -1134,7 +1134,7 @@ function showApp(admin){
   q('sRole').textContent=admin.role;
   q('sAvatar').textContent=(admin.full_name||admin.email)[0].toUpperCase();
   // Restore last visited page from URL hash on refresh
-  var validPages=['dashboard','health','revenue','churn','users','clients','invoices','payments','features','plans','announce','tickets','satisfaction','broadcast','admins','audit','email','whatsapp','sms'];
+  var validPages=['dashboard','health','revenue','churn','users','clients','invoices','payments','features','plans','announce','tickets','satisfaction','broadcast','admins','audit','email','whatsapp','sms','stripe'];
   var hash=window.location.hash.replace('#','');
   var startPage=(hash&&validPages.indexOf(hash)!==-1)?hash:'dashboard';
   goPage(startPage);

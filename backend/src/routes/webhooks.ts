@@ -1,7 +1,13 @@
 import { Router, Request, Response } from 'express'
-import { stripeService, planFromPriceId } from '../services/stripeService'
+import { stripeService } from '../services/stripeService'
 import { supabase } from '../lib/supabase'
 import { emailService } from '../services/emailService'
+
+// Look up plan slug from Stripe price ID via DB
+async function planFromPriceId(priceId: string): Promise<string | null> {
+  const { data } = await supabase.from('plans').select('slug').eq('stripe_price_id', priceId).single()
+  return data?.slug || null
+}
 
 const router = Router()
 
@@ -55,7 +61,7 @@ router.post('/stripe', async (req: Request, res: Response) => {
 
     // Determine plan from price ID
     const priceId = obj.items?.data?.[0]?.price?.id
-    const plan = priceId ? planFromPriceId(priceId) : null
+    const plan = priceId ? await planFromPriceId(priceId) : null
 
     const updates: Record<string, any> = {
       stripe_subscription_id: subscriptionId,

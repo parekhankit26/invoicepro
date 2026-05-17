@@ -483,8 +483,33 @@ tr:hover td{background:#fafaf8}
 
       <!-- PLANS -->
       <div class="pg" id="pg-plans">
-        <div class="ph"><div><div class="pt">Plans & pricing</div></div></div>
-        <div class="g4" id="planCards"></div>
+        <div class="ph">
+          <div>
+            <div class="pt">Plans & pricing</div>
+            <div class="ps">Manage plan prices and Stripe price IDs — no code changes needed</div>
+          </div>
+        </div>
+
+        <!-- Stripe key status banner -->
+        <div id="stripeKeyBanner" class="al al-info" style="margin-bottom:16px">
+          ⏳ Checking Stripe configuration...
+        </div>
+
+        <!-- Plan cards -->
+        <div id="planCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:24px"></div>
+
+        <!-- How to get price IDs guide -->
+        <div class="bc">
+          <div style="font-size:13px;font-weight:600;margin-bottom:10px">🔑 How to set up Stripe price IDs</div>
+          <ol style="padding-left:18px;font-size:13px;color:var(--ink2);line-height:2">
+            <li>Go to <strong>Stripe Dashboard → Products</strong></li>
+            <li>Create a product for each plan (e.g. "InvoicePro Pro")</li>
+            <li>Add a recurring monthly price (e.g. £19.00/month)</li>
+            <li>Copy the <strong>Price ID</strong> (starts with <code>price_</code>)</li>
+            <li>Paste it into the field above and click Save</li>
+          </ol>
+          <div class="al al-ok" style="margin-top:10px">✅ Once saved, users can self-subscribe instantly via Stripe Checkout — no manual intervention needed.</div>
+        </div>
       </div>
 
       <!-- ANNOUNCEMENT -->
@@ -1330,33 +1355,101 @@ function loadFeatures(){
 }
 
 // PLANS
+var planColors={free:'#6b7280',starter:'#1d4ed8',pro:'#7c3aed',enterprise:'#b45309'};
+
 function loadPlans(){
-  req('/admin/plans').then(function(d){
-    var cs={free:'#b8b2a3',starter:'#1d4ed8',pro:'#7c3aed',enterprise:'#b45309'};
-    q('planCards').innerHTML=d.map(function(p){return '<div class="kc" style="border-top:3px solid '+(cs[p.slug]||'#888')+'"><div class="kl">'+p.name+'</div><div class="kv">£'+p.price_monthly+'<span style="font-size:12px;color:var(--ink3)">/mo</span></div><div class="ks" style="margin-bottom:12px">£'+p.price_yearly+'/yr · '+(p.max_invoices===-1?'∞':p.max_invoices)+' invoices/mo</div><label style="font-size:12px;font-weight:500;color:#666;display:block;margin-bottom:4px">Monthly price (£)</label><input class="fi" id="pi_'+p.id+'" value="'+p.price_monthly+'" type="number" step="0.01" style="font-size:12px;padding:7px 10px;margin-bottom:8px"/><button class="ab ab-p ab-sm" style="width:100%;justify-content:center" onclick="savePlan(\''+p.id+'\')">Save</button></div>';}).join('');
-  }).catch(function(){});
+  // Check Stripe key status
+  var banner=q('stripeKeyBanner');
+  req('/admin/health').then(function(h){
+    var hasKey=h&&h.stripe_configured;
+    if(banner){
+      banner.className='al '+(hasKey?'al-ok':'al-warn');
+      banner.innerHTML=hasKey
+        ? '✅ Stripe is configured — users can subscribe instantly once price IDs are set below.'
+        : '⚠️ <strong>STRIPE_SECRET_KEY not set on Railway.</strong> Add it to Railway environment variables to enable payments. Price IDs saved here will be ready to go once you add the key.';
+    }
+  }).catch(function(){
+    if(banner){banner.className='al al-warn';banner.innerHTML='⚠️ Could not check Stripe status.';}
+  });
+
+  req('/admin/plans').then(function(plans){
+    q('planCards').innerHTML=plans.map(function(p){
+      var c=planColors[p.slug]||'#888';
+      var isFree=p.slug==='free';
+      var hasPrice=!!(p.stripe_price_id&&p.stripe_price_id.trim());
+      var statusDot=isFree?'':'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(hasPrice?'#16a34a':'#e5e7eb')+';margin-left:6px;vertical-align:middle" title="'+(hasPrice?'Stripe price set':'No price ID yet')+'"></span>';
+
+      return '<div style="background:var(--white);border:1px solid var(--border);border-top:4px solid '+c+';border-radius:12px;padding:20px">'
+        // Header
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'
+        +  '<div style="font-weight:700;font-size:15px;color:'+c+'">'+p.name+statusDot+'</div>'
+        +  (p.slug!=='free'?'<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer"><input type="checkbox" id="pActive_'+p.id+'" '+(p.is_active?'checked':'')+' onchange="togglePlan(\''+p.id+'\')" style="width:auto;accent-color:'+c+'"/> Active</label>':'<span style="font-size:11px;font-weight:600;color:#9ca3af;letter-spacing:.04em">ALWAYS ON</span>')
+        +'</div>'
+        // Price display
+        +'<div style="font-size:26px;font-weight:800;letter-spacing:-.03em;margin-bottom:2px">£'+p.price_monthly+'<span style="font-size:13px;font-weight:400;color:var(--ink3)">/mo</span></div>'
+        +'<div style="font-size:12px;color:var(--ink3);margin-bottom:16px">£'+p.price_yearly+'/yr · '+(p.max_invoices===-1?'Unlimited':p.max_invoices)+' invoices · '+(p.max_team_members===-1?'Unlimited':p.max_team_members===0?'No':p.max_team_members)+' team seats</div>'
+        // Monthly price input
+        +(isFree?'':
+          '<label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);display:block;margin-bottom:4px">Monthly price (£)</label>'
+          +'<input class="fi" id="pPrice_'+p.id+'" value="'+p.price_monthly+'" type="number" step="0.01" min="0" style="margin-bottom:10px"/>'
+        )
+        // Stripe price ID input
+        +(isFree?'':
+          '<label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);display:block;margin-bottom:4px">Stripe price ID</label>'
+          +'<input class="fi" id="pStripe_'+p.id+'" value="'+(p.stripe_price_id||'')+'" placeholder="price_1ABC..." style="font-family:monospace;font-size:12px;margin-bottom:10px"/>'
+          +'<div style="font-size:11px;color:var(--ink3);margin-bottom:10px">Get this from Stripe Dashboard → Products → Price</div>'
+        )
+        // Save button
+        +(isFree?'<div class="al al-info" style="font-size:12px">Free plan — no payment required, no Stripe ID needed.</div>':
+          '<button class="ab ab-p" id="pSaveBtn_'+p.id+'" style="width:100%;justify-content:center" onclick="savePlan(\''+p.id+'\')">💾 Save changes</button>'
+        )
+        +'</div>';
+    }).join('');
+  }).catch(function(e){showToast(e.message,'err');});
 }
+
 function savePlan(id){
-  var inp=q('pi_'+id);
-  var val=+(inp.value);
-  var btn=document.querySelector('[onclick="savePlan(\''+id+'\')"]');
+  var priceInput=q('pPrice_'+id);
+  var stripeInput=q('pStripe_'+id);
+  var btn=q('pSaveBtn_'+id);
+  var payload={};
+  if(priceInput){
+    var val=parseFloat(priceInput.value);
+    if(isNaN(val)||val<0){showToast('Invalid price','err');return;}
+    payload.price_monthly=val;
+    payload.price_yearly=Math.round(val*12*100)/100;
+  }
+  if(stripeInput){
+    var sid=stripeInput.value.trim();
+    if(sid&&!sid.startsWith('price_')){showToast('Stripe price ID must start with price_','err');return;}
+    payload.stripe_price_id=sid||null;
+  }
   if(btn){btn.disabled=true;btn.textContent='Saving...';}
-  req('/admin/plans/'+id,{method:'PUT',body:JSON.stringify({price_monthly:val})})
+  req('/admin/plans/'+id,{method:'PUT',body:JSON.stringify(payload)})
     .then(function(d){
-      // Instant UI update — no reload needed
-      var card=inp.closest('.kc');
-      if(card){
-        var kv=card.querySelector('.kv');
-        if(kv)kv.innerHTML='£'+val+'<span style="font-size:12px;color:var(--ink3)">/mo</span>';
-        var ks=card.querySelector('.ks');
-        if(ks){var yr=Math.round(val*12*100)/100;ks.textContent='£'+yr+'/yr · '+(ks.textContent.split('·')[1]||'').trim();}
+      if(btn){btn.disabled=false;btn.textContent='✅ Saved!';}
+      setTimeout(function(){if(btn)btn.textContent='💾 Save changes';},2500);
+      // Update price display
+      var card=btn&&btn.closest('div[style]');
+      if(card&&payload.price_monthly!==undefined){
+        var priceEl=card.querySelector('[style*="font-size:26px"]');
+        if(priceEl)priceEl.innerHTML='£'+payload.price_monthly+'<span style="font-size:13px;font-weight:400;color:var(--ink3)">/mo</span>';
       }
-      if(btn){btn.disabled=false;btn.textContent='Saved ✓';setTimeout(function(){btn.textContent='Save';},2000);}
-      showToast('Plan price updated to £'+val+'/mo','ok');
+      // Update status dot
+      var hasPriceNow=!!(payload.stripe_price_id);
+      showToast('Plan updated successfully','ok');
+      loadPlans(); // refresh to update status dots
     }).catch(function(e){
-      if(btn){btn.disabled=false;btn.textContent='Save';}
+      if(btn){btn.disabled=false;btn.textContent='💾 Save changes';}
       showToast(e.message,'err');
     });
+}
+
+function togglePlan(id){
+  var cb=q('pActive_'+id);
+  req('/admin/plans/'+id,{method:'PUT',body:JSON.stringify({is_active:cb.checked})})
+    .then(function(){showToast(cb.checked?'Plan activated':'Plan deactivated','ok');})
+    .catch(function(e){cb.checked=!cb.checked;showToast(e.message,'err');});
 }
 
 // ANNOUNCEMENT

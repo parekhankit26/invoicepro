@@ -702,13 +702,15 @@ router.get('/plans', adminAuth, async (_req: any, res: Response) => {
 
 router.put('/plans/:id', adminAuth, async (req: any, res: Response) => {
   try {
-    const { price_monthly, price_yearly, max_invoices, max_clients, max_team_members } = (req as any).body
+    const { price_monthly, price_yearly, max_invoices, max_clients, max_team_members, stripe_price_id, is_active } = (req as any).body
     const updates: any = {}
     if (price_monthly !== undefined) updates.price_monthly = price_monthly
     if (price_yearly !== undefined) updates.price_yearly = price_yearly
     if (max_invoices !== undefined) updates.max_invoices = max_invoices
     if (max_clients !== undefined) updates.max_clients = max_clients
     if (max_team_members !== undefined) updates.max_team_members = max_team_members
+    if (stripe_price_id !== undefined) updates.stripe_price_id = stripe_price_id
+    if (is_active !== undefined) updates.is_active = is_active
     const { data, error } = await supabase.from('plans').update(updates).eq('id', req.params.id).select().single()
     if (error) return res.status(400).json({ error: error.message })
     await log(req.admin.id, 'plan_updated', 'plan', req.params.id, updates)

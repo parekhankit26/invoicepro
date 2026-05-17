@@ -1470,8 +1470,10 @@ function loadPlans(){
     q('planCards').innerHTML=plans.map(function(p){
       var c=planColors[p.slug]||'#888';
       var isFree=p.slug==='free';
-      var hasPrice=!!(p.stripe_price_id&&p.stripe_price_id.trim());
-      var statusDot=isFree?'':'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(hasPrice?'#16a34a':'#e5e7eb')+';margin-left:6px;vertical-align:middle" title="'+(hasPrice?'Stripe price set':'No price ID yet')+'"></span>';
+      var hasMonthly=!!(p.stripe_price_id&&p.stripe_price_id.trim());
+      var hasYearly=!!(p.stripe_price_id_yearly&&p.stripe_price_id_yearly.trim());
+      var bothSet=hasMonthly&&hasYearly;
+      var statusDot=isFree?'':'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(bothSet?'#16a34a':hasMonthly?'#f59e0b':'#e5e7eb')+';margin-left:6px;vertical-align:middle" title="'+(bothSet?'Monthly + yearly set':hasMonthly?'Monthly only — add yearly price ID':'No price IDs yet')+'"></span>';
 
       return '<div style="background:var(--white);border:1px solid var(--border);border-top:4px solid '+c+';border-radius:12px;padding:20px">'
         // Header
@@ -1486,12 +1488,19 @@ function loadPlans(){
         +(isFree?'':
           '<label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);display:block;margin-bottom:4px">Monthly price (£)</label>'
           +'<input class="fi" id="pPrice_'+p.id+'" value="'+p.price_monthly+'" type="number" step="0.01" min="0" style="margin-bottom:10px"/>'
+          +'<label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);display:block;margin-bottom:4px">Yearly price (£) <span style="font-weight:400;text-transform:none">total per year</span></label>'
+          +'<input class="fi" id="pPriceY_'+p.id+'" value="'+(p.price_yearly||'')+'" type="number" step="0.01" min="0" placeholder="e.g. 86 (saves 2 months)" style="margin-bottom:10px"/>'
         )
-        // Stripe price ID input
+        // Stripe price IDs
         +(isFree?'':
-          '<label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);display:block;margin-bottom:4px">Stripe price ID</label>'
-          +'<input class="fi" id="pStripe_'+p.id+'" value="'+(p.stripe_price_id||'')+'" placeholder="price_1ABC..." style="font-family:monospace;font-size:12px;margin-bottom:10px"/>'
-          +'<div style="font-size:11px;color:var(--ink3);margin-bottom:10px">Get this from Stripe Dashboard → Products → Price</div>'
+          '<div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:10px">'
+          +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);margin-bottom:8px">Stripe price IDs</div>'
+          +'<label style="font-size:11px;color:var(--ink2);display:block;margin-bottom:3px">Monthly (price_...)</label>'
+          +'<input class="fi" id="pStripe_'+p.id+'" value="'+(p.stripe_price_id||'')+'" placeholder="price_monthly..." style="font-family:monospace;font-size:12px;margin-bottom:8px"/>'
+          +'<label style="font-size:11px;color:var(--ink2);display:block;margin-bottom:3px">Yearly (price_...)</label>'
+          +'<input class="fi" id="pStripeY_'+p.id+'" value="'+(p.stripe_price_id_yearly||'')+'" placeholder="price_yearly..." style="font-family:monospace;font-size:12px;margin-bottom:4px"/>'
+          +'<div style="font-size:11px;color:var(--ink3)">Create two separate prices in Stripe Dashboard (one monthly, one yearly recurring)</div>'
+          +'</div>'
         )
         // Save button
         +(isFree?'<div class="al al-info" style="font-size:12px">Free plan — no payment required, no Stripe ID needed.</div>':
@@ -1504,9 +1513,20 @@ function loadPlans(){
 
 function savePlan(id){
   var priceInput=q('pPrice_'+id);
+  var priceYInput=q('pPriceY_'+id);
   var stripeInput=q('pStripe_'+id);
+  var stripeYInput=q('pStripeY_'+id);
   var btn=q('pSaveBtn_'+id);
   var payload={};
+  if(priceYInput&&priceYInput.value.trim()!==''){
+    var yval=parseFloat(priceYInput.value);
+    if(!isNaN(yval))payload.price_yearly=yval;
+  }
+  if(stripeYInput){
+    var sidy=stripeYInput.value.trim();
+    if(sidy&&!sidy.startsWith('price_')){showToast('Yearly Stripe price ID must start with price_','err');return;}
+    payload.stripe_price_id_yearly=sidy||null;
+  }
   if(priceInput){
     var val=parseFloat(priceInput.value);
     if(isNaN(val)||val<0){showToast('Invalid price','err');return;}

@@ -544,9 +544,11 @@ ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 
 SELECT 'Hostinger email pre-configured ✅' as status;
 
--- ── PLANS: STRIPE PRICE ID ───────────────────────────────────
+-- ── PLANS: STRIPE PRICE IDs ──────────────────────────────────
 ALTER TABLE plans ADD COLUMN IF NOT EXISTS stripe_price_id TEXT;
+ALTER TABLE plans ADD COLUMN IF NOT EXISTS stripe_price_id_yearly TEXT;
 CREATE INDEX IF NOT EXISTS idx_plans_stripe_price ON plans(stripe_price_id);
+CREATE INDEX IF NOT EXISTS idx_plans_stripe_price_yearly ON plans(stripe_price_id_yearly);
 
 -- ── STRIPE SUBSCRIPTION COLUMNS ──────────────────────────────
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT;

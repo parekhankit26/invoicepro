@@ -8,9 +8,8 @@ router.use(authenticate)
 
 const FRONTEND = process.env.FRONTEND_URL || 'https://invoicepro-ten.vercel.app'
 
-// Helper: fetch all plans from DB with Stripe price IDs
 async function getPlansFromDB() {
-  const { data } = await supabase.from('plans').select('slug, name, price_monthly, stripe_price_id, is_active').order('price_monthly')
+  const { data } = await supabase.from('plans').select('slug, name, price_monthly, price_yearly, stripe_price_id, stripe_price_id_yearly, is_active').order('price_monthly')
   return data || []
 }
 
@@ -31,9 +30,16 @@ router.get('/subscription', async (req: AuthRequest, res: Response) => {
     for (const p of plans) {
       if (p.slug === 'free') continue
       available_plans[p.slug] = {
-        price: p.price_monthly,
-        configured: stripeActive && !!p.stripe_price_id,
+        price_monthly: p.price_monthly,
+        price_yearly: p.price_yearly,
+        // yearly saving as percentage
+        yearly_saving: p.price_monthly && p.price_yearly
+          ? Math.round((1 - p.price_yearly / (p.price_monthly * 12)) * 100)
+          : 0,
+        monthly_configured: stripeActive && !!p.stripe_price_id,
+        yearly_configured: stripeActive && !!p.stripe_price_id_yearly,
         stripe_price_id: p.stripe_price_id || null,
+        stripe_price_id_yearly: p.stripe_price_id_yearly || null,
       }
     }
 
@@ -54,18 +60,21 @@ router.get('/subscription', async (req: AuthRequest, res: Response) => {
 // POST /api/billing/subscribe — create Stripe Checkout session
 router.post('/subscribe', async (req: AuthRequest, res: Response) => {
   try {
-    const { plan } = req.body
+    const { plan, billing_period = 'monthly' } = req.body
     if (!['starter', 'pro', 'enterprise'].includes(plan)) {
       return res.status(400).json({ error: 'Invalid plan' })
     }
-    if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_test_placeholder') {
-      return res.status(400).json({ error: 'Stripe is not configured. Add STRIPE_SECRET_KEY to Railway.' })
+    if (!['monthly', 'yearly'].includes(billing_period)) {
+      return res.status(400).json({ error: 'billing_period must be monthly or yearly' })
     }
 
-    // Fetch price ID from DB
-    const { data: planRow } = await supabase.from('plans').select('stripe_price_id, name').eq('slug', plan).single()
-    if (!planRow?.stripe_price_id) {
-      return res.status(400).json({ error: `No Stripe price ID set for the ${plan} plan. Set it in the admin panel → Plans.` })
+    const { data: planRow } = await supabase.from('plans').select('stripe_price_id, stripe_price_id_yearly, name').eq('slug', plan).single()
+
+    const priceId = billing_period === 'yearly' ? planRow?.stripe_price_id_yearly : planRow?.stripe_price_id
+
+    if (!priceId) {
+      const period = billing_period === 'yearly' ? 'yearly' : 'monthly'
+      return res.status(400).json({ error: `No Stripe ${period} price ID set for the ${plan} plan. Add it in admin panel → Plans.` })
     }
 
     const { data: profile } = await supabase.from('profiles')
@@ -75,9 +84,9 @@ router.post('/subscribe', async (req: AuthRequest, res: Response) => {
       userId: (req as any).user!.id,
       email: (req as any).user!.email,
       plan,
-      priceId: planRow.stripe_price_id,
+      priceId,
       customerId: profile?.stripe_customer_id || undefined,
-      successUrl: `${FRONTEND}/enterprise?upgrade=success&plan=${plan}`,
+      successUrl: `${FRONTEND}/enterprise?upgrade=success&plan=${plan}&period=${billing_period}`,
       cancelUrl:  `${FRONTEND}/enterprise?upgrade=cancelled`,
     })
 
@@ -90,9 +99,6 @@ router.post('/subscribe', async (req: AuthRequest, res: Response) => {
 // POST /api/billing/portal — Stripe billing portal
 router.post('/portal', async (req: AuthRequest, res: Response) => {
   try {
-    if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_test_placeholder') {
-      return res.status(400).json({ error: 'Stripe is not configured.' })
-    }
     const { data: profile } = await supabase.from('profiles')
       .select('stripe_customer_id').eq('id', (req as any).user!.id).single()
     if (!profile?.stripe_customer_id) {

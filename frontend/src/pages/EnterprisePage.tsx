@@ -113,15 +113,29 @@ const PLANS = [
 
 function UpgradeModal({ currentPlan, subInfo, onClose }: { currentPlan: string; subInfo: any; onClose: () => void }) {
   const [selected, setSelected] = useState(currentPlan === 'free' ? 'pro' : currentPlan === 'starter' ? 'pro' : 'enterprise')
+  const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly')
   const [loading, setLoading] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
 
-  const stripeConfigured = subInfo?.available_plans?.[selected]?.configured
+  const planInfo = subInfo?.available_plans?.[selected]
+  const stripeConfigured = billing === 'yearly'
+    ? planInfo?.yearly_configured
+    : planInfo?.monthly_configured
+  // fall back to old 'configured' field for backwards compat
+  const stripeReady = stripeConfigured ?? planInfo?.configured
+
+  const selectedPlan = PLANS.find(p => p.id === selected)
+  const monthlyPrice = planInfo?.price_monthly ?? selectedPlan?.price
+  const yearlyPrice = planInfo?.price_yearly
+  const yearlyPerMonth = yearlyPrice ? Math.round((yearlyPrice / 12) * 100) / 100 : null
+  const yearlySaving = planInfo?.yearly_saving ?? 0
+
+  const displayPrice = billing === 'yearly' && yearlyPerMonth ? yearlyPerMonth : monthlyPrice
 
   const handleStripeCheckout = async () => {
     setLoading(true)
     try {
-      const data = await api.post<any>('/billing/subscribe', { plan: selected })
+      const data = await api.post<any>('/billing/subscribe', { plan: selected, billing_period: billing })
       window.location.href = data.url
     } catch (e: any) {
       toast.error(e.message)
@@ -132,31 +146,63 @@ function UpgradeModal({ currentPlan, subInfo, onClose }: { currentPlan: string; 
   const handleEmailRequest = () => {
     const plan = PLANS.find(p => p.id === selected)
     const subject = encodeURIComponent(`Upgrade request — ${plan?.label} plan`)
-    const body = encodeURIComponent(`Hi,\n\nI'd like to upgrade my InvoicePro account to the ${plan?.label} plan (£${plan?.price}/month).\n\nPlease let me know how to proceed.\n\nThank you!`)
+    const body = encodeURIComponent(`Hi,\n\nI'd like to upgrade my InvoicePro account to the ${plan?.label} plan (${billing}).\n\nPlease let me know how to proceed.\n\nThank you!`)
     window.open(`mailto:support@invoicepro.com?subject=${subject}&body=${body}`, '_blank')
     setEmailSent(true)
   }
 
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="modal-box" style={{ maxWidth: 680 }}>
+      <div className="modal-box" style={{ maxWidth: 700 }}>
         <div className="modal-header">
           <div>
             <h2 style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.02em' }}>Upgrade your plan</h2>
             <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
-              {stripeConfigured ? 'Instant activation — pay securely with Stripe' : 'Choose a plan and we\'ll get you set up'}
+              {stripeReady ? 'Instant activation — pay securely with Stripe' : 'Choose a plan and we\'ll get you set up'}
             </p>
           </div>
           <button className="btn btn-ghost btn-icon" onClick={onClose}><X size={18}/></button>
         </div>
 
         <div className="modal-body">
+          {/* Monthly / Yearly toggle */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+            <div style={{ display: 'inline-flex', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 10, padding: 3, gap: 3 }}>
+              <button
+                onClick={() => setBilling('monthly')}
+                style={{ padding: '7px 20px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13, fontFamily: 'inherit', transition: 'all .15s',
+                  background: billing === 'monthly' ? 'var(--surface)' : 'transparent',
+                  color: billing === 'monthly' ? 'var(--text)' : 'var(--text-muted)',
+                  boxShadow: billing === 'monthly' ? '0 1px 4px rgba(0,0,0,.08)' : 'none',
+                }}>Monthly</button>
+              <button
+                onClick={() => setBilling('yearly')}
+                style={{ padding: '7px 20px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13, fontFamily: 'inherit', transition: 'all .15s', display: 'flex', alignItems: 'center', gap: 6,
+                  background: billing === 'yearly' ? 'var(--surface)' : 'transparent',
+                  color: billing === 'yearly' ? 'var(--text)' : 'var(--text-muted)',
+                  boxShadow: billing === 'yearly' ? '0 1px 4px rgba(0,0,0,.08)' : 'none',
+                }}>
+                Yearly
+                {yearlySaving > 0 && (
+                  <span style={{ background: '#dcfce7', color: '#15803d', fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 20 }}>
+                    SAVE {yearlySaving}%
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+
           {/* Plan cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
             {PLANS.map(plan => {
               const isSelected = selected === plan.id
               const isCurrent = currentPlan === plan.id
               const isDowngrade = ['free','starter','pro','enterprise'].indexOf(plan.id) < ['free','starter','pro','enterprise'].indexOf(currentPlan)
+              const pInfo = subInfo?.available_plans?.[plan.id]
+              const pMonthly = pInfo?.price_monthly ?? plan.price
+              const pYearly = pInfo?.price_yearly
+              const pYearlyPerMonth = pYearly ? Math.round((pYearly / 12) * 100) / 100 : null
+              const showPrice = billing === 'yearly' && pYearlyPerMonth ? pYearlyPerMonth : pMonthly
               return (
                 <div key={plan.id}
                   onClick={() => !isCurrent && !isDowngrade && setSelected(plan.id)}
@@ -179,9 +225,17 @@ function UpgradeModal({ currentPlan, subInfo, onClose }: { currentPlan: string; 
                     </div>
                   )}
                   <div style={{ fontWeight: 700, fontSize: 15, color: plan.color, marginBottom: 4 }}>{plan.label}</div>
-                  <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 12 }}>
-                    £{plan.price}<span style={{ fontSize: 13, fontWeight: 400, color: 'var(--text-muted)' }}>/mo</span>
+                  <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 2 }}>
+                    £{showPrice}<span style={{ fontSize: 13, fontWeight: 400, color: 'var(--text-muted)' }}>/mo</span>
                   </div>
+                  {billing === 'yearly' && pYearly && (
+                    <div style={{ fontSize: 11, color: '#15803d', fontWeight: 600, marginBottom: 10 }}>
+                      £{pYearly}/year · 2 months free
+                    </div>
+                  )}
+                  {billing === 'monthly' && (
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>billed monthly</div>
+                  )}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {plan.features.map(f => (
                       <div key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 12 }}>
@@ -209,7 +263,7 @@ function UpgradeModal({ currentPlan, subInfo, onClose }: { currentPlan: string; 
                 <div style={{ fontSize: 12, color: '#166534', marginTop: 2 }}>We'll confirm and activate your plan within 24 hours.</div>
               </div>
             </div>
-          ) : stripeConfigured ? (
+          ) : stripeReady ? (
             <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '12px 14px', fontSize: 13, color: '#166534', display: 'flex', alignItems: 'center', gap: 8 }}>
               <CheckCircle size={14} color="#16a34a"/>
               Secure payment via Stripe — your plan activates instantly after payment
@@ -217,20 +271,20 @@ function UpgradeModal({ currentPlan, subInfo, onClose }: { currentPlan: string; 
           ) : (
             <div style={{ background: 'var(--bg)', borderRadius: 10, padding: '12px 14px', fontSize: 13, color: 'var(--text-muted)' }}>
               <Zap size={13} style={{ marginRight: 6, verticalAlign: 'middle', color: '#b45309' }}/>
-              Stripe not yet configured — clicking below sends an email upgrade request instead
+              {billing === 'yearly' ? 'Yearly price ID not set in admin panel yet — switching to email request' : 'Stripe not yet configured — clicking below sends an email upgrade request instead'}
             </div>
           )}
         </div>
 
         <div className="modal-footer">
           <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
-          {stripeConfigured ? (
+          {stripeReady ? (
             <button className="btn btn-primary" onClick={handleStripeCheckout} disabled={loading || currentPlan === selected}>
-              {loading ? 'Redirecting to Stripe...' : `Subscribe to ${PLANS.find(p => p.id === selected)?.label} — £${PLANS.find(p => p.id === selected)?.price}/mo`}
+              {loading ? 'Redirecting to Stripe...' : `Subscribe — £${billing === 'yearly' && yearlyPrice ? yearlyPrice + '/yr' : displayPrice + '/mo'}`}
             </button>
           ) : (
             <button className="btn btn-primary" onClick={handleEmailRequest} disabled={emailSent || currentPlan === selected}>
-              {emailSent ? 'Request sent ✓' : `Request ${PLANS.find(p => p.id === selected)?.label} plan`}
+              {emailSent ? 'Request sent ✓' : `Request ${selectedPlan?.label} plan`}
             </button>
           )}
         </div>

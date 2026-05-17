@@ -1487,9 +1487,19 @@ function loadPlans(){
         // Monthly price input
         +(isFree?'':
           '<label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);display:block;margin-bottom:4px">Monthly price (£)</label>'
-          +'<input class="fi" id="pPrice_'+p.id+'" value="'+p.price_monthly+'" type="number" step="0.01" min="0" style="margin-bottom:10px"/>'
-          +'<label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);display:block;margin-bottom:4px">Yearly price (£) <span style="font-weight:400;text-transform:none">total per year</span></label>'
-          +'<input class="fi" id="pPriceY_'+p.id+'" value="'+(p.price_yearly||'')+'" type="number" step="0.01" min="0" placeholder="e.g. 86 (saves 2 months)" style="margin-bottom:10px"/>'
+          +'<input class="fi" id="pPrice_'+p.id+'" value="'+p.price_monthly+'" type="number" step="0.01" min="0" style="margin-bottom:10px" oninput="calcYearly(\''+p.id+'\')" />'
+          // Yearly discount % + auto-calculated price
+          +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
+          +'<div>'
+          +'<label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);display:block;margin-bottom:4px">Yearly discount (%)</label>'
+          +'<input class="fi" id="pDiscount_'+p.id+'" value="'+(p.price_monthly&&p.price_yearly&&p.price_yearly<p.price_monthly*12?Math.round((1-p.price_yearly/(p.price_monthly*12))*100):'')+'" type="number" step="1" min="0" max="80" placeholder="e.g. 15" oninput="calcYearly(\''+p.id+'\')" />'
+          +'</div>'
+          +'<div>'
+          +'<label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);display:block;margin-bottom:4px">Yearly total (£) <span style="font-weight:400;text-transform:none">auto-calculated</span></label>'
+          +'<input class="fi" id="pPriceY_'+p.id+'" value="'+(p.price_yearly||'')+'" type="number" step="0.01" min="0" placeholder="auto" oninput="syncDiscount(\''+p.id+'\')" style="background:var(--bg)" />'
+          +'</div>'
+          +'</div>'
+          +'<div id="pYearlySaving_'+p.id+'" style="font-size:12px;color:var(--green);margin-top:-6px;margin-bottom:10px;min-height:16px"></div>'
         )
         // Stripe price IDs
         +(isFree?'':
@@ -1509,6 +1519,39 @@ function loadPlans(){
         +'</div>';
     }).join('');
   }).catch(function(e){showToast(e.message,'err');});
+}
+
+function calcYearly(id) {
+  var monthly = parseFloat(q('pPrice_'+id)?.value || 0);
+  var disc = parseFloat(q('pDiscount_'+id)?.value || 0);
+  if (!monthly || isNaN(monthly)) return;
+  var yearly = Math.round(monthly * 12 * (1 - disc/100) * 100) / 100;
+  if (q('pPriceY_'+id)) q('pPriceY_'+id).value = yearly;
+  updateSavingLabel(id, monthly, yearly, disc);
+}
+
+function syncDiscount(id) {
+  var monthly = parseFloat(q('pPrice_'+id)?.value || 0);
+  var yearly = parseFloat(q('pPriceY_'+id)?.value || 0);
+  if (!monthly || !yearly) return;
+  var disc = Math.round((1 - yearly / (monthly * 12)) * 100);
+  if (q('pDiscount_'+id)) q('pDiscount_'+id).value = disc > 0 ? disc : '';
+  updateSavingLabel(id, monthly, yearly, disc);
+}
+
+function updateSavingLabel(id, monthly, yearly, disc) {
+  var el = q('pYearlySaving_'+id);
+  if (!el) return;
+  if (yearly && monthly && disc > 0) {
+    var saved = Math.round((monthly * 12 - yearly) * 100) / 100;
+    el.innerHTML = '✅ Customer saves £' + saved.toFixed(2) + '/yr (' + disc + '% off) vs paying monthly';
+    el.style.color = 'var(--green)';
+  } else if (yearly && monthly) {
+    el.innerHTML = 'No discount — same as paying monthly';
+    el.style.color = 'var(--ink3)';
+  } else {
+    el.innerHTML = '';
+  }
 }
 
 function savePlan(id){

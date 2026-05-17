@@ -1679,18 +1679,29 @@ function renderRegionalTab(cur){
   var sym=_currencySymbols[cur]||cur;
   var countries=_currencyCountries[cur]||'';
   var isGBP=cur==='GBP';
+  // Derive existing discount % from saved data
+  var existingDisc='';
+  if(d.price_monthly&&d.price_yearly&&d.price_yearly<d.price_monthly*12){
+    existingDisc=Math.round((1-d.price_yearly/(d.price_monthly*12))*100);
+  }
   q('regionalTabContent').innerHTML=
     '<div style="font-size:11px;color:var(--ink2);margin-bottom:14px;background:var(--bg);border-radius:8px;padding:10px 12px">'
     +(isGBP?'GBP is the <strong>default currency</strong> from the Plans section above. Set regional prices here only if you want Indian, US, or EU users to see different prices.'
       :'Countries: <strong>'+countries+'</strong> — users from these regions will see '+sym+' prices.')
     +'</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">'
-    +'<div><label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);display:block;margin-bottom:4px">Monthly price ('+sym+')</label>'
-    +'<input class="fi" id="rMonthly" type="number" step="0.01" min="0" placeholder="e.g. '+(cur==='INR'?'799':cur==='USD'?'12':'11')+'" value="'+(d.price_monthly||'')+'" oninput="calcRYearly()" /></div>'
-    +'<div><label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);display:block;margin-bottom:4px">Yearly total ('+sym+')</label>'
-    +'<input class="fi" id="rYearly" type="number" step="0.01" min="0" placeholder="auto" value="'+(d.price_yearly||'')+'" style="background:var(--bg)" /></div>'
+    // Monthly price
+    +'<label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);display:block;margin-bottom:4px">Monthly price ('+sym+')</label>'
+    +'<input class="fi" id="rMonthly" type="number" step="0.01" min="0" placeholder="e.g. '+(cur==='INR'?'799':cur==='USD'?'12':'11')+'" value="'+(d.price_monthly||'')+'" oninput="calcRYearly()" style="margin-bottom:10px"/>'
+    // Discount % + Yearly total side by side
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px">'
+    +'<div><label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);display:block;margin-bottom:4px">Yearly discount (%)</label>'
+    +'<input class="fi" id="rDiscount" type="number" step="1" min="0" max="80" placeholder="e.g. 15" value="'+existingDisc+'" oninput="calcRYearly()" /></div>'
+    +'<div><label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);display:block;margin-bottom:4px">Yearly total ('+sym+') <span style="font-weight:400;text-transform:none">auto-calc</span></label>'
+    +'<input class="fi" id="rYearly" type="number" step="0.01" min="0" placeholder="auto" value="'+(d.price_yearly||'')+'" style="background:var(--bg)" oninput="syncRDiscount()" /></div>'
     +'</div>'
-    +'<div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:12px">'
+    +'<div id="rSavingLabel" style="font-size:12px;min-height:16px;margin-bottom:12px"></div>'
+    // Stripe price IDs
+    +'<div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:4px">'
     +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);margin-bottom:8px">Stripe price IDs ('+cur+')</div>'
     +'<label style="font-size:11px;color:var(--ink2);display:block;margin-bottom:3px">Monthly price ID</label>'
     +'<input class="fi" id="rStripeM" value="'+(d.stripe_price_id||'')+'" placeholder="price_..." style="font-family:monospace;font-size:12px;margin-bottom:8px"/>'
@@ -1698,13 +1709,46 @@ function renderRegionalTab(cur){
     +'<input class="fi" id="rStripeY" value="'+(d.stripe_price_id_yearly||'')+'" placeholder="price_..." style="font-family:monospace;font-size:12px;margin-bottom:4px"/>'
     +'<div style="font-size:11px;color:var(--ink3);margin-top:6px">⚠️ Create these prices in Stripe Dashboard in <strong>'+cur+'</strong> currency — Stripe requires separate price objects per currency.</div>'
     +'</div>';
+  // Trigger label update for existing data
+  if(d.price_monthly&&d.price_yearly) updateRSavingLabel();
 }
 
 function calcRYearly(){
-  var m=parseFloat(q('rMonthly')&&q('rMonthly').value||0);
+  var m=parseFloat((q('rMonthly')&&q('rMonthly').value)||0);
+  var disc=parseFloat((q('rDiscount')&&q('rDiscount').value)||0);
   if(!m||isNaN(m))return;
-  var y=Math.round(m*12*0.85*100)/100; // default 15% discount suggestion
-  if(!(q('rYearly').value)) q('rYearly').value=y;
+  var y=Math.round(m*12*(1-disc/100)*100)/100;
+  if(q('rYearly')) q('rYearly').value=y;
+  updateRSavingLabel();
+}
+
+function syncRDiscount(){
+  var m=parseFloat((q('rMonthly')&&q('rMonthly').value)||0);
+  var y=parseFloat((q('rYearly')&&q('rYearly').value)||0);
+  if(!m||!y)return;
+  var disc=Math.round((1-y/(m*12))*100);
+  if(q('rDiscount')) q('rDiscount').value=disc>0?disc:'';
+  updateRSavingLabel();
+}
+
+function updateRSavingLabel(){
+  var el=q('rSavingLabel');
+  if(!el)return;
+  var cur=_regionalCurrency;
+  var sym=_currencySymbols[cur]||cur;
+  var m=parseFloat((q('rMonthly')&&q('rMonthly').value)||0);
+  var y=parseFloat((q('rYearly')&&q('rYearly').value)||0);
+  var disc=parseFloat((q('rDiscount')&&q('rDiscount').value)||0);
+  if(y&&m&&disc>0){
+    var saved=Math.round((m*12-y)*100)/100;
+    el.innerHTML='✅ Customer saves '+sym+saved.toFixed(2)+'/yr ('+disc+'% off) vs paying monthly';
+    el.style.color='var(--green)';
+  } else if(y&&m){
+    el.innerHTML='No discount — same as paying monthly';
+    el.style.color='var(--ink3)';
+  } else {
+    el.innerHTML='';
+  }
 }
 
 function saveRegionalCurrency(){

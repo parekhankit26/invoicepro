@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
-import { Key, Users, Globe, FileText, Download, Plus, Trash2, Copy, X, Shield, CheckCircle, Clock, ArrowRight, Sparkles } from 'lucide-react'
+import { Key, Users, Globe, FileText, Download, Plus, Trash2, Copy, X, Shield, CheckCircle, Clock, ArrowRight, Sparkles, Zap } from 'lucide-react'
 import { api } from '../lib/api'
 import { formatCurrency, formatDate } from '../lib/utils'
 import toast from 'react-hot-toast'
@@ -80,8 +80,125 @@ export default function EnterprisePage() {
   )
 }
 
+// ── UPGRADE MODAL ────────────────────────────────────────
+const PLANS = [
+  {
+    id: 'starter', label: 'Starter', price: 9, color: '#1d4ed8', bg: '#eff6ff', border: '#bfdbfe',
+    features: ['Unlimited invoices & quotes', 'Client portal links', 'WhatsApp notifications', 'PDF generation', 'Email support'],
+  },
+  {
+    id: 'pro', label: 'Pro', price: 19, color: '#6d28d9', bg: '#ede9fe', border: '#c4b5fd',
+    features: ['Everything in Starter', 'Team members (up to 10)', 'Role-based access', 'Advanced reports', 'Priority support'],
+    popular: true,
+  },
+  {
+    id: 'enterprise', label: 'Enterprise', price: 49, color: '#92400e', bg: '#fef3c7', border: '#fcd34d',
+    features: ['Everything in Pro', 'Unlimited team members', 'White label branding', 'API access', 'Custom domain', 'Tax report export', 'Dedicated support'],
+  },
+]
+
+function UpgradeModal({ currentPlan, onClose }: { currentPlan: string; onClose: () => void }) {
+  const [selected, setSelected] = useState('pro')
+  const [sent, setSent] = useState(false)
+
+  const handleRequest = () => {
+    const plan = PLANS.find(p => p.id === selected)
+    const subject = encodeURIComponent(`Upgrade request — ${plan?.label} plan`)
+    const body = encodeURIComponent(`Hi,\n\nI'd like to upgrade my InvoicePro account to the ${plan?.label} plan (£${plan?.price}/month).\n\nPlease let me know how to proceed.\n\nThank you!`)
+    window.open(`mailto:support@invoicepro.com?subject=${subject}&body=${body}`, '_blank')
+    setSent(true)
+  }
+
+  return (
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal-box" style={{ maxWidth: 680 }}>
+        <div className="modal-header">
+          <div>
+            <h2 style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.02em' }}>Upgrade your plan</h2>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Choose a plan and we'll get you set up</p>
+          </div>
+          <button className="btn btn-ghost btn-icon" onClick={onClose}><X size={18}/></button>
+        </div>
+
+        <div className="modal-body">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
+            {PLANS.map(plan => {
+              const isSelected = selected === plan.id
+              const isCurrent = currentPlan === plan.id
+              return (
+                <div key={plan.id}
+                  onClick={() => !isCurrent && setSelected(plan.id)}
+                  style={{
+                    border: `2px solid ${isSelected ? plan.color : 'var(--border)'}`,
+                    borderRadius: 12, padding: '16px 14px', cursor: isCurrent ? 'default' : 'pointer',
+                    background: isSelected ? plan.bg : 'var(--surface)',
+                    transition: 'all .15s', position: 'relative',
+                    opacity: isCurrent ? 0.5 : 1,
+                  }}>
+                  {plan.popular && !isCurrent && (
+                    <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', background: plan.color, color: 'white', fontSize: 10, fontWeight: 700, padding: '2px 10px', borderRadius: 20, whiteSpace: 'nowrap', letterSpacing: '0.04em' }}>
+                      MOST POPULAR
+                    </div>
+                  )}
+                  {isCurrent && (
+                    <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', background: 'var(--text-subtle)', color: 'white', fontSize: 10, fontWeight: 700, padding: '2px 10px', borderRadius: 20, whiteSpace: 'nowrap' }}>
+                      CURRENT
+                    </div>
+                  )}
+                  <div style={{ fontWeight: 700, fontSize: 15, color: plan.color, marginBottom: 4 }}>{plan.label}</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 12 }}>
+                    £{plan.price}<span style={{ fontSize: 13, fontWeight: 400, color: 'var(--text-muted)' }}>/mo</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {plan.features.map(f => (
+                      <div key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 12 }}>
+                        <CheckCircle size={12} color={plan.color} style={{ flexShrink: 0, marginTop: 1 }}/>
+                        <span style={{ color: 'var(--text-muted)' }}>{f}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {isSelected && !isCurrent && (
+                    <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${plan.border}` }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: plan.color, fontWeight: 600 }}>
+                        <CheckCircle size={12}/> Selected
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          {sent ? (
+            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <CheckCircle size={18} color="#16a34a"/>
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 13, color: '#15803d' }}>Upgrade request sent!</div>
+                <div style={{ fontSize: 12, color: '#166534', marginTop: 2 }}>We'll confirm your upgrade and activate it within 24 hours.</div>
+              </div>
+            </div>
+          ) : (
+            <div style={{ background: 'var(--bg)', borderRadius: 10, padding: '12px 14px', fontSize: 13, color: 'var(--text-muted)' }}>
+              <Zap size={13} style={{ marginRight: 6, verticalAlign: 'middle', color: '#b45309' }}/>
+              Clicking below will open your email app with a pre-filled upgrade request. We activate your plan manually within 24 hours.
+            </div>
+          )}
+        </div>
+
+        <div className="modal-footer">
+          <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={handleRequest} disabled={sent || currentPlan === selected}>
+            {sent ? 'Request sent ✓' : `Request ${PLANS.find(p => p.id === selected)?.label} plan`}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── OVERVIEW TAB ─────────────────────────────────────────
 function OverviewTab({ plan, profile, onGoTab }: { plan: string; profile: any; onGoTab: (t: string) => void }) {
+  const [showUpgrade, setShowUpgrade] = useState(false)
   const isEnterprise = plan === 'enterprise'
   const isPro = plan === 'pro' || isEnterprise
 
@@ -273,12 +390,14 @@ function OverviewTab({ plan, profile, onGoTab }: { plan: string; profile: any; o
               <Sparkles size={13} style={{ marginRight: 4, verticalAlign: 'middle', color: '#b45309' }} />
               Upgrade to Enterprise to unlock all features
             </div>
-            <button className="btn btn-sm btn-primary" onClick={() => toast('Contact us to upgrade your plan')}>
-              Upgrade plan
+            <button className="btn btn-sm btn-primary" onClick={() => { setShowUpgrade(true); modalState.open() }}>
+              <Zap size={13}/> Upgrade plan
             </button>
           </div>
         )}
       </div>
+
+      {showUpgrade && <UpgradeModal currentPlan={plan} onClose={() => { setShowUpgrade(false); modalState.close() }} />}
     </div>
   )
 }

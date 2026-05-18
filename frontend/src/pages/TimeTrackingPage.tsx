@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Clock, Trash2, FileText, X, Play, Square } from 'lucide-react'
+import { Plus, Clock, Trash2, FileText, X } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { api } from '../lib/api'
 import { formatCurrency, formatDate } from '../lib/utils'
@@ -13,7 +13,6 @@ export default function TimeTrackingPage() {
   const [showConvertModal, setShowConvertModal] = useState(false)
   const [selectedEntries, setSelectedEntries] = useState<string[]>([])
   const [filterClient, setFilterClient] = useState('')
-  const [timer, setTimer] = useState<{ running: boolean; start: Date | null; seconds: number }>({ running: false, start: null, seconds: 0 })
 
   const { data, isLoading } = useQuery({
     queryKey: ['time-entries', filterClient],
@@ -168,6 +167,8 @@ export default function TimeTrackingPage() {
 }
 
 function LogTimeModal({ clients, onClose, onSave }: any) {
+  const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: () => api.get<any>('/auth/profile') })
+  const currencySymbol = profile?.default_currency === 'USD' ? '$' : profile?.default_currency === 'EUR' ? '€' : profile?.default_currency === 'INR' ? '₹' : '£'
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: { date: new Date().toISOString().split('T')[0], hours: 1, hourly_rate: 75, is_billable: true }
   })
@@ -216,7 +217,7 @@ function LogTimeModal({ clients, onClose, onSave }: any) {
                 <input {...(register as any)('hours', { required: true, valueAsNumber: true })} className="form-input" type="number" min="0.1" step="0.25" />
               </div>
               <div className="form-group">
-                <label className="form-label">Hourly rate (£) *</label>
+                <label className="form-label">Hourly rate ({currencySymbol}) *</label>
                 <input {...(register as any)('hourly_rate', { required: true, valueAsNumber: true })} className="form-input" type="number" min="0" step="0.01" />
               </div>
               <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

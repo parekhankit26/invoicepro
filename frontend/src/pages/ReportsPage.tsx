@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, AreaChart, Area } from 'recharts'
 import { api } from '../lib/api'
@@ -9,7 +8,6 @@ import toast from 'react-hot-toast'
 const COLORS = ['#1a1814','#4b5563','#6b7280','#9ca3af','#d1d5db','#374151','#111827']
 
 export default function ReportsPage() {
-  const [dateRange, setDateRange] = useState('all')
   const { data, isLoading } = useQuery({ queryKey: ['dashboard'], queryFn: () => api.get<any>('/dashboard/overview') })
   const { data: expSummary } = useQuery({ queryKey: ['expense-summary'], queryFn: () => api.get<any>('/expenses/summary') })
   const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: () => api.get<any>('/auth/profile') })

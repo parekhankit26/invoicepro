@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { CURRENCIES } from '../lib/utils'
 import { COUNTRY_LIST, COUNTRY_TAX_CONFIGS, CURRENCY_TO_COUNTRY } from '../lib/taxSystem'
@@ -9,6 +10,7 @@ import toast from 'react-hot-toast'
 
 export default function SettingsPage() {
   const qc = useQueryClient()
+  const navigate = useNavigate()
   const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: () => api.get<any>('/auth/profile') })
   const { register, handleSubmit, reset, watch, setValue } = useForm()
 
@@ -124,7 +126,7 @@ export default function SettingsPage() {
                       <div style={{ fontSize: 11, color: 'var(--text-subtle)', marginBottom: 8 }}>{features}</div>
                       {active
                         ? <span className="badge badge-paid">Current plan</span>
-                        : <button type="button" className="btn btn-sm btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => toast('Contact us to upgrade your plan')}>Upgrade</button>
+                        : <button type="button" className="btn btn-sm btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => navigate('/enterprise')}>Upgrade</button>
                       }
                     </div>
                   )

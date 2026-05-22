@@ -3,10 +3,21 @@ import { stripeService } from '../services/stripeService'
 import { supabase } from '../lib/supabase'
 import { emailService } from '../services/emailService'
 
-// Look up plan slug from Stripe price ID via DB
+// Look up plan slug from Stripe price ID via DB — checks monthly, yearly, and regional price IDs
 async function planFromPriceId(priceId: string): Promise<string | null> {
-  const { data } = await supabase.from('plans').select('slug').eq('stripe_price_id', priceId).single()
-  return data?.slug || null
+  // Check default plans (monthly and yearly)
+  const { data } = await supabase.from('plans').select('slug')
+    .or(`stripe_price_id.eq.${priceId},stripe_price_id_yearly.eq.${priceId}`).maybeSingle()
+  if (data?.slug) return data.slug
+
+  // Check regional pricing table
+  const { data: regional } = await supabase.from('plan_regional_pricing').select('plan_id')
+    .or(`stripe_price_id.eq.${priceId},stripe_price_id_yearly.eq.${priceId}`).maybeSingle()
+  if (regional?.plan_id) {
+    const { data: plan } = await supabase.from('plans').select('slug').eq('id', regional.plan_id).single()
+    return plan?.slug || null
+  }
+  return null
 }
 
 const router = Router()
@@ -30,7 +41,9 @@ router.post('/stripe', async (req: Request, res: Response) => {
       if (invoice) {
         await supabase.from('invoices').update({ status: 'paid', amount_paid: obj.amount_total / 100, paid_at: new Date().toISOString() }).eq('id', invoiceId)
         await supabase.from('payments').insert({ user_id: invoice.user_id, invoice_id: invoiceId, amount: obj.amount_total / 100, currency: obj.currency.toUpperCase(), method: 'stripe', stripe_payment_id: obj.payment_intent, status: 'completed' })
-        if (invoice.clients) await emailService.sendPaymentConfirmation({ invoice, client: invoice.clients })
+        if (invoice.clients?.email) {
+          await emailService.sendPaymentConfirmation({ to: invoice.clients.email, clientName: invoice.clients.name, invoice }).catch((e: any) => console.error('Payment confirmation email failed:', e.message))
+        }
       }
     }
   }

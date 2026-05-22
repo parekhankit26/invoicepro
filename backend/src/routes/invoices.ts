@@ -133,8 +133,19 @@ router.post('/:id/send', async (req: AuthRequest, res: Response) => {
     try { paymentLink = await stripeService.createPaymentLink(invoice); await supabase.from('invoices').update({ stripe_payment_link: paymentLink }).eq('id', invoice.id) } catch(e) {}
 
     try {
-      const pdfBuffer = await pdfService.generateInvoicePDF(invoice)
-      await emailService.sendInvoice({ to: invoice.clients.email, clientName: invoice.clients.name, invoice: { ...invoice, stripe_payment_link: paymentLink }, pdfBuffer })
+      // Build invoice data with all fields the PDF renderer needs
+      const invoiceForPdf: any = {
+        ...invoice,
+        items: invoice.invoice_items || [],
+        company_name: invProfile?.company_name || invProfile?.full_name || 'Your Company',
+        from_address: invProfile?.company_address || '',
+        client_name: invoice.clients?.name || '',
+        client_email: invoice.clients?.email || '',
+        client_address: invoice.clients?.address || '',
+        stripe_payment_link: paymentLink,
+      }
+      const pdfBuffer = await pdfService.generateInvoicePDF(invoiceForPdf)
+      await emailService.sendInvoice({ to: invoice.clients.email, clientName: invoice.clients.name, invoice: invoiceForPdf, pdfBuffer })
       await supabase.from('invoices').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', invoice.id)
       return res.json({ message: `Invoice sent to ${invoice.clients.email}`, payment_link: paymentLink, email_sent: true })
     } catch (emailErr: any) {

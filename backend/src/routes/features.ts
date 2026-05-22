@@ -148,7 +148,7 @@ router.post('/satisfaction/send/:invoiceId', authenticate, async (req: AuthReque
     // Send email (simple version)
     try {
       const { emailService } = await import('../services/emailService')
-      await emailService.sendSatisfactionSurvey({ to: invoice.clients.email, clientName: invoice.clients.name, companyName, surveyUrl, invoice })
+      await emailService.sendSatisfactionSurvey({ to: invoice.clients.email, clientName: invoice.clients.name, companyName, surveyUrl, invoiceNumber: invoice.invoice_number })
     } catch(emailErr) { console.log('Survey email not sent:', emailErr) }
 
     return res.json({ message: 'Satisfaction survey sent!', survey_url: surveyUrl })

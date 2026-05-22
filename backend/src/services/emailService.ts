@@ -89,6 +89,25 @@ async function sendEmail(to: string, subject: string, html: string, attachments?
   await transporter.sendMail({ from: fromStr, to, subject, html, attachments })
 }
 
+// Currency code → symbol helper (covers all 60+ currencies in the system)
+const sym = (currency: string): string => {
+  const map: Record<string, string> = {
+    GBP:'£', USD:'$', EUR:'€', INR:'₹', CAD:'C$', AUD:'A$', NZD:'NZ$', SGD:'S$',
+    CHF:'Fr', JPY:'¥', CNY:'¥', HKD:'HK$', KRW:'₩', MYR:'RM', THB:'฿', IDR:'Rp',
+    PHP:'₱', VND:'₫', BDT:'৳', PKR:'₨', LKR:'Rs', NPR:'Rs', AED:'د.إ', SAR:'﷼',
+    QAR:'QR', KWD:'KD', BHD:'BD', OMR:'OMR', ILS:'₪', TRY:'₺', EGP:'E£', ZAR:'R',
+    NGN:'₦', KES:'KSh', GHS:'₵', MAD:'MAD', SEK:'kr', NOK:'kr', DKK:'kr', PLN:'zł',
+    CZK:'Kč', HUF:'Ft', RON:'lei', BGN:'лв', RUB:'₽', UAH:'₴', MXN:'$', BRL:'R$',
+    ARS:'$', CLP:'$', COP:'$', PEN:'S/.',
+  }
+  return map[currency] || (currency + ' ')
+}
+const fmtAmt = (amount: number, currency: string): string => {
+  const noDecimals = ['JPY','KRW','VND','IDR','HUF','CLP']
+  const decimals = noDecimals.includes(currency) ? 0 : 2
+  return `${sym(currency)}${amount.toLocaleString('en-GB', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`
+}
+
 const base = (content: string, accentColor = '#0f172a') => `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
@@ -124,12 +143,12 @@ export const emailService = {
           <div class="row"><span>Invoice number</span><strong>${invoice.invoice_number}</strong></div>
           <div class="row"><span>Due date</span><strong>${dueDate}</strong></div>
           <div class="row"><span>Currency</span><strong>${invoice.currency || 'GBP'}</strong></div>
-          <div class="total"><span>Total due</span><span>${invoice.currency || '£'}${invoice.total?.toFixed(2)}</span></div>
+          <div class="total"><span>Total due</span><span>${fmtAmt(invoice.total, invoice.currency || 'GBP')}</span></div>
         </div>
-        ${invoice.stripe_payment_link ? `<a href="${invoice.stripe_payment_link}" class="btn btn-primary" style="background:#0f172a;color:#fff">Pay Now — ${invoice.currency || '£'}${invoice.total?.toFixed(2)}</a>` : ''}
+        ${invoice.stripe_payment_link ? `<a href="${invoice.stripe_payment_link}" class="btn btn-primary" style="background:#0f172a;color:#fff">Pay Now — ${fmtAmt(invoice.total, invoice.currency || 'GBP')}</a>` : ''}
       </div>
       <div class="footer">This invoice was sent via InvoicePro. Please do not reply to this email.</div>`)
-    await sendEmail(to, `Invoice ${invoice.invoice_number} — ${invoice.currency || 'GBP'} ${invoice.total?.toFixed(2)} due ${dueDate}`, html, [
+    await sendEmail(to, `Invoice ${invoice.invoice_number} — ${fmtAmt(invoice.total, invoice.currency || 'GBP')} due ${dueDate}`, html, [
       { filename: `${invoice.invoice_number}.pdf`, content: pdfBuffer, contentType: 'application/pdf' }
     ])
   },
@@ -144,14 +163,14 @@ export const emailService = {
         <div class="box">
           <div class="row"><span>Quote number</span><strong>${quote.quote_number}</strong></div>
           <div class="row"><span>Valid until</span><strong>${expiryDate}</strong></div>
-          <div class="total"><span>Total</span><span>${quote.currency || '£'}${quote.total?.toFixed(2)}</span></div>
+          <div class="total"><span>Total</span><span>${fmtAmt(quote.total, quote.currency || 'GBP')}</span></div>
         </div>
         <a href="${portalUrl}?action=accept" class="btn btn-success" style="margin-right:12px">✓ Accept Quote</a>
         <a href="${portalUrl}?action=decline" class="btn btn-danger">✗ Decline</a>
         <p style="color:#9ca3af;font-size:13px;margin-top:16px">Or view online: <a href="${portalUrl}" style="color:#0369a1">${portalUrl}</a></p>
       </div>
       <div class="footer">This quote was sent via InvoicePro.</div>`)
-    await sendEmail(to, `Quote ${quote.quote_number} — ${quote.currency || 'GBP'} ${quote.total?.toFixed(2)} — Please review`, html)
+    await sendEmail(to, `Quote ${quote.quote_number} — ${fmtAmt(quote.total, quote.currency || 'GBP')} — Please review`, html)
   },
 
   async sendPaymentReminder({ to, clientName, invoice }: { to: string; clientName: string; invoice: any }) {
@@ -170,7 +189,7 @@ export const emailService = {
         <div class="box">
           <div class="row"><span>Invoice</span><strong>${invoice.invoice_number}</strong></div>
           <div class="row"><span>Due date</span><strong>${dueDate}</strong></div>
-          <div class="total"><span>Amount due</span><span>${invoice.currency || '£'}${invoice.total?.toFixed(2)}</span></div>
+          <div class="total"><span>Amount due</span><span>${fmtAmt(invoice.total, invoice.currency || 'GBP')}</span></div>
         </div>
         ${invoice.stripe_payment_link ? `<a href="${invoice.stripe_payment_link}" class="btn btn-primary" style="background:#dc2626">Pay Now</a>` : ''}
       </div>
@@ -191,12 +210,12 @@ export const emailService = {
   },
   async sendPaymentConfirmation({ to, clientName, invoice }: any) {
     await sendEmail(to, `Payment received — Invoice ${invoice.invoice_number}`,
-      base(`<div class="hdr" style="background:#16a34a"><h1>Payment received</h1></div><div class="body"><p>Dear ${clientName},</p><p style="color:#6b7280">Thank you! Payment for invoice ${invoice.invoice_number} has been received.</p><div class="box"><div class="total"><span>Amount</span><span>${invoice.currency||'£'}${invoice.total?.toFixed(2)}</span></div></div></div><div class="footer">InvoicePro.</div>`))
+      base(`<div class="hdr" style="background:#16a34a"><h1>Payment received</h1></div><div class="body"><p>Dear ${clientName},</p><p style="color:#6b7280">Thank you! Payment for invoice ${invoice.invoice_number} has been received.</p><div class="box"><div class="total"><span>Amount</span><span>${fmtAmt(invoice.total, invoice.currency||'GBP')}</span></div></div></div><div class="footer">InvoicePro.</div>`))
   },
   async sendOverdueReminder({ to, clientName, invoice }: any) {
     const days = Math.floor((Date.now() - new Date(invoice.due_date).getTime()) / 86400000)
-    await sendEmail(to, `[OVERDUE ${days}d] Invoice ${invoice.invoice_number}`,
-      base(`<div class="hdr" style="background:#dc2626"><h1>Invoice overdue</h1></div><div class="body"><p>Dear ${clientName},</p><p style="color:#6b7280">Invoice ${invoice.invoice_number} is ${days} days overdue. Please arrange payment.</p>${invoice.stripe_payment_link?`<a href="${invoice.stripe_payment_link}" class="btn btn-danger">Pay now</a>`:''}</div><div class="footer">InvoicePro.</div>`))
+    await sendEmail(to, `[OVERDUE ${days}d] Invoice ${invoice.invoice_number} — ${fmtAmt(invoice.total, invoice.currency||'GBP')}`,
+      base(`<div class="hdr" style="background:#dc2626"><h1>Invoice overdue</h1></div><div class="body"><p>Dear ${clientName},</p><p style="color:#6b7280">Invoice ${invoice.invoice_number} for ${fmtAmt(invoice.total, invoice.currency||'GBP')} is ${days} days overdue. Please arrange payment.</p>${invoice.stripe_payment_link?`<a href="${invoice.stripe_payment_link}" class="btn btn-danger">Pay now</a>`:''}</div><div class="footer">InvoicePro.</div>`))
   },
   async sendUpcomingReminder({ to, clientName, invoice }: any) {
     await sendEmail(to, `Payment due soon — Invoice ${invoice.invoice_number}`,

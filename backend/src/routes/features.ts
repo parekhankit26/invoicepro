@@ -188,7 +188,7 @@ router.get('/satisfaction/scores', authenticate, async (req: AuthRequest, res: R
 })
 
 // ── FEATURE 7: Invoice Financing ─────────────────────────
-router.post('/financing/quote/:invoiceId', authenticate, async (req: AuthRequest, res: Response) => {
+router.get('/financing/quote/:invoiceId', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const { data: invoice } = await supabase.from('invoices').select(`*, clients(*)`).eq('id', (req as any).params.invoiceId).eq('user_id', (req as any).user!.id).single()
     if (!invoice) return res.status(404).json({ error: 'Invoice not found' })

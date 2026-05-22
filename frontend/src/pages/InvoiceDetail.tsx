@@ -5,6 +5,7 @@ import { ArrowLeft, Send, Download, CheckCircle, XCircle, Edit, Trash2, Link, Me
 import { api } from '../lib/api'
 import { modalState } from '../lib/modalState'
 import { formatCurrency, formatDate, formatRelative, getStatusClass } from '../lib/utils'
+import { calculateTax } from '../lib/taxSystem'
 import InvoiceModal from '../components/InvoiceModal'
 import { FinancingWidget } from '../components/FeatureComponents'
 import toast from 'react-hot-toast'
@@ -90,6 +91,16 @@ export default function InvoiceDetail() {
   const items = invoice.invoice_items || []
   const views = invoice.view_count || 0
   const isPaid = invoice.status === 'paid'
+
+  // Recalculate tax breakdown on-the-fly from stored fields (ensures correct values
+  // even for invoices saved before the tax-on-taxable-amount fix was deployed)
+  const taxCalc = calculateTax(
+    invoice.subtotal || 0,
+    invoice.discount_percent || 0,
+    invoice.tax_rate || 0,
+    invoice.country_code || 'GB',
+    invoice.tax_type || 'CGST_SGST'
+  )
 
   return (
     <>
@@ -212,19 +223,19 @@ export default function InvoiceDetail() {
             {/* Totals */}
             <div style={{ display:'flex', justifyContent:'flex-end' }}>
               <div style={{ width:260 }}>
-                <TotalRow label="Subtotal" value={formatCurrency(invoice.subtotal, invoice.currency)}/>
-                {invoice.discount_amount > 0 && (
-                  <TotalRow label={`Discount (${invoice.discount_percent}%)`} value={`-${formatCurrency(invoice.discount_amount, invoice.currency)}`} color="var(--red)"/>
+                <TotalRow label="Subtotal" value={formatCurrency(taxCalc.subtotal, invoice.currency)}/>
+                {taxCalc.discountAmount > 0 && (
+                  <TotalRow label={`Discount (${invoice.discount_percent}%)`} value={`-${formatCurrency(taxCalc.discountAmount, invoice.currency)}`} color="var(--red)"/>
                 )}
-                {invoice.discount_amount > 0 && (
-                  <TotalRow label="Taxable amount" value={formatCurrency((invoice.subtotal||0) - (invoice.discount_amount||0), invoice.currency)} subtle/>
+                {taxCalc.discountAmount > 0 && (
+                  <TotalRow label="Taxable amount" value={formatCurrency(taxCalc.taxableAmount, invoice.currency)} subtle/>
                 )}
-                {(invoice.tax_lines && invoice.tax_lines.length > 0)
-                  ? invoice.tax_lines.map((line: any) => (
+                {taxCalc.taxLines.length > 0
+                  ? taxCalc.taxLines.map((line: any) => (
                       <TotalRow key={line.label} label={line.label} value={formatCurrency(line.amount, invoice.currency)} color="var(--blue)"/>
                     ))
-                  : invoice.tax_amount > 0 && (
-                      <TotalRow label={`${invoice.tax_summary_label || 'Tax'} (${invoice.tax_rate}%)`} value={formatCurrency(invoice.tax_amount, invoice.currency)} color="var(--blue)"/>
+                  : taxCalc.totalTax > 0 && (
+                      <TotalRow label={`${taxCalc.taxSummaryLabel || 'Tax'} (${invoice.tax_rate}%)`} value={formatCurrency(taxCalc.totalTax, invoice.currency)} color="var(--blue)"/>
                     )
                 }
                 {invoice.late_fee_amount > 0 && (
@@ -232,7 +243,7 @@ export default function InvoiceDetail() {
                 )}
                 <div style={{ borderTop:'2px solid var(--text)', paddingTop:10, marginTop:6, display:'flex', justifyContent:'space-between', fontWeight:800, fontSize:16 }}>
                   <span>Total</span>
-                  <span className="currency-amount">{formatCurrency(invoice.total, invoice.currency)}</span>
+                  <span className="currency-amount">{formatCurrency(taxCalc.total + (invoice.late_fee_amount || 0), invoice.currency)}</span>
                 </div>
               </div>
             </div>

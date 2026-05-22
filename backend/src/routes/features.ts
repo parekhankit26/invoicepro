@@ -1,6 +1,7 @@
 import { Router, Response, Request } from 'express'
 import { authenticate, AuthRequest } from '../middleware/auth'
 import { supabase } from '../lib/supabase'
+import { calculateTax } from '../lib/taxCalculator'
 
 const router = Router()
 
@@ -193,26 +194,48 @@ router.get('/financing/quote/:invoiceId', authenticate, async (req: AuthRequest,
     const { data: invoice } = await supabase.from('invoices').select(`*, clients(*)`).eq('id', (req as any).params.invoiceId).eq('user_id', (req as any).user!.id).single()
     if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
     if (invoice.status === 'paid') return res.status(400).json({ error: 'Invoice already paid' })
-    if (invoice.total < 500) return res.status(400).json({ error: 'Minimum invoice amount is £500 for financing' })
 
+    // Always recalculate the correct invoice total — never trust stored value
+    // (handles invoices created before the tax-on-taxable-amount fix)
+    const taxResult = calculateTax(
+      invoice.subtotal || 0,
+      invoice.discount_percent || 0,
+      invoice.tax_rate || 0,
+      invoice.country_code || 'GB',
+      invoice.tax_type || 'CGST_SGST'
+    )
+    const correctTotal = taxResult.total + (invoice.late_fee_amount || 0)
+
+    if (correctTotal < 500) return res.status(400).json({ error: 'Minimum invoice amount is £500 for financing' })
+
+    // Fee tier based on how overdue the invoice is
     const daysOverdue = Math.max(0, Math.floor((Date.now() - new Date(invoice.due_date).getTime()) / 86400000))
     const feePercent = daysOverdue > 30 ? 4.5 : daysOverdue > 0 ? 3.5 : 2.5
+    const feeLabel = daysOverdue > 30
+      ? 'Early repayment fee (30+ days overdue tier)'
+      : daysOverdue > 0
+        ? 'Early repayment fee (overdue tier)'
+        : 'Early repayment fee (standard tier)'
+
     const advancePercent = 0.90
-    const grossAdvance = invoice.total * advancePercent
-    const fee = grossAdvance * (feePercent / 100)
-    const netAdvance = grossAdvance - fee
+    const r = (n: number) => Math.round(n * 100) / 100
+    const grossAdvance = r(correctTotal * advancePercent)
+    const feeAmount = r(grossAdvance * (feePercent / 100))
+    const netAdvance = r(grossAdvance - feeAmount)
 
     return res.json({
       invoice_id: invoice.id,
-      invoice_amount: invoice.total,
+      invoice_amount: r(correctTotal),
       advance_percent: advancePercent * 100,
-      gross_advance: Math.round(grossAdvance * 100) / 100,
+      gross_advance: grossAdvance,
       fee_percent: feePercent,
-      fee_amount: Math.round(fee * 100) / 100,
-      net_advance: Math.round(netAdvance * 100) / 100,
+      fee_amount: feeAmount,
+      fee_label: feeLabel,
+      net_advance: netAdvance,
       currency: invoice.currency,
+      days_overdue: daysOverdue,
       estimated_funding: '24 hours',
-      message: `Get ${Math.round(netAdvance * 100) / 100} ${invoice.currency} today instead of waiting`
+      message: `Get ${netAdvance} ${invoice.currency} today instead of waiting`
     })
   } catch (err) {
     return res.status(500).json({ error: 'Failed to calculate financing quote' })

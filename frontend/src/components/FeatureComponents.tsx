@@ -134,6 +134,21 @@ export function FinancingWidget({ invoiceId, invoiceTotal, currency, onClose }: 
   })
 
   if (isLoading) return <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-subtle)' }}>Calculating your advance...</div>
+  if (!data) return null
+
+  const feeLabel = `Service fee (${data.fee_percent}%)`
+  const feeNote = data.days_overdue > 30
+    ? `${data.fee_percent}% — overdue 30+ days tier`
+    : data.days_overdue > 0
+      ? `${data.fee_percent}% — overdue tier`
+      : `${data.fee_percent}% — standard rate for invoices not yet due`
+
+  const rows: [string, string, string?][] = [
+    ['Invoice total', formatCurrency(data.invoice_amount, currency)],
+    ['We advance (90%)', formatCurrency(data.gross_advance, currency)],
+    [feeLabel, `-${formatCurrency(data.fee_amount, currency)}`, feeNote],
+    ['You receive', formatCurrency(data.net_advance, currency)],
+  ]
 
   return (
     <div style={{ padding: 24 }}>
@@ -147,18 +162,38 @@ export function FinancingWidget({ invoiceId, invoiceTotal, currency, onClose }: 
         <>
           <div style={{ textAlign: 'center', marginBottom: 20 }}>
             <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 6 }}>Get paid today instead of waiting</div>
-            <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--green)' }}>{formatCurrency(data?.net_advance || 0, currency)}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-subtle)', marginTop: 4 }}>net advance (deposited within 24 hours)</div>
+            <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--green)' }}>{formatCurrency(data.net_advance, currency)}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-subtle)', marginTop: 4 }}>net advance · deposited within 24 hours</div>
           </div>
-          <div style={{ background: 'var(--bg)', borderRadius: 10, padding: 16, marginBottom: 20 }}>
-            {[['Invoice amount', formatCurrency(data?.invoice_amount||0, currency)],['Advance (90%)', formatCurrency(data?.gross_advance||0, currency)],[`Fee (${data?.fee_percent}%)`, `-${formatCurrency(data?.fee_amount||0, currency)}`],['You receive', formatCurrency(data?.net_advance||0, currency)]].map(([l,v],i) => (
-              <div key={l} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: i < 3 ? '1px solid var(--border)' : 'none', fontSize: 13, fontWeight: i === 3 ? 700 : 400, color: i === 2 ? 'var(--red)' : i === 3 ? 'var(--green)' : 'var(--text)' }}>
-                <span style={{ color: i < 3 ? 'var(--text-muted)' : 'inherit' }}>{l}</span><span>{v}</span>
+
+          <div style={{ background: 'var(--bg)', borderRadius: 10, padding: 16, marginBottom: 16 }}>
+            {rows.map(([label, value, note], i) => (
+              <div key={label}>
+                <div style={{
+                  display: 'flex', justifyContent: 'space-between', padding: '7px 0',
+                  borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none',
+                  fontSize: 13, fontWeight: i === rows.length - 1 ? 700 : 400,
+                  color: i === 2 ? 'var(--red)' : i === rows.length - 1 ? 'var(--green)' : 'var(--text)'
+                }}>
+                  <span style={{ color: i < rows.length - 1 ? 'var(--text-muted)' : 'inherit' }}>{label}</span>
+                  <span>{value}</span>
+                </div>
+                {note && (
+                  <div style={{ fontSize: 11, color: 'var(--text-subtle)', paddingBottom: 4, marginTop: -4 }}>
+                    {note}
+                  </div>
+                )}
               </div>
             ))}
           </div>
+
+          {/* Fee explanation */}
+          <div style={{ background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 8, padding: '10px 12px', marginBottom: 16, fontSize: 12, color: '#92400e', lineHeight: 1.5 }}>
+            <strong>What is the service fee?</strong> This is a one-time financing fee charged by the lender for advancing your payment. The fee is deducted from the advance — you receive the net amount immediately, and the lender collects the full invoice from your client on the due date.
+          </div>
+
           <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: 12, fontSize: 14 }} onClick={() => applyMutation.mutate()} disabled={applyMutation.isPending}>
-            {applyMutation.isPending ? 'Submitting...' : `Get ${formatCurrency(data?.net_advance||0, currency)} now`}
+            {applyMutation.isPending ? 'Submitting...' : `Get ${formatCurrency(data.net_advance, currency)} now`}
           </button>
           <div style={{ fontSize: 11, color: 'var(--text-subtle)', textAlign: 'center', marginTop: 10 }}>No credit check · Funded in 24 hours · Simple 1-page application</div>
         </>

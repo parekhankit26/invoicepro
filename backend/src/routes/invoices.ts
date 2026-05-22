@@ -119,8 +119,14 @@ router.get('/:id/pdf', async (req: AuthRequest, res: Response) => {
 
 router.post('/:id/send', async (req: AuthRequest, res: Response) => {
   try {
-    const { data: invoice } = await supabase.from('invoices').select('*, clients(*), invoice_items(*), profiles(*)').eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id).single()
-    if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
+    const { data: invoice, error: invSendErr } = await supabase.from('invoices').select('*, clients(*), invoice_items(*)').eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id).single()
+    if (invSendErr || !invoice) {
+      console.error('Invoice send lookup error:', invSendErr?.message)
+      return res.status(404).json({ error: 'Invoice not found' })
+    }
+    // Fetch profile separately to avoid cross-schema join issues
+    const { data: invProfile } = await supabase.from('profiles').select('company_name, full_name, company_address, company_phone, tax_number').eq('id', (req as any).user!.id).single()
+    ;(invoice as any).profiles = invProfile
     if (!invoice.clients?.email) return res.status(400).json({ error: 'Client has no email address. Add one in the client profile first.' })
     
     let paymentLink = invoice.stripe_payment_link

@@ -167,10 +167,16 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
 // Send quote by email
 router.post('/:id/send', async (req: AuthRequest, res: Response) => {
   try {
-    const { data: quote } = await supabase
-      .from('quotes').select(`*, clients(*), quote_items(*), profiles(*)`)
+    const { data: quote, error: quoteErr } = await supabase
+      .from('quotes').select(`*, clients(*), quote_items(*)`)
       .eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id).single()
-    if (!quote) return res.status(404).json({ error: 'Quote not found' })
+    if (quoteErr || !quote) {
+      console.error('Quote send lookup error:', quoteErr?.message)
+      return res.status(404).json({ error: 'Quote not found' })
+    }
+    // Fetch profile separately to avoid cross-schema join issues
+    const { data: profile } = await supabase.from('profiles').select('company_name, full_name').eq('id', (req as any).user!.id).single()
+    ;(quote as any).profiles = profile
     if (!quote.clients?.email) return res.status(400).json({ error: 'Client has no email address' })
 
     // Use client portal token (global portal) for the email link

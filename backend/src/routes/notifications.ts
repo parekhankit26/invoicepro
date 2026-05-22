@@ -73,14 +73,17 @@ function waLink(phone: string, message: string) {
 // WhatsApp invoice notification (wa.me deep link — no Twilio required)
 router.post('/whatsapp/:invoiceId', async (req: AuthRequest, res: Response) => {
   try {
-    const { data: invoice } = await supabase.from('invoices')
-      .select(`*, clients(*), profiles(company_name, full_name)`)
+    const { data: invoice, error: invWaErr } = await supabase.from('invoices')
+      .select(`*, clients(*)`)
       .eq('id', (req as any).params.invoiceId).eq('user_id', (req as any).user!.id).single()
 
-    if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
+    if (invWaErr || !invoice) {
+      console.error('WhatsApp invoice lookup error:', invWaErr?.message)
+      return res.status(404).json({ error: 'Invoice not found' })
+    }
     if (!invoice.clients?.phone) return res.status(400).json({ error: 'Client has no phone number. Add a phone number to this client first.' })
-
-    const companyName = invoice.profiles?.company_name || invoice.profiles?.full_name || 'Your vendor'
+    const { data: waProfile } = await supabase.from('profiles').select('company_name, full_name').eq('id', (req as any).user!.id).single()
+    const companyName = waProfile?.company_name || waProfile?.full_name || 'Your vendor'
     const sym: Record<string, string> = { GBP: '£', USD: '$', EUR: '€' }
     const currency = sym[invoice.currency] || invoice.currency
     const dueDate = new Date(invoice.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -109,11 +112,17 @@ router.post('/whatsapp/:invoiceId', async (req: AuthRequest, res: Response) => {
 // WhatsApp quote notification (wa.me deep link)
 router.post('/whatsapp-quote/:quoteId', async (req: AuthRequest, res: Response) => {
   try {
-    const { data: quote } = await supabase.from('quotes')
-      .select(`*, clients(*), profiles(company_name, full_name)`)
+    const { data: quote, error: quoteErr } = await supabase.from('quotes')
+      .select(`*, clients(*)`)
       .eq('id', (req as any).params.quoteId).eq('user_id', (req as any).user!.id).single()
 
-    if (!quote) return res.status(404).json({ error: 'Quote not found' })
+    if (quoteErr || !quote) {
+      console.error('WhatsApp quote lookup error:', quoteErr?.message)
+      return res.status(404).json({ error: 'Quote not found' })
+    }
+    // Fetch profile separately to avoid cross-schema join issues
+    const { data: profileData } = await supabase.from('profiles').select('company_name, full_name').eq('id', (req as any).user!.id).single()
+    ;(quote as any).profiles = profileData
     if (!quote.clients?.phone) return res.status(400).json({ error: 'Client has no phone number. Add a phone number to this client first.' })
 
     const companyName = quote.profiles?.company_name || quote.profiles?.full_name || 'Your vendor'
@@ -150,11 +159,14 @@ router.post('/whatsapp-quote/:quoteId', async (req: AuthRequest, res: Response) 
 // Send SMS reminder
 router.post('/sms/:invoiceId', async (req: AuthRequest, res: Response) => {
   try {
-    const { data: invoice } = await supabase.from('invoices')
-      .select(`*, clients(*), profiles(company_name, full_name)`)
+    const { data: invoice, error: smsInvErr } = await supabase.from('invoices')
+      .select(`*, clients(*)`)
       .eq('id', (req as any).params.invoiceId).eq('user_id', (req as any).user!.id).single()
 
-    if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
+    if (smsInvErr || !invoice) {
+      console.error('SMS invoice lookup error:', smsInvErr?.message)
+      return res.status(404).json({ error: 'Invoice not found' })
+    }
     if (!invoice.clients?.phone) return res.status(400).json({ error: 'Client has no phone number' })
 
     const sym: Record<string, string> = { GBP: '£', USD: '$', EUR: '€' }

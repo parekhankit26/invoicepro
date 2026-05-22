@@ -616,9 +616,16 @@ router.put('/feature-flags/:key', adminAuth, async (req: any, res: Response) => 
 router.get('/satisfaction', adminAuth, async (_req: any, res: Response) => {
   try {
     const { data: scores } = await supabase.from('satisfaction_scores')
-      .select('*, profiles(full_name, company_name), clients(name)')
+      .select('*, clients(name)')
       .order('responded_at', { ascending: false }).limit(100)
-    const all = scores || []
+    // Batch-fetch profiles to avoid cross-schema join issue
+    const userIds = [...new Set((scores || []).map((s: any) => s.user_id).filter(Boolean))]
+    const profileMap: Record<string, any> = {}
+    if (userIds.length) {
+      const { data: profileRows } = await supabase.from('profiles').select('id, full_name, company_name').in('id', userIds)
+      ;(profileRows || []).forEach((p: any) => { profileMap[p.id] = p })
+    }
+    const all = (scores || []).map((s: any) => ({ ...s, profiles: profileMap[s.user_id] || null }))
     const avg = all.length ? (all.reduce((s, r: any) => s + r.score, 0) / all.length).toFixed(1) : 0
     const dist: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
     all.forEach((r: any) => { if (dist[r.score] !== undefined) dist[r.score]++ })

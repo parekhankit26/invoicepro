@@ -191,19 +191,23 @@ router.post('/sms/:invoiceId', async (req: AuthRequest, res: Response) => {
 router.post('/whatsapp-bulk', async (req: AuthRequest, res: Response) => {
   try {
     const { data: overdue } = await supabase.from('invoices')
-      .select(`*, clients(*), profiles(company_name, full_name)`)
+      .select(`*, clients(*)`)
       .eq('user_id', (req as any).user!.id)
       .in('status', ['overdue', 'sent', 'pending'])
       .lt('due_date', new Date().toISOString().split('T')[0])
 
     if (!overdue?.length) return res.json({ message: 'No overdue invoices found', sent: 0 })
 
+    // Fetch profile once for the authenticated user
+    const { data: bulkProfile } = await supabase.from('profiles').select('company_name, full_name').eq('id', (req as any).user!.id).single()
+    const bulkCompanyName = bulkProfile?.company_name || bulkProfile?.full_name || 'Your vendor'
+
     let sent = 0
     for (const invoice of overdue) {
       if (!invoice.clients?.phone) continue
       const sym: Record<string, string> = { GBP: '£', USD: '$', EUR: '€' }
       const currency = sym[invoice.currency] || invoice.currency
-      const companyName = invoice.profiles?.company_name || invoice.profiles?.full_name || 'Your vendor'
+      const companyName = bulkCompanyName
       const message = `Hi ${invoice.clients.name}, invoice ${invoice.invoice_number} for ${currency}${invoice.total.toFixed(2)} from ${companyName} is overdue. Please pay: ${invoice.stripe_payment_link || 'Contact us'}`
       const success = await sendWhatsApp(invoice.clients.phone, message)
       if (success) {

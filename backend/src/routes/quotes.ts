@@ -13,10 +13,15 @@ router.get('/portal/:token', async (req: Request, res: Response) => {
   try {
     const { data: quote, error } = await supabase
       .from('quotes')
-      .select(`*, clients(*), quote_items(*), profiles(company_name, full_name, company_address, company_phone, tax_number)`)
+      .select(`*, clients(*), quote_items(*)`)
       .eq('client_token', (req as any).params.token)
       .single()
     if (error || !quote) return res.status(404).json({ error: 'Quote not found' })
+    // Fetch profile separately to avoid cross-schema join issues
+    const { data: portalProfile } = await supabase.from('profiles')
+      .select('company_name, full_name, company_address, company_phone, tax_number')
+      .eq('id', quote.user_id).single()
+    ;(quote as any).profiles = portalProfile
     // Track view
     await supabase.from('quotes').update({ status: quote.status === 'draft' ? 'sent' : quote.status }).eq('id', quote.id)
     return res.json(quote)

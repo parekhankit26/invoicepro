@@ -12,12 +12,18 @@ router.get('/view/:token', async (req: Request, res: Response) => {
   try {
     const { data: portal } = await supabase
       .from('client_portal_tokens')
-      .select(`*, clients(*), profiles(company_name, full_name, company_logo, company_address, company_phone)`)
+      .select(`*, clients(*)`)
       .eq('token', (req as any).params.token)
       .eq('is_active', true)
       .single()
 
     if (!portal) return res.status(404).json({ error: 'Portal not found or inactive' })
+
+    // Fetch profile separately to avoid cross-schema join issues
+    const { data: portalBiz } = await supabase.from('profiles')
+      .select('company_name, full_name, company_logo, company_address, company_phone')
+      .eq('id', portal.user_id).single()
+    ;(portal as any).profiles = portalBiz
 
     // Update last accessed
     await supabase.from('client_portal_tokens').update({ last_accessed: new Date().toISOString() }).eq('token', (req as any).params.token)

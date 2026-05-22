@@ -132,13 +132,15 @@ router.get('/cashflow', authenticate, async (req: AuthRequest, res: Response) =>
 // ── FEATURE 6: Client Happiness Score ────────────────────
 router.post('/satisfaction/send/:invoiceId', authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { data: invoice } = await supabase.from('invoices').select(`*, clients(*), profiles(company_name, full_name)`).eq('id', (req as any).params.invoiceId).eq('user_id', (req as any).user!.id).single()
-    if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
+    const { data: invoice, error: survInvErr } = await supabase.from('invoices').select(`*, clients(*)`).eq('id', (req as any).params.invoiceId).eq('user_id', (req as any).user!.id).single()
+    if (survInvErr || !invoice) return res.status(404).json({ error: 'Invoice not found' })
     if (invoice.status !== 'paid') return res.status(400).json({ error: 'Can only send satisfaction survey for paid invoices' })
+    // Fetch profile separately to avoid cross-schema join issues
+    const { data: survProfile } = await supabase.from('profiles').select('company_name, full_name').eq('id', (req as any).user!.id).single()
 
     const token = Buffer.from(`${invoice.id}:${Date.now()}`).toString('base64url')
     const surveyUrl = `${process.env.FRONTEND_URL}/satisfaction/${token}`
-    const companyName = invoice.profiles?.company_name || invoice.profiles?.full_name || 'us'
+    const companyName = survProfile?.company_name || survProfile?.full_name || 'us'
 
     // Store token
     await supabase.from('invoices').update({ client_token: token }).eq('id', invoice.id)

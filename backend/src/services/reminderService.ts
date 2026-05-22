@@ -12,7 +12,7 @@ export const reminderService = {
       const { data: recent } = await supabase.from('reminder_logs').select('id').eq('invoice_id', invoice.id).eq('type', 'overdue').gte('sent_at', new Date(Date.now() - 86400000).toISOString()).single()
       if (recent) continue
       try {
-        await emailService.sendOverdueReminder({ invoice, client: invoice.clients, daysOverdue })
+        await emailService.sendOverdueReminder({ to: invoice.clients.email, clientName: invoice.clients.name, invoice })
         await supabase.from('reminder_logs').insert({ invoice_id: invoice.id, type: 'overdue', email_to: invoice.clients.email, success: true })
         await supabase.from('invoices').update({ status: 'overdue' }).eq('id', invoice.id)
       } catch {}
@@ -26,7 +26,7 @@ export const reminderService = {
       const daysUntilDue = Math.ceil((new Date(invoice.due_date).getTime() - Date.now()) / 86400000)
       if (![1,3,7].includes(daysUntilDue)) continue
       try {
-        await emailService.sendUpcomingReminder({ invoice, client: invoice.clients, daysUntilDue })
+        await emailService.sendUpcomingReminder({ to: invoice.clients.email, clientName: invoice.clients.name, invoice })
         await supabase.from('reminder_logs').insert({ invoice_id: invoice.id, type: 'upcoming', email_to: invoice.clients.email, success: true })
       } catch {}
     }

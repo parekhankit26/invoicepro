@@ -60,8 +60,10 @@ router.put('/:id', requirePermission('create_invoices'), async (req: AuthRequest
     invoiceData.subtotal = subtotal
     const taxResult = calculateTax(subtotal, invoiceData.discount_percent || 0, invoiceData.tax_rate || 0, invoiceData.country_code || 'GB', invoiceData.tax_type || 'CGST_SGST')
     invoiceData.discount_amount = taxResult.discountAmount
+    invoiceData.taxable_amount = taxResult.taxableAmount
     invoiceData.tax_amount = taxResult.totalTax
     invoiceData.tax_lines = taxResult.taxLines
+    invoiceData.tax_summary_label = taxResult.taxSummaryLabel
     invoiceData.total = taxResult.total
     await supabase.from('invoice_items').delete().eq('invoice_id', (req as any).params.id)
     await supabase.from('invoice_items').insert(items.map((item: any, idx: number) => ({ invoice_id: (req as any).params.id, description: item.description, quantity: item.quantity, unit_price: item.unit_price, tax_rate: item.tax_rate || 0, amount: item.quantity * item.unit_price, sort_order: idx })))

@@ -110,7 +110,14 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 
     const { data: quote, error } = await supabase
       .from('quotes')
-      .insert({ ...quoteData, user_id: (req as any).user!.id, subtotal, tax_amount: taxAmount, discount_amount: discountAmount, total, client_token: clientToken })
+      .insert({
+        ...quoteData, user_id: (req as any).user!.id, subtotal,
+        tax_amount: taxAmount, discount_amount: discountAmount, total,
+        tax_lines: taxResult.taxLines,
+        taxable_amount: taxResult.taxableAmount,
+        tax_summary_label: taxResult.taxSummaryLabel,
+        client_token: clientToken,
+      })
       .select().single()
     if (error) return res.status(400).json({ error: error.message })
 
@@ -142,6 +149,9 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
       quoteData.tax_amount = taxResult.totalTax
       quoteData.discount_amount = taxResult.discountAmount
       quoteData.total = taxResult.total
+      quoteData.tax_lines = taxResult.taxLines
+      quoteData.taxable_amount = taxResult.taxableAmount
+      quoteData.tax_summary_label = taxResult.taxSummaryLabel
       await supabase.from('quote_items').delete().eq('quote_id', (req as any).params.id)
       const lineItems = items.map((item: any, idx: number) => ({
         quote_id: (req as any).params.id, description: item.description,
@@ -232,15 +242,35 @@ router.post('/:id/convert', async (req: AuthRequest, res: Response) => {
     const dueDate = new Date()
     dueDate.setDate(dueDate.getDate() + 30)
 
+    // Re-run calculateTax so the invoice always has correct tax_lines
+    // (handles quotes created before the tax_lines fix was deployed)
+    const qSubtotal = quote.subtotal || 0
+    const qTaxResult = calculateTax(
+      qSubtotal,
+      quote.discount_percent || 0,
+      quote.tax_rate || 0,
+      quote.country_code || 'GB',
+      quote.tax_type || 'CGST_SGST'
+    )
+
     const { data: invoice, error } = await supabase.from('invoices').insert({
       user_id: (req as any).user!.id, client_id: quote.client_id,
       invoice_number: invoiceNumber, status: 'draft',
       issue_date: new Date().toISOString().split('T')[0],
       due_date: dueDate.toISOString().split('T')[0],
-      currency: quote.currency, subtotal: quote.subtotal,
-      tax_rate: quote.tax_rate, tax_amount: quote.tax_amount,
-      discount_percent: quote.discount_percent, discount_amount: quote.discount_amount,
-      total: quote.total, notes: quote.notes, terms: quote.terms
+      currency: quote.currency,
+      country_code: quote.country_code || 'GB',
+      tax_type: quote.tax_type || 'CGST_SGST',
+      subtotal: qSubtotal,
+      tax_rate: quote.tax_rate,
+      tax_amount: qTaxResult.totalTax,
+      discount_percent: quote.discount_percent,
+      discount_amount: qTaxResult.discountAmount,
+      taxable_amount: qTaxResult.taxableAmount,
+      tax_lines: qTaxResult.taxLines,
+      tax_summary_label: qTaxResult.taxSummaryLabel,
+      total: qTaxResult.total,
+      notes: quote.notes, terms: quote.terms
     }).select().single()
     if (error) return res.status(400).json({ error: error.message })
 

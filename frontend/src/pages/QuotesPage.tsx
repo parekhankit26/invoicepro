@@ -190,7 +190,13 @@ function QuoteModal({ quote, clients, profile, onClose, onSave }: any) {
           <h2 style={{ fontSize:17, fontWeight:700 }}>{isEdit ? 'Edit quote' : 'New quote'}</h2>
           <button className="btn btn-ghost btn-icon" onClick={onClose}><X size={18}/></button>
         </div>
-        <form onSubmit={handleSubmit(d => saveMutation.mutate(d))}>
+        <form onSubmit={handleSubmit(d => saveMutation.mutate({
+          ...d,
+          // Always attach live-calculated tax breakdown so DB has correct values
+          tax_lines: taxResult.taxLines,
+          taxable_amount: taxResult.taxableAmount,
+          tax_summary_label: taxResult.taxSummaryLabel,
+        }))}>
           <div className="modal-body">
             {/* Row 1 */}
             <div className="form-grid-3" style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12, marginBottom:16 }}>

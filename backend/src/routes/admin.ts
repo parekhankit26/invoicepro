@@ -636,26 +636,69 @@ router.get('/satisfaction', adminAuth, async (_req: any, res: Response) => {
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
 
-// ── FINANCING APPLICATIONS ───────────────────────────────
-router.get('/financing', adminAuth, async (_req: any, res: Response) => {
+// ── FINANCING APPLICATIONS ────────────────────────────────
+router.get('/financing', adminAuth, async (req: any, res: Response) => {
   try {
-    const { data } = await supabase.from('activity_logs')
-      .select('*, profiles!user_id(full_name, company_name, email)')
-      .eq('action', 'financing_applied').order('created_at', { ascending: false })
-    return res.json(data || [])
+    const { status } = (req as any).query
+    let query = supabase.from('financing_applications')
+      .select('*, invoices(invoice_number, due_date, currency)')
+      .order('created_at', { ascending: false })
+    if (status) query = query.eq('status', status)
+    const { data, error } = await query
+    if (error) {
+      if (error.message?.includes('does not exist')) return res.json([])
+      return res.status(400).json({ error: error.message })
+    }
+    // Fetch user profiles separately
+    const userIds = [...new Set((data || []).map((a: any) => a.user_id))]
+    const profileMap: Record<string, any> = {}
+    if (userIds.length) {
+      const { data: profiles } = await supabase.from('profiles').select('id, full_name, company_name, email').in('id', userIds as string[])
+      ;(profiles || []).forEach((p: any) => { profileMap[p.id] = p })
+    }
+    return res.json((data || []).map((a: any) => ({ ...a, profile: profileMap[a.user_id] || null })))
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
 
 router.put('/financing/:id/status', adminAuth, async (req: any, res: Response) => {
   try {
-    const { status } = (req as any).body
-    const { data } = await supabase.from('activity_logs').select('metadata').eq('id', req.params.id).single()
-    const { error } = await supabase.from('activity_logs').update({
-      metadata: { ...(data?.metadata || {}), status }
-    }).eq('id', req.params.id)
+    const { status, admin_notes, rejection_reason } = (req as any).body
+    const validStatuses = ['pending', 'under_review', 'approved', 'funded', 'repaid', 'rejected']
+    if (!validStatuses.includes(status)) return res.status(400).json({ error: 'Invalid status' })
+
+    const now = new Date().toISOString()
+    const updates: any = { status, admin_notes: admin_notes || null }
+    if (status === 'under_review') updates.reviewed_at = now
+    if (status === 'approved') updates.approved_at = now
+    if (status === 'funded') updates.funded_at = now
+    if (status === 'repaid') updates.repaid_at = now
+    if (status === 'rejected') { updates.rejected_at = now; updates.rejection_reason = rejection_reason || null }
+
+    const { data: application, error } = await supabase.from('financing_applications')
+      .update(updates).eq('id', (req as any).params.id).select('*, invoices(invoice_number)').single()
     if (error) return res.status(400).json({ error: error.message })
-    await log(req.admin.id, `financing_${status}`, 'financing', req.params.id, { status })
-    return res.json({ message: `Application ${status}` })
+
+    // Send status email to user
+    try {
+      const { data: profile } = await supabase.from('profiles').select('full_name, company_name, email').eq('id', application.user_id).single()
+      const userEmail = profile?.email || ''
+      const userName = profile?.company_name || profile?.full_name || 'there'
+      if (userEmail) {
+        const { emailService } = await import('../services/emailService')
+        await emailService.sendFinancingStatusUpdate({
+          to: userEmail, name: userName, status,
+          reference: application.reference,
+          invoiceNumber: application.invoices?.invoice_number || '',
+          netAdvance: application.net_advance,
+          currency: application.currency,
+          rejectionReason: rejection_reason || null,
+          adminNotes: admin_notes || null,
+        })
+      }
+    } catch(e) { console.error('Financing status email failed:', e) }
+
+    await log(req.admin.id, `financing_${status}`, 'financing_application', (req as any).params.id, { status, admin_notes })
+    return res.json({ message: `Application ${status}`, application })
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
 

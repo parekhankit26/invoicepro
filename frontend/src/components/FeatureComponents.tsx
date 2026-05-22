@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts'
 import { TrendingUp, Star, DollarSign, Calendar, Gift, Camera, Plus, X, Zap } from 'lucide-react'
@@ -124,82 +124,255 @@ export function HappinessPage() {
 }
 
 // ── INVOICE FINANCING ─────────────────────────────────────
-export function FinancingWidget({ invoiceId, invoiceTotal, currency, onClose }: { invoiceId: string; invoiceTotal: number; currency: string; onClose: () => void }) {
-  const [applied, setApplied] = useState(false)
-  const { data, isLoading } = useQuery({ queryKey: ['financing', invoiceId], queryFn: () => api.get<any>(`/features/financing/quote/${invoiceId}`) })
-  const applyMutation = useMutation({
-    mutationFn: () => api.post(`/features/financing/apply/${invoiceId}`, {}),
-    onSuccess: () => { setApplied(true); toast.success('Application received! You\'ll be contacted within 2 hours.') },
-    onError: (e: any) => toast.error(e.message)
-  })
+type FinancingStep = 'loading' | 'unavailable' | 'status' | 'terms' | 'form' | 'confirm' | 'success'
 
-  if (isLoading) return <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-subtle)' }}>Calculating your advance...</div>
-  if (!data) return null
+export function FinancingWidget({ invoiceId, currency, onClose }: { invoiceId: string; invoiceTotal: number; currency: string; onClose: () => void }) {
+  const qc = useQueryClient()
+  const [step, setStep] = useState<FinancingStep>('loading')
+  const [form, setForm] = useState({ account_holder_name: '', bank_name: '', account_number: '', sort_code: '', contact_phone: '', business_registered_name: '' })
+  const [application, setApplication] = useState<any>(null)
+  const [quote, setQuote] = useState<any>(null)
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
-  const feeLabel = `Service fee (${data.fee_percent}%)`
-  const feeNote = data.days_overdue > 30
-    ? `${data.fee_percent}% — overdue 30+ days tier`
-    : data.days_overdue > 0
-      ? `${data.fee_percent}% — overdue tier`
-      : `${data.fee_percent}% — standard rate for invoices not yet due`
+  // Load quote + existing application on mount
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const [quoteRes, appRes] = await Promise.all([
+          api.get<any>(`/features/financing/quote/${invoiceId}`).catch(() => null),
+          api.get<any>(`/features/financing/application/${invoiceId}`).catch(() => ({ application: null })),
+        ])
+        if (cancelled) return
+        if (!quoteRes) { setStep('unavailable'); return }
+        setQuote(quoteRes)
+        if (appRes?.application) { setApplication(appRes.application); setStep('status') }
+        else setStep('terms')
+      } catch { setStep('unavailable') }
+    })()
+    return () => { cancelled = true }
+  }, [invoiceId])
 
-  const rows: [string, string, string?][] = [
-    ['Invoice total', formatCurrency(data.invoice_amount, currency)],
-    ['We advance (90%)', formatCurrency(data.gross_advance, currency)],
-    [feeLabel, `-${formatCurrency(data.fee_amount, currency)}`, feeNote],
-    ['You receive', formatCurrency(data.net_advance, currency)],
-  ]
+  const handleSubmit = async () => {
+    setError('')
+    setSubmitting(true)
+    try {
+      const res = await api.post<any>(`/features/financing/apply/${invoiceId}`, form)
+      setApplication(res.application)
+      setStep('success')
+      qc.invalidateQueries({ queryKey: ['invoice', invoiceId] })
+    } catch(e: any) {
+      setError(e.message || 'Submission failed')
+    } finally { setSubmitting(false) }
+  }
 
-  return (
-    <div style={{ padding: 24 }}>
-      {applied ? (
-        <div style={{ textAlign: 'center', padding: 20 }}>
-          <div style={{ fontSize: 32, marginBottom: 12 }}>🎉</div>
-          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Application received!</div>
-          <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>We'll contact you within 2 hours with your advance.</div>
-        </div>
-      ) : (
-        <>
-          <div style={{ textAlign: 'center', marginBottom: 20 }}>
-            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 6 }}>Get paid today instead of waiting</div>
-            <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--green)' }}>{formatCurrency(data.net_advance, currency)}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-subtle)', marginTop: 4 }}>net advance · deposited within 24 hours</div>
-          </div>
+  const STATUS_CONFIG: Record<string, { icon: string; color: string; bg: string; title: string; desc: string }> = {
+    pending:      { icon: '⏳', color: '#b45309', bg: '#fef9c3', title: 'Application submitted', desc: 'Our team will review your application within 2 business hours.' },
+    under_review: { icon: '🔍', color: '#0369a1', bg: '#dbeafe', title: 'Under review', desc: 'Our financing team is reviewing your application now.' },
+    approved:     { icon: '✅', color: '#15803d', bg: '#dcfce7', title: 'Approved!', desc: 'Your application is approved. Funds will be transferred to your bank account within 24 hours.' },
+    funded:       { icon: '💰', color: '#15803d', bg: '#dcfce7', title: 'Funds sent!', desc: 'The advance has been deposited to your bank account. We will collect from your client on the due date.' },
+    repaid:       { icon: '🎉', color: '#374151', bg: '#f3f4f6', title: 'Complete', desc: 'Your client has paid. The financing arrangement is now closed.' },
+    rejected:     { icon: '❌', color: '#dc2626', bg: '#fee2e2', title: 'Not approved', desc: '' },
+  }
 
-          <div style={{ background: 'var(--bg)', borderRadius: 10, padding: 16, marginBottom: 16 }}>
-            {rows.map(([label, value, note], i) => (
-              <div key={label}>
-                <div style={{
-                  display: 'flex', justifyContent: 'space-between', padding: '7px 0',
-                  borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none',
-                  fontSize: 13, fontWeight: i === rows.length - 1 ? 700 : 400,
-                  color: i === 2 ? 'var(--red)' : i === rows.length - 1 ? 'var(--green)' : 'var(--text)'
-                }}>
-                  <span style={{ color: i < rows.length - 1 ? 'var(--text-muted)' : 'inherit' }}>{label}</span>
-                  <span>{value}</span>
-                </div>
-                {note && (
-                  <div style={{ fontSize: 11, color: 'var(--text-subtle)', paddingBottom: 4, marginTop: -4 }}>
-                    {note}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+  if (step === 'loading') return (
+    <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-subtle)', fontSize: 13 }}>Calculating your advance...</div>
+  )
 
-          {/* Fee explanation */}
-          <div style={{ background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 8, padding: '10px 12px', marginBottom: 16, fontSize: 12, color: '#92400e', lineHeight: 1.5 }}>
-            <strong>What is the service fee?</strong> This is a one-time financing fee charged by the lender for advancing your payment. The fee is deducted from the advance — you receive the net amount immediately, and the lender collects the full invoice from your client on the due date.
-          </div>
-
-          <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: 12, fontSize: 14 }} onClick={() => applyMutation.mutate()} disabled={applyMutation.isPending}>
-            {applyMutation.isPending ? 'Submitting...' : `Get ${formatCurrency(data.net_advance, currency)} now`}
-          </button>
-          <div style={{ fontSize: 11, color: 'var(--text-subtle)', textAlign: 'center', marginTop: 10 }}>No credit check · Funded in 24 hours · Simple 1-page application</div>
-        </>
-      )}
+  if (step === 'unavailable') return (
+    <div style={{ padding: 20, textAlign: 'center' }}>
+      <div style={{ fontSize: 28, marginBottom: 8 }}>💼</div>
+      <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Invoice financing is not available for this invoice.</div>
+      <button className="btn btn-sm btn-secondary" style={{ marginTop: 12 }} onClick={onClose}>Close</button>
     </div>
   )
+
+  // ── STATUS VIEW ───────────────────────────────────────────
+  if (step === 'status' && application) {
+    const cfg = STATUS_CONFIG[application.status] || STATUS_CONFIG.pending
+    return (
+      <div style={{ padding: 20 }}>
+        <div style={{ background: cfg.bg, borderRadius: 10, padding: '14px 16px', marginBottom: 16, textAlign: 'center' }}>
+          <div style={{ fontSize: 28, marginBottom: 6 }}>{cfg.icon}</div>
+          <div style={{ fontWeight: 700, fontSize: 14, color: cfg.color, marginBottom: 4 }}>{cfg.title}</div>
+          <div style={{ fontSize: 12, color: '#6b7280', lineHeight: 1.5 }}>
+            {application.status === 'rejected' && application.rejection_reason ? application.rejection_reason : cfg.desc}
+          </div>
+        </div>
+        <div style={{ background: 'var(--bg)', borderRadius: 8, padding: 14, fontSize: 12, marginBottom: 12 }}>
+          {[
+            ['Reference', application.reference],
+            ['Invoice advance', formatCurrency(application.gross_advance, currency)],
+            ['Service fee (' + application.fee_percent + '%)', '-' + formatCurrency(application.fee_amount, currency)],
+            ['Net advance', formatCurrency(application.net_advance, currency)],
+            ['Bank account', application.bank_name + ' ···' + application.account_number.slice(-4)],
+            ['Applied', new Date(application.applied_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })],
+          ].map(([l, v]) => (
+            <div key={l} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid var(--border)', color: 'var(--text-muted)' }}>
+              <span>{l}</span><span style={{ fontWeight: 500, color: 'var(--text)' }}>{v}</span>
+            </div>
+          ))}
+        </div>
+        {application.status === 'rejected' && (
+          <button className="btn btn-sm btn-secondary" style={{ width: '100%', justifyContent: 'center' }}
+            onClick={() => { setApplication(null); setStep('terms') }}>
+            Submit new application
+          </button>
+        )}
+      </div>
+    )
+  }
+
+  // ── SUCCESS ───────────────────────────────────────────────
+  if (step === 'success' && application) {
+    return (
+      <div style={{ padding: 24, textAlign: 'center' }}>
+        <div style={{ fontSize: 40, marginBottom: 12 }}>🎉</div>
+        <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 8 }}>Application submitted!</div>
+        <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16, lineHeight: 1.6 }}>
+          Reference: <strong>{application.reference}</strong><br/>
+          We'll review and respond within 2 business hours. Check your email for confirmation.
+        </div>
+        <button className="btn btn-sm btn-secondary" style={{ width: '100%', justifyContent: 'center' }}
+          onClick={() => setStep('status')}>
+          View application status
+        </button>
+      </div>
+    )
+  }
+
+  // ── TERMS (Step 1) ────────────────────────────────────────
+  if (step === 'terms' && quote) {
+    return (
+      <div style={{ padding: 20 }}>
+        <div style={{ textAlign: 'center', marginBottom: 16 }}>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>You could receive today</div>
+          <div style={{ fontSize: 30, fontWeight: 800, color: 'var(--green)', letterSpacing: '-0.03em' }}>{formatCurrency(quote.net_advance, currency)}</div>
+          <div style={{ fontSize: 11, color: 'var(--text-subtle)', marginTop: 2 }}>deposited within 24 hours of approval</div>
+        </div>
+        <div style={{ background: 'var(--bg)', borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
+          {[
+            { label: 'Invoice total', value: formatCurrency(quote.invoice_amount, currency), color: '', bold: false, note: undefined },
+            { label: 'We advance (90%)', value: formatCurrency(quote.gross_advance, currency), color: '', bold: false, note: undefined },
+            { label: `Service fee (${quote.fee_percent}%)`, value: '-' + formatCurrency(quote.fee_amount, currency), color: 'var(--red)', bold: false, note: quote.days_overdue > 0 ? `Overdue tier — ${quote.fee_percent}%` : `Standard tier — ${quote.fee_percent}% (invoice not yet due)` },
+            { label: 'You receive', value: formatCurrency(quote.net_advance, currency), color: 'var(--green)', bold: true, note: undefined },
+          ].map(({ label, value, color, bold, note }, i) => (
+            <div key={label}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: i < 3 ? '1px solid var(--border)' : 'none', fontSize: 12.5, fontWeight: bold ? 700 : 400 }}>
+                <span style={{ color: 'var(--text-muted)' }}>{label}</span>
+                <span style={color ? { color } : {}}>{value}</span>
+              </div>
+              {note && <div style={{ fontSize: 10.5, color: 'var(--text-subtle)', paddingBottom: 4 }}>{note}</div>}
+            </div>
+          ))}
+        </div>
+        <div style={{ background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 8, padding: '10px 12px', marginBottom: 14, fontSize: 11.5, color: '#92400e', lineHeight: 1.5 }}>
+          <strong>How it works:</strong> We advance 90% of your invoice today. You pay a one-time {quote.fee_percent}% service fee. We collect the full invoice amount from your client on the due date — they don't know about this arrangement.
+        </div>
+        <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '11px 16px' }}
+          onClick={() => setStep('form')}>
+          Apply — get {formatCurrency(quote.net_advance, currency)} now
+        </button>
+        <div style={{ fontSize: 11, color: 'var(--text-subtle)', textAlign: 'center', marginTop: 8 }}>No credit check · Decision in 2 hours · No hidden charges</div>
+      </div>
+    )
+  }
+
+  // ── FORM (Step 2) ─────────────────────────────────────────
+  if (step === 'form') {
+    const upd = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
+    return (
+      <div style={{ padding: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+          <button className="btn btn-ghost btn-icon" onClick={() => setStep('terms')} style={{ padding: 4 }}>←</button>
+          <div style={{ fontWeight: 600, fontSize: 14 }}>Bank account details</div>
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14, lineHeight: 1.5 }}>
+          We'll transfer {formatCurrency(quote?.net_advance || 0, currency)} to this account within 24 hours of approval.
+        </div>
+        {[
+          { key: 'account_holder_name', label: 'Account holder name *', placeholder: 'Name as it appears on the account' },
+          { key: 'bank_name', label: 'Bank name *', placeholder: 'e.g. HDFC Bank, Barclays, Chase' },
+          { key: 'account_number', label: 'Account number *', placeholder: 'Your bank account number' },
+          { key: 'sort_code', label: 'Sort code / IFSC / IBAN', placeholder: 'Sort code, IFSC, or IBAN (if applicable)' },
+          { key: 'contact_phone', label: 'Contact phone *', placeholder: 'Your mobile number' },
+          { key: 'business_registered_name', label: 'Registered business name', placeholder: 'Optional — your company\'s legal name' },
+        ].map(({ key, label, placeholder }) => (
+          <div key={key} style={{ marginBottom: 10 }}>
+            <label style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>{label}</label>
+            <input
+              className="form-input"
+              placeholder={placeholder}
+              value={(form as any)[key]}
+              onChange={e => upd(key, e.target.value)}
+              style={{ fontSize: 13 }}
+            />
+          </div>
+        ))}
+        {error && <div style={{ color: 'var(--red)', fontSize: 12, marginBottom: 10 }}>{error}</div>}
+        <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '11px 16px', marginTop: 4 }}
+          onClick={() => {
+            if (!form.account_holder_name.trim()) { setError('Account holder name is required'); return }
+            if (!form.bank_name.trim()) { setError('Bank name is required'); return }
+            if (!form.account_number.trim()) { setError('Account number is required'); return }
+            if (!form.contact_phone.trim()) { setError('Contact phone is required'); return }
+            setError(''); setStep('confirm')
+          }}>
+          Review &amp; confirm →
+        </button>
+      </div>
+    )
+  }
+
+  // ── CONFIRM (Step 3) ──────────────────────────────────────
+  if (step === 'confirm' && quote) {
+    return (
+      <div style={{ padding: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+          <button className="btn btn-ghost btn-icon" onClick={() => setStep('form')} style={{ padding: 4 }}>←</button>
+          <div style={{ fontWeight: 600, fontSize: 14 }}>Confirm application</div>
+        </div>
+        <div style={{ background: 'var(--bg)', borderRadius: 10, padding: '12px 14px', marginBottom: 14, fontSize: 12 }}>
+          <div style={{ fontWeight: 600, fontSize: 11, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Financing offer</div>
+          {[
+            ['Net advance to you', formatCurrency(quote.net_advance, currency)],
+            ['Service fee', formatCurrency(quote.fee_amount, currency) + ' (' + quote.fee_percent + '%)'],
+            ['Funding time', 'Within 24 hours of approval'],
+          ].map(([l, v]) => (
+            <div key={l} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid var(--border)', color: 'var(--text-muted)' }}>
+              <span>{l}</span><span style={{ fontWeight: 600, color: 'var(--text)' }}>{v}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ background: 'var(--bg)', borderRadius: 10, padding: '12px 14px', marginBottom: 14, fontSize: 12 }}>
+          <div style={{ fontWeight: 600, fontSize: 11, color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Bank account</div>
+          {[
+            ['Account holder', form.account_holder_name],
+            ['Bank', form.bank_name],
+            ['Account number', '···' + form.account_number.slice(-4)],
+            ...(form.sort_code ? [['Sort code / IFSC', form.sort_code]] : []),
+            ['Phone', form.contact_phone],
+            ...(form.business_registered_name ? [['Business name', form.business_registered_name]] : []),
+          ].map(([l, v]) => (
+            <div key={l} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid var(--border)', color: 'var(--text-muted)' }}>
+              <span>{l}</span><span style={{ fontWeight: 500, color: 'var(--text)' }}>{v}</span>
+            </div>
+          ))}
+        </div>
+        {error && <div style={{ color: 'var(--red)', fontSize: 12, marginBottom: 10 }}>{error}</div>}
+        <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '11px 16px' }}
+          onClick={handleSubmit} disabled={submitting}>
+          {submitting ? 'Submitting...' : `Submit application for ${formatCurrency(quote.net_advance, currency)}`}
+        </button>
+        <div style={{ fontSize: 11, color: 'var(--text-subtle)', textAlign: 'center', marginTop: 8 }}>
+          By submitting you agree to the financing terms. Your client will be unaware of this arrangement.
+        </div>
+      </div>
+    )
+  }
+
+  return null
 }
 
 // ── YEAR IN REVIEW ────────────────────────────────────────

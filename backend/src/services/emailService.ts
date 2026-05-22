@@ -220,6 +220,52 @@ export const emailService = {
   async sendUpcomingReminder({ to, clientName, invoice }: any) {
     await sendEmail(to, `Payment due soon — Invoice ${invoice.invoice_number}`,
       base(`<div class="hdr" style="background:#d97706"><h1>Payment due soon</h1></div><div class="body"><p>Dear ${clientName},</p><p style="color:#6b7280">Invoice ${invoice.invoice_number} is due soon.</p>${invoice.stripe_payment_link?`<a href="${invoice.stripe_payment_link}" class="btn btn-primary" style="background:#d97706">Pay now</a>`:''}</div><div class="footer">InvoicePro.</div>`))
-  }
+  },
+
+  async sendFinancingApplicationReceived({ to, name, reference, invoiceNumber, netAdvance, currency }: any) {
+    if (!to) return
+    const s = (c: string) => ({GBP:'£',USD:'$',EUR:'€',INR:'₹',CAD:'C$',AUD:'A$'}[c] || c + ' ')
+    const amt = `${s(currency)}${netAdvance.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    await sendEmail(to, `Financing application received — Ref: ${reference}`,
+      base(`
+        <div class="hdr" style="background:#0369a1"><h1>Application received</h1><p>Ref: ${reference}</p></div>
+        <div class="body">
+          <p>Hi ${name},</p>
+          <p style="color:#6b7280;font-size:14px;line-height:1.6">We've received your invoice financing application and our team will review it within 2 business hours.</p>
+          <div class="box">
+            <div class="row"><span>Reference</span><strong>${reference}</strong></div>
+            <div class="row"><span>Invoice</span><strong>${invoiceNumber}</strong></div>
+            <div class="total"><span>Net advance requested</span><span>${amt}</span></div>
+          </div>
+          <p style="color:#6b7280;font-size:13px">You'll receive an email as soon as your application is reviewed. No action needed from you right now.</p>
+        </div>
+        <div class="footer">InvoicePro Financing · Questions? Reply to this email.</div>`))
+  },
+
+  async sendFinancingStatusUpdate({ to, name, status, reference, invoiceNumber, netAdvance, currency, rejectionReason, adminNotes }: any) {
+    if (!to) return
+    const s = (c: string) => ({GBP:'£',USD:'$',EUR:'€',INR:'₹',CAD:'C$',AUD:'A$'}[c] || c + ' ')
+    const amt = `${s(currency)}${netAdvance.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+
+    const configs: Record<string, any> = {
+      under_review: { color: '#0369a1', title: 'Under review', body: 'Your application is now being reviewed by our financing team. You\'ll hear back very shortly.' },
+      approved: { color: '#16a34a', title: 'Application approved!', body: `Great news! Your financing application has been approved. We will transfer ${amt} to your bank account within 24 hours.` },
+      funded: { color: '#16a34a', title: 'Funds sent!', body: `${amt} has been transferred to your bank account. Please allow 1-2 hours for the funds to appear. We will collect the invoice amount from your client on the due date.` },
+      repaid: { color: '#374151', title: 'Financing complete', body: 'Your client has paid the invoice and the financing arrangement is now complete. Thank you for using InvoicePro Financing.' },
+      rejected: { color: '#dc2626', title: 'Application update', body: rejectionReason ? `We were unable to approve your financing application. Reason: ${rejectionReason}` : 'We were unable to approve your financing application at this time. Please contact us for more information.' },
+    }
+    const cfg = configs[status]
+    if (!cfg) return
+
+    await sendEmail(to, `Financing ${status.replace('_', ' ')} — Ref: ${reference}`,
+      base(`
+        <div class="hdr" style="background:${cfg.color}"><h1>${cfg.title}</h1><p>Ref: ${reference} · Invoice ${invoiceNumber}</p></div>
+        <div class="body">
+          <p>Hi ${name},</p>
+          <p style="color:#6b7280;font-size:14px;line-height:1.6">${cfg.body}</p>
+          ${adminNotes && status !== 'rejected' ? `<div class="box"><p style="margin:0;font-size:13px;color:#374151"><strong>Note from our team:</strong> ${adminNotes}</p></div>` : ''}
+        </div>
+        <div class="footer">InvoicePro Financing · Ref: ${reference}</div>`))
+  },
 
 }

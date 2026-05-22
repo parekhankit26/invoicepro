@@ -243,25 +243,96 @@ router.get('/financing/quote/:invoiceId', authenticate, async (req: AuthRequest,
 })
 
 router.post('/financing/apply/:invoiceId', authenticate, async (req: AuthRequest, res: Response) => {
-  try {
-    // In production this would integrate with a financing partner API
-    // For now we store the application and simulate approval
-    const { data: invoice } = await supabase.from('invoices').select('*').eq('id', (req as any).params.invoiceId).eq('user_id', (req as any).user!.id).single()
-    if (!invoice) return res.status(404).json({ error: 'Invoice not found' })
+  const { account_holder_name, bank_name, account_number, sort_code, contact_phone, business_registered_name } = (req as any).body
+  // Validate required fields
+  if (!account_holder_name?.trim()) return res.status(400).json({ error: 'Account holder name is required' })
+  if (!bank_name?.trim()) return res.status(400).json({ error: 'Bank name is required' })
+  if (!account_number?.trim()) return res.status(400).json({ error: 'Account number is required' })
+  if (!contact_phone?.trim()) return res.status(400).json({ error: 'Contact phone is required' })
 
-    await supabase.from('activity_logs').insert({
-      user_id: (req as any).user!.id, entity_type: 'invoice', entity_id: invoice.id,
-      action: 'financing_applied', metadata: { amount: invoice.total }
-    })
+  const invoice = await supabase.from('invoices').select('*, clients(*)').eq('id', (req as any).params.invoiceId).eq('user_id', (req as any).user!.id).single()
+  if (!invoice.data) return res.status(404).json({ error: 'Invoice not found' })
+  if (invoice.data.status === 'paid') return res.status(400).json({ error: 'Invoice already paid' })
 
-    return res.json({
-      status: 'application_received',
-      message: 'Your financing application has been received. You will be contacted within 2 hours.',
-      reference: `FIN-${Date.now().toString(36).toUpperCase()}`
-    })
-  } catch (err) {
-    return res.status(500).json({ error: 'Financing application failed' })
+  // Check no existing active application
+  const existing = await supabase.from('financing_applications')
+    .select('id, status').eq('invoice_id', (req as any).params.invoiceId).eq('user_id', (req as any).user!.id)
+    .not('status', 'eq', 'rejected').single()
+  if (existing.data) return res.status(400).json({ error: 'An application already exists for this invoice', application: existing.data })
+
+  // Recalculate offer
+  const taxResult = calculateTax(invoice.data.subtotal || 0, invoice.data.discount_percent || 0, invoice.data.tax_rate || 0, invoice.data.country_code || 'GB', invoice.data.tax_type || 'CGST_SGST')
+  const correctTotal = taxResult.total + (invoice.data.late_fee_amount || 0)
+  const daysOverdue = Math.max(0, Math.floor((Date.now() - new Date(invoice.data.due_date).getTime()) / 86400000))
+  const feePercent = daysOverdue > 30 ? 4.5 : daysOverdue > 0 ? 3.5 : 2.5
+  const grossAdvance = Math.round(correctTotal * 0.90 * 100) / 100
+  const feeAmount = Math.round(grossAdvance * (feePercent / 100) * 100) / 100
+  const netAdvance = Math.round((grossAdvance - feeAmount) * 100) / 100
+
+  // Generate reference
+  const reference = 'FA-' + Date.now().toString(36).toUpperCase()
+
+  const { data: application, error } = await supabase.from('financing_applications').insert({
+    user_id: (req as any).user!.id,
+    invoice_id: invoice.data.id,
+    reference,
+    invoice_amount: Math.round(correctTotal * 100) / 100,
+    advance_percent: 90,
+    gross_advance: grossAdvance,
+    fee_percent: feePercent,
+    fee_amount: feeAmount,
+    net_advance: netAdvance,
+    currency: invoice.data.currency || 'GBP',
+    account_holder_name: account_holder_name.trim(),
+    bank_name: bank_name.trim(),
+    account_number: account_number.trim(),
+    sort_code: sort_code?.trim() || null,
+    contact_phone: contact_phone.trim(),
+    business_registered_name: business_registered_name?.trim() || null,
+    status: 'pending',
+  }).select().single()
+
+  if (error) {
+    // If table doesn't exist yet (migration not run), return helpful message
+    if (error.message?.includes('does not exist')) {
+      return res.status(503).json({ error: 'Financing table not set up. Run the financing_migration.sql in Supabase SQL editor.' })
+    }
+    return res.status(400).json({ error: error.message })
   }
+
+  // Send confirmation email
+  try {
+    const { emailService } = await import('../services/emailService')
+    const { data: profile } = await supabase.from('profiles').select('full_name, company_name').eq('id', (req as any).user!.id).single()
+    await emailService.sendFinancingApplicationReceived({
+      to: (req as any).user!.email || '',
+      name: profile?.company_name || profile?.full_name || 'there',
+      reference,
+      invoiceNumber: invoice.data.invoice_number,
+      netAdvance,
+      currency: invoice.data.currency || 'GBP',
+    })
+  } catch(e) { console.error('Financing email failed:', e) }
+
+  return res.status(201).json({ message: 'Application submitted successfully', application, reference })
+})
+
+// GET /features/financing/application/:invoiceId — get status of application for an invoice
+router.get('/financing/application/:invoiceId', authenticate, async (req: AuthRequest, res: Response) => {
+  const { data, error } = await supabase.from('financing_applications')
+    .select('*').eq('invoice_id', (req as any).params.invoiceId).eq('user_id', (req as any).user!.id)
+    .order('created_at', { ascending: false }).limit(1).single()
+  if (error || !data) return res.json({ application: null })
+  return res.json({ application: data })
+})
+
+// GET /features/financing/applications — list all user applications
+router.get('/financing/applications', authenticate, async (req: AuthRequest, res: Response) => {
+  const { data } = await supabase.from('financing_applications')
+    .select('*, invoices(invoice_number, due_date)')
+    .eq('user_id', (req as any).user!.id)
+    .order('created_at', { ascending: false })
+  return res.json(data || [])
 })
 
 // ── FEATURE 9: Milestone Billing ──────────────────────────

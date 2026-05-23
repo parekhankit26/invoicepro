@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { Key, Users, Globe, FileText, Download, Plus, Trash2, Copy, X, Shield, CheckCircle, Clock, ArrowRight, Sparkles, Zap } from 'lucide-react'
@@ -1043,8 +1043,8 @@ function FinancingAdminTab() {
                 const sc = STATUS_COLORS[app.status] || STATUS_COLORS.pending
                 const isActionOpen = actionRow === app.id
                 return (
-                  <>
-                    <tr key={app.id}>
+                  <React.Fragment key={app.id}>
+                    <tr>
                       <td style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--text-muted)' }}>{app.reference}</td>
                       <td>
                         <div style={{ fontWeight: 500, fontSize: 13 }}>{app.profile?.company_name || app.profile?.full_name || '—'}</div>
@@ -1081,7 +1081,7 @@ function FinancingAdminTab() {
                       </td>
                     </tr>
                     {isActionOpen && (
-                      <tr key={app.id + '-action'}>
+                      <tr>
                         <td colSpan={7} style={{ background: 'var(--bg)', padding: '14px 20px' }}>
                           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
                             <div>
@@ -1139,7 +1139,7 @@ function FinancingAdminTab() {
                         </td>
                       </tr>
                     )}
-                  </>
+                  </React.Fragment>
                 )
               })}
             </tbody>

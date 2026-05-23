@@ -36,8 +36,8 @@ router.post('/portal/:token/respond', async (req: Request, res: Response) => {
     const { data: quote } = await supabase
       .from('quotes').select('*').eq('client_token', (req as any).params.token).single()
     if (!quote) return res.status(404).json({ error: 'Quote not found' })
-    if (!['accepted', 'declined'].includes(action === 'accept' ? 'accepted' : 'declined')) {
-      return res.status(400).json({ error: 'Invalid action' })
+    if (!['accept', 'decline'].includes(action)) {
+      return res.status(400).json({ error: 'Invalid action. Use accept or decline' })
     }
     const updateData: any = {
       status: action === 'accept' ? 'accepted' : 'declined',
@@ -209,18 +209,13 @@ router.post('/:id/send', async (req: AuthRequest, res: Response) => {
       if (newPortal?.token) portalUrl = `${frontendUrl}/portal/${newPortal.token}`
     }
 
-    if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
-      await supabase.from('quotes').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', quote.id)
-      return res.json({ message: 'Quote marked as sent (email requires SMTP config)', portal_url: portalUrl, email_sent: false })
-    }
-    
     try {
       await emailService.sendQuote({ to: quote.clients.email, clientName: quote.clients.name, quote, portalUrl })
     } catch (emailErr: any) {
       await supabase.from('quotes').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', quote.id)
-      return res.json({ message: `Quote marked as sent but email failed: ${emailErr.message}`, email_sent: false })
+      return res.json({ message: `Quote marked as sent but email failed: ${emailErr.message}`, portal_url: portalUrl, email_sent: false })
     }
-    
+
     await supabase.from('quotes').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', quote.id)
     return res.json({ message: `Quote sent to ${quote.clients.email}`, portal_url: portalUrl, email_sent: true })
   } catch (err: any) {

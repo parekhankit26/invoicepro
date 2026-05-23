@@ -207,7 +207,7 @@ export function FinancingWidget({ invoiceId, currency, onClose }: { invoiceId: s
             ['Service fee (' + application.fee_percent + '%)', '-' + formatCurrency(application.fee_amount, currency)],
             ['Net advance', formatCurrency(application.net_advance, currency)],
             ['Bank account', application.bank_name + ' ···' + application.account_number.slice(-4)],
-            ['Applied', new Date(application.applied_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })],
+            ['Applied', new Date(application.applied_at || application.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })],
           ].map(([l, v]) => (
             <div key={l} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid var(--border)', color: 'var(--text-muted)' }}>
               <span>{l}</span><span style={{ fontWeight: 500, color: 'var(--text)' }}>{v}</span>

@@ -97,12 +97,21 @@ router.get('/users/:id', adminAuth, async (req: any, res: Response) => {
 
 router.put('/users/:id', adminAuth, async (req: any, res: Response) => {
   try {
-    const allowed = ['full_name','company_name','company_address','company_phone','tax_number','default_currency','default_tax_rate','plan']
+    const { email, ...rest } = (req as any).body
+    const allowed = ['full_name','company_name','company_address','company_phone','tax_number','default_currency','default_tax_rate','plan','company_website']
     const updates: any = {}
-    allowed.forEach((k: string) => { if ((req as any).body[k] !== undefined) updates[k] = (req as any).body[k] })
+    allowed.forEach((k: string) => { if (rest[k] !== undefined) updates[k] = rest[k] })
+
+    // Email lives in auth.users — update via admin API
+    if (email) {
+      const { error: emailErr } = await supabase.auth.admin.updateUserById(req.params.id, { email })
+      if (emailErr) return res.status(400).json({ error: 'Email update failed: ' + emailErr.message })
+      updates.email = email // also sync to profiles table
+    }
+
     const { data, error } = await supabase.from('profiles').update(updates).eq('id', req.params.id).select().single()
     if (error) return res.status(400).json({ error: error.message })
-    await log(req.admin.id, 'user_updated', 'user', req.params.id, updates)
+    await log(req.admin.id, 'user_updated', 'user', req.params.id, { ...updates, email_changed: !!email })
     return res.json(data)
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
@@ -531,6 +540,29 @@ router.get('/clients', adminAuth, async (req: any, res: Response) => {
     const { data, error, count } = await query
     if (error) return res.status(400).json({ error: error.message })
     return res.json({ data, total: count })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// Edit client details (name, email, phone, address, currency, vat_number)
+router.put('/clients/:id', adminAuth, async (req: any, res: Response) => {
+  try {
+    const allowed = ['name', 'email', 'phone', 'address', 'currency', 'vat_number', 'website', 'notes']
+    const updates: Record<string, any> = {}
+    allowed.forEach(k => { if (req.body[k] !== undefined) updates[k] = req.body[k] })
+    if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'No valid fields' })
+    const { data, error } = await supabase.from('clients').update(updates).eq('id', req.params.id).select().single()
+    if (error) return res.status(400).json({ error: error.message })
+    await log(req.admin.id, 'client_updated', 'client', req.params.id, updates)
+    return res.json({ message: 'Client updated', data })
+  } catch(e: any) { return res.status(500).json({ error: e.message }) }
+})
+
+// Get single client by id
+router.get('/clients/:id', adminAuth, async (req: any, res: Response) => {
+  try {
+    const { data, error } = await supabase.from('clients').select('*').eq('id', req.params.id).single()
+    if (error) return res.status(404).json({ error: 'Client not found' })
+    return res.json(data)
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })
 

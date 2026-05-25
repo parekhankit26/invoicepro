@@ -426,13 +426,85 @@ tr:hover td{background:#fafaf8}
         <div id="userPager" style="display:flex;gap:6px;justify-content:flex-end;margin-top:10px;flex-wrap:wrap"></div>
       </div>
 
+      <!-- USER EDIT MODAL -->
+      <div id="userModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center">
+        <div style="background:#fff;border-radius:14px;padding:28px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+            <div style="font-size:16px;font-weight:700">Edit user account</div>
+            <button onclick="closeUserModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#666">&times;</button>
+          </div>
+          <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400e;margin-bottom:16px">
+            ⚠ Changing email will update the user's login credentials. They will need to use the new email to sign in.
+          </div>
+          <input type="hidden" id="editUserId"/>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="fg"><label>Full name</label><input class="fi" id="euName" placeholder="Jane Smith"/></div>
+            <div class="fg"><label>Email (login) *</label><input class="fi" id="euEmail" type="email" placeholder="jane@company.com"/></div>
+            <div class="fg"><label>Company name</label><input class="fi" id="euCompany" placeholder="Acme Ltd"/></div>
+            <div class="fg"><label>Phone</label><input class="fi" id="euPhone" placeholder="+44 7700 000000"/></div>
+            <div class="fg"><label>Plan</label>
+              <select class="fi" id="euPlan">
+                <option value="free">Free</option>
+                <option value="starter">Starter</option>
+                <option value="pro">Pro</option>
+                <option value="enterprise">Enterprise</option>
+              </select>
+            </div>
+            <div class="fg"><label>Default currency</label>
+              <select class="fi" id="euCurrency">
+                <option>GBP</option><option>USD</option><option>EUR</option><option>INR</option><option>CAD</option><option>AUD</option>
+              </select>
+            </div>
+            <div class="fg" style="grid-column:1/-1"><label>Company address</label><textarea class="fi" id="euAddress" rows="2"></textarea></div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+            <button class="ab" onclick="closeUserModal()">Cancel</button>
+            <button class="ab ab-p" onclick="saveUser()">Save changes</button>
+          </div>
+          <div id="userSaveMsg" style="margin-top:10px;font-size:13px"></div>
+        </div>
+      </div>
+
       <!-- CLIENTS -->
       <div class="pg" id="pg-clients">
-        <div class="ph"><div><div class="pt">All clients</div><div class="ps" id="clientCount">—</div></div></div>
+        <div class="ph">
+          <div><div class="pt">All clients</div><div class="ps" id="clientCount">—</div></div>
+          <input class="fi" id="clientSearch" placeholder="Search name or email..." style="width:220px" oninput="loadClients()"/>
+        </div>
         <div class="bc" style="padding:0"><div class="tbl-wrap">
-          <table><thead><tr><th>Name</th><th>Email</th><th>Owner</th><th>Currency</th></tr></thead>
-          <tbody id="clientRows"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
+          <table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Owner</th><th>Currency</th><th>Actions</th></tr></thead>
+          <tbody id="clientRows"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
         </div></div>
+      </div>
+
+      <!-- CLIENT EDIT MODAL -->
+      <div id="clientModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center">
+        <div style="background:#fff;border-radius:14px;padding:28px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+            <div style="font-size:16px;font-weight:700">Edit client</div>
+            <button onclick="closeClientModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#666">&times;</button>
+          </div>
+          <input type="hidden" id="editClientId"/>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="fg"><label>Full name *</label><input class="fi" id="ecName" placeholder="Acme Ltd"/></div>
+            <div class="fg"><label>Email *</label><input class="fi" id="ecEmail" type="email" placeholder="client@company.com"/></div>
+            <div class="fg"><label>Phone</label><input class="fi" id="ecPhone" placeholder="+44 7700 000000"/></div>
+            <div class="fg"><label>Currency</label>
+              <select class="fi" id="ecCurrency">
+                <option>GBP</option><option>USD</option><option>EUR</option><option>INR</option><option>CAD</option><option>AUD</option>
+              </select>
+            </div>
+            <div class="fg" style="grid-column:1/-1"><label>Address</label><textarea class="fi" id="ecAddress" rows="2" placeholder="Street, City, Postcode"></textarea></div>
+            <div class="fg"><label>VAT / Tax number</label><input class="fi" id="ecVat" placeholder="GB123456789"/></div>
+            <div class="fg"><label>Website</label><input class="fi" id="ecWebsite" placeholder="https://..."/></div>
+            <div class="fg" style="grid-column:1/-1"><label>Internal notes</label><textarea class="fi" id="ecNotes" rows="2" placeholder="Admin notes (not visible to client)"></textarea></div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+            <button class="ab" onclick="closeClientModal()">Cancel</button>
+            <button class="ab ab-p" onclick="saveClient()">Save changes</button>
+          </div>
+          <div id="clientSaveMsg" style="margin-top:10px;font-size:13px"></div>
+        </div>
       </div>
 
       <!-- INVOICES -->
@@ -1298,7 +1370,7 @@ function loadUsers(){
         +'<td>'+mkPlanSel(u.id,u.plan)+'</td>'
         +'<td style="color:var(--blue);font-size:12px">'+(u.email||'—')+'</td>'
         +'<td style="font-size:11px;color:var(--ink3)">'+dDate(u.created_at)+'</td>'
-        +'<td><div style="display:flex;gap:4px"><button class="ab ab-sm ab-s" onclick="giveTrialPro(\''+u.id+'\')" title="Give 14-day Pro trial">⚡ Trial</button><button class="ab ab-sm ab-d" onclick="doSuspend(\''+u.id+'\')" title="Suspend account">⊘ Suspend</button></div></td>'
+        +'<td><div style="display:flex;gap:4px"><button class="ab ab-sm ab-p" onclick="openUserModal(\''+u.id+'\','+JSON.stringify(JSON.stringify(u))+')" title="Edit user details">✎ Edit</button><button class="ab ab-sm ab-s" onclick="giveTrialPro(\''+u.id+'\')" title="Give 14-day Pro trial">⚡ Trial</button><button class="ab ab-sm ab-d" onclick="doSuspend(\''+u.id+'\')" title="Suspend account">⊘ Suspend</button></div></td>'
         +'</tr>';}).join('')||'<tr><td colspan="5" class="empty">No users</td></tr>';
       var pages=Math.ceil((d.total||0)/25);
       if(pages>1){var h='';for(var i=1;i<=Math.min(pages,10);i++){h+='<button class="ab ab-sm'+(i===uPage?' ab-p':'')+'" onclick="uPage='+i+';loadUsers()">'+i+'</button>';}q('userPager').innerHTML=h;}
@@ -1409,11 +1481,111 @@ function doSuspend(id){
 
 // CLIENTS
 function loadClients(){
-  req('/admin/clients').then(function(d){
+  var s=q('clientSearch')?q('clientSearch').value:'';
+  req('/admin/clients'+(s?'?search='+encodeURIComponent(s):'')).then(function(d){
     q('clientCount').textContent=(d.total||0)+' clients';
-    q('clientRows').innerHTML=(d.data||[]).map(function(c){return '<tr><td style="font-weight:500">'+(c.name||'—')+'</td><td style="color:var(--blue);font-size:12px">'+(c.email||'—')+'</td><td style="font-size:12px;color:var(--ink2)">'+(c.profiles&&(c.profiles.company_name||c.profiles.full_name)||'—')+'</td><td>'+(c.currency||'GBP')+'</td></tr>';}).join('')||'<tr><td colspan="4" class="empty">No clients</td></tr>';
+    q('clientRows').innerHTML=(d.data||[]).map(function(c){
+      var esc=JSON.stringify(JSON.stringify(c));
+      return '<tr>'
+        +'<td style="font-weight:600;font-size:13px">'+(c.name||'—')+'</td>'
+        +'<td style="color:var(--blue);font-size:12px">'+(c.email||'—')+'</td>'
+        +'<td style="font-size:12px;color:var(--ink3)">'+(c.phone||'—')+'</td>'
+        +'<td style="font-size:12px;color:var(--ink2)">'+(c.profiles&&(c.profiles.company_name||c.profiles.full_name)||'—')+'</td>'
+        +'<td>'+(c.currency||'GBP')+'</td>'
+        +'<td><div style="display:flex;gap:4px">'
+        +'<button class="ab ab-sm ab-p" onclick="openClientModal(\''+c.id+'\','+esc+')">✎ Edit</button>'
+        +'<button class="ab ab-sm ab-d" onclick="archiveClient(\''+c.id+'\')">Archive</button>'
+        +'</div></td>'
+        +'</tr>';
+    }).join('')||'<tr><td colspan="6" class="empty">No clients found</td></tr>';
   }).catch(function(){});
 }
+
+// ── CLIENT MODAL ───────────────────────────────────────────
+function openClientModal(id, dataStr){
+  var c=JSON.parse(dataStr);
+  q('editClientId').value=id;
+  q('ecName').value=c.name||'';
+  q('ecEmail').value=c.email||'';
+  q('ecPhone').value=c.phone||'';
+  q('ecAddress').value=c.address||'';
+  q('ecVat').value=c.vat_number||'';
+  q('ecWebsite').value=c.website||'';
+  q('ecNotes').value=c.notes||'';
+  q('ecCurrency').value=c.currency||'GBP';
+  q('clientSaveMsg').textContent='';
+  q('clientModal').style.display='flex';
+}
+function closeClientModal(){ q('clientModal').style.display='none'; }
+function saveClient(){
+  var id=q('editClientId').value;
+  var body={
+    name:q('ecName').value.trim(),
+    email:q('ecEmail').value.trim(),
+    phone:q('ecPhone').value.trim(),
+    address:q('ecAddress').value.trim(),
+    vat_number:q('ecVat').value.trim(),
+    website:q('ecWebsite').value.trim(),
+    notes:q('ecNotes').value.trim(),
+    currency:q('ecCurrency').value
+  };
+  if(!body.name){q('clientSaveMsg').innerHTML='<span style="color:var(--red)">Name is required</span>';return;}
+  q('clientSaveMsg').textContent='Saving…';
+  req('/admin/clients/'+id,{method:'PUT',body:JSON.stringify(body)})
+    .then(function(){
+      q('clientSaveMsg').innerHTML='<span style="color:var(--green)">✓ Saved successfully</span>';
+      showToast('Client updated','ok');
+      setTimeout(function(){closeClientModal();loadClients();},800);
+    }).catch(function(e){q('clientSaveMsg').innerHTML='<span style="color:var(--red)">Error: '+e.message+'</span>';});
+}
+function archiveClient(id){
+  if(!confirm('Archive this client? They will be hidden from the user\'s client list.'))return;
+  req('/admin/clients/'+id,{method:'DELETE'})
+    .then(function(){showToast('Client archived','ok');loadClients();})
+    .catch(function(e){showToast(e.message,'err');});
+}
+
+// ── USER MODAL ─────────────────────────────────────────────
+function openUserModal(id, dataStr){
+  var u=JSON.parse(dataStr);
+  q('editUserId').value=id;
+  q('euName').value=u.full_name||'';
+  q('euEmail').value=u.email||'';
+  q('euCompany').value=u.company_name||'';
+  q('euPhone').value=u.company_phone||'';
+  q('euPlan').value=u.plan||'free';
+  q('euCurrency').value=u.default_currency||'GBP';
+  q('euAddress').value=u.company_address||'';
+  q('userSaveMsg').textContent='';
+  q('userModal').style.display='flex';
+}
+function closeUserModal(){ q('userModal').style.display='none'; }
+function saveUser(){
+  var id=q('editUserId').value;
+  var body={
+    full_name:q('euName').value.trim(),
+    email:q('euEmail').value.trim(),
+    company_name:q('euCompany').value.trim(),
+    company_phone:q('euPhone').value.trim(),
+    plan:q('euPlan').value,
+    default_currency:q('euCurrency').value,
+    company_address:q('euAddress').value.trim()
+  };
+  if(!body.email){q('userSaveMsg').innerHTML='<span style="color:var(--red)">Email is required</span>';return;}
+  q('userSaveMsg').textContent='Saving…';
+  req('/admin/users/'+id,{method:'PUT',body:JSON.stringify(body)})
+    .then(function(){
+      q('userSaveMsg').innerHTML='<span style="color:var(--green)">✓ Saved. Email change takes effect immediately.</span>';
+      showToast('User updated','ok');
+      setTimeout(function(){closeUserModal();loadUsers();},900);
+    }).catch(function(e){q('userSaveMsg').innerHTML='<span style="color:var(--red)">Error: '+e.message+'</span>';});
+}
+
+// Close modals on backdrop click
+document.addEventListener('click',function(e){
+  if(e.target===q('clientModal'))closeClientModal();
+  if(e.target===q('userModal'))closeUserModal();
+});
 
 // INVOICES
 function loadInv(){

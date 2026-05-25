@@ -172,8 +172,9 @@ export const pdfService = {
 
           renderTotals(doc, y, subtotal, discountPercent, discountAmount, taxableAmount, taxLines, taxRate, lateFee, grandTotal, currency, primaryColor)
           renderStatus(doc, invoice.status, y - 30)
+          renderNotes(doc, invoice)
           renderPaymentDetails(doc, invoice, primaryColor)
-          renderFooter(doc, footerText, accentColor, invoice)
+          renderFooter(doc, footerText, accentColor)
         }
 
         // ═══════════════════════════════════════════════════════
@@ -235,8 +236,9 @@ export const pdfService = {
 
           renderTotals(doc, y, subtotal, discountPercent, discountAmount, taxableAmount, taxLines, taxRate, lateFee, grandTotal, currency, primaryColor)
           renderStatus(doc, invoice.status, y - 30)
+          renderNotes(doc, invoice)
           renderPaymentDetails(doc, invoice, primaryColor)
-          renderFooter(doc, footerText, accentColor, invoice)
+          renderFooter(doc, footerText, accentColor)
         }
 
         // ═══════════════════════════════════════════════════════
@@ -298,8 +300,9 @@ export const pdfService = {
           y += 12
           renderTotals(doc, y, subtotal, discountPercent, discountAmount, taxableAmount, taxLines, taxRate, lateFee, grandTotal, currency, primaryColor, true)
           renderStatus(doc, invoice.status, y - 30)
+          renderNotes(doc, invoice)
           renderPaymentDetails(doc, invoice, primaryColor)
-          renderFooter(doc, footerText, accentColor, invoice)
+          renderFooter(doc, footerText, accentColor)
         }
 
         // ═══════════════════════════════════════════════════════
@@ -363,8 +366,9 @@ export const pdfService = {
           y += 12
           renderTotals(doc, y, subtotal, discountPercent, discountAmount, taxableAmount, taxLines, taxRate, lateFee, grandTotal, currency, primaryColor)
           renderStatus(doc, invoice.status, y - 30)
+          renderNotes(doc, invoice)
           renderPaymentDetails(doc, invoice, primaryColor)
-          renderFooter(doc, footerText, primaryColor, invoice)
+          renderFooter(doc, footerText, primaryColor)
         }
 
         doc.end()
@@ -430,9 +434,9 @@ function renderStatus(doc: any, status: string, y: number) {
   doc.fontSize(22).fillColor(color).opacity(0.85).text(status.toUpperCase(), 50, y).opacity(1)
 }
 
-// ── Payment details block ─────────────────────────────────────────────
+// ── Payment details block — professional redesign ──────────────────────
 function renderPaymentDetails(doc: any, invoice: any, primaryColor: string) {
-  // Parse bank details — may come as JSON string or object
+  // Parse bank details
   let bank: any = null
   try {
     const raw = invoice.bank_account_details
@@ -441,56 +445,112 @@ function renderPaymentDetails(doc: any, invoice: any, primaryColor: string) {
 
   const hasBank = bank && (bank.account_number || bank.iban || bank.sort_code)
   const hasStripe = !!invoice.stripe_payment_link
+  if (!hasBank && !hasStripe) return
 
-  if (!hasBank && !hasStripe) return // nothing to render
-
-  // Start below totals + notes
   doc.moveDown(0.5)
-  const startY = (doc as any).y + 10
-  doc.moveTo(50, startY).lineTo(545, startY).strokeColor('#e8e5de').lineWidth(1).stroke()
+  let y = (doc as any).y + 14
 
-  let y = startY + 12
-  doc.fontSize(9).fillColor('#888').text('PAYMENT DETAILS', 50, y)
-  y += 16
+  // ── Section header bar ─────────────────────────────────────────────
+  doc.rect(50, y, 495, 22).fill('#f3f4f6')
+  doc.fontSize(8).fillColor('#6b7280')
+    .text('HOW TO PAY', 60, y + 7, { characterSpacing: 1.2 })
+  y += 30
 
+  // ── Stripe online payment (full width, prominent) ──────────────────
   if (hasStripe) {
-    // Online pay button — clickable hyperlink rectangle
-    doc.rect(50, y, 245, 28).fill(primaryColor)
-    doc.fontSize(10).fillColor(contrastText(primaryColor)).text('Pay online now →', 52, y + 8, { width: 241, align: 'center' })
-    // Add a real PDF hyperlink annotation so clicking the button opens the Stripe link
-    doc.link(50, y, 245, 28, invoice.stripe_payment_link)
-    // Also print the URL as small text below (clickable too)
-    doc.fontSize(8).fillColor('#4b72c4')
-      .text(invoice.stripe_payment_link, 50, y + 32, { width: 245, link: invoice.stripe_payment_link, underline: true })
-    y += hasBank ? 56 : 42
+    // Button background
+    doc.rect(50, y, 495, 36).fill(primaryColor)
+    // Shield / lock icon (drawn as simple circle)
+    doc.circle(76, y + 18, 8).fill('rgba(255,255,255,0.15)')
+    doc.fontSize(10).fillColor(contrastText(primaryColor))
+      .text('🔒', 62, y + 11, { width: 20, align: 'center' })
+    // Button text
+    doc.fontSize(12).fillColor(contrastText(primaryColor))
+      .text('Pay online now', 85, y + 5, { width: 340, align: 'left' })
+    doc.fontSize(9).fillColor(contrastText(primaryColor)).opacity(0.75)
+      .text('Secure payment powered by Stripe', 85, y + 20, { width: 340 }).opacity(1)
+    // Amount badge on right
+    const total = fmtMoney(Number(invoice.total || 0), invoice.currency || 'GBP')
+    doc.fontSize(13).fillColor(contrastText(primaryColor))
+      .text(total, 390, y + 11, { width: 145, align: 'right' })
+    // Clickable hyperlink over entire button
+    doc.link(50, y, 495, 36, invoice.stripe_payment_link)
+    y += 44
+
+    // URL in small text below button
+    doc.fontSize(7.5).fillColor('#6b7280')
+      .text('Click the button above or visit: ', 50, y, { continued: true })
+    doc.fillColor('#3b82f6')
+      .text(invoice.stripe_payment_link, { link: invoice.stripe_payment_link, underline: true, width: 495 })
+    y += 16
   }
 
+  // ── Bank transfer section ──────────────────────────────────────────
   if (hasBank) {
-    const lines: string[] = []
-    if (bank.account_holder_name) lines.push(`Account: ${bank.account_holder_name}${bank.bank_name ? ` · ${bank.bank_name}` : ''}`)
-    if (bank.account_number)      lines.push(`Account number: ${bank.account_number}${bank.sort_code ? `   Sort code: ${bank.sort_code}` : ''}`)
-    if (bank.iban)                lines.push(`IBAN: ${bank.iban}${bank.swift_bic ? `   SWIFT/BIC: ${bank.swift_bic}` : ''}`)
-    lines.push(`Reference: ${invoice.invoice_number || invoice.quote_number || 'Your invoice number'}`)
-    if (bank.payment_instructions) lines.push(bank.payment_instructions)
-
-    lines.forEach(line => {
-      doc.fontSize(9).fillColor('#374151').text(line, hasStripe ? 310 : 50, y, { width: hasStripe ? 235 : 495 })
+    if (hasStripe) {
+      // Divider between stripe and bank sections
+      y += 6
+      doc.fontSize(8).fillColor('#9ca3af').text('— or pay by bank transfer —', 50, y, { width: 495, align: 'center' })
       y += 14
+    }
+
+    // Bank details card background
+    const rows: Array<[string, string]> = []
+    if (bank.account_holder_name) rows.push(['Account name', bank.account_holder_name])
+    if (bank.bank_name)           rows.push(['Bank', bank.bank_name])
+    if (bank.account_number)      rows.push(['Account number', bank.account_number])
+    if (bank.sort_code)           rows.push(['Sort code', bank.sort_code])
+    if (bank.iban)                rows.push(['IBAN', bank.iban])
+    if (bank.swift_bic)           rows.push(['SWIFT / BIC', bank.swift_bic])
+    const refNum = invoice.invoice_number || invoice.quote_number || 'See invoice'
+    rows.push(['Payment reference', refNum])
+
+    const cardH = rows.length * 22 + 16
+    doc.rect(50, y, 495, cardH).fill('#f9fafb').stroke('#e5e7eb')
+
+    let ry = y + 10
+    rows.forEach(([label, value], idx) => {
+      const isRef = label === 'Payment reference'
+      // Alternate row tint
+      if (idx % 2 === 1) doc.rect(50, ry - 3, 495, 22).fill('#f0f1f3')
+      // Label column
+      doc.fontSize(8.5).fillColor('#6b7280').text(label, 62, ry, { width: 160 })
+      // Value column — reference gets bold + accent color
+      if (isRef) {
+        doc.fontSize(9).fillColor(primaryColor).font('Helvetica-Bold')
+          .text(value, 230, ry, { width: 300 }).font('Helvetica')
+      } else {
+        doc.fontSize(9).fillColor('#111827').text(value, 230, ry, { width: 300 })
+      }
+      ry += 22
     })
+    y = ry + 8
+
+    // Payment instructions note
+    if (bank.payment_instructions) {
+      doc.rect(50, y, 495, 2).fill('#e5e7eb')
+      y += 8
+      doc.fontSize(8).fillColor('#92400e')
+        .text('ℹ  ' + bank.payment_instructions, 50, y, { width: 495 })
+      y += 18
+    }
   }
-  // Set doc position past our block so footer doesn't overlap
+
   doc.text('', 50, y + 4)
 }
 
-// ── Footer ────────────────────────────────────────────────────────────
-function renderFooter(doc: any, footerText: string, accentColor: string, invoice: any) {
-  if (invoice.notes) {
-    doc.moveDown(0.5)
-    const ny = (doc as any).y + 8
-    doc.fontSize(8).fillColor('#888').text('NOTES', 50, ny)
-    doc.fontSize(9).fillColor('#374151').text(invoice.notes, 50, ny + 12, { width: 495 })
-  }
+// ── Notes block (rendered BEFORE payment details) ────────────────────
+function renderNotes(doc: any, invoice: any) {
+  if (!invoice.notes) return
+  doc.moveDown(0.5)
+  const ny = (doc as any).y + 8
+  doc.rect(50, ny, 495, 1).fill('#e5e7eb')
+  doc.fontSize(8).fillColor('#888').text('NOTES', 50, ny + 8, { characterSpacing: 0.8 })
+  doc.fontSize(9).fillColor('#374151').text(invoice.notes, 50, ny + 20, { width: 495 })
+}
 
+// ── Footer ────────────────────────────────────────────────────────────
+function renderFooter(doc: any, footerText: string, accentColor: string) {
   const pageBottom = 790
   doc.moveTo(50, pageBottom - 18).lineTo(545, pageBottom - 18).strokeColor('#e5e5e5').lineWidth(1).stroke()
   doc.fontSize(8).fillColor('#999').text(footerText || 'Thank you for your business!', 50, pageBottom - 10, { width: 300 })

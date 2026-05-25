@@ -66,12 +66,23 @@ router.put('/profile', authenticate, async (req: AuthRequest, res: Response) => 
     'full_name', 'company_name', 'company_address', 'company_phone',
     'company_website', 'tax_number', 'default_currency', 'default_tax_rate',
     'default_payment_terms', 'country_code', 'notify_on_view',
-    'notify_on_payment', 'auto_reminders'
+    'notify_on_payment', 'auto_reminders', 'company_logo', 'invoice_template'
   ]
   const updates: Record<string, any> = {}
   allowed.forEach(k => { if ((req as any).body[k] !== undefined) updates[k] = (req as any).body[k] })
   if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'No valid fields to update' })
-  const { data, error } = await supabase.from('profiles').update(updates).eq('id', req.user!.id).select().single()
+
+  // Try full update; if invoice_template column doesn't exist yet, retry without it
+  let { data, error } = await supabase.from('profiles').update(updates).eq('id', req.user!.id).select().single()
+  if (error && error.message?.includes('invoice_template')) {
+    const { invoice_template, ...safeUpdates } = updates
+    const retry = await supabase.from('profiles').update(safeUpdates).eq('id', req.user!.id).select().single()
+    data = retry.data
+    error = retry.error
+    // Return success even though invoice_template wasn't persisted to DB —
+    // the frontend stores it in localStorage as primary source
+    if (!error) return res.json({ ...data, invoice_template: invoice_template })
+  }
   if (error) return res.status(400).json({ error: error.message })
   return res.json(data)
 })

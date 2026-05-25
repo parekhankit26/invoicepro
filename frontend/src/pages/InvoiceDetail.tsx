@@ -185,8 +185,8 @@ export default function InvoiceDetail() {
             {/* From (sender / business owner) */}
             {profile && (
               <div style={{ display:'flex', alignItems:'flex-start', gap:14, marginBottom:24, paddingBottom:20, borderBottom:'1px solid var(--border)' }}>
-                {profile.logo_url && (
-                  <img src={profile.logo_url} alt="logo" style={{ height:44, width:'auto', borderRadius:6, objectFit:'contain', flexShrink:0 }} />
+                {profile.company_logo && (
+                  <img src={profile.company_logo} alt="logo" style={{ height:44, width:'auto', borderRadius:6, objectFit:'contain', flexShrink:0 }} />
                 )}
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.06em', color:'var(--text-subtle)', marginBottom:4 }}>From</div>

@@ -1,8 +1,16 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Eye } from 'lucide-react'
 import { api } from '../lib/api'
 import toast from 'react-hot-toast'
+
+const LS_KEY = 'invoicepro_template'
+function loadLocalTemplate() {
+  try { const s = localStorage.getItem(LS_KEY); return s ? JSON.parse(s) : null } catch { return null }
+}
+function saveLocalTemplate(t: any) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(t)) } catch {}
+}
 
 const TEMPLATES = [
   { id: 'classic', name: 'Classic', desc: 'Clean dark header, professional' },
@@ -21,31 +29,57 @@ const SAMPLE_ITEMS = [
 const TODAY = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 
 export default function InvoiceDesignerPage() {
-  const [template, setTemplate] = useState('classic')
-  const [primaryColor, setPrimaryColor] = useState('#1a1814')
-  const [accentColor, setAccentColor] = useState('#a3e635')
-  const [font, setFont] = useState('DM Sans')
-  const [showLogo, setShowLogo] = useState(true)
-  const [footerText, setFooterText] = useState('Thank you for your business!')
+  const local = loadLocalTemplate()
+  const [template, setTemplate] = useState(local?.template || 'classic')
+  const [primaryColor, setPrimaryColor] = useState(local?.primaryColor || '#1a1814')
+  const [accentColor, setAccentColor] = useState(local?.accentColor || '#a3e635')
+  const [font, setFont] = useState(local?.font || 'DM Sans')
+  const [showLogo, setShowLogo] = useState(local?.showLogo !== undefined ? local.showLogo : true)
+  const [footerText, setFooterText] = useState(local?.footerText || 'Thank you for your business!')
   const [saved, setSaved] = useState(false)
 
   const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: () => api.get<any>('/auth/profile') })
 
+  // If profile has a saved template and no local copy yet, load it
+  useEffect(() => {
+    if (profile?.invoice_template && !loadLocalTemplate()) {
+      try {
+        const t = typeof profile.invoice_template === 'string'
+          ? JSON.parse(profile.invoice_template)
+          : profile.invoice_template
+        if (t) {
+          if (t.template) setTemplate(t.template)
+          if (t.primaryColor) setPrimaryColor(t.primaryColor)
+          if (t.accentColor) setAccentColor(t.accentColor)
+          if (t.font) setFont(t.font)
+          if (t.showLogo !== undefined) setShowLogo(t.showLogo)
+          if (t.footerText) setFooterText(t.footerText)
+        }
+      } catch {}
+    }
+  }, [profile])
+
   const saveTemplate = async () => {
+    const tpl = { template, primaryColor, accentColor, font, showLogo, footerText }
+    // Always save to localStorage first — works even if DB column doesn't exist yet
+    saveLocalTemplate(tpl)
     try {
-      await api.put('/auth/profile', {
-        invoice_template: JSON.stringify({ template, primaryColor, accentColor, font, showLogo, footerText })
-      })
+      await api.put('/auth/profile', { invoice_template: JSON.stringify(tpl) })
       setSaved(true)
-      toast.success('Invoice template saved! New invoices will use this design.')
+      toast.success('Template saved! New invoices will use this design.')
       setTimeout(() => setSaved(false), 3000)
-    } catch { toast.error('Failed to save template') }
+    } catch {
+      // LocalStorage save already succeeded — user's template is safe
+      setSaved(true)
+      toast.success('Template saved locally!')
+      setTimeout(() => setSaved(false), 3000)
+    }
   }
 
   const companyName = profile?.company_name || 'Your Company'
   const companyAddress = profile?.company_address || 'Your address'
   const vatNumber = profile?.tax_number ? `VAT: ${profile.tax_number}` : 'VAT: GB123456789'
-  const logoUrl = showLogo && profile?.logo_url ? profile.logo_url : null
+  const logoUrl = showLogo && profile?.company_logo ? profile.company_logo : null
 
   // ── Template-specific live previews ───────────────────
   const renderPreview = () => {

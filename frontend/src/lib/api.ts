@@ -59,6 +59,26 @@ export const api = {
     document.body.removeChild(a)
     setTimeout(() => URL.revokeObjectURL(url), 1000)
   },
+  downloadQuotePDF: async (quoteId: string, quoteNumber: string) => {
+    const token = await getToken()
+    if (!token) throw new Error('Not authenticated')
+    const res = await fetch(`${API_URL}/quotes/${quoteId}/pdf`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'PDF generation failed' }))
+      throw new Error(err.error || 'Failed to generate PDF')
+    }
+    const blob = new Blob([await res.arrayBuffer()], { type: 'application/pdf' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${quoteNumber}.pdf`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+  },
 }
 
 // Constant for non-hook contexts (portal, satisfaction, team pages)

@@ -135,6 +135,50 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   }
 })
 
+// Download quote as PDF
+router.get('/:id/pdf', async (req: AuthRequest, res: Response) => {
+  try {
+    const { data: quote, error: qErr } = await supabase
+      .from('quotes').select('*').eq('id', (req as any).params.id).eq('user_id', (req as any).user!.id).single()
+    if (qErr || !quote) return res.status(404).json({ error: 'Quote not found' })
+
+    const [itemsRes, clientRes, profileRes] = await Promise.all([
+      supabase.from('quote_items').select('*').eq('quote_id', quote.id).order('sort_order', { ascending: true }),
+      quote.client_id ? supabase.from('clients').select('*').eq('id', quote.client_id).single() : Promise.resolve({ data: null }),
+      supabase.from('profiles').select('*').eq('id', (req as any).user!.id).single()
+    ])
+
+    const items = itemsRes.data || []
+    const client = (clientRes.data as any) || {}
+    const profile = (profileRes.data as any) || {}
+
+    const quoteData: any = {
+      ...quote,
+      _type: 'quote',
+      invoice_number: quote.quote_number,
+      issue_date: quote.issue_date || new Date().toISOString().split('T')[0],
+      due_date: quote.expiry_date || '',
+      items,
+      company_name: profile.company_name || 'Your Company',
+      from_address: profile.company_address || '',
+      from_email: profile.email || '',
+      from_tax: profile.tax_number ? `VAT: ${profile.tax_number}` : '',
+      client_name: client.name || 'Client',
+      client_email: client.email || '',
+      client_address: client.address || '',
+      invoice_template: profile.invoice_template || null,
+    }
+
+    const pdfBuffer = await pdfService.generateInvoicePDF(quoteData)
+    res.setHeader('Content-Type', 'application/pdf')
+    res.setHeader('Content-Disposition', `attachment; filename="${quote.quote_number}.pdf"`)
+    res.setHeader('Content-Length', pdfBuffer.length.toString())
+    return res.send(pdfBuffer)
+  } catch (e: any) {
+    return res.status(500).json({ error: 'Failed to generate PDF: ' + e.message })
+  }
+})
+
 // Update quote
 router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {

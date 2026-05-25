@@ -103,9 +103,11 @@ router.get('/:id/pdf', async (req: AuthRequest, res: Response) => {
       company_name: profile.company_name || 'Your Company',
       from_address: profile.company_address || '',
       from_email: profile.email || '',
+      from_tax: profile.tax_number ? `VAT: ${profile.tax_number}` : '',
       client_name: client.name || invoice.bill_to || 'Client',
       client_email: client.email || '',
-      client_address: client.address || ''
+      client_address: client.address || '',
+      invoice_template: profile.invoice_template || null,
     }
     
     const pdfBuffer = await pdfService.generateInvoicePDF(invoiceData)
@@ -127,7 +129,7 @@ router.post('/:id/send', async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Invoice not found' })
     }
     // Fetch profile separately to avoid cross-schema join issues
-    const { data: invProfile } = await supabase.from('profiles').select('company_name, full_name, company_address, company_phone, tax_number').eq('id', (req as any).user!.id).single()
+    const { data: invProfile } = await supabase.from('profiles').select('company_name, full_name, company_address, company_phone, tax_number, email, invoice_template').eq('id', (req as any).user!.id).single()
     ;(invoice as any).profiles = invProfile
     if (!invoice.clients?.email) return res.status(400).json({ error: 'Client has no email address. Add one in the client profile first.' })
     
@@ -141,10 +143,13 @@ router.post('/:id/send', async (req: AuthRequest, res: Response) => {
         items: invoice.invoice_items || [],
         company_name: invProfile?.company_name || invProfile?.full_name || 'Your Company',
         from_address: invProfile?.company_address || '',
+        from_email: invProfile?.email || '',
+        from_tax: invProfile?.tax_number ? `VAT: ${invProfile.tax_number}` : '',
         client_name: invoice.clients?.name || '',
         client_email: invoice.clients?.email || '',
         client_address: invoice.clients?.address || '',
         stripe_payment_link: paymentLink,
+        invoice_template: invProfile?.invoice_template || null,
       }
       const pdfBuffer = await pdfService.generateInvoicePDF(invoiceForPdf)
       await emailService.sendInvoice({ to: invoice.clients.email, clientName: invoice.clients.name, invoice: invoiceForPdf, pdfBuffer })

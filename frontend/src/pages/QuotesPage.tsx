@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Send, FileText, CheckCircle, RefreshCw, Trash2, Search, X, Info, MessageSquare } from 'lucide-react'
+import { Plus, Send, FileText, CheckCircle, RefreshCw, Trash2, Search, X, Info, MessageSquare, Download } from 'lucide-react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { api } from '../lib/api'
 import { formatCurrency, formatDate, CURRENCIES } from '../lib/utils'
@@ -102,6 +102,7 @@ export default function QuotesPage() {
                     <td>
                       <div style={{ display:'flex', gap:4 }}>
                         <button className="btn btn-sm btn-secondary" onClick={() => { setEditQuote(q); { setShowModal(true); modalState.open() } }}>Edit</button>
+                        <button className="btn btn-sm btn-secondary" title="Download PDF" onClick={() => api.downloadQuotePDF(q.id, q.quote_number).catch((e: any) => toast.error(e.message))}><Download size={12}/></button>
                         {q.status === 'draft' && <button className="btn btn-sm btn-secondary" title="Send to client" onClick={() => sendMutation.mutate(q.id)}><Send size={12}/></button>}
                         {['draft','sent'].includes(q.status) && (
                           <button className="btn btn-sm btn-secondary" title="Send via WhatsApp" style={{ color:'#25D366' }} onClick={() => whatsappMutation.mutate(q.id)}>

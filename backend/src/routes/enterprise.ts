@@ -223,7 +223,31 @@ router.get('/export/:format', async (req: AuthRequest, res: Response) => {
       return res.send(csv)
     }
 
-    return res.status(400).json({ error: 'Invalid format. Use: csv, xero, quickbooks' })
+    if (format === 'quickbooks') {
+      // QuickBooks Online IIF-compatible CSV format
+      const headers = ['InvoiceNo','Customer','InvoiceDate','DueDate','Item','Qty','Rate','Amount','TaxAmount','TaxCode','Currency','Terms','Memo']
+      const rows = (invoices || []).map(inv => [
+        inv.invoice_number,
+        inv.clients?.name || '',
+        inv.issue_date,
+        inv.due_date,
+        'Services',
+        1,
+        inv.subtotal,
+        inv.subtotal,
+        inv.tax_amount || 0,
+        inv.tax_rate > 0 ? 'TAX' : 'NON',
+        inv.currency,
+        `Net ${inv.payment_terms || 30}`,
+        inv.notes || ''
+      ])
+      const csv = [headers, ...rows].map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n')
+      res.setHeader('Content-Type', 'text/csv')
+      res.setHeader('Content-Disposition', `attachment; filename="quickbooks-export.csv"`)
+      return res.send(csv)
+    }
+
+    return res.status(400).json({ error: 'Invalid format. Use: csv, xero, or quickbooks' })
   } catch {
     return res.status(500).json({ error: 'Failed to export' })
   }

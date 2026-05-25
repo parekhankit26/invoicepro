@@ -929,7 +929,7 @@ function TaxReportTab() {
   )
 }
 
-// ── FINANCING ADMIN TAB ───────────────────────────────────
+// ── FINANCING TAB ─────────────────────────────────────────
 const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
   pending:      { bg: '#fef9c3', color: '#b45309' },
   under_review: { bg: '#dbeafe', color: '#0369a1' },
@@ -940,89 +940,34 @@ const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
 }
 
 function FinancingAdminTab() {
-  const [applications, setApplications] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [filterStatus, setFilterStatus] = useState('')
-  const [actionRow, setActionRow] = useState<string | null>(null)
-  const [actionStatus, setActionStatus] = useState('')
-  const [adminNotes, setAdminNotes] = useState('')
-  const [rejectionReason, setRejectionReason] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-
-  const adminToken = localStorage.getItem('adminToken') || ''
-
-  const fetchApplications = async () => {
-    setLoading(true)
-    try {
-      const url = filterStatus
-        ? `${API_BASE}/admin/financing?status=${filterStatus}`
-        : `${API_BASE}/admin/financing`
-      const res = await fetch(url, { headers: { Authorization: `Bearer ${adminToken}` } })
-      const data = await res.json()
-      setApplications(Array.isArray(data) ? data : [])
-    } catch {
-      setApplications([])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => { fetchApplications() }, [filterStatus])
-
-  const handleStatusUpdate = async (id: string) => {
-    if (!actionStatus) { setError('Please select a status'); return }
-    setSaving(true)
-    setError('')
-    try {
-      const res = await fetch(`${API_BASE}/admin/financing/${id}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${adminToken}` },
-        body: JSON.stringify({ status: actionStatus, admin_notes: adminNotes || null, rejection_reason: rejectionReason || null }),
-      })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Update failed'); return }
-      setActionRow(null)
-      setActionStatus('')
-      setAdminNotes('')
-      setRejectionReason('')
-      fetchApplications()
-    } catch (e: any) {
-      setError(e.message || 'Update failed')
-    } finally {
-      setSaving(false)
-    }
-  }
+  const { data: applications = [], isLoading, refetch } = useQuery({
+    queryKey: ['financing-applications'],
+    queryFn: () => api.get<any[]>('/features/financing/applications'),
+  })
 
   const currencySymbol = (c: string) => ({ GBP: '£', USD: '$', EUR: '€', INR: '₹', CAD: 'C$', AUD: 'A$' }[c] || c + ' ')
   const fmtAmt = (amount: number, currency: string) =>
     `${currencySymbol(currency)}${Number(amount).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
+  const apps = Array.isArray(applications) ? applications : []
+
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <div style={{ fontWeight: 600, fontSize: 14 }}>Invoice financing applications</div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <select className="form-input" style={{ fontSize: 12, padding: '6px 10px', width: 'auto' }}
-            value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-            <option value="">All statuses</option>
-            <option value="pending">Pending</option>
-            <option value="under_review">Under review</option>
-            <option value="approved">Approved</option>
-            <option value="funded">Funded</option>
-            <option value="repaid">Repaid</option>
-            <option value="rejected">Rejected</option>
-          </select>
-          <button className="btn btn-secondary btn-sm" onClick={fetchApplications}>Refresh</button>
+        <div>
+          <div style={{ fontWeight: 600, fontSize: 14 }}>Invoice financing applications</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>Track the status of your financing requests</div>
         </div>
+        <button className="btn btn-secondary btn-sm" onClick={() => refetch()}>Refresh</button>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-subtle)', fontSize: 13 }}>Loading applications...</div>
-      ) : applications.length === 0 ? (
+      ) : apps.length === 0 ? (
         <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-subtle)', fontSize: 13 }}>
           <Zap size={24} style={{ marginBottom: 8, opacity: 0.3 }} />
-          <div>No financing applications{filterStatus ? ` with status "${filterStatus}"` : ''}</div>
+          <div style={{ marginBottom: 8 }}>No financing applications yet</div>
+          <div style={{ fontSize: 12 }}>Apply for financing from any unpaid invoice over £500</div>
         </div>
       ) : (
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -1030,122 +975,57 @@ function FinancingAdminTab() {
             <thead>
               <tr>
                 <th>Reference</th>
-                <th>Business</th>
                 <th>Invoice</th>
                 <th>Net advance</th>
                 <th>Applied</th>
                 <th>Status</th>
-                <th>Actions</th>
+                <th>Notes</th>
               </tr>
             </thead>
             <tbody>
-              {applications.map((app: any) => {
+              {apps.map((app: any) => {
                 const sc = STATUS_COLORS[app.status] || STATUS_COLORS.pending
-                const isActionOpen = actionRow === app.id
                 return (
-                  <React.Fragment key={app.id}>
-                    <tr>
-                      <td style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--text-muted)' }}>{app.reference}</td>
-                      <td>
-                        <div style={{ fontWeight: 500, fontSize: 13 }}>{app.profile?.company_name || app.profile?.full_name || '—'}</div>
-                        {app.profile?.email && <div style={{ fontSize: 11, color: 'var(--text-subtle)' }}>{app.profile.email}</div>}
-                      </td>
-                      <td>
-                        <div style={{ fontFamily: 'monospace', fontSize: 12 }}>{app.invoices?.invoice_number || '—'}</div>
-                        {app.invoices?.due_date && <div style={{ fontSize: 11, color: 'var(--text-subtle)' }}>Due {new Date(app.invoices.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>}
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: 600, color: 'var(--green)' }}>{fmtAmt(app.net_advance, app.currency)}</div>
-                        <div style={{ fontSize: 11, color: 'var(--text-subtle)' }}>{app.fee_percent}% fee · {fmtAmt(app.gross_advance, app.currency)} gross</div>
-                      </td>
-                      <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                        {new Date(app.applied_at || app.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                      </td>
-                      <td>
-                        <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: sc.bg, color: sc.color }}>
-                          {app.status.replace('_', ' ')}
-                        </span>
-                      </td>
-                      <td>
-                        <button className="btn btn-ghost btn-sm" style={{ fontSize: 12 }}
-                          onClick={() => {
-                            if (isActionOpen) { setActionRow(null); return }
-                            setActionRow(app.id)
-                            setActionStatus('')
-                            setAdminNotes(app.admin_notes || '')
-                            setRejectionReason(app.rejection_reason || '')
-                            setError('')
-                          }}>
-                          {isActionOpen ? 'Cancel' : 'Update status'}
-                        </button>
-                      </td>
-                    </tr>
-                    {isActionOpen && (
-                      <tr>
-                        <td colSpan={7} style={{ background: 'var(--bg)', padding: '14px 20px' }}>
-                          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-                            <div>
-                              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>New status *</label>
-                              <select className="form-input" style={{ fontSize: 12, padding: '7px 10px' }}
-                                value={actionStatus} onChange={e => setActionStatus(e.target.value)}>
-                                <option value="">Select status</option>
-                                <option value="pending">Pending</option>
-                                <option value="under_review">Under review</option>
-                                <option value="approved">Approved</option>
-                                <option value="funded">Funded</option>
-                                <option value="repaid">Repaid</option>
-                                <option value="rejected">Rejected</option>
-                              </select>
-                            </div>
-                            <div style={{ flex: 1, minWidth: 200 }}>
-                              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Admin notes (optional)</label>
-                              <input className="form-input" style={{ fontSize: 12 }} placeholder="Internal note for the user..."
-                                value={adminNotes} onChange={e => setAdminNotes(e.target.value)} />
-                            </div>
-                            {actionStatus === 'rejected' && (
-                              <div style={{ flex: 1, minWidth: 200 }}>
-                                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Rejection reason</label>
-                                <input className="form-input" style={{ fontSize: 12 }} placeholder="Reason shown to user..."
-                                  value={rejectionReason} onChange={e => setRejectionReason(e.target.value)} />
-                              </div>
-                            )}
-                            <button className="btn btn-primary btn-sm" onClick={() => handleStatusUpdate(app.id)} disabled={saving}>
-                              {saving ? 'Saving...' : 'Save'}
-                            </button>
-                          </div>
-                          {error && <div style={{ color: 'var(--red)', fontSize: 12, marginTop: 8 }}>{error}</div>}
-                          {/* Application details */}
-                          <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, fontSize: 12 }}>
-                            <div>
-                              <div style={{ fontWeight: 600, color: 'var(--text-subtle)', fontSize: 11, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Bank details</div>
-                              <div style={{ color: 'var(--text-muted)' }}>Holder: <strong style={{ color: 'var(--text)' }}>{app.account_holder_name}</strong></div>
-                              <div style={{ color: 'var(--text-muted)' }}>Bank: <strong style={{ color: 'var(--text)' }}>{app.bank_name}</strong></div>
-                              <div style={{ color: 'var(--text-muted)' }}>Account: <strong style={{ color: 'var(--text)' }}>···{app.account_number?.slice(-4)}</strong></div>
-                              {app.sort_code && <div style={{ color: 'var(--text-muted)' }}>Sort/IFSC: <strong style={{ color: 'var(--text)' }}>{app.sort_code}</strong></div>}
-                            </div>
-                            <div>
-                              <div style={{ fontWeight: 600, color: 'var(--text-subtle)', fontSize: 11, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Contact</div>
-                              <div style={{ color: 'var(--text-muted)' }}>Phone: <strong style={{ color: 'var(--text)' }}>{app.contact_phone}</strong></div>
-                              {app.business_registered_name && <div style={{ color: 'var(--text-muted)' }}>Business: <strong style={{ color: 'var(--text)' }}>{app.business_registered_name}</strong></div>}
-                            </div>
-                            <div>
-                              <div style={{ fontWeight: 600, color: 'var(--text-subtle)', fontSize: 11, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Offer</div>
-                              <div style={{ color: 'var(--text-muted)' }}>Invoice: <strong style={{ color: 'var(--text)' }}>{fmtAmt(app.invoice_amount, app.currency)}</strong></div>
-                              <div style={{ color: 'var(--text-muted)' }}>Gross advance: <strong style={{ color: 'var(--text)' }}>{fmtAmt(app.gross_advance, app.currency)}</strong></div>
-                              <div style={{ color: 'var(--text-muted)' }}>Fee ({app.fee_percent}%): <strong style={{ color: 'var(--text)' }}>{fmtAmt(app.fee_amount, app.currency)}</strong></div>
-                              <div style={{ color: 'var(--text-muted)' }}>Net advance: <strong style={{ color: 'var(--green)' }}>{fmtAmt(app.net_advance, app.currency)}</strong></div>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
+                  <tr key={app.id}>
+                    <td style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--text-muted)' }}>{app.reference}</td>
+                    <td>
+                      <div style={{ fontFamily: 'monospace', fontSize: 12 }}>{app.invoices?.invoice_number || '—'}</div>
+                      {app.invoices?.due_date && (
+                        <div style={{ fontSize: 11, color: 'var(--text-subtle)' }}>
+                          Due {new Date(app.invoices.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </div>
+                      )}
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: 600, color: 'var(--green)' }}>{fmtAmt(app.net_advance, app.currency)}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-subtle)' }}>{app.fee_percent}% fee · {fmtAmt(app.gross_advance, app.currency)} gross</div>
+                    </td>
+                    <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                      {new Date(app.applied_at || app.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </td>
+                    <td>
+                      <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: sc.bg, color: sc.color }}>
+                        {app.status.replace('_', ' ')}
+                      </span>
+                    </td>
+                    <td style={{ fontSize: 12, color: 'var(--text-muted)', maxWidth: 200 }}>
+                      {app.status === 'rejected' && app.rejection_reason
+                        ? <span style={{ color: 'var(--red)' }}>{app.rejection_reason}</span>
+                        : app.admin_notes || '—'}
+                    </td>
+                  </tr>
                 )
               })}
             </tbody>
           </table>
         </div>
       )}
+
+      {/* Info box */}
+      <div style={{ marginTop: 16, padding: '12px 16px', background: 'var(--bg)', borderRadius: 10, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+        <strong style={{ color: 'var(--text)' }}>How it works:</strong> Apply for financing from any eligible invoice (£500+) to receive up to 90% of the invoice value within 24 hours.
+        Our team reviews applications and updates the status here. You'll also receive email updates for each status change.
+      </div>
     </div>
   )
 }

@@ -145,7 +145,7 @@ INSTRUCTIONS:
 })
 
 // Get conversation suggestions
-router.get('/suggestions', async (req: AuthRequest, res: Response) => {
+router.get('/suggestions', authenticate, async (req: AuthRequest, res: Response) => {
   const { data: overdue } = await supabase.from('invoices').select('invoice_number').eq('user_id', (req as any).user!.id).eq('status', 'overdue').limit(3)
   const suggestions = [
     'Who hasn\'t paid me this month?',

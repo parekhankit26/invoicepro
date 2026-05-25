@@ -35,7 +35,10 @@ const ALLOWED_ORIGINS = [
   process.env.FRONTEND_URL || 'https://invoicepro-ten.vercel.app',
   'http://localhost:5173',
   'http://localhost:3000',
-]
+  // Backend's own origin — needed so the admin panel (served from Railway) can call /api/* routes
+  'https://invoicepro-production-2ed7.up.railway.app',
+  process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : '',
+].filter(Boolean)
 
 // Trust Railway proxy (needed for correct IP behind load balancer)
 app.set('trust proxy', 1)
@@ -135,6 +138,15 @@ app.get('/admin', (_req, res) => res.sendFile(path.join(adminPanelPath, 'index.h
 app.get('/admin/*', (_req, res) => res.sendFile(path.join(adminPanelPath, 'index.html')))
 
 app.get('/health', (_, res) => res.json({ status: 'ok', version: '2.0.0', features: ['ai-assistant','whatsapp-sms','receipt-scanner','cashflow','financing','milestones','early-payment','happiness-score','year-review'], timestamp: new Date().toISOString() }))
+
+// Global error handler — ensures API routes always return JSON, never HTML
+app.use((err: any, req: any, res: any, next: any) => {
+  if (req.path.startsWith('/api/')) {
+    const status = err.status || err.statusCode || 500
+    return res.status(status).json({ error: err.message || 'Internal server error' })
+  }
+  next(err)
+})
 
 cron.schedule('0 9 * * *', async () => { await reminderService.sendOverdueReminders(); await reminderService.sendUpcomingDueReminders() })
 cron.schedule('0 0 * * *', async () => { const { supabase } = await import('./lib/supabase'); await supabase.from('invoices').update({ status: 'overdue' }).in('status', ['sent','pending']).lt('due_date', new Date().toISOString().split('T')[0]) })

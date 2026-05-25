@@ -456,33 +456,39 @@ function renderPaymentDetails(doc: any, invoice: any, primaryColor: string) {
     .text('HOW TO PAY', 60, y + 7, { characterSpacing: 1.2 })
   y += 30
 
-  // ── Stripe online payment (full width, prominent) ──────────────────
+  // ── Stripe online payment (full width, clean button) ─────────────────
   if (hasStripe) {
-    // Button background
-    doc.rect(50, y, 495, 36).fill(primaryColor)
-    // Shield / lock icon (drawn as simple circle)
-    doc.circle(76, y + 18, 8).fill('rgba(255,255,255,0.15)')
-    doc.fontSize(10).fillColor(contrastText(primaryColor))
-      .text('🔒', 62, y + 11, { width: 20, align: 'center' })
-    // Button text
-    doc.fontSize(12).fillColor(contrastText(primaryColor))
-      .text('Pay online now', 85, y + 5, { width: 340, align: 'left' })
-    doc.fontSize(9).fillColor(contrastText(primaryColor)).opacity(0.75)
-      .text('Secure payment powered by Stripe', 85, y + 20, { width: 340 }).opacity(1)
-    // Amount badge on right
+    const btnH = 44
+    const textColor = contrastText(primaryColor)
     const total = fmtMoney(Number(invoice.total || 0), invoice.currency || 'GBP')
-    doc.fontSize(13).fillColor(contrastText(primaryColor))
-      .text(total, 390, y + 11, { width: 145, align: 'right' })
-    // Clickable hyperlink over entire button
-    doc.link(50, y, 495, 36, invoice.stripe_payment_link)
-    y += 44
 
-    // URL in small text below button
-    doc.fontSize(7.5).fillColor('#6b7280')
-      .text('Click the button above or visit: ', 50, y, { continued: true })
+    // Solid button background
+    doc.rect(50, y, 495, btnH).fill(primaryColor)
+
+    // Thin inner border for depth (slightly lighter/darker shade)
+    doc.rect(52, y + 2, 491, btnH - 4).strokeColor('rgba(255,255,255,0.15)').lineWidth(1).stroke()
+
+    // Left side: main label + subtitle, all cleanly centered vertically
+    doc.fontSize(13).font('Helvetica-Bold').fillColor(textColor)
+      .text('Pay Online Now', 60, y + 8, { width: 300 })
+    doc.fontSize(8.5).font('Helvetica').fillColor(textColor).opacity(0.7)
+      .text('Secure payment powered by Stripe', 60, y + 26, { width: 300 }).opacity(1)
+
+    // Right side: amount, bold, vertically centered
+    doc.fontSize(15).font('Helvetica-Bold').fillColor(textColor)
+      .text(total, 360, y + 14, { width: 174, align: 'right' })
+    doc.font('Helvetica')
+
+    // Clickable hyperlink over entire button
+    doc.link(50, y, 495, btnH, invoice.stripe_payment_link)
+    y += btnH + 8
+
+    // URL below in small grey text (also clickable)
+    doc.fontSize(7.5).fillColor('#9ca3af')
+      .text('Link: ', 50, y, { continued: true, width: 495 })
     doc.fillColor('#3b82f6')
-      .text(invoice.stripe_payment_link, { link: invoice.stripe_payment_link, underline: true, width: 495 })
-    y += 16
+      .text(invoice.stripe_payment_link, { link: invoice.stripe_payment_link, underline: true })
+    y += 14
   }
 
   // ── Bank transfer section ──────────────────────────────────────────
@@ -526,13 +532,15 @@ function renderPaymentDetails(doc: any, invoice: any, primaryColor: string) {
     })
     y = ry + 8
 
-    // Payment instructions note
+    // Payment instructions note — amber box, no emoji (PDFKit can't render them)
     if (bank.payment_instructions) {
-      doc.rect(50, y, 495, 2).fill('#e5e7eb')
-      y += 8
-      doc.fontSize(8).fillColor('#92400e')
-        .text('ℹ  ' + bank.payment_instructions, 50, y, { width: 495 })
-      y += 18
+      y += 4
+      doc.rect(50, y, 495, 24).fill('#fffbeb').stroke('#fde68a')
+      doc.fontSize(8).font('Helvetica-Bold').fillColor('#92400e')
+        .text('Note:', 60, y + 8, { continued: true, width: 50 })
+      doc.font('Helvetica').fillColor('#92400e')
+        .text('  ' + bank.payment_instructions, { width: 420 })
+      y += 30
     }
   }
 

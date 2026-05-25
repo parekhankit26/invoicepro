@@ -23,7 +23,17 @@ router.get('/view/:token', async (req: Request, res: Response) => {
     const { data: portalBiz } = await supabase.from('profiles')
       .select('company_name, full_name, company_logo, company_address, company_phone, bank_account_details')
       .eq('id', portal.user_id).single()
-    ;(portal as any).profiles = portalBiz
+
+    // Fallback: read bank_account_details from user metadata if not on profile column
+    const bizData: any = { ...(portalBiz || {}) }
+    if (!bizData.bank_account_details) {
+      try {
+        const { data: authUser } = await supabase.auth.admin.getUserById(portal.user_id)
+        const meta = authUser?.user?.user_metadata || {}
+        if (meta.bank_account_details) bizData.bank_account_details = meta.bank_account_details
+      } catch {}
+    }
+    ;(portal as any).profiles = bizData
 
     // Update last accessed
     await supabase.from('client_portal_tokens').update({ last_accessed: new Date().toISOString() }).eq('token', (req as any).params.token)

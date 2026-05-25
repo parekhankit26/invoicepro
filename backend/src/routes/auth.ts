@@ -58,6 +58,16 @@ router.get('/profile', authenticate, async (req: AuthRequest, res: Response) => 
     }).select().single()
     return res.json(created || { id: req.user!.id, email: req.user!.email, plan: 'free' })
   }
+  // Merge in invoice_template and bank_account_details from user metadata as fallback
+  // (in case the DB columns haven't been migrated yet)
+  if (!data.invoice_template || !data.bank_account_details) {
+    try {
+      const { data: authUser } = await supabase.auth.admin.getUserById(req.user!.id)
+      const meta = authUser?.user?.user_metadata || {}
+      if (!data.invoice_template && meta.invoice_template) data.invoice_template = meta.invoice_template
+      if (!data.bank_account_details && meta.bank_account_details) data.bank_account_details = meta.bank_account_details
+    } catch {}
+  }
   return res.json(data)
 })
 
@@ -73,13 +83,26 @@ router.put('/profile', authenticate, async (req: AuthRequest, res: Response) => 
   allowed.forEach(k => { if ((req as any).body[k] !== undefined) updates[k] = (req as any).body[k] })
   if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'No valid fields to update' })
 
-  // Try full update; gracefully strip columns that don't exist in DB yet
+  // Always persist invoice_template and bank_account_details in auth user metadata
+  // (no DB migration needed — this works even if the columns don't exist on profiles yet)
+  const metaUpdates: any = {}
+  if (updates.invoice_template !== undefined) metaUpdates.invoice_template = updates.invoice_template
+  if (updates.bank_account_details !== undefined) metaUpdates.bank_account_details = updates.bank_account_details
+  if (Object.keys(metaUpdates).length > 0) {
+    await supabase.auth.admin.updateUserById(req.user!.id, { user_metadata: metaUpdates })
+  }
+
+  // Try to update profiles table; gracefully strip columns that may not exist yet
   let { data, error } = await supabase.from('profiles').update(updates).eq('id', req.user!.id).select().single()
-  if (error && (error.message?.includes('invoice_template') || error.message?.includes('bank_account_details'))) {
+  if (error && (error.message?.includes('invoice_template') || error.message?.includes('bank_account_details') || error.message?.includes('column'))) {
     const { invoice_template, bank_account_details, ...safeUpdates } = updates
-    const retry = await supabase.from('profiles').update(safeUpdates).eq('id', req.user!.id).select().single()
-    data = retry.data; error = retry.error
-    // Return success — frontend stores these in localStorage as primary source
+    if (Object.keys(safeUpdates).length > 0) {
+      const retry = await supabase.from('profiles').update(safeUpdates).eq('id', req.user!.id).select().single()
+      data = retry.data; error = retry.error
+    } else {
+      error = null
+    }
+    // Return success with the extra fields merged in
     if (!error) return res.json({ ...data, invoice_template, bank_account_details })
   }
   if (error) return res.status(400).json({ error: error.message })

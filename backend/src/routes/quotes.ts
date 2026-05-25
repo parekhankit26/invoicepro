@@ -152,6 +152,18 @@ router.get('/:id/pdf', async (req: AuthRequest, res: Response) => {
     const client = (clientRes.data as any) || {}
     const profile = (profileRes.data as any) || {}
 
+    // Fallback for template/bank details from user metadata
+    let quoteTemplate = profile.invoice_template || null
+    let quoteBankDetails = profile.bank_account_details || null
+    if (!quoteTemplate || !quoteBankDetails) {
+      try {
+        const { data: authUser } = await supabase.auth.admin.getUserById((req as any).user!.id)
+        const meta = authUser?.user?.user_metadata || {}
+        if (!quoteTemplate && meta.invoice_template) quoteTemplate = meta.invoice_template
+        if (!quoteBankDetails && meta.bank_account_details) quoteBankDetails = meta.bank_account_details
+      } catch {}
+    }
+
     const quoteData: any = {
       ...quote,
       _type: 'quote',
@@ -166,8 +178,8 @@ router.get('/:id/pdf', async (req: AuthRequest, res: Response) => {
       client_name: client.name || 'Client',
       client_email: client.email || '',
       client_address: client.address || '',
-      invoice_template: profile.invoice_template || null,
-      bank_account_details: profile.bank_account_details || null,
+      invoice_template: quoteTemplate,
+      bank_account_details: quoteBankDetails,
     }
 
     const pdfBuffer = await pdfService.generateInvoicePDF(quoteData)

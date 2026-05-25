@@ -97,6 +97,18 @@ router.get('/:id/pdf', async (req: AuthRequest, res: Response) => {
     const client = clientRes.data || {}
     const profile = profileRes.data || {}
     
+    // Fallback: read invoice_template and bank_account_details from user metadata if not on profile
+    let invoiceTemplate = profile.invoice_template || null
+    let bankDetails = profile.bank_account_details || null
+    if (!invoiceTemplate || !bankDetails) {
+      try {
+        const { data: authUser } = await supabase.auth.admin.getUserById((req as any).user!.id)
+        const meta = authUser?.user?.user_metadata || {}
+        if (!invoiceTemplate && meta.invoice_template) invoiceTemplate = meta.invoice_template
+        if (!bankDetails && meta.bank_account_details) bankDetails = meta.bank_account_details
+      } catch {}
+    }
+
     const invoiceData: any = {
       ...invoice,
       items,
@@ -107,10 +119,10 @@ router.get('/:id/pdf', async (req: AuthRequest, res: Response) => {
       client_name: client.name || invoice.bill_to || 'Client',
       client_email: client.email || '',
       client_address: client.address || '',
-      invoice_template: profile.invoice_template || null,
-      bank_account_details: profile.bank_account_details || null,
+      invoice_template: invoiceTemplate,
+      bank_account_details: bankDetails,
     }
-    
+
     const pdfBuffer = await pdfService.generateInvoicePDF(invoiceData)
     res.setHeader('Content-Type', 'application/pdf')
     res.setHeader('Content-Disposition', `attachment; filename="${invoice.invoice_number}.pdf"`)
@@ -139,6 +151,17 @@ router.post('/:id/send', async (req: AuthRequest, res: Response) => {
 
     try {
       // Build invoice data with all fields the PDF renderer needs
+      // Fallback for template/bank details from user metadata
+      let sendTemplate = invProfile?.invoice_template || null
+      let sendBankDetails = invProfile?.bank_account_details || null
+      if (!sendTemplate || !sendBankDetails) {
+        try {
+          const { data: authUser } = await supabase.auth.admin.getUserById((req as any).user!.id)
+          const meta = authUser?.user?.user_metadata || {}
+          if (!sendTemplate && meta.invoice_template) sendTemplate = meta.invoice_template
+          if (!sendBankDetails && meta.bank_account_details) sendBankDetails = meta.bank_account_details
+        } catch {}
+      }
       const invoiceForPdf: any = {
         ...invoice,
         items: invoice.invoice_items || [],
@@ -150,8 +173,8 @@ router.post('/:id/send', async (req: AuthRequest, res: Response) => {
         client_email: invoice.clients?.email || '',
         client_address: invoice.clients?.address || '',
         stripe_payment_link: paymentLink,
-        invoice_template: invProfile?.invoice_template || null,
-        bank_account_details: invProfile?.bank_account_details || null,
+        invoice_template: sendTemplate,
+        bank_account_details: sendBankDetails,
       }
       const pdfBuffer = await pdfService.generateInvoicePDF(invoiceForPdf)
       await emailService.sendInvoice({ to: invoice.clients.email, clientName: invoice.clients.name, invoice: invoiceForPdf, pdfBuffer })

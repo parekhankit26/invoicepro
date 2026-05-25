@@ -108,6 +108,7 @@ router.get('/:id/pdf', async (req: AuthRequest, res: Response) => {
       client_email: client.email || '',
       client_address: client.address || '',
       invoice_template: profile.invoice_template || null,
+      bank_account_details: profile.bank_account_details || null,
     }
     
     const pdfBuffer = await pdfService.generateInvoicePDF(invoiceData)
@@ -129,7 +130,7 @@ router.post('/:id/send', async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Invoice not found' })
     }
     // Fetch profile separately to avoid cross-schema join issues
-    const { data: invProfile } = await supabase.from('profiles').select('company_name, full_name, company_address, company_phone, tax_number, email, invoice_template').eq('id', (req as any).user!.id).single()
+    const { data: invProfile } = await supabase.from('profiles').select('company_name, full_name, company_address, company_phone, tax_number, email, invoice_template, bank_account_details').eq('id', (req as any).user!.id).single()
     ;(invoice as any).profiles = invProfile
     if (!invoice.clients?.email) return res.status(400).json({ error: 'Client has no email address. Add one in the client profile first.' })
     
@@ -150,6 +151,7 @@ router.post('/:id/send', async (req: AuthRequest, res: Response) => {
         client_address: invoice.clients?.address || '',
         stripe_payment_link: paymentLink,
         invoice_template: invProfile?.invoice_template || null,
+        bank_account_details: invProfile?.bank_account_details || null,
       }
       const pdfBuffer = await pdfService.generateInvoicePDF(invoiceForPdf)
       await emailService.sendInvoice({ to: invoice.clients.email, clientName: invoice.clients.name, invoice: invoiceForPdf, pdfBuffer })

@@ -167,6 +167,7 @@ router.get('/:id/pdf', async (req: AuthRequest, res: Response) => {
       client_email: client.email || '',
       client_address: client.address || '',
       invoice_template: profile.invoice_template || null,
+      bank_account_details: profile.bank_account_details || null,
     }
 
     const pdfBuffer = await pdfService.generateInvoicePDF(quoteData)

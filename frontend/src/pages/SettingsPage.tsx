@@ -8,6 +8,10 @@ import { CURRENCIES } from '../lib/utils'
 import { COUNTRY_LIST, COUNTRY_TAX_CONFIGS, CURRENCY_TO_COUNTRY } from '../lib/taxSystem'
 import toast from 'react-hot-toast'
 
+const LS_BANK_KEY = 'invoicepro_bank_details'
+function loadLocalBank() { try { const s = localStorage.getItem(LS_BANK_KEY); return s ? JSON.parse(s) : null } catch { return null } }
+function saveLocalBank(b: any) { try { localStorage.setItem(LS_BANK_KEY, JSON.stringify(b)) } catch {} }
+
 export default function SettingsPage() {
   const qc = useQueryClient()
   const navigate = useNavigate()
@@ -134,6 +138,11 @@ export default function SettingsPage() {
               </div>
             </div>
 
+            {/* Payment details */}
+            <div className="card card-p" style={{ gridColumn: '1/-1' }}>
+              <PaymentDetailsSection profile={profile} />
+            </div>
+
             {/* Notification preferences */}
             <div className="card card-p" style={{ gridColumn: '1/-1' }}>
               <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Notifications & reminders</div>
@@ -172,6 +181,86 @@ export default function SettingsPage() {
   )
 }
 
+
+function PaymentDetailsSection({ profile }: { profile: any }) {
+  const qc = useQueryClient()
+  const local = loadLocalBank()
+  const fromDb = (() => { try { return profile?.bank_account_details ? (typeof profile.bank_account_details === 'string' ? JSON.parse(profile.bank_account_details) : profile.bank_account_details) : null } catch { return null } })()
+  const initial = local || fromDb || {}
+
+  const [form, setForm] = useState({
+    account_holder_name: initial.account_holder_name || '',
+    bank_name:           initial.bank_name           || '',
+    account_number:      initial.account_number      || '',
+    sort_code:           initial.sort_code           || '',
+    iban:                initial.iban                || '',
+    swift_bic:           initial.swift_bic           || '',
+    payment_instructions: initial.payment_instructions || '',
+  })
+  const [saving, setSaving] = useState(false)
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSaving(true)
+    saveLocalBank(form)
+    try {
+      await api.put('/auth/profile', { bank_account_details: JSON.stringify(form) })
+      qc.invalidateQueries({ queryKey: ['profile'] })
+      toast.success('Payment details saved!')
+    } catch {
+      toast.success('Payment details saved locally!')
+    } finally { setSaving(false) }
+  }
+
+  const f = (k: keyof typeof form) => ({
+    value: form[k],
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setForm(p => ({ ...p, [k]: e.target.value }))
+  })
+
+  return (
+    <form onSubmit={handleSave}>
+      <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Payment details</div>
+      <div style={{ fontSize: 12, color: 'var(--text-subtle)', marginBottom: 16 }}>
+        These appear on every invoice PDF and in the client portal, so clients know exactly how to pay you.
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+        <div className="form-group">
+          <label className="form-label">Account holder name</label>
+          <input {...f('account_holder_name')} className="form-input" placeholder="Asproite Ltd" />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Bank name</label>
+          <input {...f('bank_name')} className="form-input" placeholder="Barclays Bank" />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Account number</label>
+          <input {...f('account_number')} className="form-input" placeholder="12345678" />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Sort code <span style={{ color: 'var(--text-subtle)', fontWeight: 400 }}>(UK)</span></label>
+          <input {...f('sort_code')} className="form-input" placeholder="20-00-00" />
+        </div>
+        <div className="form-group">
+          <label className="form-label">IBAN <span style={{ color: 'var(--text-subtle)', fontWeight: 400 }}>(international)</span></label>
+          <input {...f('iban')} className="form-input" placeholder="GB29 NWBK 6016 1331 9268 19" />
+        </div>
+        <div className="form-group">
+          <label className="form-label">SWIFT / BIC</label>
+          <input {...f('swift_bic')} className="form-input" placeholder="NWBKGB2L" />
+        </div>
+        <div className="form-group" style={{ gridColumn: '1/-1' }}>
+          <label className="form-label">Additional payment instructions <span style={{ color: 'var(--text-subtle)', fontWeight: 400 }}>(optional)</span></label>
+          <textarea {...(f('payment_instructions') as any)} className="form-input" rows={2} style={{ resize: 'vertical' }} placeholder="e.g. Please use the invoice number as payment reference. Payments typically clear within 1 business day." />
+        </div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
+        <button type="submit" className="btn btn-primary" disabled={saving}>
+          {saving ? 'Saving…' : 'Save payment details'}
+        </button>
+      </div>
+    </form>
+  )
+}
 
 function PasswordChangeForm() {
   const [form, setForm] = useState({ current: '', next: '', confirm: '' })

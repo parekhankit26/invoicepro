@@ -21,7 +21,7 @@ router.get('/view/:token', async (req: Request, res: Response) => {
 
     // Fetch profile separately to avoid cross-schema join issues
     const { data: portalBiz } = await supabase.from('profiles')
-      .select('company_name, full_name, company_logo, company_address, company_phone')
+      .select('company_name, full_name, company_logo, company_address, company_phone, bank_account_details')
       .eq('id', portal.user_id).single()
     ;(portal as any).profiles = portalBiz
 

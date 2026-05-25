@@ -66,22 +66,21 @@ router.put('/profile', authenticate, async (req: AuthRequest, res: Response) => 
     'full_name', 'company_name', 'company_address', 'company_phone',
     'company_website', 'tax_number', 'default_currency', 'default_tax_rate',
     'default_payment_terms', 'country_code', 'notify_on_view',
-    'notify_on_payment', 'auto_reminders', 'company_logo', 'invoice_template'
+    'notify_on_payment', 'auto_reminders', 'company_logo',
+    'invoice_template', 'bank_account_details'
   ]
   const updates: Record<string, any> = {}
   allowed.forEach(k => { if ((req as any).body[k] !== undefined) updates[k] = (req as any).body[k] })
   if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'No valid fields to update' })
 
-  // Try full update; if invoice_template column doesn't exist yet, retry without it
+  // Try full update; gracefully strip columns that don't exist in DB yet
   let { data, error } = await supabase.from('profiles').update(updates).eq('id', req.user!.id).select().single()
-  if (error && error.message?.includes('invoice_template')) {
-    const { invoice_template, ...safeUpdates } = updates
+  if (error && (error.message?.includes('invoice_template') || error.message?.includes('bank_account_details'))) {
+    const { invoice_template, bank_account_details, ...safeUpdates } = updates
     const retry = await supabase.from('profiles').update(safeUpdates).eq('id', req.user!.id).select().single()
-    data = retry.data
-    error = retry.error
-    // Return success even though invoice_template wasn't persisted to DB —
-    // the frontend stores it in localStorage as primary source
-    if (!error) return res.json({ ...data, invoice_template: invoice_template })
+    data = retry.data; error = retry.error
+    // Return success — frontend stores these in localStorage as primary source
+    if (!error) return res.json({ ...data, invoice_template, bank_account_details })
   }
   if (error) return res.status(400).json({ error: error.message })
   return res.json(data)

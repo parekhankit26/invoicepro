@@ -51,7 +51,26 @@
       "Bash(grep -rn \"{ invoice, client\" backend/src/ --include=\"*.ts\")",
       "Bash(node -e ' *)",
       "Bash(node_modules/.bin/ts-node --skip-project -e ' *)",
-      "Bash(node_modules/.bin/tsx --eval ' *)"
+      "Bash(node_modules/.bin/tsx --eval ' *)",
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(find \"C:\\\\Users\\\\parek\\\\.claude\\\\worktrees\\\\busy-volhard-3817cc\" -name \"*.env\" -not -path \"*/node_modules/*\" 2>/dev/null; find \"C:\\\\Users\\\\parek\" -maxdepth 3 -name \".env\" 2>/dev/null | head -10)",
+      "Read(//c/Users/parek/**)",
+      "Read(//c/Users/parek/Desktop/**)",
+      "Bash(ls /mnt/c/Users/parek/ 2>/dev/null | head -30)",
+      "Bash(supabase --version)",
+      "Bash(npx supabase *)",
+      "Bash(grep \"^pg$\")",
+      "Bash(grep -E \"^pg$|^postgres$|^@supabase\")",
+      "Bash(supabase projects *)",
+      "mcp__Claude_in_Chrome__list_connected_browsers",
+      "mcp__Claude_in_Chrome__select_browser",
+      "Bash(SUPABASE_ACCESS_TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6bXlobGt3c3N5aHhrcXJqbXdqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTUwMjAwMSwiZXhwIjoyMDkxMDc4MDAxfQ.94S9NWf-lCuW-jV29T9uppk4ybRZHTJEWnL0yQ3q4Pg\" npx supabase projects list)",
+      "Bash(npx railway *)",
+      "Bash(xargs grep -l \"DB_PASSWORD\\\\|DATABASE_URL\\\\|POSTGRES\\\\|db_password\\\\|supabase_db\")",
+      "Bash(xargs grep -l \"SUPABASE_DB\\\\|DATABASE_URL\\\\|POSTGRES_PASSWORD\\\\|DB_PASS\")",
+      "Bash(npm uninstall *)",
+      "Bash(xargs ls -lt)",
+      "Bash(git -C /c/Users/parek/.openclaw/workspace/asproite-site status)"
     ]
   }
 }

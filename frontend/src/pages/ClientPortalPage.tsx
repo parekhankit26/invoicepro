@@ -36,6 +36,16 @@ export default function ClientPortalPage() {
   )
 
   const { client, business, invoices, quotes, stats } = data
+
+  // Parse bank details from business profile
+  const bankDetails = (() => {
+    try {
+      const raw = business?.bank_account_details
+      if (!raw) return null
+      const b = typeof raw === 'string' ? JSON.parse(raw) : raw
+      return (b.account_number || b.iban || b.sort_code) ? b : null
+    } catch { return null }
+  })()
   const outstanding = invoices.filter((i: any) => i.status !== 'paid' && i.status !== 'cancelled')
   const paid = invoices.filter((i: any) => i.status === 'paid')
 
@@ -84,7 +94,7 @@ export default function ClientPortalPage() {
               <AlertTriangle size={15} color="#b45309" /> Outstanding invoices
             </h2>
             {outstanding.map((inv: any) => (
-              <InvoiceCard key={inv.id} invoice={inv} token={token!} highlight />
+              <InvoiceCard key={inv.id} invoice={inv} token={token!} bankDetails={bankDetails} highlight />
             ))}
           </div>
         )}
@@ -128,7 +138,7 @@ export default function ClientPortalPage() {
             <h2 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
               <CheckCircle size={15} color="#16a34a" /> Payment history
             </h2>
-            {paid.map((inv: any) => <InvoiceCard key={inv.id} invoice={inv} token={token!} />)}
+            {paid.map((inv: any) => <InvoiceCard key={inv.id} invoice={inv} token={token!} bankDetails={null} />)}
           </div>
         )}
       </div>
@@ -136,34 +146,90 @@ export default function ClientPortalPage() {
   )
 }
 
-function InvoiceCard({ invoice: inv, token, highlight = false }: { invoice: any; token: string; highlight?: boolean }) {
+function InvoiceCard({ invoice: inv, token, bankDetails, highlight = false }: { invoice: any; token: string; bankDetails: any; highlight?: boolean }) {
+  const [showBank, setShowBank] = useState(false)
   const isOverdue = inv.status !== 'paid' && new Date(inv.due_date) < new Date()
+  const unpaid = inv.status !== 'paid' && inv.status !== 'cancelled'
+
   return (
     <div style={{
       background: 'white', borderRadius: 12, border: `1px solid ${highlight ? (isOverdue ? '#fecaca' : '#fef08a') : '#e8e5de'}`,
       padding: '16px 20px', marginBottom: 10
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+      {/* Header row */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: unpaid ? 12 : 0 }}>
         <div>
           <div style={{ fontWeight: 700, fontSize: 14 }}>{inv.invoice_number}</div>
           <div style={{ fontSize: 12, color: '#756d5c' }}>
             {inv.status === 'paid' ? `Paid ${formatDate(inv.paid_at)}` : `Due ${formatDate(inv.due_date)}`}
-            {isOverdue && <span style={{ color: '#dc2626', marginLeft: 6 }}>· OVERDUE</span>}
+            {isOverdue && <span style={{ color: '#dc2626', marginLeft: 6, fontWeight: 600 }}>· OVERDUE</span>}
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.02em' }}>{formatCurrency(inv.total, inv.currency)}</div>
+          <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em' }}>{formatCurrency(inv.total, inv.currency)}</div>
           <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, fontWeight: 600, background: inv.status === 'paid' ? '#dcfce7' : isOverdue ? '#fee2e2' : '#fef9c3', color: inv.status === 'paid' ? '#15803d' : isOverdue ? '#dc2626' : '#b45309' }}>
-            {inv.status === 'paid' ? 'Paid' : isOverdue ? 'Overdue' : 'Pending'}
+            {inv.status === 'paid' ? '✓ Paid' : isOverdue ? 'Overdue' : 'Pending'}
           </span>
         </div>
       </div>
-      {inv.status !== 'paid' && inv.stripe_payment_link && (
-        <a href={inv.stripe_payment_link} target="_blank" rel="noopener noreferrer"
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '11px', background: '#1a1814', color: 'white', borderRadius: 8, textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>
-          <CreditCard size={14} /> Pay {formatCurrency(inv.total, inv.currency)} securely
-        </a>
+
+      {/* Payment options — only for unpaid invoices */}
+      {unpaid && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {/* Online Pay button */}
+          {inv.stripe_payment_link && (
+            <a href={inv.stripe_payment_link} target="_blank" rel="noopener noreferrer"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', background: '#1a1814', color: 'white', borderRadius: 10, textDecoration: 'none', fontWeight: 700, fontSize: 14 }}>
+              <CreditCard size={15} /> Pay {formatCurrency(inv.total, inv.currency)} online now →
+            </a>
+          )}
+
+          {/* Bank Transfer option */}
+          {bankDetails && (
+            <div>
+              <button onClick={() => setShowBank(v => !v)}
+                style={{ width: '100%', padding: '11px', background: showBank ? '#f8f7f4' : 'white', border: '1px solid #e8e5de', borderRadius: 10, fontWeight: 600, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: '#374151' }}>
+                🏦 {showBank ? 'Hide' : 'Pay by bank transfer'}
+              </button>
+              {showBank && (
+                <div style={{ background: '#f8f7f4', borderRadius: 10, padding: '14px 16px', marginTop: 6, fontSize: 13 }}>
+                  <div style={{ fontWeight: 700, marginBottom: 10, color: '#1a1814' }}>Bank transfer details</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 16px' }}>
+                    {bankDetails.account_holder_name && <Row label="Account name" value={bankDetails.account_holder_name} />}
+                    {bankDetails.bank_name          && <Row label="Bank"         value={bankDetails.bank_name} />}
+                    {bankDetails.account_number     && <Row label="Account no."  value={bankDetails.account_number} />}
+                    {bankDetails.sort_code          && <Row label="Sort code"    value={bankDetails.sort_code} />}
+                    {bankDetails.iban               && <Row label="IBAN"         value={bankDetails.iban} />}
+                    {bankDetails.swift_bic          && <Row label="SWIFT/BIC"    value={bankDetails.swift_bic} />}
+                    <Row label="Reference" value={inv.invoice_number} highlight />
+                  </div>
+                  {bankDetails.payment_instructions && (
+                    <div style={{ marginTop: 10, padding: '8px 12px', background: '#fef9c3', borderRadius: 8, fontSize: 12, color: '#92400e' }}>
+                      {bankDetails.payment_instructions}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* No payment method available */}
+          {!inv.stripe_payment_link && !bankDetails && (
+            <div style={{ textAlign: 'center', fontSize: 12, color: '#9ca3af', padding: '8px 0' }}>
+              Contact {inv.business_name || 'your supplier'} to arrange payment
+            </div>
+          )}
+        </div>
       )}
+    </div>
+  )
+}
+
+function Row({ label, value, highlight = false }: { label: string; value: string; highlight?: boolean }) {
+  return (
+    <div>
+      <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#9ca3af', marginBottom: 2 }}>{label}</div>
+      <div style={{ fontWeight: highlight ? 700 : 500, color: highlight ? '#1a1814' : '#374151', fontSize: 13 }}>{value}</div>
     </div>
   )
 }

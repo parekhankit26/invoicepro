@@ -4,6 +4,7 @@ import cors from 'cors'
 import helmet from 'helmet'
 import dotenv from 'dotenv'
 import cron from 'node-cron'
+import rateLimit from 'express-rate-limit'
 
 import authRoutes from './routes/auth'
 import invoiceRoutes from './routes/invoices'
@@ -29,23 +30,85 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 3001
 
-// Trust Railway proxy
+// Allowed frontend origins — add your Vercel preview URLs or custom domain if needed
+const ALLOWED_ORIGINS = [
+  process.env.FRONTEND_URL || 'https://invoicepro-ten.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000',
+]
+
+// Trust Railway proxy (needed for correct IP behind load balancer)
 app.set('trust proxy', 1)
 
+// Security headers via Helmet
 app.use(helmet({
-  crossOriginResourcePolicy: false,
-  contentSecurityPolicy: false
+  crossOriginResourcePolicy: { policy: 'cross-origin' }, // needed for PDF/logo serving
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],   // needed for admin panel inline scripts
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      imgSrc: ["'self'", 'data:', 'https:'],
+      connectSrc: ["'self'", 'https://api.anthropic.com', 'https://api.stripe.com'],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"],
+    }
+  }
 }))
-app.use(cors({ 
-  origin: (origin: any, cb: any) => cb(null, true), // Allow all origins — protected by auth tokens 
+
+// CORS — only allow the actual frontend, not every origin on the internet
+app.use(cors({
+  origin: (origin: any, cb: any) => {
+    // Allow requests with no origin (mobile apps, curl, Stripe webhooks)
+    if (!origin) return cb(null, true)
+    // Allow whitelisted origins
+    if (ALLOWED_ORIGINS.some(o => origin === o || origin.endsWith('.vercel.app'))) {
+      return cb(null, true)
+    }
+    return cb(new Error(`CORS: origin ${origin} not allowed`), false)
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   exposedHeaders: ['Content-Disposition', 'Content-Type', 'Content-Length']
 }))
+
+// ── Rate limiting ─────────────────────────────────────────
+// Strict limit on auth endpoints to prevent brute force
+const authRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,                   // 20 attempts per IP per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Please try again in 15 minutes.' },
+  skip: (req) => process.env.NODE_ENV === 'development',
+})
+
+// General API limit — generous but still blocks abuse
+const generalRateLimit = rateLimit({
+  windowMs: 60 * 1000,  // 1 minute
+  max: 300,             // 300 requests per IP per minute
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Please slow down.' },
+  skip: (req) => process.env.NODE_ENV === 'development',
+})
+
+// Apply rate limits
+app.use('/api/auth/login', authRateLimit)
+app.use('/api/auth/register', authRateLimit)
+app.use('/api/auth/forgot-password', authRateLimit)
+app.use('/api/auth/reset-user-password', authRateLimit)
+app.use('/api/admin/login', authRateLimit)
+app.use('/api', generalRateLimit)
+
+// Stripe webhooks need raw body — must be before express.json()
 app.use('/api/webhooks', express.raw({ type: 'application/json' }), webhookRoutes)
-app.use(express.json({ limit: '10mb' }))
-app.use(express.urlencoded({ extended: true }))
+
+// Body parsers — 1MB default, receipt scanner gets 10MB on its specific route
+app.use(express.json({ limit: '1mb' }))
+app.use(express.urlencoded({ extended: true, limit: '1mb' }))
 
 
 app.use('/api/auth', authRoutes)

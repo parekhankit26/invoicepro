@@ -160,12 +160,15 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
       return res.json({ email_sent: true, message: 'Password reset email sent! Check your inbox (and spam folder).' })
     } catch (emailErr: any) {
       console.error('Password reset email failed:', emailErr.message)
-      // Always surface the real error so the user can fix their email settings
+      const isDev = process.env.NODE_ENV === 'development'
       return res.json({
         email_sent: false,
         email_error: emailErr.message,
-        dev_reset_url: resetUrl,
-        message: `Reset link generated but email delivery failed: ${emailErr.message}. Check Admin Panel → Email Settings.`
+        // Only expose the raw link in development — never in production
+        ...(isDev ? { dev_reset_url: resetUrl } : {}),
+        message: isDev
+          ? `Reset link generated but email delivery failed: ${emailErr.message}. Check Admin Panel → Email Settings.`
+          : 'If an account with that email exists, a reset link has been sent.'
       })
     }
   } catch (e: any) {
@@ -175,15 +178,18 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
 })
 
 // One-time admin setup endpoint — creates first super admin
-// Protected by ADMIN_SETUP_KEY env var
+// Protected by ADMIN_SETUP_KEY env var (must be set — no insecure default)
 router.post('/setup-admin', async (req: Request, res: Response) => {
   try {
     const { email, password, full_name, setup_key } = (req as any).body
-    
-    // Must match ADMIN_SETUP_KEY env var
-    const validKey = process.env.ADMIN_SETUP_KEY || 'InvoiceProSetup2024'
+
+    // ADMIN_SETUP_KEY must be explicitly set — no hardcoded fallback
+    const validKey = process.env.ADMIN_SETUP_KEY
+    if (!validKey) {
+      return res.status(503).json({ error: 'Admin setup is disabled. Set ADMIN_SETUP_KEY environment variable on the server to enable it.' })
+    }
     if (setup_key !== validKey) {
-      return res.status(403).json({ error: 'Invalid setup key. Use: InvoiceProSetup2024 or your ADMIN_SETUP_KEY env var' })
+      return res.status(403).json({ error: 'Invalid setup key.' })
     }
     if (!email || !password || password.length < 8) {
       return res.status(400).json({ error: 'Email and password (8+ chars) required' })
@@ -239,7 +245,8 @@ router.get('/setup-status', async (req: Request, res: Response) => {
 router.post('/reset-user-password', async (req: Request, res: Response) => {
   try {
     const { email, new_password, admin_key } = (req as any).body
-    if (admin_key !== (process.env.ADMIN_SETUP_KEY || 'InvoiceProSetup2024')) {
+    const validKey = process.env.ADMIN_SETUP_KEY
+    if (!validKey || admin_key !== validKey) {
       return res.status(403).json({ error: 'Invalid admin key' })
     }
     if (!email || !new_password || new_password.length < 8) {

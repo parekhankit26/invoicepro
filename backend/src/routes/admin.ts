@@ -6,10 +6,15 @@ import { emailService } from '../services/emailService'
 import { stripeService } from '../services/stripeService'
 
 const router = Router()
-const ADMIN_JWT_SECRET = process.env.ADMIN_JWT_SECRET || process.env.JWT_SECRET || 'invoicepro-admin-secret-2024'
+// ADMIN_JWT_SECRET must be explicitly set — no hardcoded fallback (prevents token forgery if secret is public)
+const ADMIN_JWT_SECRET = process.env.ADMIN_JWT_SECRET || process.env.JWT_SECRET
+if (!ADMIN_JWT_SECRET) {
+  console.error('FATAL: ADMIN_JWT_SECRET environment variable is not set. Admin panel will reject all logins.')
+}
 
 // ── Admin auth middleware ────────────────────────────────
 const adminAuth = (req: any, res: any, next: any) => {
+  if (!ADMIN_JWT_SECRET) return res.status(503).json({ error: 'Admin JWT secret not configured. Set ADMIN_JWT_SECRET on the server.' })
   const token = req.headers.authorization?.split(' ')[1]
   if (!token) return res.status(401).json({ error: 'Unauthorized' })
   try { req.admin = jwt.verify(token, ADMIN_JWT_SECRET); next() }
@@ -29,6 +34,7 @@ router.post('/login', async (req: Request, res: Response) => {
     const valid = await bcrypt.compare(password, admin.password_hash)
     if (!valid) return res.status(401).json({ error: 'Invalid credentials' })
     await supabase.from('admin_users').update({ last_login: new Date().toISOString() }).eq('id', admin.id)
+    if (!ADMIN_JWT_SECRET) return res.status(503).json({ error: 'Admin JWT secret not configured on server.' })
     const token = jwt.sign({ id: admin.id, email: admin.email, role: admin.role }, ADMIN_JWT_SECRET, { expiresIn: '8h' })
     return res.json({ token, admin: { id: admin.id, email: admin.email, full_name: admin.full_name, role: admin.role } })
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
@@ -477,10 +483,11 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
     // Log the attempt
     try { await supabase.from('admin_audit_log').insert({ admin_id: admin.id, action: 'password_reset_requested', entity_type: 'admin_user', entity_id: admin.id, new_value: { email: admin.email } }) } catch(_) {}
 
+    const isDev = process.env.NODE_ENV === 'development'
     return res.json({
       message: emailSent ? 'Reset link sent to your email!' : 'If that email exists, a reset link has been sent.',
-      // Always return the direct link so admin can reset even without email configured
-      dev_reset_url: resetUrl
+      // Only expose the raw link in development — keep it out of production responses
+      ...(isDev ? { dev_reset_url: resetUrl } : {})
     })
   } catch(e: any) { return res.status(500).json({ error: e.message }) }
 })

@@ -1,4 +1,4 @@
-import { Router, Response, Request } from 'express'
+import express, { Router, Response, Request } from 'express'
 import { authenticate, AuthRequest } from '../middleware/auth'
 import { supabase } from '../lib/supabase'
 import { calculateTax } from '../lib/taxCalculator'
@@ -6,7 +6,8 @@ import { calculateTax } from '../lib/taxCalculator'
 const router = Router()
 
 // ── FEATURE 3: AI Receipt Scanner ────────────────────────
-router.post('/scan-receipt', authenticate, async (req: AuthRequest, res: Response) => {
+// Needs larger body limit for base64-encoded images — 10MB override applied here only
+router.post('/scan-receipt', express.json({ limit: '10mb' }), authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const { image_base64, media_type = 'image/jpeg' } = (req as any).body
     if (!image_base64) return res.status(400).json({ error: 'image_base64 is required' })

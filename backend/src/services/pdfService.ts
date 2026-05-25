@@ -532,15 +532,16 @@ function renderPaymentDetails(doc: any, invoice: any, primaryColor: string) {
     })
     y = ry + 8
 
-    // Payment instructions note — amber box, no emoji (PDFKit can't render them)
+    // Payment instructions note — full-width amber bar, single text call
     if (bank.payment_instructions) {
-      y += 4
-      doc.rect(50, y, 495, 24).fill('#fffbeb').stroke('#fde68a')
-      doc.fontSize(8).font('Helvetica-Bold').fillColor('#92400e')
-        .text('Note:', 60, y + 8, { continued: true, width: 50 })
+      y += 6
+      doc.rect(50, y, 495, 22).fill('#fef3c7').stroke('#fde68a').lineWidth(1)
+      doc.fontSize(8.5).font('Helvetica-Bold').fillColor('#b45309')
+        .text('Note:  ', 62, y + 7, { continued: true })
       doc.font('Helvetica').fillColor('#92400e')
-        .text('  ' + bank.payment_instructions, { width: 420 })
-      y += 30
+        .text(bank.payment_instructions, { width: 430, lineBreak: false })
+      doc.font('Helvetica')
+      y += 28
     }
   }
 

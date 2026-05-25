@@ -138,11 +138,6 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* Payment details */}
-            <div className="card card-p" style={{ gridColumn: '1/-1' }}>
-              <PaymentDetailsSection profile={profile} />
-            </div>
-
             {/* Notification preferences */}
             <div className="card card-p" style={{ gridColumn: '1/-1' }}>
               <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Notifications & reminders</div>
@@ -171,6 +166,11 @@ export default function SettingsPage() {
           </div>
         </form>
 
+        {/* Payment details — must be OUTSIDE the main form to avoid nested-form bug */}
+        <div className="card card-p" style={{ marginTop: 16 }}>
+          <PaymentDetailsSection profile={profile} />
+        </div>
+
         {/* Password Change */}
         <div className="card card-p" style={{ marginTop: 16 }}>
           <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Change password</div>
@@ -184,20 +184,34 @@ export default function SettingsPage() {
 
 function PaymentDetailsSection({ profile }: { profile: any }) {
   const qc = useQueryClient()
-  const local = loadLocalBank()
-  const fromDb = (() => { try { return profile?.bank_account_details ? (typeof profile.bank_account_details === 'string' ? JSON.parse(profile.bank_account_details) : profile.bank_account_details) : null } catch { return null } })()
-  const initial = local || fromDb || {}
 
-  const [form, setForm] = useState({
-    account_holder_name: initial.account_holder_name || '',
-    bank_name:           initial.bank_name           || '',
-    account_number:      initial.account_number      || '',
-    sort_code:           initial.sort_code           || '',
-    iban:                initial.iban                || '',
-    swift_bic:           initial.swift_bic           || '',
-    payment_instructions: initial.payment_instructions || '',
-  })
+  const blank = { account_holder_name: '', bank_name: '', account_number: '', sort_code: '', iban: '', swift_bic: '', payment_instructions: '' }
+  const [form, setForm] = useState(blank)
+  const [loaded, setLoaded] = useState(false)
   const [saving, setSaving] = useState(false)
+
+  // Populate form once: prefer localStorage, then DB/metadata value
+  useEffect(() => {
+    if (loaded) return // only run once
+    const local = loadLocalBank()
+    const fromDb = (() => { try { const raw = profile?.bank_account_details; if (!raw) return null; return typeof raw === 'string' ? JSON.parse(raw) : raw } catch { return null } })()
+    const src = local || fromDb
+    if (src) {
+      setForm({
+        account_holder_name:  src.account_holder_name  || '',
+        bank_name:            src.bank_name            || '',
+        account_number:       src.account_number       || '',
+        sort_code:            src.sort_code            || '',
+        iban:                 src.iban                 || '',
+        swift_bic:            src.swift_bic            || '',
+        payment_instructions: src.payment_instructions || '',
+      })
+      setLoaded(true)
+    } else if (profile !== undefined) {
+      // profile loaded but no bank details yet — mark as loaded so we don't loop
+      setLoaded(true)
+    }
+  }, [profile, loaded])
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()

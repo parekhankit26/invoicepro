@@ -454,11 +454,15 @@ function renderPaymentDetails(doc: any, invoice: any, primaryColor: string) {
   y += 16
 
   if (hasStripe) {
-    // Online pay button — prominent
+    // Online pay button — clickable hyperlink rectangle
     doc.rect(50, y, 245, 28).fill(primaryColor)
     doc.fontSize(10).fillColor(contrastText(primaryColor)).text('Pay online now →', 52, y + 8, { width: 241, align: 'center' })
-    doc.fontSize(8).fillColor('#9ca3af').text(invoice.stripe_payment_link, 50, y + 32, { width: 245 })
-    y += hasBank ? 52 : 36
+    // Add a real PDF hyperlink annotation so clicking the button opens the Stripe link
+    doc.link(50, y, 245, 28, invoice.stripe_payment_link)
+    // Also print the URL as small text below (clickable too)
+    doc.fontSize(8).fillColor('#4b72c4')
+      .text(invoice.stripe_payment_link, 50, y + 32, { width: 245, link: invoice.stripe_payment_link, underline: true })
+    y += hasBank ? 56 : 42
   }
 
   if (hasBank) {

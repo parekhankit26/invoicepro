@@ -153,7 +153,7 @@ router.post('/invite', async (req: AuthRequest, res: Response) => {
     const inviteUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/team/accept/${inviteToken}`
     const companyName = profile.company_name || profile.full_name || 'Your employer'
     try {
-      await emailService.sendTeamInvite({ to: email, inviteeName: full_name || email, inviteUrl, role })
+      await emailService.sendTeamInvite({ to: email, inviterName: companyName, companyName, acceptUrl: inviteUrl })
     } catch(e) { console.log('Invite email failed:', e) }
 
     return res.status(201).json({ ...data, invite_url: inviteUrl, message: `Invite sent to ${email}` })

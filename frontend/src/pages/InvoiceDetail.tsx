@@ -35,6 +35,8 @@ export default function InvoiceDetail() {
     queryFn: () => api.get<any>(`/invoices/${id}`)
   })
 
+  const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: () => api.get<any>('/auth/profile') })
+
   const sendMutation = useMutation({
     mutationFn: () => api.post(`/invoices/${id}/send`, {}),
     onSuccess: (data: any) => { qc.invalidateQueries({ queryKey: ['invoice', id] }); toast.success(data.message || 'Invoice sent!') },
@@ -180,6 +182,22 @@ export default function InvoiceDetail() {
       <div className="page-body">
         <div className="invoice-detail-grid" style={{ display:'grid', gridTemplateColumns:'1fr 280px', gap:16 }}>
           <div className="card card-p">
+            {/* From (sender / business owner) */}
+            {profile && (
+              <div style={{ display:'flex', alignItems:'flex-start', gap:14, marginBottom:24, paddingBottom:20, borderBottom:'1px solid var(--border)' }}>
+                {profile.logo_url && (
+                  <img src={profile.logo_url} alt="logo" style={{ height:44, width:'auto', borderRadius:6, objectFit:'contain', flexShrink:0 }} />
+                )}
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.06em', color:'var(--text-subtle)', marginBottom:4 }}>From</div>
+                  <div style={{ fontWeight:700, fontSize:15 }}>{profile.company_name || profile.full_name || '—'}</div>
+                  {profile.email && <div style={{ fontSize:12, color:'var(--text-muted)', marginTop:2 }}>{profile.email}</div>}
+                  {profile.company_address && <div style={{ fontSize:12, color:'var(--text-subtle)', marginTop:2, lineHeight:1.5 }}>{profile.company_address}</div>}
+                  {profile.company_phone && <div style={{ fontSize:12, color:'var(--text-subtle)' }}>{profile.company_phone}</div>}
+                  {profile.tax_number && <div style={{ fontSize:12, color:'var(--text-subtle)', marginTop:2 }}>VAT: {profile.tax_number}</div>}
+                </div>
+              </div>
+            )}
             {/* Bill To + Amount */}
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, marginBottom:24, paddingBottom:24, borderBottom:'1px solid var(--border)' }}>
               <div>

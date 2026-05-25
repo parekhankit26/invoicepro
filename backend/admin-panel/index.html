@@ -1370,7 +1370,7 @@ function loadUsers(){
         +'<td>'+mkPlanSel(u.id,u.plan)+'</td>'
         +'<td style="color:var(--blue);font-size:12px">'+(u.email||'—')+'</td>'
         +'<td style="font-size:11px;color:var(--ink3)">'+dDate(u.created_at)+'</td>'
-        +'<td><div style="display:flex;gap:4px"><button class="ab ab-sm ab-p" onclick="openUserModal(\''+u.id+'\','+JSON.stringify(JSON.stringify(u))+')" title="Edit user details">✎ Edit</button><button class="ab ab-sm ab-s" onclick="giveTrialPro(\''+u.id+'\')" title="Give 14-day Pro trial">⚡ Trial</button><button class="ab ab-sm ab-d" onclick="doSuspend(\''+u.id+'\')" title="Suspend account">⊘ Suspend</button></div></td>'
+        +'<td><div style="display:flex;gap:4px"><button class="ab ab-sm ab-p" onclick="openUserModal(\''+u.id+'\')" title="Edit user details">✎ Edit</button><button class="ab ab-sm ab-s" onclick="giveTrialPro(\''+u.id+'\')" title="Give 14-day Pro trial">⚡ Trial</button><button class="ab ab-sm ab-d" onclick="doSuspend(\''+u.id+'\')" title="Suspend account">⊘ Suspend</button></div></td>'
         +'</tr>';}).join('')||'<tr><td colspan="5" class="empty">No users</td></tr>';
       var pages=Math.ceil((d.total||0)/25);
       if(pages>1){var h='';for(var i=1;i<=Math.min(pages,10);i++){h+='<button class="ab ab-sm'+(i===uPage?' ab-p':'')+'" onclick="uPage='+i+';loadUsers()">'+i+'</button>';}q('userPager').innerHTML=h;}
@@ -1485,7 +1485,6 @@ function loadClients(){
   req('/admin/clients'+(s?'?search='+encodeURIComponent(s):'')).then(function(d){
     q('clientCount').textContent=(d.total||0)+' clients';
     q('clientRows').innerHTML=(d.data||[]).map(function(c){
-      var esc=JSON.stringify(JSON.stringify(c));
       return '<tr>'
         +'<td style="font-weight:600;font-size:13px">'+(c.name||'—')+'</td>'
         +'<td style="color:var(--blue);font-size:12px">'+(c.email||'—')+'</td>'
@@ -1493,7 +1492,7 @@ function loadClients(){
         +'<td style="font-size:12px;color:var(--ink2)">'+(c.profiles&&(c.profiles.company_name||c.profiles.full_name)||'—')+'</td>'
         +'<td>'+(c.currency||'GBP')+'</td>'
         +'<td><div style="display:flex;gap:4px">'
-        +'<button class="ab ab-sm ab-p" onclick="openClientModal(\''+c.id+'\','+esc+')">✎ Edit</button>'
+        +'<button class="ab ab-sm ab-p" onclick="openClientModal(\''+c.id+'\')">✎ Edit</button>'
         +'<button class="ab ab-sm ab-d" onclick="archiveClient(\''+c.id+'\')">Archive</button>'
         +'</div></td>'
         +'</tr>';
@@ -1502,19 +1501,21 @@ function loadClients(){
 }
 
 // ── CLIENT MODAL ───────────────────────────────────────────
-function openClientModal(id, dataStr){
-  var c=JSON.parse(dataStr);
+function openClientModal(id){
   q('editClientId').value=id;
-  q('ecName').value=c.name||'';
-  q('ecEmail').value=c.email||'';
-  q('ecPhone').value=c.phone||'';
-  q('ecAddress').value=c.address||'';
-  q('ecVat').value=c.vat_number||'';
-  q('ecWebsite').value=c.website||'';
-  q('ecNotes').value=c.notes||'';
-  q('ecCurrency').value=c.currency||'GBP';
-  q('clientSaveMsg').textContent='';
+  q('clientSaveMsg').textContent='Loading…';
   q('clientModal').style.display='flex';
+  req('/admin/clients/'+id).then(function(c){
+    q('ecName').value=c.name||'';
+    q('ecEmail').value=c.email||'';
+    q('ecPhone').value=c.phone||'';
+    q('ecAddress').value=c.address||'';
+    q('ecVat').value=c.vat_number||'';
+    q('ecWebsite').value=c.website||'';
+    q('ecNotes').value=c.notes||'';
+    q('ecCurrency').value=c.currency||'GBP';
+    q('clientSaveMsg').textContent='';
+  }).catch(function(e){q('clientSaveMsg').innerHTML='<span style="color:var(--red)">Failed to load: '+e.message+'</span>';});
 }
 function closeClientModal(){ q('clientModal').style.display='none'; }
 function saveClient(){
@@ -1546,18 +1547,21 @@ function archiveClient(id){
 }
 
 // ── USER MODAL ─────────────────────────────────────────────
-function openUserModal(id, dataStr){
-  var u=JSON.parse(dataStr);
+function openUserModal(id){
   q('editUserId').value=id;
-  q('euName').value=u.full_name||'';
-  q('euEmail').value=u.email||'';
-  q('euCompany').value=u.company_name||'';
-  q('euPhone').value=u.company_phone||'';
-  q('euPlan').value=u.plan||'free';
-  q('euCurrency').value=u.default_currency||'GBP';
-  q('euAddress').value=u.company_address||'';
-  q('userSaveMsg').textContent='';
+  q('userSaveMsg').textContent='Loading…';
   q('userModal').style.display='flex';
+  req('/admin/users/'+id).then(function(d){
+    var u=d.profile||d; // GET /admin/users/:id returns {profile, invoices, ...}
+    q('euName').value=u.full_name||'';
+    q('euEmail').value=u.email||'';
+    q('euCompany').value=u.company_name||'';
+    q('euPhone').value=u.company_phone||'';
+    q('euPlan').value=u.plan||'free';
+    q('euCurrency').value=u.default_currency||'GBP';
+    q('euAddress').value=u.company_address||'';
+    q('userSaveMsg').textContent='';
+  }).catch(function(e){q('userSaveMsg').innerHTML='<span style="color:var(--red)">Failed to load: '+e.message+'</span>';});
 }
 function closeUserModal(){ q('userModal').style.display='none'; }
 function saveUser(){

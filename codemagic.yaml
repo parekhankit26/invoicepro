@@ -1,13 +1,10 @@
 workflows:
-  ios-release:
-    name: InvoicePro iOS — App Store Release
+  ios-build-only:
+    name: InvoicePro iOS — Build Only (No Signing)
     max_build_duration: 60
     instance_type: mac_mini_m2
 
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.invoicepro.app
       vars:
         BUNDLE_ID: "com.invoicepro.app"
         XCODE_PROJECT: "frontend/ios/App/App.xcodeproj"
@@ -33,22 +30,27 @@ workflows:
 
       - name: Resolve Swift Package dependencies
         script: |
-          xcodebuild -resolvePackageDependencies \
+          xcodebuild \
+            -resolvePackageDependencies \
             -project "$XCODE_PROJECT" \
-            -scheme "$XCODE_SCHEME"
+            -scheme "$XCODE_SCHEME" \
+            -clonedSourcePackagesDirPath "$CM_BUILD_DIR/.spm"
 
-      - name: Set up code signing
+      - name: Build iOS (unsigned)
         script: |
-          xcode-project use-profiles
-
-      - name: Build iOS IPA
-        script: |
-          xcode-project build-ipa \
-            --project "$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME"
+          xcodebuild \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            -derivedDataPath "$CM_BUILD_DIR/build"
 
     artifacts:
-      - build/ios/ipa/*.ipa
+      - $CM_BUILD_DIR/build/Build/Products/**/*.app
       - /tmp/xcodebuild_logs/*.log
 
     publishing:
@@ -59,8 +61,8 @@ workflows:
           success: true
           failure: true
 
-  ios-testflight:
-    name: InvoicePro iOS — TestFlight Upload
+  ios-release:
+    name: InvoicePro iOS — App Store Release (Needs Apple Account)
     max_build_duration: 60
     instance_type: mac_mini_m2
 
@@ -96,9 +98,11 @@ workflows:
 
       - name: Resolve Swift Package dependencies
         script: |
-          xcodebuild -resolvePackageDependencies \
+          xcodebuild \
+            -resolvePackageDependencies \
             -project "$XCODE_PROJECT" \
-            -scheme "$XCODE_SCHEME"
+            -scheme "$XCODE_SCHEME" \
+            -clonedSourcePackagesDirPath "$CM_BUILD_DIR/.spm"
 
       - name: Set up code signing
         script: |
@@ -110,11 +114,12 @@ workflows:
           cd frontend/ios/App
           agvtool new-version -all "$BUILD_NUMBER"
 
-      - name: Build iOS IPA
+      - name: Build signed IPA
         script: |
           xcode-project build-ipa \
             --project "$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME"
+            --scheme "$XCODE_SCHEME" \
+            --cloned-source-packages-path "$CM_BUILD_DIR/.spm"
 
     artifacts:
       - build/ios/ipa/*.ipa

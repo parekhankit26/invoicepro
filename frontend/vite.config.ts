@@ -18,7 +18,7 @@ export default defineConfig({
         orientation: 'portrait-primary',
         start_url: '/dashboard',
         scope: '/',
-        id: 'com.invoicepro.app',
+        id: 'com.asproite.invoicepro',
         icons: [
           { src: '/icons/icon-72.png',   sizes: '72x72',   type: 'image/png' },
           { src: '/icons/icon-96.png',   sizes: '96x96',   type: 'image/png' },

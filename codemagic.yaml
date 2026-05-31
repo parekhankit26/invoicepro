@@ -6,7 +6,7 @@ workflows:
 
     environment:
       vars:
-        BUNDLE_ID: "com.invoicepro.app"
+        BUNDLE_ID: "com.asproite.invoicepro"
         XCODE_PROJECT: "frontend/ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
       node: v22.13.1
@@ -73,9 +73,9 @@ workflows:
     environment:
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.invoicepro.app
+        bundle_identifier: com.asproite.invoicepro
       vars:
-        BUNDLE_ID: "com.invoicepro.app"
+        BUNDLE_ID: "com.asproite.invoicepro"
         XCODE_PROJECT: "frontend/ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
       node: v22.13.1

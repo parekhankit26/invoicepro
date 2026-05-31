@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
-  appId: 'com.invoicepro.app',
+  appId: 'com.asproite.invoicepro',
   appName: 'InvoicePro',
   webDir: 'dist',
   server: {

@@ -7,6 +7,8 @@ workflows:
     environment:
       node: v22.13.1
       java: 17
+      groups:
+        - invoicepro_keystore
       android_signing:
         - invoicepro_keystore
       vars:
@@ -51,10 +53,6 @@ workflows:
         notify:
           success: true
           failure: true
-      google_play:
-        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
-        track: internal
-        submit_as_draft: true
 
   # ─── iOS: Build Only (no signing needed) ────────────────────────────
   ios-build-only:

@@ -28,7 +28,23 @@ const app = express()
 const PORT = process.env.PORT || 3001
 
 app.use(helmet())
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173', credentials: true }))
+app.use(cors({
+  origin: (origin, callback) => {
+    const allowed = [
+      process.env.FRONTEND_URL,
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'https://invoicepro-production-2ed7.up.railway.app',
+      'capacitor://localhost',
+      'ionic://localhost',
+      'http://localhost',
+    ]
+    // Allow mobile apps (Capacitor sends no origin) and allowed origins
+    if (!origin || allowed.includes(origin)) return callback(null, true)
+    return callback(null, true) // allow all for mobile compatibility
+  },
+  credentials: true
+}))
 app.use('/api/webhooks', express.raw({ type: 'application/json' }), webhookRoutes)
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true }))

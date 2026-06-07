@@ -2,11 +2,9 @@ workflows:
 
   android-release:
     name: InvoicePro Android - Google Play
-    instance_type: linux_x2
     max_build_duration: 60
     environment:
       node: v22.13.1
-      java: 17
       vars:
         VITE_API_URL: https://invoicepro-production-2ed7.up.railway.app/api
         VITE_SUPABASE_URL: https://bzmyhlkwssyhxkqrjmwj.supabase.co
@@ -31,7 +29,7 @@ workflows:
         script: |
           cd frontend/android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace
     artifacts:
       - frontend/android/app/build/outputs/**/*.apk
     publishing:

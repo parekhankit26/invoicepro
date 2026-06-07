@@ -2,6 +2,7 @@ workflows:
 
   android-release:
     name: InvoicePro Android - Google Play
+    instance_type: linux_x2
     max_build_duration: 60
     environment:
       node: v22.13.1
@@ -11,28 +12,27 @@ workflows:
         VITE_SUPABASE_URL: https://bzmyhlkwssyhxkqrjmwj.supabase.co
         VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6bXlobGt3c3N5aHhrcXJqbXdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MDIwMDEsImV4cCI6MjA5MTA3ODAwMX0.CAGeBDHDNMUyQYtggaqasgs4X6OgDF5PqYfX8kE_64E
     scripts:
-      - name: Install frontend dependencies
+      - name: Install dependencies
         script: |
           cd frontend
           npm install --legacy-peer-deps
-      - name: Build frontend
+      - name: Build web app
         script: |
           cd frontend
           echo "VITE_API_URL=$VITE_API_URL" > .env
           echo "VITE_SUPABASE_URL=$VITE_SUPABASE_URL" >> .env
           echo "VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY" >> .env
           npm run build
-      - name: Sync Capacitor Android
+      - name: Sync Capacitor
         script: |
           cd frontend
           npx cap sync android
-      - name: Build Android AAB
+      - name: Build APK
         script: |
           cd frontend/android
           chmod +x gradlew
-          ./gradlew assembleRelease
+          ./gradlew assembleDebug
     artifacts:
-      - frontend/android/app/build/outputs/**/*.aab
       - frontend/android/app/build/outputs/**/*.apk
     publishing:
       email:
@@ -44,8 +44,8 @@ workflows:
 
   ios-build-only:
     name: InvoicePro iOS - Build Only (No Signing)
-    max_build_duration: 60
     instance_type: mac_mini_m2
+    max_build_duration: 60
     environment:
       node: v22.13.1
       xcode: latest
@@ -94,7 +94,6 @@ workflows:
             -derivedDataPath "$CM_BUILD_DIR/build"
     artifacts:
       - $CM_BUILD_DIR/build/Build/Products/**/*.app
-      - /tmp/xcodebuild_logs/*.log
     publishing:
       email:
         recipients:
@@ -105,8 +104,8 @@ workflows:
 
   ios-release:
     name: InvoicePro iOS - App Store Release (Needs Apple Account)
-    max_build_duration: 60
     instance_type: mac_mini_m2
+    max_build_duration: 60
     integrations:
       app_store_connect: InvoicePro
     environment:
@@ -147,8 +146,7 @@ workflows:
             -scheme "$XCODE_SCHEME" \
             -clonedSourcePackagesDirPath "$CM_BUILD_DIR/.spm"
       - name: Set up code signing
-        script: |
-          xcode-project use-profiles
+        script: xcode-project use-profiles
       - name: Set build number
         script: |
           cd frontend/ios/App
@@ -160,7 +158,6 @@ workflows:
             --scheme "$XCODE_SCHEME"
     artifacts:
       - build/ios/ipa/*.ipa
-      - /tmp/xcodebuild_logs/*.log
     publishing:
       email:
         recipients:

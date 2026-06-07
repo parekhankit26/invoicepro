@@ -1,28 +1,22 @@
 workflows:
 
-  # ─── ANDROID: Google Play ───────────────────────────────────────────
   android-release:
-    name: InvoicePro Android — Google Play
+    name: InvoicePro Android - Google Play
     max_build_duration: 60
     environment:
       node: v22.13.1
       java: 17
-      groups:
-        - invoicepro_keystore
       android_signing:
         - invoicepro_keystore
       vars:
-        PACKAGE_NAME: com.asproite.invoicepro
         VITE_API_URL: https://invoicepro-production-2ed7.up.railway.app/api
         VITE_SUPABASE_URL: https://bzmyhlkwssyhxkqrjmwj.supabase.co
         VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6bXlobGt3c3N5aHhrcXJqbXdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MDIwMDEsImV4cCI6MjA5MTA3ODAwMX0.CAGeBDHDNMUyQYtggaqasgs4X6OgDF5PqYfX8kE_64E
-
     scripts:
       - name: Install frontend dependencies
         script: |
           cd frontend
           npm install --legacy-peer-deps
-
       - name: Build frontend
         script: |
           cd frontend
@@ -30,22 +24,18 @@ workflows:
           echo "VITE_SUPABASE_URL=$VITE_SUPABASE_URL" >> .env
           echo "VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY" >> .env
           npm run build
-
       - name: Sync Capacitor Android
         script: |
           cd frontend
           npx cap sync android
-
       - name: Build Android AAB
         script: |
           cd frontend/android
           chmod +x gradlew
           ./gradlew bundleRelease
-
     artifacts:
       - frontend/android/app/build/outputs/**/*.aab
       - frontend/android/app/build/outputs/**/*.apk
-
     publishing:
       email:
         recipients:
@@ -54,29 +44,25 @@ workflows:
           success: true
           failure: true
 
-  # ─── iOS: Build Only (no signing needed) ────────────────────────────
   ios-build-only:
-    name: InvoicePro iOS — Build Only (No Signing)
+    name: InvoicePro iOS - Build Only (No Signing)
     max_build_duration: 60
     instance_type: mac_mini_m2
-
     environment:
+      node: v22.13.1
+      xcode: latest
       vars:
-        BUNDLE_ID: "com.asproite.invoicepro"
-        XCODE_PROJECT: "frontend/ios/App/App.xcodeproj"
-        XCODE_SCHEME: "App"
+        BUNDLE_ID: com.asproite.invoicepro
+        XCODE_PROJECT: frontend/ios/App/App.xcodeproj
+        XCODE_SCHEME: App
         VITE_API_URL: https://invoicepro-production-2ed7.up.railway.app/api
         VITE_SUPABASE_URL: https://bzmyhlkwssyhxkqrjmwj.supabase.co
         VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6bXlobGt3c3N5aHhrcXJqbXdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MDIwMDEsImV4cCI6MjA5MTA3ODAwMX0.CAGeBDHDNMUyQYtggaqasgs4X6OgDF5PqYfX8kE_64E
-      node: v22.13.1
-      xcode: latest
-
     scripts:
       - name: Install Node dependencies
         script: |
           cd frontend
           npm install --legacy-peer-deps
-
       - name: Build React web app
         script: |
           cd frontend
@@ -85,12 +71,10 @@ workflows:
           echo "VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY" >> .env
           npx tsc --noEmit || true
           npx vite build
-
       - name: Sync Capacitor to iOS
         script: |
           cd frontend
           npx cap sync ios
-
       - name: Resolve Swift Package dependencies
         script: |
           xcodebuild \
@@ -98,8 +82,7 @@ workflows:
             -project "$XCODE_PROJECT" \
             -scheme "$XCODE_SCHEME" \
             -clonedSourcePackagesDirPath "$CM_BUILD_DIR/.spm"
-
-      - name: Build iOS (unsigned)
+      - name: Build iOS unsigned
         script: |
           xcodebuild \
             -project "$XCODE_PROJECT" \
@@ -111,11 +94,9 @@ workflows:
             CODE_SIGNING_ALLOWED=NO \
             COMPILER_INDEX_STORE_ENABLE=NO \
             -derivedDataPath "$CM_BUILD_DIR/build"
-
     artifacts:
       - $CM_BUILD_DIR/build/Build/Products/**/*.app
       - /tmp/xcodebuild_logs/*.log
-
     publishing:
       email:
         recipients:
@@ -124,35 +105,30 @@ workflows:
           success: true
           failure: true
 
-  # ─── iOS: App Store Release ──────────────────────────────────────────
   ios-release:
-    name: InvoicePro iOS — App Store Release
+    name: InvoicePro iOS - App Store Release (Needs Apple Account)
     max_build_duration: 60
     instance_type: mac_mini_m2
-
     integrations:
       app_store_connect: InvoicePro
-
     environment:
+      node: v22.13.1
+      xcode: latest
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.asproite.invoicepro
       vars:
-        BUNDLE_ID: "com.asproite.invoicepro"
-        XCODE_PROJECT: "frontend/ios/App/App.xcodeproj"
-        XCODE_SCHEME: "App"
+        BUNDLE_ID: com.asproite.invoicepro
+        XCODE_PROJECT: frontend/ios/App/App.xcodeproj
+        XCODE_SCHEME: App
         VITE_API_URL: https://invoicepro-production-2ed7.up.railway.app/api
         VITE_SUPABASE_URL: https://bzmyhlkwssyhxkqrjmwj.supabase.co
         VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6bXlobGt3c3N5aHhrcXJqbXdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MDIwMDEsImV4cCI6MjA5MTA3ODAwMX0.CAGeBDHDNMUyQYtggaqasgs4X6OgDF5PqYfX8kE_64E
-      node: v22.13.1
-      xcode: latest
-
     scripts:
       - name: Install Node dependencies
         script: |
           cd frontend
           npm install --legacy-peer-deps
-
       - name: Build React web app
         script: |
           cd frontend
@@ -161,12 +137,10 @@ workflows:
           echo "VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY" >> .env
           npx tsc --noEmit || true
           npx vite build
-
       - name: Sync Capacitor to iOS
         script: |
           cd frontend
           npx cap sync ios
-
       - name: Resolve Swift Package dependencies
         script: |
           xcodebuild \
@@ -174,26 +148,21 @@ workflows:
             -project "$XCODE_PROJECT" \
             -scheme "$XCODE_SCHEME" \
             -clonedSourcePackagesDirPath "$CM_BUILD_DIR/.spm"
-
       - name: Set up code signing
         script: |
           xcode-project use-profiles
-
       - name: Set build number
         script: |
           cd frontend/ios/App
           agvtool new-version -all $BUILD_NUMBER
-
       - name: Build signed IPA
         script: |
           xcode-project build-ipa \
             --project "$XCODE_PROJECT" \
             --scheme "$XCODE_SCHEME"
-
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
-
     publishing:
       email:
         recipients:

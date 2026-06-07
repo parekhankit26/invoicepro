@@ -6,8 +6,6 @@ workflows:
     environment:
       node: v22.13.1
       java: 17
-      android_signing:
-        - invoicepro_keystore
       vars:
         VITE_API_URL: https://invoicepro-production-2ed7.up.railway.app/api
         VITE_SUPABASE_URL: https://bzmyhlkwssyhxkqrjmwj.supabase.co
@@ -32,7 +30,7 @@ workflows:
         script: |
           cd frontend/android
           chmod +x gradlew
-          ./gradlew bundleRelease
+          ./gradlew assembleRelease
     artifacts:
       - frontend/android/app/build/outputs/**/*.aab
       - frontend/android/app/build/outputs/**/*.apk

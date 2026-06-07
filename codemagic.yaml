@@ -1,21 +1,5 @@
 workflows:
 
-  android-release:
-    name: InvoicePro Android - Google Play
-    max_build_duration: 60
-    scripts:
-      - name: Build
-        script: echo "hello android"
-    artifacts:
-      - "**/*.apk"
-    publishing:
-      email:
-        recipients:
-          - parekhankit3@gmail.com
-        notify:
-          success: true
-          failure: true
-
   ios-build-only:
     name: InvoicePro iOS - Build Only (No Signing)
     instance_type: mac_mini_m2
@@ -143,3 +127,19 @@ workflows:
         auth: integration
         submit_to_testflight: false
         submit_to_app_store: false
+
+  android-release:
+    name: InvoicePro Android - Google Play
+    max_build_duration: 60
+    scripts:
+      - name: Build
+        script: echo "hello android"
+    artifacts:
+      - "**/*.apk"
+    publishing:
+      email:
+        recipients:
+          - parekhankit3@gmail.com
+        notify:
+          success: true
+          failure: true

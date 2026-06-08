@@ -92,9 +92,11 @@ workflows:
           echo "VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY" >> .env
           npx tsc --noEmit || true
           npx vite build
-      - name: Sync Capacitor to iOS
+      - name: Add and sync Capacitor iOS
         script: |
           cd frontend
+          npx cap add ios
+          npx @capacitor/assets generate --iconBackgroundColor '#1a1814' --iconBackgroundColorDark '#1a1814' --splashBackgroundColor '#1a1814' --splashBackgroundColorDark '#1a1814' || true
           npx cap sync ios
       - name: Resolve Swift Package dependencies
         script: |
@@ -103,10 +105,6 @@ workflows:
             -project "$XCODE_PROJECT" \
             -scheme "$XCODE_SCHEME" \
             -clonedSourcePackagesDirPath "$CM_BUILD_DIR/.spm"
-      - name: Generate app icons
-        script: |
-          cd frontend
-          npx @capacitor/assets generate --iconBackgroundColor '#1a1814' --iconBackgroundColorDark '#1a1814' --splashBackgroundColor '#1a1814' --splashBackgroundColorDark '#1a1814' || true
       - name: Set up code signing
         script: xcode-project use-profiles
       - name: Set build number

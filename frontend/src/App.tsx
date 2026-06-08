@@ -36,9 +36,14 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 export default function App() {
   const { setUser } = useAuthStore()
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => { setUser(session?.user ?? null) })
+    // Timeout fallback: if Supabase doesn't respond in 5s, show auth page (prevents blank screen on iOS)
+    const timeout = setTimeout(() => { setUser(null) }, 5000)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      clearTimeout(timeout)
+      setUser(session?.user ?? null)
+    }).catch(() => { clearTimeout(timeout); setUser(null) })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => { setUser(session?.user ?? null) })
-    return () => subscription.unsubscribe()
+    return () => { subscription.unsubscribe(); clearTimeout(timeout) }
   }, [setUser])
 
   return (

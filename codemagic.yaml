@@ -103,6 +103,10 @@ workflows:
             -project "$XCODE_PROJECT" \
             -scheme "$XCODE_SCHEME" \
             -clonedSourcePackagesDirPath "$CM_BUILD_DIR/.spm"
+      - name: Generate app icons
+        script: |
+          cd frontend
+          npx @capacitor/assets generate --iconBackgroundColor '#1a1814' --iconBackgroundColorDark '#1a1814' --splashBackgroundColor '#1a1814' --splashBackgroundColorDark '#1a1814' || true
       - name: Set up code signing
         script: xcode-project use-profiles
       - name: Set build number

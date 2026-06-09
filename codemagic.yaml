@@ -84,6 +84,7 @@ workflows:
         script: |
           cd frontend
           npm install --legacy-peer-deps
+          npm install @capacitor/ios --legacy-peer-deps
       - name: Build React web app
         script: |
           cd frontend

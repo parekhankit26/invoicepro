@@ -108,10 +108,14 @@ workflows:
             --iconBackgroundColorDark '#1a1814' \
             --splashBackgroundColor '#1a1814' \
             --splashBackgroundColorDark '#1a1814'
-      - name: Enable iPad support in Info.plist
+      - name: Enable iPad support (patch pbxproj + Info.plist)
         script: |
+          PBXPROJ="frontend/ios/App/App.xcodeproj/project.pbxproj"
           PLIST="frontend/ios/App/App/Info.plist"
-          # Set UISupportedInterfaceOrientations~ipad to support all iPad orientations
+          # Patch TARGETED_DEVICE_FAMILY from "1" (iPhone only) to "1,2" (iPhone + iPad)
+          sed -i '' 's/TARGETED_DEVICE_FAMILY = 1;/TARGETED_DEVICE_FAMILY = "1,2";/g' "$PBXPROJ"
+          sed -i '' 's/TARGETED_DEVICE_FAMILY = "1";/TARGETED_DEVICE_FAMILY = "1,2";/g' "$PBXPROJ"
+          # Add iPad orientations to Info.plist
           /usr/libexec/PlistBuddy -c "Delete :UISupportedInterfaceOrientations~ipad" "$PLIST" 2>/dev/null || true
           /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations~ipad array" "$PLIST"
           /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations~ipad:0 string UIInterfaceOrientationPortrait" "$PLIST"
@@ -139,8 +143,7 @@ workflows:
         script: |
           xcode-project build-ipa \
             --project "$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME" \
-            --xcargs "TARGETED_DEVICE_FAMILY='1,2'"
+            --scheme "$XCODE_SCHEME"
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:

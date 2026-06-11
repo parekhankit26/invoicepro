@@ -211,18 +211,15 @@ workflows:
         script: |
           cd frontend
           npx cap sync android
-      - name: Set up Android keystore
-        script: |
-          echo $CM_KEYSTORE | base64 --decode > /tmp/invoicepro-release-key.jks
       - name: Build signed Android App Bundle (AAB)
         script: |
           cd frontend/android
           chmod +x gradlew
           ./gradlew bundleRelease \
-            -Pandroid.injected.signing.store.file=/tmp/invoicepro-release-key.jks \
-            -Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD \
-            -Pandroid.injected.signing.key.alias=$CM_KEY_ALIAS \
-            -Pandroid.injected.signing.key.password=$CM_KEY_PASSWORD \
+            -Pandroid.injected.signing.store.file="$CM_BUILD_DIR/invoicepro-release-key.jks" \
+            -Pandroid.injected.signing.store.password=InvoicePro@2024 \
+            -Pandroid.injected.signing.key.alias=invoicepro \
+            -Pandroid.injected.signing.key.password=InvoicePro@2024 \
             -Pandroid.injected.signing.store.type=jks
     artifacts:
       - frontend/android/app/build/outputs/bundle/release/app-release.aab

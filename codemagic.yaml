@@ -170,13 +170,61 @@ workflows:
         submit_to_app_store: false
 
   android-release:
-    name: InvoicePro Android - Google Play
+    name: InvoicePro Android - Google Play (Signed AAB)
+    instance_type: mac_mini_m2
     max_build_duration: 60
+    environment:
+      node: v22.13.1
+      java: 17
+      vars:
+        VITE_API_URL: https://invoicepro-production-2ed7.up.railway.app/api
+        VITE_SUPABASE_URL: https://bzmyhlkwssyhxkqrjmwj.supabase.co
+        VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6bXlobGt3c3N5aHhrcXJqbXdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MDIwMDEsImV4cCI6MjA5MTA3ODAwMX0.CAGeBDHDNMUyQYtggaqasgs4X6OgDF5PqYfX8kE_64E
+        CM_KEYSTORE_PASSWORD: InvoicePro@2024
+        CM_KEY_ALIAS: invoicepro
+        CM_KEY_PASSWORD: InvoicePro@2024
+      # Base64-encoded keystore stored as a Codemagic secret variable
+      # Add CM_KEYSTORE (base64) in Codemagic UI → Environment variables
     scripts:
-      - name: Build
-        script: echo "hello android"
+      - name: Install Node dependencies
+        script: |
+          cd frontend
+          npm install --legacy-peer-deps
+      - name: Build React web app
+        script: |
+          cd frontend
+          echo "VITE_API_URL=$VITE_API_URL" > .env
+          echo "VITE_SUPABASE_URL=$VITE_SUPABASE_URL" >> .env
+          echo "VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY" >> .env
+          npx tsc --noEmit || true
+          npx vite build
+      - name: Generate Android icons and splash
+        script: |
+          cd frontend
+          npm install @capacitor/assets --legacy-peer-deps
+          npx @capacitor/assets generate \
+            --iconBackgroundColor '#1a1814' \
+            --iconBackgroundColorDark '#1a1814' \
+            --splashBackgroundColor '#1a1814' \
+            --splashBackgroundColorDark '#1a1814' || true
+      - name: Sync Capacitor to Android
+        script: |
+          cd frontend
+          npx cap sync android
+      - name: Set up Android keystore
+        script: |
+          echo $CM_KEYSTORE | base64 --decode > /tmp/invoicepro-release-key.jks
+      - name: Build signed Android App Bundle (AAB)
+        script: |
+          cd frontend/android
+          ./gradlew bundleRelease \
+            -Pandroid.injected.signing.store.file=/tmp/invoicepro-release-key.jks \
+            -Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD \
+            -Pandroid.injected.signing.key.alias=$CM_KEY_ALIAS \
+            -Pandroid.injected.signing.key.password=$CM_KEY_PASSWORD
     artifacts:
-      - "**/*.apk"
+      - frontend/android/app/build/outputs/bundle/release/app-release.aab
+      - frontend/android/app/build/outputs/apk/release/app-release.apk
     publishing:
       email:
         recipients:

@@ -222,7 +222,8 @@ workflows:
             -Pandroid.injected.signing.store.file=/tmp/invoicepro-release-key.jks \
             -Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD \
             -Pandroid.injected.signing.key.alias=$CM_KEY_ALIAS \
-            -Pandroid.injected.signing.key.password=$CM_KEY_PASSWORD
+            -Pandroid.injected.signing.key.password=$CM_KEY_PASSWORD \
+            -Pandroid.injected.signing.store.type=jks
     artifacts:
       - frontend/android/app/build/outputs/bundle/release/app-release.aab
       - frontend/android/app/build/outputs/apk/release/app-release.apk

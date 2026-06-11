@@ -11,6 +11,8 @@
     --blue: #1d4ed8; --blue-bg: #eff6ff;
   }
   * { box-sizing: border-box; }
+  /* #1a1814 prevents white flash on iOS WKWebView before first paint */
+  html { background: #1a1814; }
   body { background: var(--bg); color: var(--text); font-family: 'DM Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
 }
 

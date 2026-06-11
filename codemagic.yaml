@@ -38,7 +38,7 @@ workflows:
             -project "$XCODE_PROJECT" \
             -scheme "$XCODE_SCHEME" \
             -clonedSourcePackagesDirPath "$CM_BUILD_DIR/.spm"
-      - name: Build iOS unsigned
+      - name: Build iOS unsigned (iPhone + iPad)
         script: |
           xcodebuild \
             -project "$XCODE_PROJECT" \
@@ -49,6 +49,7 @@ workflows:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             COMPILER_INDEX_STORE_ENABLE=NO \
+            TARGETED_DEVICE_FAMILY="1,2" \
             -derivedDataPath "$CM_BUILD_DIR/build"
     artifacts:
       - $CM_BUILD_DIR/build/Build/Products/**/*.app
@@ -97,14 +98,26 @@ workflows:
         script: |
           cd frontend
           npx cap add ios
-      - name: Generate app icons
+      - name: Generate app icons and splash screens
         script: |
           cd frontend
+          # Install the assets tool explicitly so it doesn't fall back to a cached version
+          npm install @capacitor/assets --legacy-peer-deps
           npx @capacitor/assets generate \
             --iconBackgroundColor '#1a1814' \
             --iconBackgroundColorDark '#1a1814' \
             --splashBackgroundColor '#1a1814' \
-            --splashBackgroundColorDark '#1a1814' || true
+            --splashBackgroundColorDark '#1a1814'
+      - name: Enable iPad support in Info.plist
+        script: |
+          PLIST="frontend/ios/App/App/Info.plist"
+          # Set UISupportedInterfaceOrientations~ipad to support all iPad orientations
+          /usr/libexec/PlistBuddy -c "Delete :UISupportedInterfaceOrientations~ipad" "$PLIST" 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations~ipad array" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations~ipad:0 string UIInterfaceOrientationPortrait" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations~ipad:1 string UIInterfaceOrientationPortraitUpsideDown" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations~ipad:2 string UIInterfaceOrientationLandscapeLeft" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations~ipad:3 string UIInterfaceOrientationLandscapeRight" "$PLIST"
       - name: Sync Capacitor to iOS
         script: |
           cd frontend
@@ -122,11 +135,12 @@ workflows:
         script: |
           cd frontend/ios/App
           agvtool new-version -all $BUILD_NUMBER
-      - name: Build signed IPA
+      - name: Build signed IPA (iPhone + iPad universal)
         script: |
           xcode-project build-ipa \
             --project "$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME"
+            --scheme "$XCODE_SCHEME" \
+            --xcargs "TARGETED_DEVICE_FAMILY='1,2'"
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:

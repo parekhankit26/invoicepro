@@ -172,7 +172,7 @@ function QuoteModal({ quote, clients, onClose, onSave }: any) {
         </div>
         <form onSubmit={handleSubmit(d => saveMutation.mutate(d))}>
           <div className="modal-body">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+            <div className="form-grid" style={{ marginBottom: 16 }}>
               <div className="form-group">
                 <label className="form-label">Client *</label>
                 <select {...register('client_id', { required: true })} className="form-select">

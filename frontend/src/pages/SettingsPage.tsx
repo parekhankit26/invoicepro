@@ -49,7 +49,7 @@ export default function SettingsPage() {
       <div className="page-header"><div><h1 className="page-title">Settings</h1><p className="page-subtitle">Manage your account</p></div></div>
       <div className="page-body">
         <form onSubmit={handleSubmit(d => saveMutation.mutate(d))}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <div className="grid-2col">
             <div className="card card-p">
               <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Personal info</div>
               <div className="form-group"><label className="form-label">Full name</label><input {...register('full_name')} className="form-input" placeholder="Your name" /></div>

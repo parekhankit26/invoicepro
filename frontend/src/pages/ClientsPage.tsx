@@ -63,7 +63,7 @@ export default function ClientsPage() {
             <div className="modal-header"><h2 style={{ fontSize: 17, fontWeight: 700 }}>{editClient ? 'Edit client' : 'Add client'}</h2><button className="btn btn-ghost btn-icon" onClick={() => setShowModal(false)}><X size={18} /></button></div>
             <form onSubmit={handleSubmit(d => saveMutation.mutate(d))}>
               <div className="modal-body">
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div className="form-grid">
                   <div className="form-group" style={{ gridColumn: '1/-1' }}><label className="form-label">Name *</label><input {...register('name', { required: true })} className="form-input" placeholder="Acme Ltd" /></div>
                   <div className="form-group"><label className="form-label">Email *</label><input {...register('email', { required: true })} className="form-input" type="email" /></div>
                   <div className="form-group"><label className="form-label">Phone</label><input {...register('phone')} className="form-input" /></div>

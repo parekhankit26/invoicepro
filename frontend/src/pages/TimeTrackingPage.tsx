@@ -64,7 +64,7 @@ export default function TimeTrackingPage() {
 
       <div className="page-body">
         {/* Summary */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
+        <div className="grid-4col" style={{ marginBottom: 20 }}>
           <div className="metric-card">
             <div className="metric-label">Total hours</div>
             <div className="metric-value">{(summary.total_hours || 0).toFixed(1)}h</div>
@@ -195,7 +195,7 @@ function LogTimeModal({ clients, onClose, onSave }: any) {
         </div>
         <form onSubmit={handleSubmit(d => saveMutation.mutate(d))}>
           <div className="modal-body">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="form-grid">
               <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                 <label className="form-label">Description *</label>
                 <input {...register('description', { required: true })} className="form-input" placeholder="What did you work on?" />

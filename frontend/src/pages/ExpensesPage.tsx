@@ -31,7 +31,7 @@ export default function ExpensesPage() {
         </div>
       </div>
       <div className="page-body">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 20 }}>
+        <div className="grid-4col" style={{ marginBottom: 20 }}>
           <div className="metric-card"><div className="metric-label">Total expenses</div><div className="metric-value">{formatCurrency(summary?.total || 0)}</div></div>
           {Object.entries(summary?.by_category || {}).slice(0,3).map(([cat, amt]: any) => (<div key={cat} className="metric-card"><div className="metric-label">{cat}</div><div className="metric-value" style={{ fontSize: 18 }}>{formatCurrency(amt)}</div></div>))}
         </div>
@@ -53,7 +53,7 @@ export default function ExpensesPage() {
             <div className="modal-header"><h2 style={{ fontSize: 17, fontWeight: 700 }}>Add expense</h2><button className="btn btn-ghost btn-icon" onClick={() => setShowModal(false)}><X size={18} /></button></div>
             <form onSubmit={handleSubmit(d => saveMutation.mutate(d))}>
               <div className="modal-body">
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div className="form-grid">
                   <div className="form-group"><label className="form-label">Category</label><select {...register('category')} className="form-select">{CATS.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
                   <div className="form-group"><label className="form-label">Date</label><input {...register('date')} className="form-input" type="date" /></div>
                   <div className="form-group" style={{ gridColumn: '1/-1' }}><label className="form-label">Description *</label><input {...register('description', { required: true })} className="form-input" placeholder="e.g. Adobe Creative Cloud" /></div>

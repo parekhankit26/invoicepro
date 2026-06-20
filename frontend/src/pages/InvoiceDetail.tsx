@@ -62,7 +62,7 @@ export default function InvoiceDetail() {
       </div>
 
       <div className="page-body">
-        <div style={{ display:'grid', gridTemplateColumns:'1fr min(280px, 35vw)', gap:16, '@media (max-width:600px)': { gridTemplateColumns:'1fr' } } as any}>
+        <div className="invoice-detail-layout">
           <div className="card card-p">
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:24, marginBottom:24, paddingBottom:24, borderBottom:'1px solid var(--border)' }}>
               <div>

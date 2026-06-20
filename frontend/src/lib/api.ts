@@ -10,12 +10,21 @@ async function getHeaders(): Promise<Record<string, string>> {
   return h
 }
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
+async function request<T>(path: string, options?: RequestInit, retries = 1): Promise<T> {
   const headers = await getHeaders()
-  const res = await fetch(`${API_URL}${path}`, { ...options, headers: { ...headers, ...options?.headers } })
-  const json = await res.json()
-  if (!res.ok) throw new Error(json.error || 'Request failed')
-  return json as T
+  try {
+    const res = await fetch(`${API_URL}${path}`, { ...options, headers: { ...headers, ...options?.headers } })
+    const json = await res.json()
+    if (!res.ok) throw new Error(json.error || 'Something went wrong')
+    return json as T
+  } catch (err: any) {
+    // Retry once on network failure (handles Railway cold-start / sleeping backend)
+    if (retries > 0 && (err.name === 'TypeError' || err.message === 'Failed to fetch' || err.message === 'Network request failed')) {
+      await new Promise(r => setTimeout(r, 2000))
+      return request<T>(path, options, retries - 1)
+    }
+    throw new Error(err.message || 'Connection failed. Please try again.')
+  }
 }
 
 export const api = {

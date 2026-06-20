@@ -176,9 +176,10 @@ workflows:
           failure: true
       app_store_connect:
         auth: integration
-        # Submit to TestFlight so testers can install from the TestFlight app.
-        # Direct IPA links in emails cannot be installed on iOS — you MUST use TestFlight.
-        submit_to_testflight: true
+        # Do NOT submit for beta review — that queue only allows one build at a time.
+        # The build is uploaded to App Store Connect and available for internal testers
+        # immediately via TestFlight without any Apple review required.
+        submit_to_testflight: false
         submit_to_app_store: false
 
   android-release:

@@ -53,7 +53,7 @@ export default function AIAssistant() {
       {/* Floating button */}
       <button
         onClick={() => setOpen(!open)}
-        style={{ position: 'fixed', bottom: 24, right: 24, width: 52, height: 52, borderRadius: '50%', background: '#1a1814', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.2)', zIndex: 1000, transition: 'transform 0.2s' }}
+        style={{ position: 'fixed', bottom: 'max(24px, env(safe-area-inset-bottom))', right: 'max(24px, env(safe-area-inset-right))', width: 52, height: 52, borderRadius: '50%', background: '#1a1814', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.2)', zIndex: 1000, transition: 'transform 0.2s' }}
         title="AI Assistant"
       >
         {open ? <X size={20} color="white" /> : <MessageSquare size={20} color="white" />}
@@ -61,7 +61,7 @@ export default function AIAssistant() {
 
       {/* Chat window */}
       {open && (
-        <div style={{ position: 'fixed', bottom: 88, right: 24, width: 380, height: 520, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, display: 'flex', flexDirection: 'column', zIndex: 999, overflow: 'hidden', boxShadow: '0 8px 40px rgba(0,0,0,0.12)' }}>
+        <div style={{ position: 'fixed', bottom: 'calc(max(24px, env(safe-area-inset-bottom)) + 64px)', right: 'max(24px, env(safe-area-inset-right))', width: 'min(380px, calc(100vw - 48px))', height: 520, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, display: 'flex', flexDirection: 'column', zIndex: 999, overflow: 'hidden', boxShadow: '0 8px 40px rgba(0,0,0,0.12)' }}>
           {/* Header */}
           <div style={{ background: '#1a1814', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#a3e635', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>

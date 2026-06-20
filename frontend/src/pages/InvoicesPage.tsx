@@ -13,6 +13,7 @@ export default function InvoicesPage() {
   const [showModal, setShowModal] = useState(false)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const { data, isLoading } = useQuery({ queryKey: ['invoices', statusFilter, search], queryFn: () => api.get<any>(`/invoices?${new URLSearchParams({ ...(statusFilter && { status: statusFilter }), ...(search && { search }), limit: '50' })}`) })
 
@@ -59,7 +60,7 @@ export default function InvoicesPage() {
                           {inv.status !== 'paid' && <button className="btn btn-sm btn-secondary" onClick={() => sendMutation.mutate(inv.id)}><Send size={12} /></button>}
                           {inv.status !== 'paid' && <button className="btn btn-sm btn-secondary" onClick={() => markPaidMutation.mutate(inv.id)}><CheckCircle size={12} /></button>}
                           <button className="btn btn-sm btn-secondary" onClick={() => api.downloadPDF(inv.id, inv.invoice_number).catch(e => toast.error(e.message))}><Download size={12} /></button>
-                          {inv.status === 'draft' && <button className="btn btn-sm btn-danger" onClick={() => { if (confirm('Delete?')) deleteMutation.mutate(inv.id) }}><Trash2 size={12} /></button>}
+                          {inv.status === 'draft' && <button className="btn btn-sm btn-danger" onClick={() => setDeleteId(inv.id)}><Trash2 size={12} /></button>}
                         </div>
                       </td>
                     </tr>
@@ -71,6 +72,15 @@ export default function InvoicesPage() {
         </div>
       </div>
       {showModal && <InvoiceModal onClose={() => setShowModal(false)} onSave={() => { qc.invalidateQueries({ queryKey: ['invoices'] }); setShowModal(false) }} />}
+      {deleteId && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setDeleteId(null)}>
+          <div className="modal-box" style={{ maxWidth: 340 }}>
+            <div className="modal-header"><h2 style={{ fontSize: 16, fontWeight: 700 }}>Delete invoice?</h2></div>
+            <div className="modal-body"><p style={{ fontSize: 13, color: 'var(--text-muted)' }}>This draft will be permanently deleted.</p></div>
+            <div className="modal-footer"><button className="btn btn-secondary" onClick={() => setDeleteId(null)}>Cancel</button><button className="btn btn-danger" onClick={() => { deleteMutation.mutate(deleteId); setDeleteId(null) }} disabled={deleteMutation.isPending}>Delete</button></div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

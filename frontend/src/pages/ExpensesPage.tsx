@@ -12,6 +12,7 @@ export default function ExpensesPage() {
   const [showModal, setShowModal] = useState(false)
   const [showScanner, setShowScanner] = useState(false)
   const [filterCat, setFilterCat] = useState('')
+  const [deleteId, setDeleteId] = useState<string | null>(null)
   const today = new Date().toISOString().split('T')[0]
   const { data: expenses = [], isLoading } = useQuery({ queryKey: ['expenses', filterCat], queryFn: () => api.get<any[]>(`/expenses${filterCat ? `?category=${filterCat}` : ''}`) })
   const { data: summary } = useQuery({ queryKey: ['expense-summary'], queryFn: () => api.get<any>('/expenses/summary') })
@@ -41,7 +42,7 @@ export default function ExpensesPage() {
           ) : (
             <table className="data-table">
               <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Client</th><th>Amount</th><th>Billable</th><th></th></tr></thead>
-              <tbody>{list.map((e: any) => (<tr key={e.id}><td style={{ color: 'var(--text-subtle)', fontSize: 12 }}>{formatDate(e.date)}</td><td><span className="badge badge-draft">{e.category}</span></td><td>{e.description}</td><td style={{ color: 'var(--text-subtle)' }}>{e.clients?.name || '—'}</td><td className="currency-amount">{formatCurrency(e.amount, e.currency)}</td><td>{e.is_billable ? <span className="badge badge-sent">{e.is_billed ? 'Billed' : 'Billable'}</span> : <span style={{ color: 'var(--text-subtle)', fontSize: 12 }}>—</span>}</td><td><button className="btn btn-sm btn-danger" onClick={() => { if (confirm('Delete?')) deleteMutation.mutate(e.id) }}><Trash2 size={12} /></button></td></tr>))}</tbody>
+              <tbody>{list.map((e: any) => (<tr key={e.id}><td style={{ color: 'var(--text-subtle)', fontSize: 12 }}>{formatDate(e.date)}</td><td><span className="badge badge-draft">{e.category}</span></td><td>{e.description}</td><td style={{ color: 'var(--text-subtle)' }}>{e.clients?.name || '—'}</td><td className="currency-amount">{formatCurrency(e.amount, e.currency)}</td><td>{e.is_billable ? <span className="badge badge-sent">{e.is_billed ? 'Billed' : 'Billable'}</span> : <span style={{ color: 'var(--text-subtle)', fontSize: 12 }}>—</span>}</td><td><button className="btn btn-sm btn-danger" onClick={() => setDeleteId(e.id)}><Trash2 size={12} /></button></td></tr>))}</tbody>
             </table>
           )}
         </div>
@@ -69,6 +70,15 @@ export default function ExpensesPage() {
         </div>
       )}
       {showScanner && <ReceiptScanner onSave={() => { qc.invalidateQueries({ queryKey: ['expenses'] }); qc.invalidateQueries({ queryKey: ['expense-summary'] }); setShowScanner(false) }} onClose={() => setShowScanner(false)} />}
+      {deleteId && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setDeleteId(null)}>
+          <div className="modal-box" style={{ maxWidth: 340 }}>
+            <div className="modal-header"><h2 style={{ fontSize: 16, fontWeight: 700 }}>Delete expense?</h2></div>
+            <div className="modal-body"><p style={{ fontSize: 13, color: 'var(--text-muted)' }}>This expense will be permanently deleted.</p></div>
+            <div className="modal-footer"><button className="btn btn-secondary" onClick={() => setDeleteId(null)}>Cancel</button><button className="btn btn-danger" onClick={() => { deleteMutation.mutate(deleteId); setDeleteId(null) }}>Delete</button></div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

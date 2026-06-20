@@ -12,6 +12,7 @@ export default function TimeTrackingPage() {
   const [showConvertModal, setShowConvertModal] = useState(false)
   const [selectedEntries, setSelectedEntries] = useState<string[]>([])
   const [filterClient, setFilterClient] = useState('')
+  const [deleteId, setDeleteId] = useState<string | null>(null)
   const [timer, setTimer] = useState<{ running: boolean; start: Date | null; seconds: number }>({ running: false, start: null, seconds: 0 })
 
   const { data, isLoading } = useQuery({
@@ -126,7 +127,7 @@ export default function TimeTrackingPage() {
                     </td>
                     <td>
                       {!e.is_billed && (
-                        <button className="btn btn-sm btn-danger" onClick={() => { if (confirm('Delete?')) deleteMutation.mutate(e.id) }}>
+                        <button className="btn btn-sm btn-danger" onClick={() => setDeleteId(e.id)}>
                           <Trash2 size={12} />
                         </button>
                       )}
@@ -143,6 +144,16 @@ export default function TimeTrackingPage() {
       {showModal && (
         <LogTimeModal clients={clientList} onClose={() => setShowModal(false)}
           onSave={() => { qc.invalidateQueries({ queryKey: ['time-entries'] }); setShowModal(false) }} />
+      )}
+
+      {deleteId && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setDeleteId(null)}>
+          <div className="modal-box" style={{ maxWidth: 340 }}>
+            <div className="modal-header"><h2 style={{ fontSize: 16, fontWeight: 700 }}>Delete time entry?</h2></div>
+            <div className="modal-body"><p style={{ fontSize: 13, color: 'var(--text-muted)' }}>This time entry will be permanently deleted.</p></div>
+            <div className="modal-footer"><button className="btn btn-secondary" onClick={() => setDeleteId(null)}>Cancel</button><button className="btn btn-danger" onClick={() => { deleteMutation.mutate(deleteId); setDeleteId(null) }}>Delete</button></div>
+          </div>
+        </div>
       )}
 
       {/* Convert Modal */}

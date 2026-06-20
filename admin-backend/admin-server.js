@@ -194,7 +194,7 @@ app.get('/admin/satisfaction', adminAuth, async (req, res) => {
 app.get('/admin/ai-usage', adminAuth, async (req, res) => {
   const { data } = await supabase.from('activity_logs').select('user_id, action, created_at, metadata').eq('action', 'ai_chat').order('created_at', { ascending: false }).limit(200)
   const usage = data || []
-  const byUser: Record<string, number> = {}
+  const byUser = {}
   usage.forEach(u => { byUser[u.user_id] = (byUser[u.user_id] || 0) + 1 })
   return res.json({ total_requests: usage.length, unique_users: Object.keys(byUser).length, recent: usage.slice(0, 20) })
 })
@@ -289,13 +289,13 @@ app.get('/admin/revenue', adminAuth, async (req, res) => {
   const { data: payments } = await supabase.from('payments').select('amount, paid_at, currency').order('paid_at', { ascending: false })
   const all = payments || []
   // Group by month
-  const monthly: Record<string, number> = {}
+  const monthly = {}
   all.forEach(p => {
     const m = new Date(p.paid_at).toISOString().slice(0, 7)
     monthly[m] = (monthly[m] || 0) + p.amount
   })
   const { data: profiles } = await supabase.from('profiles').select('plan, created_at').order('created_at')
-  const growth: Record<string, number> = {}
+  const growth = {}
   profiles?.forEach(p => { const m = new Date(p.created_at).toISOString().slice(0, 7); growth[m] = (growth[m] || 0) + 1 })
   return res.json({ monthly_revenue: monthly, user_growth: growth, total_processed: all.reduce((s, p) => s + p.amount, 0) })
 })

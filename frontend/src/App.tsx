@@ -36,8 +36,9 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 export default function App() {
   const { setUser } = useAuthStore()
   useEffect(() => {
-    // Timeout fallback: if Supabase doesn't respond in 5s, show auth page (prevents blank screen on iOS)
-    const timeout = setTimeout(() => { setUser(null) }, 3000)
+    // Timeout fallback: if Supabase doesn't respond, show auth page (prevents blank screen on iOS)
+    // 8s covers slow cellular connections on iOS where session checks can take 3-5s
+    const timeout = setTimeout(() => { setUser(null) }, 8000)
     supabase.auth.getSession().then(({ data: { session } }) => {
       clearTimeout(timeout)
       setUser(session?.user ?? null)

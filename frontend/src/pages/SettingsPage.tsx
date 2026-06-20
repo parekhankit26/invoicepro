@@ -1,13 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
+import { openExternalUrl } from '../lib/iosUtils'
 import { CURRENCIES } from '../lib/utils'
+import { supabase } from '../lib/supabase'
+import { useAuthStore } from '../lib/authStore'
 import toast from 'react-hot-toast'
 import { Trash2, X } from 'lucide-react'
 
 export default function SettingsPage() {
   const qc = useQueryClient()
+  const navigate = useNavigate()
+  const { setUser } = useAuthStore()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState('')
   const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: () => api.get<any>('/auth/profile') })
@@ -17,7 +23,12 @@ export default function SettingsPage() {
   const [upgradingPlan, setUpgradingPlan] = useState<string | null>(null)
   const deleteMutation = useMutation({
     mutationFn: () => api.delete('/auth/account'),
-    onSuccess: () => { toast.success('Account deleted'); window.location.href = '/' },
+    onSuccess: async () => {
+      toast.success('Account deleted')
+      await supabase.auth.signOut()
+      setUser(null)
+      navigate('/auth', { replace: true })
+    },
     onError: (e: any) => toast.error(e.message),
   })
 
@@ -25,7 +36,7 @@ export default function SettingsPage() {
     setUpgradingPlan(plan)
     try {
       const data: any = await api.post('/auth/upgrade', { plan: plan.toLowerCase() })
-      if (data?.url) window.open(data.url, '_blank')
+      if (data?.url) openExternalUrl(data.url)
     } catch (e: any) {
       toast.error(e.message || 'Could not open upgrade page')
     } finally {

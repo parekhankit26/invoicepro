@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { FileText, CheckCircle, Clock, AlertTriangle, Download, CreditCard, Zap } from 'lucide-react'
 import { formatCurrency, formatDate, getStatusClass } from '../lib/utils'
+import toast from 'react-hot-toast'
 
 const API = import.meta.env.VITE_API_URL || '/api'
 
@@ -159,10 +160,11 @@ function InvoiceCard({ invoice: inv, token, highlight = false }: { invoice: any;
         </div>
       </div>
       {inv.status !== 'paid' && inv.stripe_payment_link && (
-        <a href={inv.stripe_payment_link} target="_blank" rel="noopener noreferrer"
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '11px', background: '#1a1814', color: 'white', borderRadius: 8, textDecoration: 'none', fontWeight: 600, fontSize: 13 }}>
+        <button
+          onClick={() => window.open(inv.stripe_payment_link, '_system')}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '11px', background: '#1a1814', color: 'white', borderRadius: 8, textDecoration: 'none', fontWeight: 600, fontSize: 13, width: '100%', border: 'none', cursor: 'pointer' }}>
           <CreditCard size={14} /> Pay {formatCurrency(inv.total, inv.currency)} securely
-        </a>
+        </button>
       )}
     </div>
   )
@@ -176,5 +178,5 @@ async function respondToQuote(quoteToken: string, action: 'accept' | 'decline') 
       body: JSON.stringify({ action })
     })
     window.location.reload()
-  } catch { alert('Failed to respond. Please try again.') }
+  } catch { toast.error('Failed to respond. Please try again.') }
 }

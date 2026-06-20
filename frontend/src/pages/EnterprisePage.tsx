@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { Key, Users, Globe, FileText, Download, Plus, Trash2, Copy, X, Shield } from 'lucide-react'
 import { api } from '../lib/api'
+import { copyToClipboard } from '../lib/iosUtils'
 import { formatCurrency, formatDate } from '../lib/utils'
 import toast from 'react-hot-toast'
 
@@ -58,6 +59,7 @@ export default function EnterprisePage() {
 function TeamTab({ plan }: { plan: string }) {
   const qc = useQueryClient()
   const [showInvite, setShowInvite] = useState(false)
+  const [removeId, setRemoveId] = useState<string | null>(null)
   const { data: members = [], isLoading } = useQuery({ queryKey: ['team'], queryFn: () => api.get<any[]>('/team') })
   const { register, handleSubmit, reset } = useForm()
 
@@ -108,13 +110,23 @@ function TeamTab({ plan }: { plan: string }) {
                   <td><span className="badge badge-sent">{m.role}</span></td>
                   <td><span className={`badge ${m.status === 'active' ? 'badge-paid' : m.status === 'pending' ? 'badge-pending' : 'badge-draft'}`}>{m.status}</span></td>
                   <td style={{ color: 'var(--text-subtle)', fontSize: 12 }}>{m.joined_at ? formatDate(m.joined_at) : 'Pending'}</td>
-                  <td><button className="btn btn-sm btn-danger" onClick={() => { if (confirm('Remove this team member?')) removeMutation.mutate(m.id) }}><Trash2 size={12} /></button></td>
+                  <td><button className="btn btn-sm btn-danger" onClick={() => setRemoveId(m.id)}><Trash2 size={12} /></button></td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
       </div>
+
+      {removeId && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setRemoveId(null)}>
+          <div className="modal-box" style={{ maxWidth: 340 }}>
+            <div className="modal-header"><h2 style={{ fontSize: 16, fontWeight: 700 }}>Remove team member?</h2></div>
+            <div className="modal-body"><p style={{ fontSize: 13, color: 'var(--text-muted)' }}>They will lose access to your InvoicePro account immediately.</p></div>
+            <div className="modal-footer"><button className="btn btn-secondary" onClick={() => setRemoveId(null)}>Cancel</button><button className="btn btn-danger" onClick={() => { removeMutation.mutate(removeId); setRemoveId(null) }}>Remove</button></div>
+          </div>
+        </div>
+      )}
 
       {showInvite && (
         <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowInvite(false)}>
@@ -155,6 +167,7 @@ function ApiKeysTab({ plan }: { plan: string }) {
   const qc = useQueryClient()
   const [showCreate, setShowCreate] = useState(false)
   const [newKey, setNewKey] = useState<string | null>(null)
+  const [revokeId, setRevokeId] = useState<string | null>(null)
   const { data: keys = [], isLoading } = useQuery({ queryKey: ['api-keys'], queryFn: () => api.get<any[]>('/enterprise/api-keys') })
   const { register, handleSubmit, reset } = useForm({ defaultValues: { name: '', permissions: ['invoices:read', 'invoices:write', 'clients:read'] } })
 
@@ -184,7 +197,7 @@ function ApiKeysTab({ plan }: { plan: string }) {
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--green)', marginBottom: 8 }}>✓ API key created — save it now, it won't be shown again</div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <code style={{ flex: 1, background: 'white', padding: '8px 12px', borderRadius: 6, fontSize: 12, wordBreak: 'break-all' }}>{newKey}</code>
-            <button className="btn btn-sm btn-secondary" onClick={() => { navigator.clipboard.writeText(newKey); toast.success('Copied!') }}><Copy size={12} /></button>
+            <button className="btn btn-sm btn-secondary" onClick={() => copyToClipboard(newKey, 'API key copied!')}><Copy size={12} /></button>
           </div>
           <button className="btn btn-ghost btn-sm" style={{ marginTop: 8 }} onClick={() => setNewKey(null)}>Dismiss</button>
         </div>
@@ -209,13 +222,23 @@ function ApiKeysTab({ plan }: { plan: string }) {
                   <td style={{ color: 'var(--text-subtle)', fontSize: 12 }}>{k.last_used ? formatDate(k.last_used) : 'Never'}</td>
                   <td style={{ color: 'var(--text-muted)' }}>{k.request_count || 0}</td>
                   <td><span className={`badge ${k.is_active ? 'badge-paid' : 'badge-draft'}`}>{k.is_active ? 'Active' : 'Revoked'}</span></td>
-                  <td>{k.is_active && <button className="btn btn-sm btn-danger" onClick={() => { if (confirm('Revoke this API key? This cannot be undone.')) revokeMutation.mutate(k.id) }}><Trash2 size={12} /></button>}</td>
+                  <td>{k.is_active && <button className="btn btn-sm btn-danger" onClick={() => setRevokeId(k.id)}><Trash2 size={12} /></button>}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
       </div>
+
+      {revokeId && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setRevokeId(null)}>
+          <div className="modal-box" style={{ maxWidth: 360 }}>
+            <div className="modal-header"><h2 style={{ fontSize: 16, fontWeight: 700 }}>Revoke API key?</h2></div>
+            <div className="modal-body"><p style={{ fontSize: 13, color: 'var(--text-muted)' }}>This API key will stop working immediately. This cannot be undone.</p></div>
+            <div className="modal-footer"><button className="btn btn-secondary" onClick={() => setRevokeId(null)}>Cancel</button><button className="btn btn-danger" onClick={() => { revokeMutation.mutate(revokeId); setRevokeId(null) }}>Revoke key</button></div>
+          </div>
+        </div>
+      )}
 
       {showCreate && (
         <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowCreate(false)}>
@@ -313,12 +336,30 @@ function TaxReportTab() {
   }
 
   const exportCSV = async (format: string) => {
-    const headers = await (api as any).getHeaders?.() || {}
-    const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/enterprise/export/${format}?from=${from}&to=${to}`, { headers })
-    const blob = await res.blob()
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a'); a.href = url; a.download = `export-${format}-${from}.${format === 'csv' || format === 'xero' ? 'csv' : 'json'}`; a.click()
-    URL.revokeObjectURL(url)
+    try {
+      const { supabase } = await import('../lib/supabase')
+      const { data: { session } } = await supabase.auth.getSession()
+      const headers: Record<string, string> = {}
+      if (session?.access_token) headers['Authorization'] = `Bearer ${session.access_token}`
+      const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/enterprise/export/${format}?from=${from}&to=${to}`, { headers })
+      if (!res.ok) throw new Error('Export failed — please try again')
+      const blob = await res.blob()
+      const ext = format === 'csv' || format === 'xero' ? 'csv' : 'json'
+      const filename = `export-${format}-${from}.${ext}`
+      try {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); document.body.removeChild(a)
+        setTimeout(() => URL.revokeObjectURL(url), 5000)
+      } catch {
+        // iOS WKWebView fallback: open as data URL
+        const reader = new FileReader()
+        reader.onload = () => { window.open(reader.result as string, '_system') }
+        reader.readAsDataURL(blob)
+      }
+      toast.success(`${format.toUpperCase()} export downloaded`)
+    } catch (e: any) {
+      toast.error(e.message || 'Export failed')
+    }
   }
 
   return (

@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useParams } from 'react-router-dom'
 
 const API = import.meta.env.VITE_API_URL || '/api'
 
 export default function SatisfactionPage() {
   const [params] = useSearchParams()
+  const { token } = useParams<{ token: string }>()
   const score = parseInt(params.get('score') || '0')
-  const token = window.location.pathname.split('/satisfaction/')[1]
   const [submitted, setSubmitted] = useState(false)
   const [comment, setComment] = useState('')
   const [loading, setLoading] = useState(false)

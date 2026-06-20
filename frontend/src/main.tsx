@@ -13,7 +13,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <App />
-        <Toaster position="bottom-right" toastOptions={{ style: { background: '#1a1814', color: '#f8f7f4', borderRadius: '10px', fontSize: '13.5px', fontFamily: 'DM Sans, sans-serif' }, success: { iconTheme: { primary: '#22c55e', secondary: '#1a1814' } }, error: { iconTheme: { primary: '#ef4444', secondary: '#1a1814' } } }} />
+        <Toaster position="bottom-right" containerStyle={{ bottom: 'max(16px, env(safe-area-inset-bottom))', right: 'max(16px, env(safe-area-inset-right))' }} toastOptions={{ style: { background: '#1a1814', color: '#f8f7f4', borderRadius: '10px', fontSize: '13.5px', fontFamily: 'DM Sans, sans-serif' }, success: { iconTheme: { primary: '#22c55e', secondary: '#1a1814' } }, error: { iconTheme: { primary: '#ef4444', secondary: '#1a1814' } } }} />
       </BrowserRouter>
     </QueryClientProvider>
   </React.StrictMode>

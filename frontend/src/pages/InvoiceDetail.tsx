@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { copyToClipboard } from '../lib/iosUtils'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Send, Download, CheckCircle, Edit, Trash2, Link, MessageSquare, Star, Zap } from 'lucide-react'
 import { api } from '../lib/api'
@@ -14,13 +15,14 @@ export default function InvoiceDetail() {
   const qc = useQueryClient()
   const [showEdit, setShowEdit] = useState(false)
   const [showFinancing, setShowFinancing] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const { data: invoice, isLoading } = useQuery({ queryKey: ['invoice', id], queryFn: () => api.get<any>(`/invoices/${id}`) })
 
   const sendMutation = useMutation({ mutationFn: () => api.post(`/invoices/${id}/send`, {}), onSuccess: () => { qc.invalidateQueries({ queryKey: ['invoice', id] }); toast.success('Invoice sent!') }, onError: (e: any) => toast.error(e.message) })
   const markPaidMutation = useMutation({ mutationFn: () => api.post(`/invoices/${id}/mark-paid`, {}), onSuccess: () => { qc.invalidateQueries({ queryKey: ['invoice', id] }); toast.success('Marked as paid!') }, onError: (e: any) => toast.error(e.message) })
-  const deleteMutation = useMutation({ mutationFn: () => api.delete(`/invoices/${id}`), onSuccess: () => { toast.success('Deleted'); navigate('/invoices') } })
-  const payLinkMutation = useMutation({ mutationFn: () => api.post(`/invoices/${id}/payment-link`, {}), onSuccess: (data: any) => { navigator.clipboard.writeText(data.payment_link); toast.success('Payment link copied!') }, onError: (e: any) => toast.error(e.message) })
+  const deleteMutation = useMutation({ mutationFn: () => api.delete(`/invoices/${id}`), onSuccess: () => { toast.success('Deleted'); navigate('/invoices') }, onError: (e: any) => toast.error(e.message) })
+  const payLinkMutation = useMutation({ mutationFn: () => api.post(`/invoices/${id}/payment-link`, {}), onSuccess: (data: any) => { copyToClipboard(data.payment_link, 'Payment link copied!') }, onError: (e: any) => toast.error(e.message) })
   const whatsappMutation = useMutation({ mutationFn: () => api.post(`/notify/whatsapp/${id}`, {}), onSuccess: (data: any) => toast.success(data.message), onError: (e: any) => toast.error(e.message) })
   const smsMutation = useMutation({ mutationFn: () => api.post(`/notify/sms/${id}`, {}), onSuccess: (data: any) => toast.success(data.message), onError: (e: any) => toast.error(e.message) })
   const surveyMutation = useMutation({ mutationFn: () => api.post(`/features/satisfaction/send/${id}`, {}), onSuccess: (data: any) => toast.success(data.message), onError: (e: any) => toast.error(e.message) })
@@ -55,12 +57,12 @@ export default function InvoiceDetail() {
           {invoice.status === 'paid' && <button className="btn btn-secondary" onClick={() => surveyMutation.mutate()} disabled={surveyMutation.isPending}><Star size={14} /> Send survey</button>}
           <button className="btn btn-secondary" onClick={() => api.downloadPDF(invoice.id, invoice.invoice_number).catch(e => toast.error(e.message))}><Download size={14} /> PDF</button>
           <button className="btn btn-secondary" onClick={() => setShowEdit(true)}><Edit size={14} /> Edit</button>
-          {invoice.status === 'draft' && <button className="btn btn-danger" onClick={() => { if (confirm('Delete?')) deleteMutation.mutate() }}><Trash2 size={14} /></button>}
+          {invoice.status === 'draft' && <button className="btn btn-danger" onClick={() => setShowDeleteConfirm(true)} disabled={deleteMutation.isPending}><Trash2 size={14} /></button>}
         </div>
       </div>
 
       <div className="page-body">
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 280px', gap:16 }}>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr min(280px, 35vw)', gap:16, '@media (max-width:600px)': { gridTemplateColumns:'1fr' } } as any}>
           <div className="card card-p">
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:24, marginBottom:24, paddingBottom:24, borderBottom:'1px solid var(--border)' }}>
               <div>
@@ -100,7 +102,7 @@ export default function InvoiceDetail() {
               <div className="card card-p" style={{ marginBottom:12 }}>
                 <div style={{ fontSize:13, fontWeight:600, marginBottom:10 }}>Payment link</div>
                 {invoice.stripe_payment_link ? (
-                  <button className="btn btn-secondary btn-sm" style={{ width:'100%', justifyContent:'center' }} onClick={() => { navigator.clipboard.writeText(invoice.stripe_payment_link); toast.success('Copied!') }}><Link size={12} /> Copy Stripe link</button>
+                  <button className="btn btn-secondary btn-sm" style={{ width:'100%', justifyContent:'center' }} onClick={() => copyToClipboard(invoice.stripe_payment_link, 'Payment link copied!')}><Link size={12} /> Copy Stripe link</button>
                 ) : (
                   <button className="btn btn-secondary btn-sm" style={{ width:'100%', justifyContent:'center' }} onClick={() => payLinkMutation.mutate()} disabled={payLinkMutation.isPending}><Link size={12} /> Generate payment link</button>
                 )}
@@ -151,6 +153,15 @@ export default function InvoiceDetail() {
       </div>
 
       {showEdit && <InvoiceModal invoice={invoice} onClose={() => setShowEdit(false)} onSave={() => { qc.invalidateQueries({ queryKey: ['invoice', id] }); setShowEdit(false) }} />}
+      {showDeleteConfirm && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowDeleteConfirm(false)}>
+          <div className="modal-box" style={{ maxWidth: 360 }}>
+            <div className="modal-header"><h2 style={{ fontSize: 16, fontWeight: 700 }}>Delete invoice?</h2><button className="btn btn-ghost btn-icon" onClick={() => setShowDeleteConfirm(false)}><ArrowLeft size={18} /></button></div>
+            <div className="modal-body"><p style={{ fontSize: 13, color: 'var(--text-muted)' }}>This will permanently delete invoice {invoice.invoice_number}. This cannot be undone.</p></div>
+            <div className="modal-footer"><button className="btn btn-secondary" onClick={() => setShowDeleteConfirm(false)}>Cancel</button><button className="btn btn-danger" onClick={() => { deleteMutation.mutate(); setShowDeleteConfirm(false) }} disabled={deleteMutation.isPending}>{deleteMutation.isPending ? 'Deleting...' : 'Delete'}</button></div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

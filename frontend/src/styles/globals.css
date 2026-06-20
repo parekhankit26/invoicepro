@@ -108,6 +108,11 @@
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   /* Invoice detail: main content + sidebar panel */
   .invoice-detail-layout { display: grid; grid-template-columns: 1fr min(280px, 35vw); gap: 16px; }
+  /* Designer / client-detail: fixed sidebar + main */
+  .designer-layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
+  .client-detail-layout { display: grid; grid-template-columns: 280px 1fr; gap: 16px; }
+  .quote-detail-layout { display: grid; grid-template-columns: 1fr 220px; gap: 16px; }
+  .grid-5col { display: grid; grid-template-columns: repeat(5,1fr); }
 
   /* ── Mobile layout ── */
   @media (max-width: 768px) {
@@ -169,12 +174,16 @@
     .metric-value { font-size: 20px; }
     .metric-card { padding: 14px; }
 
-    /* Grids collapse to 1 col on mobile */
+    /* All grids collapse to single column on mobile */
     .grid-4col { grid-template-columns: repeat(2,1fr); gap: 10px; }
+    .grid-5col { grid-template-columns: repeat(2,1fr); }
     .grid-3col { grid-template-columns: 1fr; }
     .grid-2col { grid-template-columns: 1fr; }
     .form-grid { grid-template-columns: 1fr; }
     .invoice-detail-layout { grid-template-columns: 1fr; }
+    .designer-layout { grid-template-columns: 1fr; }
+    .client-detail-layout { grid-template-columns: 1fr; }
+    .quote-detail-layout { grid-template-columns: 1fr; }
 
     /* Tables: only table-scroll wrapper scrolls horizontally */
     .table-scroll { overflow-x: auto; }

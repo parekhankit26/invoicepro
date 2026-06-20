@@ -32,7 +32,7 @@ export default function ClientDetail() {
         </div>
       </div>
       <div className="page-body">
-        <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 16 }}>
+        <div className="client-detail-layout">
           <div>
             <div className="card card-p" style={{ marginBottom: 12 }}>
               <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 14 }}>Contact</div>

@@ -211,7 +211,7 @@ function QuoteModal({ quote, clients, onClose, onSave }: any) {
               ))}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 220px', gap: 16 }}>
+            <div className="quote-detail-layout">
               <div>
                 <div className="form-group">
                   <label className="form-label">Notes</label>

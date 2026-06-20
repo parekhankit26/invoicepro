@@ -44,7 +44,7 @@ export default function InvoiceDesignerPage() {
         <button className="btn btn-primary" onClick={saveTemplate}>{saved ? '✓ Saved!' : 'Save template'}</button>
       </div>
       <div className="page-body">
-        <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 20 }}>
+        <div className="designer-layout">
           {/* Controls */}
           <div>
             <div className="card card-p" style={{ marginBottom: 12 }}>

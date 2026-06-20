@@ -17,7 +17,7 @@ export default function ReportsPage() {
       <div className="page-header"><div><h1 className="page-title">Reports</h1><p className="page-subtitle">Financial overview</p></div></div>
       <div className="page-body">
         <div className="card" style={{ marginBottom: 16, padding: 0, overflow: 'hidden' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', borderBottom: '1px solid var(--border)' }}>
+          <div className="grid-5col" style={{ borderBottom: '1px solid var(--border)' }}>
             {[['Total revenue', formatCurrency(s.total_paid||0),'var(--green)'],['Total expenses', formatCurrency(s.total_expenses||0),'var(--red)'],['Net profit', formatCurrency(s.net_profit||0),(s.net_profit||0)>=0?'var(--green)':'var(--red)'],['Profit margin', `${margin}%`,parseFloat(margin)>=0?'var(--green)':'var(--red)'],['Outstanding', formatCurrency(s.total_pending||0),'var(--amber)']].map(([label, value, color]: any) => (
               <div key={label} style={{ padding: '16px 20px', borderRight: '1px solid var(--border)' }}>
                 <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-subtle)', marginBottom: 6 }}>{label}</div>

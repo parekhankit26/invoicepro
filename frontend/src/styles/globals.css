@@ -102,6 +102,7 @@
 
   /* ── Responsive grid utilities ── */
   .grid-4col { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+  .grid-3col { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
   .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   /* Form grid: 2 col on desktop, 1 col on mobile */
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -155,8 +156,12 @@
     .metric-value { font-size: 20px; }
     .metric-card { padding: 14px; }
 
-    /* Responsive grids */
+    /* Main content: overflow-x:hidden here is safe (not on body/html) */
+    .main-content { overflow-x: hidden; }
+
+    /* Responsive grids — all collapse on mobile */
     .grid-4col { grid-template-columns: repeat(2,1fr); gap: 10px; }
+    .grid-3col { grid-template-columns: 1fr; }
     .grid-2col { grid-template-columns: 1fr; }
     .form-grid { grid-template-columns: 1fr; }
     .invoice-detail-layout { grid-template-columns: 1fr; }

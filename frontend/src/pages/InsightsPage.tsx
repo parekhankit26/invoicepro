@@ -108,7 +108,7 @@ export default function InsightsPage() {
             {/* Tips section */}
             <div className="card card-p">
               <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 14 }}>Quick wins to improve your score</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+              <div className="grid-3col">
                 {[
                   { num: '01', title: 'Enable Stripe payments', desc: 'Businesses with online payment links get paid 3x faster on average.' },
                   { num: '02', title: 'Set up auto-reminders', desc: 'Automated reminders reduce late payments by up to 60%.' },

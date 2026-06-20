@@ -65,7 +65,7 @@ export default function SettingsPage() {
             </div>
             <div className="card card-p">
               <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Invoice defaults</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+              <div className="grid-3col">
                 <div className="form-group"><label className="form-label">Default currency</label><select {...register('default_currency')} className="form-select">{CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.symbol} {c.code}</option>)}</select></div>
                 <div className="form-group"><label className="form-label">Tax rate (%)</label><input {...register('default_tax_rate', { valueAsNumber: true })} className="form-input" type="number" min="0" max="100" /><div className="form-hint">UK standard VAT is 20%</div></div>
                 <div className="form-group"><label className="form-label">Payment terms (days)</label><input {...register('default_payment_terms', { valueAsNumber: true })} className="form-input" type="number" min="0" /></div>

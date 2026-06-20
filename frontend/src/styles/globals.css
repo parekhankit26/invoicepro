@@ -156,6 +156,12 @@
     }
     .tab-item { flex: 1; min-height: 56px; }
 
+    /* iOS auto-zoom fix: inputs with font-size < 16px cause iOS to zoom in on tap.
+       Setting 16px prevents the zoom — page never zooms, keyboard just opens normally. */
+    input, select, textarea, .form-input, .form-select {
+      font-size: 16px !important;
+    }
+
     /* Page content padding */
     .page-header { padding: 16px 16px 0; margin-bottom: 16px; }
     .page-body { padding: 0 16px 32px; }

@@ -173,7 +173,9 @@ workflows:
           failure: true
       app_store_connect:
         auth: integration
-        submit_to_testflight: false
+        # Submit to TestFlight so testers can install from the TestFlight app.
+        # Direct IPA links in emails cannot be installed on iOS — you MUST use TestFlight.
+        submit_to_testflight: true
         submit_to_app_store: false
 
   android-release:

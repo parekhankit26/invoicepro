@@ -25,7 +25,7 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthStore()
   if (loading) return (
     <div style={{ display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',flexDirection:'column',gap:12,background:'#1a1814',position:'fixed',inset:0 }}>
-      <svg width="40" height="40" viewBox="0 0 200 200" fill="none"><rect width="200" height="200" rx="40" fill="#1a1814"/><rect x="40" y="36" width="90" height="10" rx="5" fill="white"/><rect x="40" y="58" width="68" height="10" rx="5" fill="white" opacity="0.5"/><circle cx="148" cy="154" r="36" fill="#a3e635"/><path d="M136 154 L144 162 L162 144" stroke="#1a1814" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      <svg width="40" height="40" viewBox="0 0 200 200" fill="none"><rect width="200" height="200" rx="40" fill="#1a1814"/><rect x="40" y="36" width="90" height="10" rx="5" fill="white"/><rect x="40" y="58" width="68" height="10" rx="5" fill="white" opacity="0.5"/><circle cx="148" cy="154" r="36" fill="#a3e635"/><path d="M136 154 L144 162 L162 144" stroke="#1a1814" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
       <div style={{ color:'#756d5c',fontSize:13 }}>Loading InvoicePro...</div>
     </div>
   )

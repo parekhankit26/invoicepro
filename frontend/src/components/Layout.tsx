@@ -86,8 +86,11 @@ export default function Layout() {
     if (mainRef.current) mainRef.current.scrollTop = 0
   }, [location.pathname])
 
-  // Inline styles guarantee the layout on every page regardless of CSS load order
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
+  // True when running inside Capacitor (iPhone/Android) OR narrow browser window.
+  // Inline styles guarantee the layout on EVERY page — CSS can lose specificity during navigation.
+  const isMobile = typeof window !== 'undefined' && (
+    !!(window as any).Capacitor || window.innerWidth <= 900
+  )
 
   return (
     <div className="app-layout" style={isMobile ? {

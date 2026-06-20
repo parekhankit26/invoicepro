@@ -66,7 +66,8 @@ app.use('/api/ai', aiAssistantRoutes)
 app.use('/api/notify', notificationsRoutes)
 app.use('/api/features', featuresRoutes)
 
-app.get('/health', (_, res) => res.json({ status: 'ok', version: '2.0.0', features: ['ai-assistant','whatsapp-sms','receipt-scanner','cashflow','financing','milestones','early-payment','happiness-score','year-review'], timestamp: new Date().toISOString() }))
+app.get('/health', (_, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }))
+app.get('/api/health', (_, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }))
 
 cron.schedule('0 9 * * *', async () => { await reminderService.sendOverdueReminders(); await reminderService.sendUpcomingDueReminders() })
 cron.schedule('0 8 * * *', async () => { await recurringService.generateDueInvoices() })

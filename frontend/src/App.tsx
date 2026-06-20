@@ -33,11 +33,18 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+const API_URL = import.meta.env.VITE_API_URL || '/api'
+// Ping backend on startup so Railway wakes up before the user submits any form.
+// iOS WKWebView throws "Load failed" if the first POST hits a cold-start server.
+function warmupBackend() {
+  fetch(`${API_URL}/health`, { method: 'GET' }).catch(() => {/* ignore — just waking it up */})
+}
+
 export default function App() {
   const { setUser } = useAuthStore()
   useEffect(() => {
+    warmupBackend()
     // Timeout fallback: if Supabase doesn't respond, show auth page (prevents blank screen on iOS)
-    // 8s covers slow cellular connections on iOS where session checks can take 3-5s
     const timeout = setTimeout(() => { setUser(null) }, 8000)
     supabase.auth.getSession().then(({ data: { session } }) => {
       clearTimeout(timeout)

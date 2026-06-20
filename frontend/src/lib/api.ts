@@ -19,7 +19,7 @@ async function request<T>(path: string, options?: RequestInit, retries = 1): Pro
     return json as T
   } catch (err: any) {
     // Retry once on network failure (handles Railway cold-start / sleeping backend)
-    if (retries > 0 && (err.name === 'TypeError' || err.message === 'Failed to fetch' || err.message === 'Network request failed')) {
+    if (retries > 0 && (err.name === 'TypeError' || err.message === 'Failed to fetch' || err.message === 'Network request failed' || err.message === 'Load failed' || err.message?.includes('fetch'))) {
       await new Promise(r => setTimeout(r, 2000))
       return request<T>(path, options, retries - 1)
     }

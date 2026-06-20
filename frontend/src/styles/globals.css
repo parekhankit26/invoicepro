@@ -110,33 +110,34 @@
 
   /* ── Mobile breakpoint ── */
   @media (max-width: 768px) {
-    /* Flex-column layout: only main-content scrolls — prevents keyboard jump */
-    .app-layout {
-      display: flex; flex-direction: column;
-      position: fixed; inset: 0; overflow: hidden;
-    }
+    /* Prevent black overscroll rubber-band on iOS */
+    html { background: var(--bg); }
+    body { overscroll-behavior-y: none; background: var(--bg); }
+
+    .app-layout { display: block; background: var(--bg); }
     .sidebar { display: none !important; }
 
-    /* In-flow top bar (no fixed/sticky needed inside flex-column) */
+    /* Fixed top bar — simple position:fixed, no flex tricks */
     .mobile-topbar {
       display: flex; align-items: center; justify-content: space-between;
-      flex-shrink: 0;
+      position: fixed; top: 0; left: 0; right: 0;
       padding: max(14px, env(safe-area-inset-top)) 16px 12px;
       background: var(--surface); border-bottom: 1px solid var(--border);
-      z-index: 30;
+      z-index: 30; box-sizing: border-box;
     }
 
-    /* Scrollable main area */
+    /* Main content pushed below topbar and above tabbar */
     .main-content {
-      flex: 1; overflow-y: auto; overflow-x: hidden;
       margin-left: 0 !important;
-      padding-top: 0;
-      -webkit-overflow-scrolling: touch;
+      padding-top: calc(56px + env(safe-area-inset-top));
+      padding-bottom: calc(72px + env(safe-area-inset-bottom));
+      background: var(--bg);
     }
 
-    /* In-flow bottom tabs */
+    /* Fixed bottom tabs */
     .mobile-tabbar {
-      display: flex; flex-shrink: 0;
+      display: flex;
+      position: fixed; bottom: 0; left: 0; right: 0;
       background: var(--surface); border-top: 1px solid var(--border);
       padding-bottom: env(safe-area-inset-bottom);
       z-index: 40;
@@ -156,11 +157,12 @@
     .invoice-detail-layout { grid-template-columns: 1fr; }
 
     /* Tables scroll horizontally */
-    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .table-scroll { overflow-x: auto; }
     .data-table { min-width: 480px; }
     .data-table th, .data-table td { padding: 10px; font-size: 13px; }
 
-    /* Modals: bottom sheet on mobile */
+    /* Modals: full-width bottom sheet.
+       NOTE: no -webkit-overflow-scrolling on parent — it breaks position:fixed in WKWebView */
     .modal-overlay { align-items: flex-end; padding: 0; }
     .modal-box { border-radius: 20px 20px 0 0; max-height: 90vh; width: 100% !important; max-width: 100% !important; }
     .modal-header { border-radius: 20px 20px 0 0; }

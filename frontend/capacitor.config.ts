@@ -13,12 +13,11 @@ const config: CapacitorConfig = {
     webContentsDebuggingEnabled: false
   },
   ios: {
-    // Prevents white flash / blank screen before the web bundle loads
-    backgroundColor: '#1a1814',
+    // Cream background (#f8f7f4) prevents black flash during iOS rubber-band overscroll
+    backgroundColor: '#f8f7f4',
     contentInset: 'always',
     allowsLinkPreview: false,
-    scrollEnabled: true,
-    // limitsNavigationsToAppBoundDomains: false allows Supabase auth redirects
+    scrollEnabled: false,
     limitsNavigationsToAppBoundDomains: false
   }
 };

@@ -136,13 +136,12 @@ workflows:
         script: |
           STORYBOARD="frontend/ios/App/App/Base.lproj/LaunchScreen.storyboard"
           APPDELEGATE="frontend/ios/App/App/AppDelegate.swift"
-          # Replace white launch screen background with app dark colour (#1a1814)
-          # The default Capacitor storyboard uses white="1" for the background colour
-          sed -i '' 's/white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/red="0.10196078431372549" green="0.09411764705882353" blue="0.07843137254901961" alpha="1" colorSpace="custom" customColorSpace="sRGB"/g' "$STORYBOARD"
-          # Also handle any systemBackground or other white references in the storyboard
-          sed -i '' 's/key="backgroundColor" white="1"/key="backgroundColor" red="0.102" green="0.094" blue="0.078" alpha="1" colorSpace="custom" customColorSpace="sRGB"/g' "$STORYBOARD"
-          # Patch AppDelegate.swift: set window background colour so WebView is dark before content loads
-          sed -i '' 's/return true/self.window?.backgroundColor = UIColor(red: 0.102, green: 0.094, blue: 0.078, alpha: 1.0)\n        return true/' "$APPDELEGATE"
+          # Replace white launch screen with cream (#f8f7f4) — matches app background
+          # so there is no flash AND no black overscroll rubber-band on iOS
+          sed -i '' 's/white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/red="0.9725" green="0.9686" blue="0.9569" alpha="1" colorSpace="custom" customColorSpace="sRGB"/g' "$STORYBOARD"
+          sed -i '' 's/key="backgroundColor" white="1"/key="backgroundColor" red="0.9725" green="0.9686" blue="0.9569" alpha="1" colorSpace="custom" customColorSpace="sRGB"/g' "$STORYBOARD"
+          # Window background = cream so rubber-band overscroll shows cream, not black
+          sed -i '' 's/return true/self.window?.backgroundColor = UIColor(red: 0.9725, green: 0.9686, blue: 0.9569, alpha: 1.0)\n        return true/' "$APPDELEGATE"
       - name: Sync Capacitor to iOS
         script: |
           cd frontend

@@ -109,72 +109,70 @@
   /* Invoice detail: main content + sidebar panel */
   .invoice-detail-layout { display: grid; grid-template-columns: 1fr min(280px, 35vw); gap: 16px; }
 
-  /* ── Mobile breakpoint ── */
+  /* ── Mobile layout: fixed header + fixed footer + ONLY middle scrolls ── */
   @media (max-width: 768px) {
-    /* Prevent black overscroll rubber-band on iOS.
-       IMPORTANT: use clip not hidden — overflow:hidden on body triggers iOS scroll-freeze bug */
-    html { background: var(--bg); }
-    body { overscroll-behavior-y: none; background: var(--bg); }
+    /* Lock body — ALL scrolling happens inside .main-content only */
+    html, body { height: 100%; overflow: hidden; background: var(--bg); }
 
-    .app-layout { display: block; background: var(--bg); }
+    /* Full-screen flex column: topbar | content | tabbar */
+    .app-layout {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column;
+      background: var(--bg);
+    }
     .sidebar { display: none !important; }
 
-    /* Fixed top bar.
-       Use max(52px, env(safe-area-inset-top)) as hardcoded fallback:
-       on iPhone the status bar is 44-54px; env() may return 0 in WKWebView
-       if contentInset is managed natively, so we always reserve at least 52px */
+    /* ── Top bar: flex child, never moves ── */
     .mobile-topbar {
       display: flex; align-items: center; justify-content: space-between;
-      position: fixed; top: 0; left: 0; right: 0;
+      flex-shrink: 0;
       padding-top: max(52px, env(safe-area-inset-top));
-      padding-left: 16px; padding-right: 16px; padding-bottom: 10px;
+      padding-left: 16px; padding-right: 16px; padding-bottom: 12px;
       background: var(--surface); border-bottom: 1px solid var(--border);
-      z-index: 30; box-sizing: border-box;
+      z-index: 30;
     }
 
-    /* Main content: sits below topbar (106px = 52px safe-area + ~54px topbar content) */
+    /* ── Middle: THE ONLY THING THAT SCROLLS ── */
     .main-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
       margin-left: 0 !important;
-      padding-top: max(106px, calc(env(safe-area-inset-top) + 54px));
-      padding-bottom: calc(72px + env(safe-area-inset-bottom));
-      background: var(--bg); box-sizing: border-box;
+      padding-top: 0;
+      padding-bottom: 0;
+      background: var(--bg);
     }
 
-    /* Fixed bottom tabs */
+    /* ── Bottom tab bar: flex child, never moves ── */
     .mobile-tabbar {
-      display: flex;
-      position: fixed; bottom: 0; left: 0; right: 0;
+      display: flex; flex-shrink: 0;
       background: var(--surface); border-top: 1px solid var(--border);
       padding-bottom: env(safe-area-inset-bottom);
       z-index: 40;
     }
 
-    /* Page content spacing */
+    /* Page content inside the scrollable area */
     .page-header { padding: 16px 16px 0; margin-bottom: 16px; }
     .page-body { padding: 0 16px 32px; }
     .page-title { font-size: 20px; }
     .metric-value { font-size: 20px; }
     .metric-card { padding: 14px; }
 
-    /* Main content: overflow-x:hidden here is safe (not on body/html) */
-    .main-content { overflow-x: hidden; }
-
-    /* Responsive grids — all collapse on mobile */
+    /* Grids: collapse to single column on mobile */
     .grid-4col { grid-template-columns: repeat(2,1fr); gap: 10px; }
     .grid-3col { grid-template-columns: 1fr; }
     .grid-2col { grid-template-columns: 1fr; }
     .form-grid { grid-template-columns: 1fr; }
     .invoice-detail-layout { grid-template-columns: 1fr; }
 
-    /* Tables scroll horizontally */
+    /* Tables: horizontal scroll inside a wrapper only */
     .table-scroll { overflow-x: auto; }
     .data-table { min-width: 480px; }
     .data-table th, .data-table td { padding: 10px; font-size: 13px; }
 
-    /* Modals: full-width bottom sheet.
-       NOTE: no -webkit-overflow-scrolling on parent — it breaks position:fixed in WKWebView */
+    /* Modals: bottom sheet, full width */
     .modal-overlay { align-items: flex-end; padding: 0; }
-    .modal-box { border-radius: 20px 20px 0 0; max-height: 90vh; width: 100% !important; max-width: 100% !important; }
+    .modal-box { border-radius: 20px 20px 0 0; max-height: 85vh; width: 100% !important; max-width: 100% !important; }
     .modal-header { border-radius: 20px 20px 0 0; }
     .modal-footer { flex-direction: column-reverse; }
     .modal-footer .btn { width: 100%; justify-content: center; }

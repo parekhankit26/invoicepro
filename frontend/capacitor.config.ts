@@ -17,7 +17,7 @@ const config: CapacitorConfig = {
     backgroundColor: '#f8f7f4',
     contentInset: 'always',
     allowsLinkPreview: false,
-    scrollEnabled: false,
+    scrollEnabled: true,
     limitsNavigationsToAppBoundDomains: false
   }
 };

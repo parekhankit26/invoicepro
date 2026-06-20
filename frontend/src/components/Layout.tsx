@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, FileText, Users, Receipt, BarChart3, Settings, LogOut, Clock, FileCheck, Crown, TrendingUp, Zap, Heart, Gift, Palette } from 'lucide-react'
+import { LayoutDashboard, FileText, Users, Receipt, BarChart3, Settings, LogOut, Clock, FileCheck, Crown, TrendingUp, Zap, Heart, Gift, Palette, Menu, X, ChevronRight } from 'lucide-react'
 import { useAuthStore } from '../lib/authStore'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../lib/api'
@@ -16,11 +17,36 @@ const Logo = () => (
     <rect x="40" y="138" width="38" height="10" rx="5" fill="white" opacity="0.3"/>
     <rect x="92" y="138" width="38" height="10" rx="5" fill="#a3e635"/>
     <circle cx="148" cy="154" r="36" fill="#a3e635"/>
-    <path d="M136 154 L144 162 L162 144" stroke="#1a1814" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M136 154 L144 162 L162 144" stroke="#1a1814" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
   </svg>
 )
 
-const nav = [
+const allNav = [
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/invoices', icon: FileText, label: 'Invoices' },
+  { to: '/quotes', icon: FileCheck, label: 'Quotes' },
+  { to: '/clients', icon: Users, label: 'Clients' },
+  { to: '/time', icon: Clock, label: 'Time' },
+  { to: '/expenses', icon: Receipt, label: 'Expenses' },
+  { to: '/reports', icon: BarChart3, label: 'Reports' },
+  { to: '/insights', icon: TrendingUp, label: 'Insights' },
+  { to: '/cashflow', icon: Zap, label: 'Cash flow' },
+  { to: '/happiness', icon: Heart, label: 'Happiness' },
+  { to: '/year-review', icon: Gift, label: 'Year review' },
+  { to: '/designer', icon: Palette, label: 'Designer' },
+  { to: '/enterprise', icon: Crown, label: 'Enterprise' },
+  { to: '/settings', icon: Settings, label: 'Settings' },
+]
+
+// Bottom 4 tabs shown on mobile
+const bottomTabs = [
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Home' },
+  { to: '/invoices', icon: FileText, label: 'Invoices' },
+  { to: '/clients', icon: Users, label: 'Clients' },
+  { to: '/expenses', icon: Receipt, label: 'Expenses' },
+]
+
+const sidebarNav = [
   { section: 'Menu', items: [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/invoices', icon: FileText, label: 'Invoices' },
@@ -48,12 +74,14 @@ const planColors: Record<string,string> = { free:'#888', starter:'#1d4ed8', pro:
 export default function Layout() {
   const { user, signOut } = useAuthStore()
   const navigate = useNavigate()
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: () => api.get<any>('/auth/profile'), staleTime: 60_000 })
   const handleSignOut = async () => { await signOut(); toast.success('Signed out'); navigate('/auth') }
   const initials = profile?.full_name ? profile.full_name.split(' ').map((n: string) => n[0]).join('').slice(0,2).toUpperCase() : user?.email?.[0].toUpperCase() || 'U'
 
   return (
     <div className="app-layout">
+      {/* ── Desktop sidebar ── */}
       <aside className="sidebar">
         <div className="sidebar-logo">
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
@@ -62,7 +90,7 @@ export default function Layout() {
           </div>
         </div>
         <nav className="sidebar-nav">
-          {nav.map(section => (
+          {sidebarNav.map(section => (
             <div key={section.section}>
               <div className="nav-section-label">{section.section}</div>
               {section.items.map(({ to, icon: Icon, label }) => (
@@ -84,10 +112,75 @@ export default function Layout() {
           </div>
         </div>
       </aside>
+
+      {/* ── Mobile top bar ── */}
+      <header className="mobile-topbar">
+        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+          <Logo />
+          <span style={{ fontWeight:700, fontSize:16, letterSpacing:'-0.03em' }}>InvoicePro</span>
+        </div>
+        <button className="mobile-menu-btn" onClick={() => setDrawerOpen(true)}>
+          <Menu size={22} />
+        </button>
+      </header>
+
+      {/* ── Mobile drawer overlay ── */}
+      {drawerOpen && (
+        <div className="drawer-overlay" onClick={() => setDrawerOpen(false)}>
+          <div className="drawer-panel" onClick={e => e.stopPropagation()}>
+            <div className="drawer-header">
+              <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                <div style={{ width:36, height:36, borderRadius:10, background:'#1a1814', color:'white', display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:700 }}>{initials}</div>
+                <div>
+                  <div style={{ fontSize:14, fontWeight:600 }}>{profile?.full_name || user?.email?.split('@')[0]}</div>
+                  <div style={{ fontSize:11, color:planColors[profile?.plan || 'free'], fontWeight:600, textTransform:'capitalize' }}>{profile?.plan || 'free'} plan</div>
+                </div>
+              </div>
+              <button onClick={() => setDrawerOpen(false)} style={{ background:'none', border:'none', padding:6, cursor:'pointer', color:'var(--text-muted)', borderRadius:8 }}>
+                <X size={20} />
+              </button>
+            </div>
+            <nav style={{ flex:1, overflowY:'auto', padding:'8px 12px' }}>
+              {allNav.map(({ to, icon: Icon, label }) => (
+                <NavLink
+                  key={to} to={to}
+                  className={({ isActive }) => `drawer-nav-item ${isActive ? 'active' : ''}`}
+                  onClick={() => setDrawerOpen(false)}
+                >
+                  <Icon size={18} />
+                  <span>{label}</span>
+                  <ChevronRight size={14} style={{ marginLeft:'auto', opacity:0.3 }} />
+                </NavLink>
+              ))}
+            </nav>
+            <div style={{ padding:'12px 16px', borderTop:'1px solid var(--border)' }}>
+              <button onClick={handleSignOut} className="drawer-signout-btn">
+                <LogOut size={16} /> Sign out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Main content ── */}
       <main className="main-content">
         <Outlet />
         <AIAssistant />
       </main>
+
+      {/* ── Mobile bottom tab bar ── */}
+      <nav className="mobile-tabbar">
+        {bottomTabs.map(({ to, icon: Icon, label }) => (
+          <NavLink key={to} to={to} className={({ isActive }) => `tab-item ${isActive ? 'active' : ''}`}>
+            <Icon size={22} />
+            <span>{label}</span>
+          </NavLink>
+        ))}
+        <button className="tab-item" onClick={() => setDrawerOpen(true)}>
+          <Menu size={22} />
+          <span>More</span>
+        </button>
+      </nav>
     </div>
   )
 }

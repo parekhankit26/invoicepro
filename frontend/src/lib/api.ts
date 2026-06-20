@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { downloadPDF as iosPDF } from './iosUtils'
+import toast from 'react-hot-toast'
 
 const API_URL = import.meta.env.VITE_API_URL || '/api'
 
@@ -20,7 +21,9 @@ async function request<T>(path: string, options?: RequestInit, retries = 1): Pro
   } catch (err: any) {
     // Retry once on network failure (handles Railway cold-start / sleeping backend)
     if (retries > 0 && (err.name === 'TypeError' || err.message === 'Failed to fetch' || err.message === 'Network request failed' || err.message === 'Load failed' || err.message?.includes('fetch'))) {
+      const t = toast.loading('Connecting… please wait')
       await new Promise(r => setTimeout(r, 2000))
+      toast.dismiss(t)
       return request<T>(path, options, retries - 1)
     }
     throw new Error(err.message || 'Connection failed. Please try again.')

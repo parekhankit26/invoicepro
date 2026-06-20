@@ -111,10 +111,10 @@
   /* ── Mobile breakpoint ── */
   @media (max-width: 768px) {
     /* Prevent black overscroll rubber-band on iOS */
-    html { background: var(--bg); }
-    body { overscroll-behavior-y: none; background: var(--bg); }
+    html { background: var(--bg); overflow-x: hidden; }
+    body { overscroll-behavior-y: none; background: var(--bg); overflow-x: hidden; width: 100%; }
 
-    .app-layout { display: block; background: var(--bg); }
+    .app-layout { display: block; background: var(--bg); width: 100%; overflow-x: hidden; }
     .sidebar { display: none !important; }
 
     /* Fixed top bar — simple position:fixed, no flex tricks */
@@ -126,12 +126,13 @@
       z-index: 30; box-sizing: border-box;
     }
 
-    /* Main content pushed below topbar and above tabbar */
+    /* Main content: clamp to screen width so nothing overflows right */
     .main-content {
       margin-left: 0 !important;
       padding-top: calc(56px + env(safe-area-inset-top));
       padding-bottom: calc(72px + env(safe-area-inset-bottom));
       background: var(--bg);
+      width: 100%; max-width: 100vw; overflow-x: hidden; box-sizing: border-box;
     }
 
     /* Fixed bottom tabs */

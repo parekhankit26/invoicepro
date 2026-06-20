@@ -81,13 +81,32 @@ export default function Layout() {
   const handleSignOut = async () => { await signOut(); toast.success('Signed out'); navigate('/auth') }
   const initials = profile?.full_name ? profile.full_name.split(' ').map((n: string) => n[0]).join('').slice(0,2).toUpperCase() : user?.email?.[0].toUpperCase() || 'U'
 
+  // Lock body scroll so ONLY main-content scrolls — applies on every page
+  useEffect(() => {
+    const isPhone = !!(window as any).Capacitor || window.innerWidth <= 900
+    if (isPhone) {
+      document.documentElement.style.overflow = 'hidden'
+      document.documentElement.style.height = '100%'
+      document.body.style.overflow = 'hidden'
+      document.body.style.height = '100%'
+      document.body.style.position = 'fixed'
+      document.body.style.width = '100%'
+    }
+    return () => {
+      document.documentElement.style.overflow = ''
+      document.documentElement.style.height = ''
+      document.body.style.overflow = ''
+      document.body.style.height = ''
+      document.body.style.position = ''
+      document.body.style.width = ''
+    }
+  }, [])
+
   // Reset middle scroll to top on every page navigation
   useEffect(() => {
     if (mainRef.current) mainRef.current.scrollTop = 0
   }, [location.pathname])
 
-  // True when running inside Capacitor (iPhone/Android) OR narrow browser window.
-  // Inline styles guarantee the layout on EVERY page — CSS can lose specificity during navigation.
   const isMobile = typeof window !== 'undefined' && (
     !!(window as any).Capacitor || window.innerWidth <= 900
   )

@@ -42,7 +42,7 @@ export default function InvoicesPage() {
           {isLoading ? <div className="empty-state">Loading...</div> : invoices.length === 0 ? (
             <div className="empty-state"><div className="empty-state-icon"><Plus size={20} /></div><div style={{ fontWeight: 500 }}>No invoices yet</div><button className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => setShowModal(true)}><Plus size={15} /> Create invoice</button></div>
           ) : (
-            <table className="data-table">
+            <div className="table-scroll"><table className="data-table">
               <thead><tr><th>Invoice</th><th>Client</th><th>Issue date</th><th>Due date</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody>
                 {invoices.map((inv: any) => {
@@ -67,7 +67,7 @@ export default function InvoicesPage() {
                   )
                 })}
               </tbody>
-            </table>
+            </table></div>
           )}
         </div>
       </div>

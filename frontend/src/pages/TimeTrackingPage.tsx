@@ -100,7 +100,7 @@ export default function TimeTrackingPage() {
               <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => setShowModal(true)}><Plus size={15} /> Log time</button>
             </div>
           ) : (
-            <table className="data-table">
+            <div className="table-scroll"><table className="data-table">
               <thead><tr>
                 <th style={{ width: 40 }}></th>
                 <th>Date</th><th>Client</th><th>Project</th><th>Description</th>
@@ -135,7 +135,7 @@ export default function TimeTrackingPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           )}
         </div>
       </div>

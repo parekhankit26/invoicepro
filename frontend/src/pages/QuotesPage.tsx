@@ -86,7 +86,7 @@ export default function QuotesPage() {
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
-              <table className="data-table">
+              <div className="table-scroll"><table className="data-table">
                 <thead><tr><th>Quote #</th><th>Client</th><th>Amount</th><th>Expiry</th><th>Status</th><th>Actions</th></tr></thead>
                 <tbody>
                   {quotes.map((q: any) => (
@@ -114,7 +114,7 @@ export default function QuotesPage() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
             </div>
           )}
         </div>

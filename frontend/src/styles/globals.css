@@ -82,7 +82,7 @@
 
   /* ── Mobile top bar (hidden on desktop) ── */
   .mobile-topbar { display: none; }
-  .mobile-menu-btn { background: none; border: none; padding: 8px; cursor: pointer; color: var(--text); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .mobile-menu-btn { background: none; border: none; padding: 8px; cursor: pointer; color: var(--text); border-radius: 10px; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
   .mobile-menu-btn:active { background: var(--bg); }
 
   /* ── Mobile bottom tab bar (hidden on desktop) ── */
@@ -90,28 +90,73 @@
   .tab-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; flex: 1; padding: 8px 4px; color: var(--text-subtle); text-decoration: none; border: none; background: none; cursor: pointer; font-family: inherit; transition: color 0.15s; -webkit-tap-highlight-color: transparent; }
   .tab-item span { font-size: 10px; font-weight: 500; }
   .tab-item.active { color: var(--text); }
-  .tab-item.active svg { stroke: #1a1814; }
 
   /* ── Mobile drawer ── */
-  .drawer-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); }
-  .drawer-panel { position: absolute; top: 0; right: 0; bottom: 0; width: 80%; max-width: 320px; background: var(--surface); display: flex; flex-direction: column; box-shadow: -8px 0 40px rgba(0,0,0,0.15); }
-  .drawer-header { display: flex; align-items: center; justify-content: space-between; padding: max(20px, env(safe-area-inset-top)) 16px 16px; border-bottom: 1px solid var(--border); }
-  .drawer-nav-item { display: flex; align-items: center; gap: 14px; padding: 13px 12px; border-radius: 10px; color: var(--text-muted); text-decoration: none; font-size: 15px; font-weight: 500; margin-bottom: 2px; -webkit-tap-highlight-color: transparent; }
+  .drawer-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+  .drawer-panel { position: absolute; top: 0; right: 0; bottom: 0; width: 82%; max-width: 300px; background: var(--surface); display: flex; flex-direction: column; box-shadow: -12px 0 40px rgba(0,0,0,0.18); }
+  .drawer-header { display: flex; align-items: center; justify-content: space-between; padding: max(24px, env(safe-area-inset-top)) 16px 16px; border-bottom: 1px solid var(--border); }
+  .drawer-nav-item { display: flex; align-items: center; gap: 14px; padding: 14px 12px; border-radius: 10px; color: var(--text-muted); text-decoration: none; font-size: 15px; font-weight: 500; margin-bottom: 2px; -webkit-tap-highlight-color: transparent; }
   .drawer-nav-item:active { background: var(--bg); }
   .drawer-nav-item.active { background: #1a1814; color: white; }
-  .drawer-nav-item.active svg { stroke: white; }
-  .drawer-signout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 13px 12px; background: var(--bg); border: none; border-radius: 10px; color: var(--text-muted); font-size: 15px; font-weight: 500; cursor: pointer; font-family: inherit; }
+  .drawer-signout-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 14px 12px; background: var(--bg); border: none; border-radius: 10px; color: var(--text-muted); font-size: 15px; font-weight: 500; cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; }
+
+  /* ── Responsive grid utilities ── */
+  .grid-4col { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+  .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
   /* ── Mobile breakpoint ── */
   @media (max-width: 768px) {
-    .sidebar { display: none; }
-    .main-content { margin-left: 0; padding-top: 0; padding-bottom: calc(65px + env(safe-area-inset-bottom)); }
-    .mobile-topbar { display: flex; align-items: center; justify-content: space-between; padding: max(16px, env(safe-area-inset-top)) 16px 12px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 30; }
-    .mobile-tabbar { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom); z-index: 40; }
+    /* Block layout so topbar/tabbar work as fixed overlays */
+    .app-layout { display: block; }
+    .sidebar { display: none !important; }
+
+    /* Fixed top bar */
+    .mobile-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      position: fixed; top: 0; left: 0; right: 0;
+      height: calc(56px + env(safe-area-inset-top));
+      padding: env(safe-area-inset-top) 16px 0;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      z-index: 30;
+    }
+
+    /* Main content: push down for topbar, up for tabbar */
+    .main-content {
+      margin-left: 0 !important;
+      padding-top: calc(56px + env(safe-area-inset-top));
+      padding-bottom: calc(70px + env(safe-area-inset-bottom));
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Fixed bottom tabs */
+    .mobile-tabbar {
+      display: flex;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding-bottom: env(safe-area-inset-bottom);
+      z-index: 40;
+    }
+
+    /* Page content spacing */
     .page-header { padding: 16px 16px 0; margin-bottom: 16px; }
-    .page-body { padding: 0 16px max(16px, env(safe-area-inset-bottom)) 16px; }
+    .page-body { padding: 0 16px 24px; }
     .page-title { font-size: 20px; }
-    .metric-value { font-size: 22px; }
+    .metric-value { font-size: 20px; }
+    .metric-card { padding: 14px; }
+
+    /* Responsive grids */
+    .grid-4col { grid-template-columns: repeat(2,1fr); gap: 10px; }
+    .grid-2col { grid-template-columns: 1fr; }
+
+    /* Tables scroll horizontally */
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .data-table { min-width: 480px; }
     .data-table th, .data-table td { padding: 10px 10px; font-size: 13px; }
+
+    /* Modals: bottom sheet style on mobile */
+    .modal-overlay { align-items: flex-end; padding: 0; }
+    .modal-box { border-radius: 20px 20px 0 0; max-height: 92vh; }
+    .modal-header { border-radius: 20px 20px 0 0; }
   }
 }

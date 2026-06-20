@@ -20,7 +20,7 @@ export default function Dashboard() {
         <button className="btn btn-primary" onClick={() => navigate('/invoices')}><Plus size={15} /> New invoice</button>
       </div>
       <div className="page-body">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 20 }}>
+        <div className="grid-4col" style={{ marginBottom: 20 }}>
           {[
             { label: 'Total billed', value: formatCurrency(s.total_billed||0), sub: `${s.invoice_count||0} invoices` },
             { label: 'Collected', value: formatCurrency(s.total_paid||0), color: 'var(--green)', sub: `${s.payment_rate||0}% rate`, icon: <TrendingUp size={14} /> },
@@ -38,7 +38,7 @@ export default function Dashboard() {
           ))}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+        <div className="grid-2col" style={{ marginBottom: 16 }}>
           <div className="card card-p">
             <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 14 }}>Net profit</div>
             <div style={{ fontSize: 28, fontWeight: 700, color: (s.net_profit||0) >= 0 ? 'var(--green)' : 'var(--red)' }}>{formatCurrency(s.net_profit||0)}</div>
@@ -82,7 +82,7 @@ export default function Dashboard() {
               <AlertTriangle size={14} color="var(--red)" />
               <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--red)' }}>Overdue invoices ({overdue.length})</span>
             </div>
-            <table className="data-table">
+            <div className="table-scroll"><table className="data-table">
               <thead><tr><th>Invoice</th><th>Due date</th><th>Amount</th><th></th></tr></thead>
               <tbody>
                 {overdue.map((inv: any) => (
@@ -94,7 +94,7 @@ export default function Dashboard() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           </div>
         )}
       </div>

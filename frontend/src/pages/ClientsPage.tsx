@@ -35,7 +35,7 @@ export default function ClientsPage() {
           {isLoading ? <div className="empty-state">Loading...</div> : clientList.length === 0 ? (
             <div className="empty-state"><div style={{ fontWeight: 500 }}>No clients yet</div><button className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => setShowModal(true)}><Plus size={15} /> Add client</button></div>
           ) : (
-            <table className="data-table">
+            <div className="table-scroll"><table className="data-table">
               <thead><tr><th>Client</th><th>Email</th><th>Phone</th><th>Currency</th><th></th></tr></thead>
               <tbody>
                 {clientList.map((c: any) => (
@@ -53,7 +53,7 @@ export default function ClientsPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           )}
         </div>
       </div>

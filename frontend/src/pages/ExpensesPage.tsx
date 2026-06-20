@@ -40,10 +40,10 @@ export default function ExpensesPage() {
           {isLoading ? <div className="empty-state">Loading...</div> : list.length === 0 ? (
             <div className="empty-state"><div className="empty-state-icon"><Receipt size={20} /></div><div style={{ fontWeight: 500 }}>No expenses yet</div><button className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => setShowModal(true)}><Plus size={15} /> Add expense</button></div>
           ) : (
-            <table className="data-table">
+            <div className="table-scroll"><table className="data-table">
               <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Client</th><th>Amount</th><th>Billable</th><th></th></tr></thead>
               <tbody>{list.map((e: any) => (<tr key={e.id}><td style={{ color: 'var(--text-subtle)', fontSize: 12 }}>{formatDate(e.date)}</td><td><span className="badge badge-draft">{e.category}</span></td><td>{e.description}</td><td style={{ color: 'var(--text-subtle)' }}>{e.clients?.name || '—'}</td><td className="currency-amount">{formatCurrency(e.amount, e.currency)}</td><td>{e.is_billable ? <span className="badge badge-sent">{e.is_billed ? 'Billed' : 'Billable'}</span> : <span style={{ color: 'var(--text-subtle)', fontSize: 12 }}>—</span>}</td><td><button className="btn btn-sm btn-danger" onClick={() => setDeleteId(e.id)}><Trash2 size={12} /></button></td></tr>))}</tbody>
-            </table>
+            </table></div>
           )}
         </div>
       </div>

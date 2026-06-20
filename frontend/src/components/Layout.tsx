@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { LayoutDashboard, FileText, Users, Receipt, BarChart3, Settings, LogOut, Clock, FileCheck, Crown, TrendingUp, Zap, Heart, Gift, Palette, Menu, X, ChevronRight } from 'lucide-react'
 import { useAuthStore } from '../lib/authStore'
 import { useQuery } from '@tanstack/react-query'
@@ -74,13 +74,27 @@ const planColors: Record<string,string> = { free:'#888', starter:'#1d4ed8', pro:
 export default function Layout() {
   const { user, signOut } = useAuthStore()
   const navigate = useNavigate()
+  const location = useLocation()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const mainRef = useRef<HTMLElement>(null)
   const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: () => api.get<any>('/auth/profile'), staleTime: 60_000 })
   const handleSignOut = async () => { await signOut(); toast.success('Signed out'); navigate('/auth') }
   const initials = profile?.full_name ? profile.full_name.split(' ').map((n: string) => n[0]).join('').slice(0,2).toUpperCase() : user?.email?.[0].toUpperCase() || 'U'
 
+  // Reset middle scroll to top on every page navigation
+  useEffect(() => {
+    if (mainRef.current) mainRef.current.scrollTop = 0
+  }, [location.pathname])
+
+  // Inline styles guarantee the layout on every page regardless of CSS load order
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
+
   return (
-    <div className="app-layout">
+    <div className="app-layout" style={isMobile ? {
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+      display: 'flex', flexDirection: 'column', overflow: 'hidden',
+      background: 'var(--bg)'
+    } : undefined}>
       {/* ── Desktop sidebar ── */}
       <aside className="sidebar">
         <div className="sidebar-logo">
@@ -114,7 +128,10 @@ export default function Layout() {
       </aside>
 
       {/* ── Mobile top bar ── */}
-      <header className="mobile-topbar">
+      <header className="mobile-topbar" style={isMobile ? {
+        flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        background: 'var(--surface)', borderBottom: '1px solid var(--border)'
+      } : undefined}>
         <div style={{ display:'flex', alignItems:'center', gap:8 }}>
           <Logo />
           <span style={{ fontWeight:700, fontSize:16, letterSpacing:'-0.03em' }}>InvoicePro</span>
@@ -163,13 +180,19 @@ export default function Layout() {
       )}
 
       {/* ── Main content ── */}
-      <main className="main-content">
+      <main ref={mainRef} className="main-content" style={isMobile ? {
+        flex: '1 1 0', minHeight: 0, overflowY: 'auto', overflowX: 'hidden',
+        background: 'var(--bg)'
+      } : undefined}>
         <Outlet />
         <AIAssistant />
       </main>
 
       {/* ── Mobile bottom tab bar ── */}
-      <nav className="mobile-tabbar">
+      <nav className="mobile-tabbar" style={isMobile ? {
+        flexShrink: 0, display: 'flex', minHeight: 56,
+        background: 'var(--surface)', borderTop: '1px solid var(--border)'
+      } : undefined}>
         {bottomTabs.map(({ to, icon: Icon, label }) => (
           <NavLink key={to} to={to} className={({ isActive }) => `tab-item ${isActive ? 'active' : ''}`}>
             <Icon size={22} />

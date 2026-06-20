@@ -122,6 +122,13 @@ workflows:
           /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations~ipad:1 string UIInterfaceOrientationPortraitUpsideDown" "$PLIST"
           /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations~ipad:2 string UIInterfaceOrientationLandscapeLeft" "$PLIST"
           /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations~ipad:3 string UIInterfaceOrientationLandscapeRight" "$PLIST"
+          # Add camera and photo library permissions (required for receipt scanning — prevents crash on Take Photo)
+          /usr/libexec/PlistBuddy -c "Delete :NSCameraUsageDescription" "$PLIST" 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'InvoicePro uses your camera to scan receipts and capture expense photos.'" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Delete :NSPhotoLibraryUsageDescription" "$PLIST" 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string 'InvoicePro accesses your photo library to upload receipt images for expense tracking.'" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Delete :NSPhotoLibraryAddUsageDescription" "$PLIST" 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryAddUsageDescription string 'InvoicePro saves scanned receipt images to your photo library.'" "$PLIST"
       - name: Patch native iOS to eliminate blank white screen
         script: |
           STORYBOARD="frontend/ios/App/App/Base.lproj/LaunchScreen.storyboard"

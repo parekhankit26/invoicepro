@@ -1,16 +1,37 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { api } from '../lib/api'
 import { CURRENCIES } from '../lib/utils'
 import toast from 'react-hot-toast'
+import { Trash2, X } from 'lucide-react'
 
 export default function SettingsPage() {
   const qc = useQueryClient()
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState('')
   const { data: profile } = useQuery({ queryKey: ['profile'], queryFn: () => api.get<any>('/auth/profile') })
   const { register, handleSubmit, reset } = useForm()
   useEffect(() => { if (profile) reset(profile) }, [profile, reset])
   const saveMutation = useMutation({ mutationFn: (data: any) => api.put('/auth/profile', data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['profile'] }); toast.success('Settings saved!') }, onError: (e: any) => toast.error(e.message) })
+  const [upgradingPlan, setUpgradingPlan] = useState<string | null>(null)
+  const deleteMutation = useMutation({
+    mutationFn: () => api.delete('/auth/account'),
+    onSuccess: () => { toast.success('Account deleted'); window.location.href = '/' },
+    onError: (e: any) => toast.error(e.message),
+  })
+
+  const handleUpgrade = async (plan: string) => {
+    setUpgradingPlan(plan)
+    try {
+      const data: any = await api.post('/auth/upgrade', { plan: plan.toLowerCase() })
+      if (data?.url) window.open(data.url, '_blank')
+    } catch (e: any) {
+      toast.error(e.message || 'Could not open upgrade page')
+    } finally {
+      setUpgradingPlan(null)
+    }
+  }
 
   return (
     <>
@@ -42,11 +63,21 @@ export default function SettingsPage() {
             <div className="card card-p">
               <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Subscription plan</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                {[{ plan: 'Free', price: '£0/mo', active: profile?.plan === 'free' || !profile?.plan },{ plan: 'Starter', price: '£9/mo', active: profile?.plan === 'starter' },{ plan: 'Pro', price: '£19/mo', active: profile?.plan === 'pro' },{ plan: 'Enterprise', price: '£49/mo', active: profile?.plan === 'enterprise' }].map(({ plan, price, active }) => (
+                {[{ plan: 'Free', price: '£0/mo', key: 'free', active: profile?.plan === 'free' || !profile?.plan },{ plan: 'Starter', price: '£9/mo', key: 'starter', active: profile?.plan === 'starter' },{ plan: 'Pro', price: '£19/mo', key: 'pro', active: profile?.plan === 'pro' },{ plan: 'Enterprise', price: '£49/mo', key: 'enterprise', active: profile?.plan === 'enterprise' }].map(({ plan, price, key, active }) => (
                   <div key={plan} style={{ border: `1px solid ${active ? 'var(--text)' : 'var(--border)'}`, borderRadius: 10, padding: 14 }}>
                     <div style={{ fontWeight: 700 }}>{plan}</div>
                     <div style={{ fontSize: 18, fontWeight: 700, margin: '6px 0' }}>{price}</div>
-                    {active ? <span className="badge badge-paid">Current plan</span> : <button type="button" className="btn btn-sm btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}>Upgrade</button>}
+                    {active ? <span className="badge badge-paid">Current plan</span> : (
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-primary"
+                        style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}
+                        disabled={upgradingPlan === key}
+                        onClick={() => handleUpgrade(key)}
+                      >
+                        {upgradingPlan === key ? 'Opening...' : 'Upgrade'}
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -56,7 +87,45 @@ export default function SettingsPage() {
             <button type="submit" className="btn btn-primary" disabled={saveMutation.isPending}>{saveMutation.isPending ? 'Saving...' : 'Save settings'}</button>
           </div>
         </form>
+
+        <div className="card card-p" style={{ marginTop: 16, borderColor: 'var(--red)', borderWidth: 1, borderStyle: 'solid' }}>
+          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8, color: 'var(--red)' }}>Danger zone</div>
+          <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14 }}>Permanently delete your account and all associated data. This action cannot be undone.</div>
+          <button type="button" className="btn btn-danger" onClick={() => setShowDeleteModal(true)} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Trash2 size={14} /> Delete my account
+          </button>
+        </div>
       </div>
+
+      {showDeleteModal && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowDeleteModal(false)}>
+          <div className="modal-box" style={{ maxWidth: 420 }}>
+            <div className="modal-header">
+              <h2 style={{ fontSize: 17, fontWeight: 700, color: 'var(--red)' }}>Delete account</h2>
+              <button className="btn btn-ghost btn-icon" onClick={() => setShowDeleteModal(false)}><X size={18} /></button>
+            </div>
+            <div className="modal-body">
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
+                This will permanently delete your account, all invoices, clients, expenses, and data. <strong>This cannot be undone.</strong>
+              </p>
+              <div className="form-group">
+                <label className="form-label">Type <strong>DELETE</strong> to confirm</label>
+                <input className="form-input" value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)} placeholder="DELETE" autoCapitalize="characters" />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => { setShowDeleteModal(false); setDeleteConfirm('') }}>Cancel</button>
+              <button
+                className="btn btn-danger"
+                disabled={deleteConfirm !== 'DELETE' || deleteMutation.isPending}
+                onClick={() => deleteMutation.mutate()}
+              >
+                {deleteMutation.isPending ? 'Deleting...' : 'Delete account permanently'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

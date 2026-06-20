@@ -241,24 +241,39 @@ export function ReceiptScanner({ onSave, onClose }: { onSave: () => void; onClos
   const [scanning, setScanning] = useState(false)
   const [result, setResult] = useState<any>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const cameraRef = useRef<HTMLInputElement>(null)
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const processFile = async (file: File) => {
     const reader = new FileReader()
     reader.onload = async (ev) => {
-      const base64 = (ev.target?.result as string).split(',')[1]
-      setPreview(ev.target?.result as string)
+      const dataUrl = ev.target?.result as string
+      const base64 = dataUrl.split(',')[1]
+      setPreview(dataUrl)
       setScanning(true)
       try {
         const data = await api.post<any>('/features/scan-receipt', { image_base64: base64, media_type: file.type })
         setResult(data)
         if (data.expense_id) { toast.success('Expense created from receipt!'); onSave() }
       } catch (err: any) {
-        toast.error('Failed to scan receipt')
+        toast.error('Failed to scan receipt. Please try again.')
       } finally { setScanning(false) }
     }
+    reader.onerror = () => toast.error('Could not read image. Please try again.')
     reader.readAsDataURL(file)
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) processFile(file)
+    e.target.value = ''
+  }
+
+  const openLibrary = () => {
+    try { fileRef.current?.click() } catch { toast.error('Could not open photo library') }
+  }
+
+  const openCamera = () => {
+    try { cameraRef.current?.click() } catch { toast.error('Could not open camera. Please check camera permissions in Settings.') }
   }
 
   return (
@@ -269,12 +284,23 @@ export function ReceiptScanner({ onSave, onClose }: { onSave: () => void; onClos
           <button className="btn btn-ghost btn-icon" onClick={onClose}><X size={18} /></button>
         </div>
         <div style={{ padding: 24 }}>
+          {/* Hidden file inputs — separate inputs for library vs camera to avoid iPad crash */}
+          <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/heic,image/heif,image/webp" onChange={handleFileChange} style={{ display: 'none' }} />
+          <input ref={cameraRef} type="file" accept="image/jpeg,image/png,image/heic,image/heif" capture="environment" onChange={handleFileChange} style={{ display: 'none' }} />
+
           {!preview ? (
-            <div style={{ border: '2px dashed var(--border-strong)', borderRadius: 12, padding: 40, textAlign: 'center', cursor: 'pointer' }} onClick={() => fileRef.current?.click()}>
-              <Camera size={32} style={{ color: 'var(--text-subtle)', margin: '0 auto 12px' }} />
-              <div style={{ fontWeight: 500, marginBottom: 4 }}>Upload a receipt photo</div>
-              <div style={{ fontSize: 12, color: 'var(--text-subtle)' }}>AI will extract merchant, amount, date and category automatically</div>
-              <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} />
+            <div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+                <button type="button" className="btn btn-secondary" style={{ flexDirection: 'column', padding: '20px 12px', gap: 8, height: 'auto' }} onClick={openCamera}>
+                  <Camera size={24} />
+                  <span style={{ fontSize: 13 }}>Take Photo</span>
+                </button>
+                <button type="button" className="btn btn-secondary" style={{ flexDirection: 'column', padding: '20px 12px', gap: 8, height: 'auto' }} onClick={openLibrary}>
+                  <Plus size={24} />
+                  <span style={{ fontSize: 13 }}>Choose from Library</span>
+                </button>
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--text-subtle)', textAlign: 'center' }}>AI will extract merchant, amount, date and category automatically</div>
             </div>
           ) : (
             <div>
@@ -296,6 +322,7 @@ export function ReceiptScanner({ onSave, onClose }: { onSave: () => void; onClos
                   {result.expense_id && <div style={{ color: 'var(--green)', fontWeight: 600, marginTop: 12, fontSize: 13 }}>✓ Expense saved automatically</div>}
                 </div>
               )}
+              {!scanning && <button type="button" className="btn btn-secondary" style={{ width: '100%', marginTop: 12, justifyContent: 'center' }} onClick={() => { setPreview(null); setResult(null) }}>Scan another receipt</button>}
             </div>
           )}
         </div>

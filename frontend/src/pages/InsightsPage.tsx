@@ -48,7 +48,7 @@ export default function InsightsPage() {
         {isLoading ? <div style={{ color: 'var(--text-subtle)' }}>Analysing your business...</div> : (
           <>
             {/* Health Score */}
-            <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 16, marginBottom: 20 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 20 }}>
               <div className="card card-p" style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-subtle)', marginBottom: 16 }}>Business health score</div>
                 <div style={{ position: 'relative', width: 140, height: 140, margin: '0 auto 16px' }}>
@@ -66,7 +66,7 @@ export default function InsightsPage() {
                 <div style={{ fontSize: 12, color: 'var(--text-subtle)', lineHeight: 1.5 }}>Based on payment rate, overdue amounts and profit margin</div>
               </div>
 
-              <div>
+              <div style={{ width: '100%' }}>
                 <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12 }}>Key metrics</div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                   {[

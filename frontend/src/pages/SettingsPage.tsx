@@ -36,9 +36,13 @@ export default function SettingsPage() {
     setUpgradingPlan(plan)
     try {
       const data: any = await api.post('/auth/upgrade', { plan: plan.toLowerCase() })
-      if (data?.url) openExternalUrl(data.url)
-    } catch (e: any) {
-      toast.error(e.message || 'Could not open upgrade page')
+      if (data?.url) {
+        openExternalUrl(data.url)
+      } else {
+        toast('To upgrade, visit invoicepro.asproite.com from your browser', { icon: '🔗' })
+      }
+    } catch {
+      toast('To upgrade your plan, please visit invoicepro.asproite.com from Safari', { icon: '🔗', duration: 5000 })
     } finally {
       setUpgradingPlan(null)
     }

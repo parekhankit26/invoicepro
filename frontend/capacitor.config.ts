@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.asproite.invoicepro',
-  appName: 'InvoicePro',
+  appName: 'Smart Invoicing',
   webDir: 'dist',
   server: {
     androidScheme: 'https'
